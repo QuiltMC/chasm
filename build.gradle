@@ -1,0 +1,23 @@
+plugins {
+    id 'java'
+    id 'antlr'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+generateGrammarSource {
+    maxHeapSize = "64m"
+    arguments += ["-visitor", "-long-messages"]
+}
+
+dependencies {
+    implementation group: 'org.ow2.asm', name: 'asm', version: '9.2'
+    antlr group: 'org.antlr', name: 'antlr4', version:'4.9.2'
+
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+}

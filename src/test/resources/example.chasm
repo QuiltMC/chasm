@@ -1,0 +1,19 @@
+{
+    string: "Test",
+    integer: 1234,
+    boolean: true,
+    empty: none,
+    map: {
+        string: "Inner"
+    },
+    list: [
+        "first",
+        "second",
+        "third"
+    ],
+    operation: 4 + 2,
+    function: argument -> argument * 2,
+    call: root.function(4),
+    compare: 5 > 3 + 1,
+    compare2: 5 > 3 + 3
+}
