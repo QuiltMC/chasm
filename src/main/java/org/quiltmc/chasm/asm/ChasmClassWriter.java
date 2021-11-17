@@ -2,6 +2,7 @@ package org.quiltmc.chasm.asm;
 
 import org.objectweb.asm.*;
 import org.quiltmc.chasm.LazyClassNode;
+import org.quiltmc.chasm.NodeConstants;
 import org.quiltmc.chasm.tree.*;
 
 import java.util.HashMap;
@@ -23,12 +24,12 @@ public class ChasmClassWriter {
 
         // visit
         {
-            int version = ((ValueNode<Integer>) classNode.get("version")).getValue();
-            int access = ((ValueNode<Integer>) classNode.get("access")).getValue();
-            String name = ((ValueNode<String>) classNode.get("name")).getValue();
-            String signature = ((ValueNode<String>) classNode.get("signature")).getValue();
-            String superClass = ((ValueNode<String>) classNode.get("super")).getValue();
-            String[] interfaces = ((ListNode) classNode.get("interfaces"))
+            int version = ((ValueNode<Integer>) classNode.get(NodeConstants.VERSION)).getValue();
+            int access = ((ValueNode<Integer>) classNode.get(NodeConstants.ACCESS)).getValue();
+            String name = ((ValueNode<String>) classNode.get(NodeConstants.NAME)).getValue();
+            String signature = ((ValueNode<String>) classNode.get(NodeConstants.SIGNATURE)).getValue();
+            String superClass = ((ValueNode<String>) classNode.get(NodeConstants.SUPER)).getValue();
+            String[] interfaces = ((ListNode) classNode.get(NodeConstants.INTERFACES))
                     .stream().map(n -> ((ValueNode<String>) n).getValue()).toArray(String[]::new);
 
             visitor.visit(version, access, name, signature, superClass, interfaces);
@@ -40,39 +41,39 @@ public class ChasmClassWriter {
         }
 
         // visitModule
-        if (classNode.containsKey("module")) {
-            MapNode moduleNode = (MapNode) classNode.get("module");
-            String name = ((ValueNode<String>) moduleNode.get("name")).getValue();
-            int access = ((ValueNode<Integer>) moduleNode.get("access")).getValue();
-            String version = ((ValueNode<String>) moduleNode.get("version")).getValue();
+        if (classNode.containsKey(NodeConstants.MODULE)) {
+            MapNode moduleNode = (MapNode) classNode.get(NodeConstants.MODULE);
+            String name = ((ValueNode<String>) moduleNode.get(NodeConstants.NAME)).getValue();
+            int access = ((ValueNode<Integer>) moduleNode.get(NodeConstants.ACCESS)).getValue();
+            String version = ((ValueNode<String>) moduleNode.get(NodeConstants.VERSION)).getValue();
 
             ModuleVisitor moduleVisitor = visitor.visitModule(name, access, version);
 
             // visitMainClass
-            if (moduleNode.containsKey("main")) {
-                moduleVisitor.visitMainClass(((ValueNode<String>)moduleNode.get("main")).getValue());
+            if (moduleNode.containsKey(NodeConstants.MAIN)) {
+                moduleVisitor.visitMainClass(((ValueNode<String>)moduleNode.get(NodeConstants.MAIN)).getValue());
             }
 
             // visitPackage
-            for (Node n : (ListNode)moduleNode.get("packages")) {
+            for (Node n : (ListNode)moduleNode.get(NodeConstants.PACKAGES)) {
                 moduleVisitor.visitPackage(((ValueNode<String>) n).getValue());
             }
 
             // visitRequire
-            for (Node n : (ListNode)moduleNode.get("requires")) {
+            for (Node n : (ListNode)moduleNode.get(NodeConstants.REQUIRES)) {
                 MapNode requireNode = (MapNode) n;
-                String reqModule = ((ValueNode<String>) requireNode.get("module")).getValue();
-                Integer reqAccess = ((ValueNode<Integer>) requireNode.get("access")).getValue();
-                String reqVersion = ((ValueNode<String>) requireNode.get("version")).getValue();
+                String reqModule = ((ValueNode<String>) requireNode.get(NodeConstants.MODULE)).getValue();
+                Integer reqAccess = ((ValueNode<Integer>) requireNode.get(NodeConstants.ACCESS)).getValue();
+                String reqVersion = ((ValueNode<String>) requireNode.get(NodeConstants.VERSION)).getValue();
                 moduleVisitor.visitRequire(reqModule, reqAccess, reqVersion);
             }
 
             // visitExport
-            for (Node n : (ListNode)moduleNode.get("exports")) {
+            for (Node n : (ListNode)moduleNode.get(NodeConstants.EXPORTS)) {
                 MapNode exportNode = (MapNode) n;
-                String expPackage = ((ValueNode<String>) exportNode.get("package")).getValue();
-                Integer expAcccess = ((ValueNode<Integer>) exportNode.get("access")).getValue();
-                ListNode reqModules = ((ListNode) exportNode.get("modules"));
+                String expPackage = ((ValueNode<String>) exportNode.get(NodeConstants.PACKAGE)).getValue();
+                Integer expAcccess = ((ValueNode<Integer>) exportNode.get(NodeConstants.ACCESS)).getValue();
+                ListNode reqModules = ((ListNode) exportNode.get(NodeConstants.MODULES));
                 String[] modules = null;
                 if (reqModules != null) {
                     modules = new String[reqModules.size()];
@@ -84,11 +85,11 @@ public class ChasmClassWriter {
             }
 
             // visitOpen
-            for (Node n : (ListNode)moduleNode.get("opens")) {
+            for (Node n : (ListNode)moduleNode.get(NodeConstants.OPENS)) {
                 MapNode openNode = (MapNode) n;
-                String openPackage = ((ValueNode<String>) openNode.get("package")).getValue();
-                Integer openAcccess = ((ValueNode<Integer>) openNode.get("access")).getValue();
-                ListNode openModules = ((ListNode) openNode.get("modules"));
+                String openPackage = ((ValueNode<String>) openNode.get(NodeConstants.PACKAGE)).getValue();
+                Integer openAcccess = ((ValueNode<Integer>) openNode.get(NodeConstants.ACCESS)).getValue();
+                ListNode openModules = ((ListNode) openNode.get(NodeConstants.MODULES));
                 String[] modules = null;
                 if (openModules != null) {
                     modules = new String[openModules.size()];
@@ -100,15 +101,15 @@ public class ChasmClassWriter {
             }
 
             // visitUse
-            for (Node n : (ListNode)moduleNode.get("uses")) {
+            for (Node n : (ListNode)moduleNode.get(NodeConstants.USES)) {
                 moduleVisitor.visitUse(((ValueNode<String>) n).getValue());
             }
 
             // visitProvide
-            for (Node n : (ListNode)moduleNode.get("provides")) {
+            for (Node n : (ListNode)moduleNode.get(NodeConstants.PROVIDES)) {
                 MapNode providesNode = (MapNode) n;
-                String service = ((ValueNode<String>) providesNode.get("service")).getValue();
-                ListNode providers = (ListNode) providesNode.get("providers");
+                String service = ((ValueNode<String>) providesNode.get(NodeConstants.SERVICE)).getValue();
+                ListNode providers = (ListNode) providesNode.get(NodeConstants.PROVIDERS);
                 String[] prov = new String[providers.size()];
                 for (int i = 0; i < providers.size(); i++) {
                     prov[i] = ((ValueNode<String>) providers.get(i)).getValue();
@@ -121,25 +122,25 @@ public class ChasmClassWriter {
         }
 
         // visitNestHost
-        if (classNode.containsKey("nestHost")) {
-            visitor.visitNestHost(((ValueNode<String>) classNode.get("nestHost")).getValue());
+        if (classNode.containsKey(NodeConstants.NEST_HOST)) {
+            visitor.visitNestHost(((ValueNode<String>) classNode.get(NodeConstants.NEST_HOST)).getValue());
         }
 
         // visitOuterClass
-        if (classNode.containsKey("ownerClass")) {
-            String ownerClass = ((ValueNode<String>) classNode.get("ownerClass")).getValue();
-            String ownerMethod = ((ValueNode<String>) classNode.get("ownerMethod")).getValue();
-            String ownerDescriptor = ((ValueNode<String>) classNode.get("ownerDescriptor")).getValue();
+        if (classNode.containsKey(NodeConstants.OWNER_CLASS)) {
+            String ownerClass = ((ValueNode<String>) classNode.get(NodeConstants.OWNER_CLASS)).getValue();
+            String ownerMethod = ((ValueNode<String>) classNode.get(NodeConstants.OWNER_METHOD)).getValue();
+            String ownerDescriptor = ((ValueNode<String>) classNode.get(NodeConstants.OWNER_DESCRIPTOR)).getValue();
             visitor.visitOuterClass(ownerClass, ownerMethod, ownerDescriptor);
         }
 
         // visitAnnotation/visitTypeAnnotation
-        for (Node n : (ListNode) classNode.get("annotations")) {
+        for (Node n : (ListNode) classNode.get(NodeConstants.ANNOTATIONS)) {
             MapNode annotationNode = (MapNode) n;
-            ValueNode<String> descriptor = (ValueNode<String>) annotationNode.get("descriptor");
-            ValueNode<Boolean> visible = (ValueNode<Boolean>) annotationNode.get("visible");
-            ValueNode<Integer> typeRef = (ValueNode<Integer>) annotationNode.get("typeRef");
-            ValueNode<String> typePath = (ValueNode<String>) annotationNode.get("typePath");
+            ValueNode<String> descriptor = (ValueNode<String>) annotationNode.get(NodeConstants.DESCRIPTOR);
+            ValueNode<Boolean> visible = (ValueNode<Boolean>) annotationNode.get(NodeConstants.VISIBLE);
+            ValueNode<Integer> typeRef = (ValueNode<Integer>) annotationNode.get(NodeConstants.TYPE_REF);
+            ValueNode<String> typePath = (ValueNode<String>) annotationNode.get(NodeConstants.TYPE_PATH);
 
             if (typeRef == null) {
                 AnnotationVisitor annotationVisitor = visitor.visitAnnotation(descriptor.getValue(), visible.getValue());
@@ -152,47 +153,47 @@ public class ChasmClassWriter {
         }
 
         // visitAttribute
-        for (Node n : (ListNode) classNode.get("attributes")) {
+        for (Node n : (ListNode) classNode.get(NodeConstants.ATTRIBUTES)) {
            visitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
         }
 
         // visitNestMember
-        for (Node n : (ListNode) classNode.get("nestMembers")) {
+        for (Node n : (ListNode) classNode.get(NodeConstants.NEST_MEMBERS)) {
             visitor.visitNestMember(((ValueNode<String>) n).getValue());
         }
 
         //visitPermittedSubclass
-        for (Node n : (ListNode) classNode.get("permittedSubclasses")) {
+        for (Node n : (ListNode) classNode.get(NodeConstants.PERMITTED_SUBCLASSES)) {
             visitor.visitPermittedSubclass(((ValueNode<String>) n).getValue());
         }
 
         // visitInnerClass
-        for (Node n : (ListNode) classNode.get("permittedSubclasses")) {
+        for (Node n : (ListNode) classNode.get(NodeConstants.PERMITTED_SUBCLASSES)) {
             MapNode innerClass = (MapNode) n;
-            ValueNode<String> name = (ValueNode<String>) innerClass.get("name");
-            ValueNode<String> outerName = (ValueNode<String>) innerClass.get("outerName");
-            ValueNode<String> innerName = (ValueNode<String>) innerClass.get("innerName");
-            ValueNode<Integer> access = (ValueNode<Integer>) innerClass.get("access");
+            ValueNode<String> name = (ValueNode<String>) innerClass.get(NodeConstants.NAME);
+            ValueNode<String> outerName = (ValueNode<String>) innerClass.get(NodeConstants.OUTER_NAME);
+            ValueNode<String> innerName = (ValueNode<String>) innerClass.get(NodeConstants.INNER_NAME);
+            ValueNode<Integer> access = (ValueNode<Integer>) innerClass.get(NodeConstants.ACCESS);
 
             visitor.visitInnerClass(name.getValue(), outerName.getValue(), innerName.getValue(), access.getValue());
         }
 
         // visitRecordComponent
-        for (Node node : (ListNode) classNode.get("recordComponents")) {
+        for (Node node : (ListNode) classNode.get(NodeConstants.RECORD_COMPONENTS)) {
             MapNode componentNode = (MapNode) node;
-            String name = ((ValueNode<String>) componentNode.get("name")).getValue();
-            String descriptor = ((ValueNode<String>) componentNode.get("descriptor")).getValue();
-            String signature = ((ValueNode<String>) componentNode.get("signature")).getValue();
+            String name = ((ValueNode<String>) componentNode.get(NodeConstants.NAME)).getValue();
+            String descriptor = ((ValueNode<String>) componentNode.get(NodeConstants.DESCRIPTOR)).getValue();
+            String signature = ((ValueNode<String>) componentNode.get(NodeConstants.SIGNATURE)).getValue();
 
             RecordComponentVisitor componentVisitor = visitor.visitRecordComponent(name, descriptor, signature);
 
             // visitAnnotation/visitTypeAnnotation
-            for (Node n : (ListNode) componentNode.get("annotations")) {
+            for (Node n : (ListNode) componentNode.get(NodeConstants.ANNOTATIONS)) {
                 MapNode annotationNode = (MapNode) n;
-                ValueNode<String> aDescriptor = (ValueNode<String>) annotationNode.get("descriptor");
-                ValueNode<Boolean> visible = (ValueNode<Boolean>) annotationNode.get("visible");
-                ValueNode<Integer> typeRef = (ValueNode<Integer>) annotationNode.get("typeRef");
-                ValueNode<String> typePath = (ValueNode<String>) annotationNode.get("typePath");
+                ValueNode<String> aDescriptor = (ValueNode<String>) annotationNode.get(NodeConstants.DESCRIPTOR);
+                ValueNode<Boolean> visible = (ValueNode<Boolean>) annotationNode.get(NodeConstants.VISIBLE);
+                ValueNode<Integer> typeRef = (ValueNode<Integer>) annotationNode.get(NodeConstants.TYPE_REF);
+                ValueNode<String> typePath = (ValueNode<String>) annotationNode.get(NodeConstants.TYPE_PATH);
 
                 if (typeRef == null) {
                     AnnotationVisitor annotationVisitor = componentVisitor.visitAnnotation(aDescriptor.getValue(), visible.getValue());
@@ -205,7 +206,7 @@ public class ChasmClassWriter {
             }
 
             // visitAttribute
-            for (Node n : (ListNode) componentNode.get("attributes")) {
+            for (Node n : (ListNode) componentNode.get(NodeConstants.ATTRIBUTES)) {
                 componentVisitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
             }
 
@@ -214,24 +215,24 @@ public class ChasmClassWriter {
         }
 
         // visitField
-        for (Node node : (ListNode) classNode.get("fields")) {
+        for (Node node : (ListNode) classNode.get(NodeConstants.FIELDS)) {
             MapNode fieldNode = (MapNode) node;
 
-            int access = ((ValueNode<Integer>) fieldNode.get("access")).getValue();
-            String name = ((ValueNode<String>) fieldNode.get("name")).getValue();
-            String descriptor = ((ValueNode<String>) fieldNode.get("descriptor")).getValue();
-            String signature = ((ValueNode<String>) fieldNode.get("signature")).getValue();
-            Object value = ((ValueNode<Object>) fieldNode.get("value")).getValue();
+            int access = ((ValueNode<Integer>) fieldNode.get(NodeConstants.ACCESS)).getValue();
+            String name = ((ValueNode<String>) fieldNode.get(NodeConstants.NAME)).getValue();
+            String descriptor = ((ValueNode<String>) fieldNode.get(NodeConstants.DESCRIPTOR)).getValue();
+            String signature = ((ValueNode<String>) fieldNode.get(NodeConstants.SIGNATURE)).getValue();
+            Object value = ((ValueNode<Object>) fieldNode.get(NodeConstants.VALUE)).getValue();
 
             FieldVisitor fieldVisitor = visitor.visitField(access, name, descriptor, signature, value);
 
             // visitAnnotation/visitTypeAnnotation
-            for (Node n : (ListNode) fieldNode.get("annotations")) {
+            for (Node n : (ListNode) fieldNode.get(NodeConstants.ANNOTATIONS)) {
                 MapNode annotation = (MapNode) n;
-                ValueNode<String> aDescriptor = (ValueNode<String>) annotation.get("descriptor");
-                ValueNode<Boolean> visible = (ValueNode<Boolean>) annotation.get("visible");
-                ValueNode<Integer> typeRef = (ValueNode<Integer>) annotation.get("typeRef");
-                ValueNode<String> typePath = (ValueNode<String>) annotation.get("typePath");
+                ValueNode<String> aDescriptor = (ValueNode<String>) annotation.get(NodeConstants.DESCRIPTOR);
+                ValueNode<Boolean> visible = (ValueNode<Boolean>) annotation.get(NodeConstants.VISIBLE);
+                ValueNode<Integer> typeRef = (ValueNode<Integer>) annotation.get(NodeConstants.TYPE_REF);
+                ValueNode<String> typePath = (ValueNode<String>) annotation.get(NodeConstants.TYPE_PATH);
                 if (typeRef == null) {
                     AnnotationVisitor annotationVisitor = fieldVisitor.visitAnnotation(aDescriptor.getValue(), visible.getValue());
                     visitAnnotation(annotationVisitor, annotation);
@@ -243,7 +244,7 @@ public class ChasmClassWriter {
             }
 
             // visitAttribute
-            for (Node n : (ListNode) fieldNode.get("attributes")) {
+            for (Node n : (ListNode) fieldNode.get(NodeConstants.ATTRIBUTES)) {
                 fieldVisitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
             }
 
@@ -252,34 +253,34 @@ public class ChasmClassWriter {
         }
 
         // visitMethod
-        for (Node node : (ListNode) classNode.get("methods")) {
+        for (Node node : (ListNode) classNode.get(NodeConstants.METHODS)) {
             MapNode methodNode = (MapNode) node;
 
-            int access = ((ValueNode<Integer>) methodNode.get("access")).getValue();
-            String name = ((ValueNode<String>) methodNode.get("name")).getValue();
-            String descriptor = ((ValueNode<String>) methodNode.get("descriptor")).getValue();
-            String signature = ((ValueNode<String>) methodNode.get("signature")).getValue();
-            String[] exceptions = ((ListNode) methodNode.get("exceptions"))
+            int access = ((ValueNode<Integer>) methodNode.get(NodeConstants.ACCESS)).getValue();
+            String name = ((ValueNode<String>) methodNode.get(NodeConstants.NAME)).getValue();
+            String descriptor = ((ValueNode<String>) methodNode.get(NodeConstants.DESCRIPTOR)).getValue();
+            String signature = ((ValueNode<String>) methodNode.get(NodeConstants.SIGNATURE)).getValue();
+            String[] exceptions = ((ListNode) methodNode.get(NodeConstants.EXCEPTIONS))
                     .stream().map(n -> ((ValueNode<String>) n).getValue()).toArray(String[]::new);
 
             MethodVisitor methodVisitor = visitor.visitMethod(access, name, descriptor, signature, exceptions);
 
             // visitParameter
-            for (Node n : (ListNode) methodNode.get("parameters")) {
+            for (Node n : (ListNode) methodNode.get(NodeConstants.PARAMETERS)) {
                 MapNode parameterNode = (MapNode) n;
-                String parameterName = ((ValueNode<String>) parameterNode.get("name")).getValue();
-                int parameterAccess = ((ValueNode<Integer>) parameterNode.get("access")).getValue();
+                String parameterName = ((ValueNode<String>) parameterNode.get(NodeConstants.NAME)).getValue();
+                int parameterAccess = ((ValueNode<Integer>) parameterNode.get(NodeConstants.ACCESS)).getValue();
                 methodVisitor.visitParameter(parameterName, parameterAccess);
             }
 
             // visitParameterAnnotation
             int visibleCount = 0;
             int invisibleCount = 0;
-            for (Node n : (ListNode) methodNode.get("parameterAnnotations")) {
+            for (Node n : (ListNode) methodNode.get(NodeConstants.PARAMETER_ANNOTATIONS)) {
                 MapNode annotationNode = (MapNode) n;
-                int parameter = ((ValueNode<Integer>)annotationNode.get("parameter")).getValue();
-                String aDescriptor = ((ValueNode<String>)annotationNode.get("descriptor")).getValue();
-                boolean visible = ((ValueNode<Boolean>)annotationNode.get("visible")).getValue();
+                int parameter = ((ValueNode<Integer>)annotationNode.get(NodeConstants.PARAMETER)).getValue();
+                String aDescriptor = ((ValueNode<String>)annotationNode.get(NodeConstants.DESCRIPTOR)).getValue();
+                boolean visible = ((ValueNode<Boolean>)annotationNode.get(NodeConstants.VISIBLE)).getValue();
 
                 AnnotationVisitor annotationVisitor = methodVisitor.visitParameterAnnotation(parameter, aDescriptor, visible);
                 visitAnnotation(annotationVisitor, annotationNode);
@@ -297,18 +298,18 @@ public class ChasmClassWriter {
             methodVisitor.visitAnnotableParameterCount(invisibleCount, false);
 
             // visitAnnotationDefault
-            if (methodNode.containsKey("annotationDefault")) {
+            if (methodNode.containsKey(NodeConstants.ANNOTATION_DEFAULT)) {
                 AnnotationVisitor annotationVisitor = methodVisitor.visitAnnotationDefault();
-                visitAnnotation(annotationVisitor, (MapNode) methodNode.get("annotationDefault"));
+                visitAnnotation(annotationVisitor, (MapNode) methodNode.get(NodeConstants.ANNOTATION_DEFAULT));
             }
 
             // visitAnnotation/visitTypeAnnotation
-            for (Node n : (ListNode) methodNode.get("annotations")) {
+            for (Node n : (ListNode) methodNode.get(NodeConstants.ANNOTATIONS)) {
                 MapNode annotation = (MapNode) n;
-                ValueNode<String> aDescriptor = (ValueNode<String>) annotation.get("descriptor");
-                ValueNode<Boolean> visible = (ValueNode<Boolean>) annotation.get("visible");
-                ValueNode<Integer> typeRef = (ValueNode<Integer>) annotation.get("typeRef");
-                ValueNode<String> typePath = (ValueNode<String>) annotation.get("typePath");
+                ValueNode<String> aDescriptor = (ValueNode<String>) annotation.get(NodeConstants.DESCRIPTOR);
+                ValueNode<Boolean> visible = (ValueNode<Boolean>) annotation.get(NodeConstants.VISIBLE);
+                ValueNode<Integer> typeRef = (ValueNode<Integer>) annotation.get(NodeConstants.TYPE_REF);
+                ValueNode<String> typePath = (ValueNode<String>) annotation.get(NodeConstants.TYPE_PATH);
                 if (typeRef == null) {
                     AnnotationVisitor annotationVisitor = methodVisitor.visitAnnotation(aDescriptor.getValue(), visible.getValue());
                     visitAnnotation(annotationVisitor, annotation);
@@ -320,31 +321,31 @@ public class ChasmClassWriter {
             }
 
             // visitAttribute
-            for (Node n : (ListNode) methodNode.get("attributes")) {
+            for (Node n : (ListNode) methodNode.get(NodeConstants.ATTRIBUTES)) {
                 methodVisitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
             }
 
             // visitCode
-            if (methodNode.containsKey("code")) {
-                MapNode codeNode = (MapNode) methodNode.get("code");
+            if (methodNode.containsKey(NodeConstants.CODE)) {
+                MapNode codeNode = (MapNode) methodNode.get(NodeConstants.CODE);
                 Map<String, Label> labelMap = new HashMap<>();
 
                 // visitFrame
                 // Don't care
 
                 // Instructions
-                for (Node n : (ListNode) codeNode.get("instructions")) {
+                for (Node n : (ListNode) codeNode.get(NodeConstants.INSTRUCTIONS)) {
                     visitInstruction(methodVisitor, (MapNode) n, labelMap);
                 }
 
                 // visitTryCatchBlock
-                for (Node n : (ListNode) codeNode.get("tryCatchBlocks")) {
+                for (Node n : (ListNode) codeNode.get(NodeConstants.TRY_CATCH_BLOCKS)) {
                     MapNode tryCatchBlock = (MapNode) n;
 
-                    String start = ((ValueNode<String>) tryCatchBlock.get("start")).getValue();
-                    String end = ((ValueNode<String>) tryCatchBlock.get("end")).getValue();
-                    String handler = ((ValueNode<String>) tryCatchBlock.get("handler")).getValue();
-                    String type = ((ValueNode<String>) tryCatchBlock.get("type")).getValue();
+                    String start = ((ValueNode<String>) tryCatchBlock.get(NodeConstants.START)).getValue();
+                    String end = ((ValueNode<String>) tryCatchBlock.get(NodeConstants.END)).getValue();
+                    String handler = ((ValueNode<String>) tryCatchBlock.get(NodeConstants.HANDLER)).getValue();
+                    String type = ((ValueNode<String>) tryCatchBlock.get(NodeConstants.TYPE)).getValue();
 
                     Label startLabel = labelMap.computeIfAbsent(start, s -> new Label());
                     Label endLabel = labelMap.computeIfAbsent(end, s -> new Label());
@@ -353,13 +354,13 @@ public class ChasmClassWriter {
                     methodVisitor.visitTryCatchBlock(startLabel, endLabel, handlerLabel, type);
 
                     // visitTryCatchBlockAnnotations
-                    for (Node n2 : (ListNode) tryCatchBlock.get("annotations")) {
+                    for (Node n2 : (ListNode) tryCatchBlock.get(NodeConstants.ANNOTATIONS)) {
                         MapNode annotation = (MapNode) n2;
 
-                        ValueNode<String> aDescriptor = (ValueNode<String>) annotation.get("descriptor");
-                        ValueNode<Boolean> visible = (ValueNode<Boolean>) annotation.get("visible");
-                        ValueNode<Integer> typeRef = (ValueNode<Integer>) annotation.get("typeRef");
-                        ValueNode<String> typePath = (ValueNode<String>) annotation.get("typePath");
+                        ValueNode<String> aDescriptor = (ValueNode<String>) annotation.get(NodeConstants.DESCRIPTOR);
+                        ValueNode<Boolean> visible = (ValueNode<Boolean>) annotation.get(NodeConstants.VISIBLE);
+                        ValueNode<Integer> typeRef = (ValueNode<Integer>) annotation.get(NodeConstants.TYPE_REF);
+                        ValueNode<String> typePath = (ValueNode<String>) annotation.get(NodeConstants.TYPE_PATH);
 
                         AnnotationVisitor annotationVisitor = methodVisitor.visitTryCatchAnnotation(typeRef.getValue(), TypePath.fromString(typePath.getValue()), aDescriptor.getValue(), visible.getValue());
                         visitAnnotation(annotationVisitor, annotation);
@@ -367,14 +368,14 @@ public class ChasmClassWriter {
                 }
 
                 // visitLocalVariable
-                for (Node n : (ListNode) codeNode.get("locals")) {
+                for (Node n : (ListNode) codeNode.get(NodeConstants.LOCALS)) {
                     MapNode localNode = (MapNode) n;
-                    String lName = ((ValueNode<String>) localNode.get("name")).getValue();
-                    String lDescriptor = ((ValueNode<String>) localNode.get("descriptor")).getValue();
-                    String lSignature = ((ValueNode<String>) localNode.get("signature")).getValue();
-                    String start = ((ValueNode<String>) localNode.get("start")).getValue();
-                    String end = ((ValueNode<String>) localNode.get("end")).getValue();
-                    int index = ((ValueNode<Integer>) localNode.get("index")).getValue();
+                    String lName = ((ValueNode<String>) localNode.get(NodeConstants.NAME)).getValue();
+                    String lDescriptor = ((ValueNode<String>) localNode.get(NodeConstants.DESCRIPTOR)).getValue();
+                    String lSignature = ((ValueNode<String>) localNode.get(NodeConstants.SIGNATURE)).getValue();
+                    String start = ((ValueNode<String>) localNode.get(NodeConstants.START)).getValue();
+                    String end = ((ValueNode<String>) localNode.get(NodeConstants.END)).getValue();
+                    int index = ((ValueNode<Integer>) localNode.get(NodeConstants.INDEX)).getValue();
 
                     Label startLabel = labelMap.get(start);
                     Label endLabel = labelMap.get(end);
@@ -404,7 +405,7 @@ public class ChasmClassWriter {
     private void visitAnnotation(AnnotationVisitor visitor, Node annotationNode) {
         ListNode values;
         if (annotationNode instanceof MapNode) {
-            values = (ListNode) ((MapNode) annotationNode).get("values");
+            values = (ListNode) ((MapNode) annotationNode).get(NodeConstants.VALUES);
         }
         else {
             values = (ListNode) annotationNode;
@@ -412,10 +413,10 @@ public class ChasmClassWriter {
 
         for (Node value : values) {
             String name = null;
-            if (value instanceof MapNode mapNode && mapNode.containsKey("name")) {
+            if (value instanceof MapNode mapNode && mapNode.containsKey(NodeConstants.NAME)) {
                 // Name-value pairs
-                name = ((ValueNode<String>) mapNode.get("name")).getValue();
-                value = mapNode.get("value");
+                name = ((ValueNode<String>) mapNode.get(NodeConstants.NAME)).getValue();
+                value = mapNode.get(NodeConstants.VALUE);
             }
 
             if (value instanceof ValueNode) {
@@ -427,15 +428,15 @@ public class ChasmClassWriter {
             }
             else {
                 MapNode mapNode = (MapNode) value;
-                if (mapNode.containsKey("value")) {
-                    String descriptor = ((ValueNode<String>) mapNode.get("descriptor")).getValue();
-                    String enumValue = ((ValueNode<String>) mapNode.get("value")).getValue();
+                if (mapNode.containsKey(NodeConstants.VALUE)) {
+                    String descriptor = ((ValueNode<String>) mapNode.get(NodeConstants.DESCRIPTOR)).getValue();
+                    String enumValue = ((ValueNode<String>) mapNode.get(NodeConstants.VALUE)).getValue();
 
                     visitor.visitEnum(name, descriptor, enumValue);
                 }
                 else {
-                    String descriptor = ((ValueNode<String>) mapNode.get("descriptor")).getValue();
-                    ListNode annotationvalues = (ListNode) mapNode.get("values");
+                    String descriptor = ((ValueNode<String>) mapNode.get(NodeConstants.DESCRIPTOR)).getValue();
+                    ListNode annotationvalues = (ListNode) mapNode.get(NodeConstants.VALUES);
 
                     AnnotationVisitor annotationVisitor = visitor.visitAnnotation(name, descriptor);
                     visitAnnotation(annotationVisitor, annotationvalues);
@@ -448,12 +449,12 @@ public class ChasmClassWriter {
 
     private void visitInstruction(MethodVisitor visitor, MapNode instructionNode, Map<String, Label> labelMap) {
         // visitLabel
-        for (Node n2 : (ListNode) instructionNode.get("labels")) {
+        for (Node n2 : (ListNode) instructionNode.get(NodeConstants.LABELS)) {
             visitor.visitLabel(labelMap.computeIfAbsent(((ValueNode<String>) n2).getValue(), s -> new Label()));
         }
 
         // visit<...>Insn
-        int opcode = ((ValueNode<Integer>)instructionNode.get("opcode")).getValue();
+        int opcode = ((ValueNode<Integer>)instructionNode.get(NodeConstants.OPCODE)).getValue();
         switch (opcode) {
             case Opcodes.NOP:
             case Opcodes.ACONST_NULL:
@@ -570,7 +571,7 @@ public class ChasmClassWriter {
             case Opcodes.SIPUSH:
             case Opcodes.NEWARRAY: {
                 // visitIntInsn
-                int operand = ((ValueNode<Integer>) instructionNode.get("operand")).getValue();
+                int operand = ((ValueNode<Integer>) instructionNode.get(NodeConstants.OPERAND)).getValue();
                 visitor.visitIntInsn(opcode, operand);
                 break;
             }
@@ -586,7 +587,7 @@ public class ChasmClassWriter {
             case Opcodes.ASTORE:
             case Opcodes.RET: {
                 // visitVarInsn
-                int var = ((ValueNode<Integer>) instructionNode.get("var")).getValue();
+                int var = ((ValueNode<Integer>) instructionNode.get(NodeConstants.VAR)).getValue();
                 visitor.visitVarInsn(opcode, var);
                 break;
             }
@@ -595,7 +596,7 @@ public class ChasmClassWriter {
             case Opcodes.CHECKCAST:
             case Opcodes.INSTANCEOF: {
                 // visitTypeInsn
-                String type = ((ValueNode<String>) instructionNode.get("type")).getValue();
+                String type = ((ValueNode<String>) instructionNode.get(NodeConstants.TYPE)).getValue();
                 visitor.visitTypeInsn(opcode, type);
                 break;
             }
@@ -604,9 +605,9 @@ public class ChasmClassWriter {
             case Opcodes.GETFIELD:
             case Opcodes.PUTFIELD: {
                 // visitFieldInsn
-                String owner = ((ValueNode<String>) instructionNode.get("owner")).getValue();
-                String name = ((ValueNode<String>) instructionNode.get("name")).getValue();
-                String descriptor = ((ValueNode<String>) instructionNode.get("descriptor")).getValue();
+                String owner = ((ValueNode<String>) instructionNode.get(NodeConstants.OWNER)).getValue();
+                String name = ((ValueNode<String>) instructionNode.get(NodeConstants.NAME)).getValue();
+                String descriptor = ((ValueNode<String>) instructionNode.get(NodeConstants.DESCRIPTOR)).getValue();
                 visitor.visitFieldInsn(opcode, owner, name, descriptor);
                 break;
             }
@@ -615,19 +616,19 @@ public class ChasmClassWriter {
             case Opcodes.INVOKESTATIC:
             case Opcodes.INVOKEINTERFACE: {
                 // visitMethodInsns
-                String owner = ((ValueNode<String>) instructionNode.get("owner")).getValue();
-                String name = ((ValueNode<String>) instructionNode.get("name")).getValue();
-                String descriptor = ((ValueNode<String>) instructionNode.get("descriptor")).getValue();
-                Boolean isInterface = ((ValueNode<Boolean>) instructionNode.get("isInterface")).getValue();
+                String owner = ((ValueNode<String>) instructionNode.get(NodeConstants.OWNER)).getValue();
+                String name = ((ValueNode<String>) instructionNode.get(NodeConstants.NAME)).getValue();
+                String descriptor = ((ValueNode<String>) instructionNode.get(NodeConstants.DESCRIPTOR)).getValue();
+                Boolean isInterface = ((ValueNode<Boolean>) instructionNode.get(NodeConstants.IS_INTERFACE)).getValue();
                 visitor.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
                 break;
             }
             case Opcodes.INVOKEDYNAMIC: {
                 // visitInvokeDynamicInsn
-                String name = ((ValueNode<String>) instructionNode.get("name")).getValue();
-                String descriptor = ((ValueNode<String>) instructionNode.get("descriptor")).getValue();
-                Handle handle = getHandle((MapNode) instructionNode.get("handle"));
-                Object[] arguments = getArguments((ListNode) instructionNode.get("arguments"));
+                String name = ((ValueNode<String>) instructionNode.get(NodeConstants.NAME)).getValue();
+                String descriptor = ((ValueNode<String>) instructionNode.get(NodeConstants.DESCRIPTOR)).getValue();
+                Handle handle = getHandle((MapNode) instructionNode.get(NodeConstants.HANDLE));
+                Object[] arguments = getArguments((ListNode) instructionNode.get(NodeConstants.ARGUMENTS));
                 visitor.visitInvokeDynamicInsn(name, descriptor, handle, arguments);
                 break;
             }
@@ -650,36 +651,36 @@ public class ChasmClassWriter {
             case Opcodes.IFNULL:
             case Opcodes.IFNONNULL: {
                 // visitJumpInsns
-                String labelString = ((ValueNode<String>) instructionNode.get("target")).getValue();
+                String labelString = ((ValueNode<String>) instructionNode.get(NodeConstants.TARGET)).getValue();
                 Label label = labelMap.computeIfAbsent(labelString, s -> new Label());
                 visitor.visitJumpInsn(opcode, label);
                 break;
             }
             case Opcodes.LDC: {
                 // visitLdcInsn
-                Object value = ((ValueNode<Object>) instructionNode.get("value")).getValue();
+                Object value = ((ValueNode<Object>) instructionNode.get(NodeConstants.VALUE)).getValue();
                 visitor.visitLdcInsn(value);
                 break;
             }
             case Opcodes.IINC: {
                 // visitIincInsn
-                int var = ((ValueNode<Integer>) instructionNode.get("var")).getValue();
-                int increment = ((ValueNode<Integer>) instructionNode.get("increment")).getValue();
+                int var = ((ValueNode<Integer>) instructionNode.get(NodeConstants.VAR)).getValue();
+                int increment = ((ValueNode<Integer>) instructionNode.get(NodeConstants.INCREMENT)).getValue();
                 visitor.visitIincInsn(var, increment);
                 break;
             }
             case Opcodes.TABLESWITCH:
             case Opcodes.LOOKUPSWITCH: {
                 // visitTableSwitchInsn / visitLookupSwitchInsn
-                String defaultString = ((ValueNode<String>) instructionNode.get("default")).getValue();
+                String defaultString = ((ValueNode<String>) instructionNode.get(NodeConstants.DEFAULT)).getValue();
                 Label dflt = labelMap.computeIfAbsent(defaultString, s -> new Label());
-                ListNode cases = (ListNode) instructionNode.get("cases");
+                ListNode cases = (ListNode) instructionNode.get(NodeConstants.CASES);
                 int[] keys = new int[cases.size()];
                 Label[] labels = new Label[cases.size()];
                 for (int i = 0; i < cases.size(); i++) {
                     MapNode caseNode = (MapNode) cases.get(i);
-                    keys[i] = ((ValueNode<Integer>) caseNode.get("key")).getValue();
-                    String caseLabelString = ((ValueNode<String>) caseNode.get("label")).getValue();
+                    keys[i] = ((ValueNode<Integer>) caseNode.get(NodeConstants.KEY)).getValue();
+                    String caseLabelString = ((ValueNode<String>) caseNode.get(NodeConstants.LABEL)).getValue();
                     labels[i] = labelMap.computeIfAbsent(caseLabelString, s -> new Label());
                 }
 
@@ -702,8 +703,8 @@ public class ChasmClassWriter {
             }
             case Opcodes.MULTIANEWARRAY: {
                 // visitMultiANewArrayInsn
-                String descriptor = ((ValueNode<String>) instructionNode.get("descriptor")).getValue();
-                int dimensions = ((ValueNode<Integer>) instructionNode.get("dimensions")).getValue();
+                String descriptor = ((ValueNode<String>) instructionNode.get(NodeConstants.DESCRIPTOR)).getValue();
+                int dimensions = ((ValueNode<Integer>) instructionNode.get(NodeConstants.DIMENSIONS)).getValue();
                 visitor.visitMultiANewArrayInsn(descriptor, dimensions);
                 break;
             }
@@ -712,13 +713,13 @@ public class ChasmClassWriter {
         }
 
         // visitInsnAnnotation
-        for (Node n : (ListNode) instructionNode.get("annotations")) {
+        for (Node n : (ListNode) instructionNode.get(NodeConstants.ANNOTATIONS)) {
             MapNode annotation = (MapNode) n;
 
-            ValueNode<String> aDescriptor = (ValueNode<String>) annotation.get("descriptor");
-            ValueNode<Boolean> visible = (ValueNode<Boolean>) annotation.get("visible");
-            ValueNode<Integer> typeRef = (ValueNode<Integer>) annotation.get("typeRef");
-            ValueNode<String> typePath = (ValueNode<String>) annotation.get("typePath");
+            ValueNode<String> aDescriptor = (ValueNode<String>) annotation.get(NodeConstants.DESCRIPTOR);
+            ValueNode<Boolean> visible = (ValueNode<Boolean>) annotation.get(NodeConstants.VISIBLE);
+            ValueNode<Integer> typeRef = (ValueNode<Integer>) annotation.get(NodeConstants.TYPE_REF);
+            ValueNode<String> typePath = (ValueNode<String>) annotation.get(NodeConstants.TYPE_PATH);
 
             AnnotationVisitor annotationVisitor = visitor.visitTypeAnnotation(typeRef.getValue(), TypePath.fromString(typePath.getValue()), aDescriptor.getValue(), visible.getValue());
             visitAnnotation(annotationVisitor, annotation);
@@ -732,15 +733,15 @@ public class ChasmClassWriter {
             if (argNode instanceof ValueNode valueNode) {
                 arguments[i] = valueNode.getValue();
             }
-            else if (((MapNode) argNode).containsKey("tag")) {
+            else if (((MapNode) argNode).containsKey(NodeConstants.TAG)) {
                 arguments[i] = getHandle((MapNode) argNode);
             }
             else {
                 MapNode constDynamicNode = (MapNode) argNode;
-                String name = ((ValueNode<String>) constDynamicNode.get("name")).getValue();
-                String descriptor = ((ValueNode<String>) constDynamicNode.get("descriptor")).getValue();
-                Handle handle = getHandle((MapNode) constDynamicNode.get("handle"));
-                Object[] args = getArguments((ListNode) constDynamicNode.get("args"));
+                String name = ((ValueNode<String>) constDynamicNode.get(NodeConstants.NAME)).getValue();
+                String descriptor = ((ValueNode<String>) constDynamicNode.get(NodeConstants.DESCRIPTOR)).getValue();
+                Handle handle = getHandle((MapNode) constDynamicNode.get(NodeConstants.HANDLE));
+                Object[] args = getArguments((ListNode) constDynamicNode.get(NodeConstants.ARGS));
                 arguments[i] = new ConstantDynamic(name, descriptor, handle, args);
             }
         }
@@ -749,11 +750,11 @@ public class ChasmClassWriter {
     }
 
     private Handle getHandle(MapNode handleNode) {
-        int tag = ((ValueNode<Integer>) handleNode.get("tag")).getValue();
-        String owner = ((ValueNode<String>) handleNode.get("owner")).getValue();
-        String name = ((ValueNode<String>) handleNode.get("name")).getValue();
-        String descriptor = ((ValueNode<String>) handleNode.get("descriptor")).getValue();
-        boolean isInterface = ((ValueNode<Boolean>) handleNode.get("isInterface")).getValue();
+        int tag = ((ValueNode<Integer>) handleNode.get(NodeConstants.TAG)).getValue();
+        String owner = ((ValueNode<String>) handleNode.get(NodeConstants.OWNER)).getValue();
+        String name = ((ValueNode<String>) handleNode.get(NodeConstants.NAME)).getValue();
+        String descriptor = ((ValueNode<String>) handleNode.get(NodeConstants.DESCRIPTOR)).getValue();
+        boolean isInterface = ((ValueNode<Boolean>) handleNode.get(NodeConstants.IS_INTERFACE)).getValue();
 
         return new Handle(tag, owner, name, descriptor, isInterface);
     }
