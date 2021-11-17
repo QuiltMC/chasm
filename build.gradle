@@ -19,5 +19,13 @@ dependencies {
     implementation group: 'org.ow2.asm', name: 'asm', version: '9.2'
     antlr group: 'org.antlr', name: 'antlr4', version:'4.9.2'
 
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+}
+
+test {
+    useJUnitPlatform()
+
+    delete 'test'
+    mkdir 'test'
+    workingDir 'test'
 }

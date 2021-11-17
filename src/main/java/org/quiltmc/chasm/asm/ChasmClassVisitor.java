@@ -1,86 +1,182 @@
 package org.quiltmc.chasm.asm;
 
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.*;
 import org.quiltmc.chasm.tree.*;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 public class ChasmClassVisitor extends ClassVisitor {
-    private final ChasmMap classNode = new ChasmMap();
-    private final ChasmList fields = new ChasmList();
-    private final ChasmList methods = new ChasmList();
+    private final MapNode classNode = new LinkedHashMapNode();
+    private final ListNode fields = new LinkedListNode();
+    private final ListNode methods = new LinkedListNode();
+    private final ListNode recordComponents = new LinkedListNode();
+
+    private final ListNode nestMembers = new LinkedListNode();
+    private final ListNode permittedSubclasses = new LinkedListNode();
+    private final ListNode innerClasses = new LinkedListNode();
+
+    private final ListNode annotations = new LinkedListNode();
+    private final ListNode attributes = new LinkedListNode();
 
     public ChasmClassVisitor() {
         super(Opcodes.ASM7);
     }
 
+    public MapNode getClassNode() {
+        return classNode;
+    }
+
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        classNode.put("version", new ChasmValue<>(version));
-        classNode.put("access", new ChasmValue<>(access));
-        classNode.put("name", new ChasmValue<>(name));
-        classNode.put("signature", new ChasmValue<>(signature));
-        classNode.put("super", new ChasmValue<>(superName));
-        classNode.put("interfaces", new ChasmList(Arrays.stream(interfaces).map(ChasmValue::new).collect(Collectors.toList())));
+        // NOTE: Ensure parity with names in ClassNode
+        classNode.put("version", new ValueNode<>(version));
+        classNode.put("access", new ValueNode<>(access));
+        classNode.put("name", new ValueNode<>(name));
+        classNode.put("signature", new ValueNode<>(signature));
+        classNode.put("super", new ValueNode<>(superName));
+
+        ListNode interfacesNode = new LinkedListNode();
+        for (String iface : interfaces) {
+            interfacesNode.add(new ValueNode<>(iface));
+        }
+        classNode.put("interfaces", interfacesNode);
 
         classNode.put("fields", fields);
         classNode.put("methods", methods);
+        classNode.put("recordComponents", recordComponents);
+
+        classNode.put("nestMembers", nestMembers);
+        classNode.put("permittedSubclasses", permittedSubclasses);
+        classNode.put("innerClasses", innerClasses);
+
+        classNode.put("annotations", annotations);
+        classNode.put("attributes", attributes);
     }
 
     @Override
     public void visitSource(String source, String debug) {
-        //Stub for completeness
+        // Don't care
     }
 
-    // Todo: visitModule
+    @Override
+    public ModuleVisitor visitModule(String name, int access, String version) {
+        MapNode moduleNode = new LinkedHashMapNode();
+        moduleNode.put("name", new ValueNode<>(name));
+        moduleNode.put("access", new ValueNode<>(access));
+        moduleNode.put("version", new ValueNode<>(version));
+        classNode.put("module", moduleNode);
 
-    // Todo: visitNestHost
+        return new ChasmModuleVisitor(api, moduleNode);
+    }
 
-    // Todo: visitOuterClass
+    @Override
+    public void visitNestHost(String nestHost) {
+        classNode.put("nestHost", new ValueNode<>(nestHost));
+    }
 
-    // Todo: visitAnnotation
+    @Override
+    public void visitOuterClass(String owner, String name, String descriptor) {
+        classNode.put("ownerClass", new ValueNode<>(owner));
+        classNode.put("ownerMethod", new ValueNode<>(name));
+        classNode.put("ownerDescriptor", new ValueNode<>(descriptor));
+    }
 
-    // Todo: visitTypeAnnotation
+    @Override
+    public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+        MapNode annotation = new LinkedHashMapNode();
+        ListNode values = new LinkedListNode();
+        annotation.put("descriptor", new ValueNode<>(descriptor));
+        annotation.put("visible", new ValueNode<>(visible));
+        annotation.put("values", values);
+        annotations.add(annotation);
 
-    // Todo: visitAttribute
+        return new ChasmAnnotationVisitor(api, values);
+    }
 
-    // Todo: visitNestMember
+    @Override
+    public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
+        MapNode annotation = new LinkedHashMapNode();
+        ListNode values = new LinkedListNode();
+        annotation.put("descriptor", new ValueNode<>(descriptor));
+        annotation.put("visible", new ValueNode<>(visible));
+        annotation.put("typeRef", new ValueNode<>(typeRef));
+        annotation.put("typePath", new ValueNode<>(typePath.toString()));
+        annotation.put("values", values);
+        annotations.add(annotation);
 
-    // Todo: visitPermittedSubclass
+        return new ChasmAnnotationVisitor(api, values);
+    }
 
-    // Todo: visitInnerClass
+    @Override
+    public void visitAttribute(Attribute attribute) {
+        attributes.add(new ValueNode<>(attribute));
+    }
 
-    // Todo: visitRecordComponent
+    @Override
+    public void visitNestMember(String nestMember) {
+        nestMembers.add(new ValueNode<>(nestMember));
+    }
+
+    @Override
+    public void visitPermittedSubclass(String permittedSubclass) {
+        permittedSubclasses.add(new ValueNode<>(permittedSubclass));
+    }
+
+    @Override
+    public void visitInnerClass(String name, String outerName, String innerName, int access) {
+        MapNode innerClass = new LinkedHashMapNode();
+        innerClass.put("name", new ValueNode<>(name));
+        innerClass.put("outerName", new ValueNode<>(outerName));
+        innerClass.put("innerName", new ValueNode<>(innerName));
+        innerClass.put("access", new ValueNode<>(access));
+        innerClasses.add(innerClass);
+    }
+
+    @Override
+    public RecordComponentVisitor visitRecordComponent(String name, String descriptor, String signature) {
+        MapNode recordComponentNode = new LinkedHashMapNode();
+        recordComponentNode.put("name", new ValueNode<>(name));
+        recordComponentNode.put("descriptor", new ValueNode<>(descriptor));
+        recordComponentNode.put("signature", new ValueNode<>(signature));
+        recordComponents.add(recordComponentNode);
+
+        return new ChasmRecordComponentVisitor(api, recordComponentNode);
+    }
 
     @Override
     public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
-        ChasmMap fieldNode = new ChasmMap();
+        MapNode fieldNode = new LinkedHashMapNode();
 
-        fieldNode.put("access", new ChasmValue<>(access));
-        fieldNode.put("name", new ChasmValue<>(name));
-        fieldNode.put("descriptor", new ChasmValue<>(descriptor));
-        fieldNode.put("signature", new ChasmValue<>(signature));
-        fieldNode.put("value", new ChasmValue<>(value));
+        fieldNode.put("access", new ValueNode<>(access));
+        fieldNode.put("name", new ValueNode<>(name));
+        fieldNode.put("descriptor", new ValueNode<>(descriptor));
+        fieldNode.put("signature", new ValueNode<>(signature));
+        fieldNode.put("value", new ValueNode<>(value));
 
         return new ChasmFieldVisitor(api, fieldNode);
     }
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-        ChasmMap methodNode = new ChasmMap();
+        MapNode methodNode = new LinkedHashMapNode();
 
-        methodNode.put("access", new ChasmValue<>(access));
-        methodNode.put("name", new ChasmValue<>(name));
-        methodNode.put("descriptor", new ChasmValue<>(descriptor));
-        methodNode.put("signature", new ChasmValue<>(signature));
-        methodNode.put("exceptions", new ChasmList(Arrays.stream(exceptions).map(ChasmValue::new).collect(Collectors.toList())));
+        methodNode.put("access", new ValueNode<>(access));
+        methodNode.put("name", new ValueNode<>(name));
+        methodNode.put("descriptor", new ValueNode<>(descriptor));
+        methodNode.put("signature", new ValueNode<>(signature));
+
+        ListNode exceptionsNode = new LinkedListNode();
+        if (exceptions != null) {
+            for (String exception : exceptions) {
+                exceptionsNode.add(new ValueNode<>(exception));
+            }
+        }
+        methodNode.put("exceptions", exceptionsNode);
+        methods.add(methodNode);
 
         return new ChasmMethodVisitor(api, methodNode);
     }
 
-    // Todo: visitEnd
+    @Override
+    public void visitEnd() {
+        // Nothing to do here
+    }
 }

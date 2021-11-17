@@ -1,21 +1,17 @@
 package org.quiltmc.chasm.asm;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.TypePath;
+import org.objectweb.asm.*;
 import org.quiltmc.chasm.tree.*;
 
-public class ChasmFieldVisitor extends FieldVisitor {
-
+public class ChasmRecordComponentVisitor extends RecordComponentVisitor {
     private final ListNode annotations = new LinkedListNode();
     private final ListNode attributes = new LinkedListNode();
 
-    public ChasmFieldVisitor(int api, MapNode fieldNode) {
+    public ChasmRecordComponentVisitor(int api, MapNode recordComponentNode) {
         super(api);
 
-        fieldNode.put("annotations", annotations);
-        fieldNode.put("attributes", attributes);
+        recordComponentNode.put("annotations", annotations);
+        recordComponentNode.put("attributes", attributes);
     }
 
     @Override
@@ -24,7 +20,7 @@ public class ChasmFieldVisitor extends FieldVisitor {
         ListNode values = new LinkedListNode();
         annotation.put("descriptor", new ValueNode<>(descriptor));
         annotation.put("visible", new ValueNode<>(visible));
-        annotation.put("values", values);
+        annotation.put("values", new ValueNode<>(values));
         annotations.add(annotation);
 
         return new ChasmAnnotationVisitor(api, values);
@@ -36,7 +32,7 @@ public class ChasmFieldVisitor extends FieldVisitor {
         ListNode values = new LinkedListNode();
         annotation.put("descriptor", new ValueNode<>(descriptor));
         annotation.put("visible", new ValueNode<>(visible));
-        annotation.put("values", new ValueNode<>(values));
+        annotation.put("values", new ValueNode<>(visible));
         annotation.put("typeRef", new ValueNode<>(typeRef));
         annotation.put("typePath", new ValueNode<>(typePath.toString()));
         annotations.add(annotation);

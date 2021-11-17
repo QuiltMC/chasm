@@ -28,7 +28,7 @@ literal
     ;
 
 map
-    : '{' (mapEntry (',' mapEntry)*)? ','? '}'
+    : '{' (mapEntry (',' mapEntry)* ','? )? '}'
     ;
 
 mapEntry
@@ -36,7 +36,7 @@ mapEntry
     ;
 
 list
-    : '[' (expression (',' expression)*)? ','? ']'
+    : '[' (expression (',' expression)* ','? )? ']'
     ;
 
 WHITESPACE: (' '  | '\n' | '\r' | '\t' | EOF) -> skip;
