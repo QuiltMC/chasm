@@ -18,6 +18,8 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 public class ChasmProcessor {
+    public static final String CLASS_FILE_EXTENSION = ".class";
+
     private final List<Transformer> transformers = new ArrayList<>();
 
     public void addTransformer(Transformer transformerNode) {
@@ -32,7 +34,7 @@ public class ChasmProcessor {
 
         // Read input jar
         for(ZipEntry entry : inputJar.stream().toList()) {
-            if (entry.getName().endsWith(".class")) {
+            if (entry.getName().endsWith(CLASS_FILE_EXTENSION)) {
                 classReaders.add(new ClassReader(inputJar.getInputStream(entry)));
             }
             else {
@@ -117,7 +119,7 @@ public class ChasmProcessor {
                 ClassWriter writer = new ClassWriter(null, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
                 chasmWriter.accept(writer);
 
-                outputJar.putNextEntry(new ZipEntry(mapNode.get("name") + ".class"));
+                outputJar.putNextEntry(new ZipEntry(mapNode.get(NodeConstants.NAME) + CLASS_FILE_EXTENSION));
                 outputJar.write(writer.toByteArray());
             }
             else {

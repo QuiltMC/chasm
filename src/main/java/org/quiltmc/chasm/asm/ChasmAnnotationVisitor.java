@@ -1,6 +1,7 @@
 package org.quiltmc.chasm.asm;
 
 import org.objectweb.asm.AnnotationVisitor;
+import org.quiltmc.chasm.NodeConstants;
 import org.quiltmc.chasm.tree.*;
 
 public class ChasmAnnotationVisitor extends AnnotationVisitor {
@@ -26,8 +27,8 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
         }
         else {
             MapNode valueNode = new LinkedHashMapNode();
-            valueNode.put("name", new ValueNode<>(name));
-            valueNode.put("value", new ValueNode<>(value));
+            valueNode.put(NodeConstants.NAME, new ValueNode<>(name));
+            valueNode.put(NodeConstants.VALUE, new ValueNode<>(value));
             this.values.add(valueNode);
         }
     }
@@ -35,13 +36,13 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
     @Override
     public void visitEnum(String name, String descriptor, String value) {
         MapNode enumValueNode = new LinkedHashMapNode();
-        enumValueNode.put("descriptor", new ValueNode<>(descriptor));
-        enumValueNode.put("value", new ValueNode<>(value));
+        enumValueNode.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
+        enumValueNode.put(NodeConstants.VALUE, new ValueNode<>(value));
 
         if (name != null) {
             MapNode valueNode = new LinkedHashMapNode();
-            valueNode.put("name", new ValueNode<>(name));
-            valueNode.put("value", enumValueNode);
+            valueNode.put(NodeConstants.NAME, new ValueNode<>(name));
+            valueNode.put(NodeConstants.VALUE, enumValueNode);
             this.values.add(valueNode);
         }
         else {
@@ -53,13 +54,13 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
     public AnnotationVisitor visitAnnotation(String name, String descriptor) {
         MapNode annotationValueNode = new LinkedHashMapNode();
         ListNode values = new LinkedListNode();
-        annotationValueNode.put("descriptor", new ValueNode<>(descriptor));
-        annotationValueNode.put("values", values);
+        annotationValueNode.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
+        annotationValueNode.put(NodeConstants.VALUES, values);
 
         if (name != null) {
             MapNode valueNode = new LinkedHashMapNode();
-            valueNode.put("name", new ValueNode<>(name));
-            valueNode.put("value", annotationValueNode);
+            valueNode.put(NodeConstants.NAME, new ValueNode<>(name));
+            valueNode.put(NodeConstants.VALUE, annotationValueNode);
             this.values.add(valueNode);
         }
         else {
@@ -75,8 +76,8 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
 
         if (name != null) {
             MapNode valueNode = new LinkedHashMapNode();
-            valueNode.put("name", new ValueNode<>(name));
-            valueNode.put("value", values);
+            valueNode.put(NodeConstants.NAME, new ValueNode<>(name));
+            valueNode.put(NodeConstants.VALUE, values);
             this.values.add(valueNode);
         }
         else {

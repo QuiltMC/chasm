@@ -6,7 +6,7 @@ import java.io.PrintStream;
 import java.util.Map;
 
 public class NodePrinter {
-    private final static String indentString = "  ";
+    private static final String INDENT_STRING = "  ";
 
     private final PrintStream printStream;
     private final Boolean expandClasses;
@@ -66,7 +66,7 @@ public class NodePrinter {
 
     private void printIndent(int indent) {
         for (int i = 0; i < indent; i++) {
-            printStream.print(indentString);
+            printStream.print(INDENT_STRING);
         }
     }
 }

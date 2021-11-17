@@ -1,6 +1,7 @@
 package org.quiltmc.chasm.asm;
 
 import org.objectweb.asm.ModuleVisitor;
+import org.quiltmc.chasm.NodeConstants;
 import org.quiltmc.chasm.tree.*;
 
 public class ChasmModuleVisitor extends ModuleVisitor {
@@ -17,17 +18,17 @@ public class ChasmModuleVisitor extends ModuleVisitor {
         super(api);
         this.moduleNode = moduleNode;
 
-        moduleNode.put("packages", packages);
-        moduleNode.put("requires", requires);
-        moduleNode.put("exports", exports);
-        moduleNode.put("opens", opens);
-        moduleNode.put("uses", uses);
-        moduleNode.put("provides", provides);
+        moduleNode.put(NodeConstants.PACKAGES, packages);
+        moduleNode.put(NodeConstants.REQUIRES, requires);
+        moduleNode.put(NodeConstants.EXPORTS, exports);
+        moduleNode.put(NodeConstants.OPENS, opens);
+        moduleNode.put(NodeConstants.USES, uses);
+        moduleNode.put(NodeConstants.PROVIDERS, provides);
     }
 
     @Override
     public void visitMainClass(String mainClass) {
-        moduleNode.put("main", new ValueNode<>(mainClass));
+        moduleNode.put(NodeConstants.MAIN, new ValueNode<>(mainClass));
     }
 
     @Override
@@ -38,23 +39,23 @@ public class ChasmModuleVisitor extends ModuleVisitor {
     @Override
     public void visitRequire(String module, int access, String version) {
         MapNode requireNode = new LinkedHashMapNode();
-        requireNode.put("module", new ValueNode<>(module));
-        requireNode.put("access", new ValueNode<>(access));
-        requireNode.put("version", new ValueNode<>(version));
+        requireNode.put(NodeConstants.MODULE, new ValueNode<>(module));
+        requireNode.put(NodeConstants.ACCESS, new ValueNode<>(access));
+        requireNode.put(NodeConstants.VERSION, new ValueNode<>(version));
         requires.add(requireNode);
     }
 
     @Override
     public void visitExport(String packaze, int access, String... modules) {
         MapNode exportNode = new LinkedHashMapNode();
-        exportNode.put("package", new ValueNode<>(packaze));
-        exportNode.put("access", new ValueNode<>(access));
+        exportNode.put(NodeConstants.PACKAGE, new ValueNode<>(packaze));
+        exportNode.put(NodeConstants.ACCESS, new ValueNode<>(access));
         if (modules != null) {
             ListNode modulesNode = new LinkedListNode();
             for (String m : modules) {
                 modulesNode.add(new ValueNode<>(m));
             }
-            exportNode.put("modules", modulesNode);
+            exportNode.put(NodeConstants.MODULES, modulesNode);
         }
         exports.add(exportNode);
     }
@@ -62,14 +63,14 @@ public class ChasmModuleVisitor extends ModuleVisitor {
     @Override
     public void visitOpen(String packaze, int access, String... modules) {
         MapNode openNode = new LinkedHashMapNode();
-        openNode.put("package", new ValueNode<>(packaze));
-        openNode.put("access", new ValueNode<>(access));
+        openNode.put(NodeConstants.PACKAGE, new ValueNode<>(packaze));
+        openNode.put(NodeConstants.ACCESS, new ValueNode<>(access));
         if (modules != null) {
             ListNode modulesNode = new LinkedListNode();
             for (String m : modules) {
                 modulesNode.add(new ValueNode<>(m));
             }
-            openNode.put("modules", modulesNode);
+            openNode.put(NodeConstants.MODULES, modulesNode);
         }
         opens.add(openNode);
     }
@@ -82,12 +83,12 @@ public class ChasmModuleVisitor extends ModuleVisitor {
     @Override
     public void visitProvide(String service, String... providers) {
         MapNode provideNode = new LinkedHashMapNode();
-        provideNode.put("service", new ValueNode<>(service));
+        provideNode.put(NodeConstants.SERVICE, new ValueNode<>(service));
         ListNode providersNode = new LinkedListNode();
         for (String provider : providers) {
             providersNode.add(new ValueNode<>(provider));
         }
-        provideNode.put("providers", providersNode);
+        provideNode.put(NodeConstants.PROVIDERS, providersNode);
         provides.add(provideNode);
     }
 

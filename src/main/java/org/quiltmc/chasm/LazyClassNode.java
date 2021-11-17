@@ -22,15 +22,15 @@ public class LazyClassNode extends AbstractMap<String, Node> implements MapNode 
 
         // NOTE: Ensure parity with names in ChasmClassVisitor
         this.nonLazyChildren = new LinkedHashMapNode();
-        this.nonLazyChildren.put("access", new ValueNode<>(reader.getAccess()));
-        this.nonLazyChildren.put("name", new ValueNode<>(reader.getClassName()));
-        this.nonLazyChildren.put("super", new ValueNode<>(reader.getSuperName()));
+        this.nonLazyChildren.put(NodeConstants.ACCESS, new ValueNode<>(reader.getAccess()));
+        this.nonLazyChildren.put(NodeConstants.NAME, new ValueNode<>(reader.getClassName()));
+        this.nonLazyChildren.put(NodeConstants.SUPER, new ValueNode<>(reader.getSuperName()));
 
         ListNode interfaces = new LinkedListNode();
         for (String iface : reader.getInterfaces()) {
             interfaces.add(new ValueNode<>(iface));
         }
-        this.nonLazyChildren.put("interfaces", interfaces);
+        this.nonLazyChildren.put(NodeConstants.INTERFACES, interfaces);
     }
 
     public MapNode getFullNode() {
