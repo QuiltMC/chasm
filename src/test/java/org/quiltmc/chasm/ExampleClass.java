@@ -1,6 +1,9 @@
 package org.quiltmc.chasm;
 
-public class ExampleClass {
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+public abstract class ExampleClass {
     public static void publicStaticMethod() {
         System.out.println("Hello Chasm!");
         int five = 5;
@@ -14,5 +17,12 @@ public class ExampleClass {
         }
 
         publicStaticMethod();
+    }
+
+    public abstract void annotationTest(@TestAnnotation("first") String first, @TestAnnotation("second") String second);
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface TestAnnotation {
+        String value();
     }
 }

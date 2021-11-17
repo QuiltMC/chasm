@@ -51,7 +51,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
         annotation.put(NodeConstants.PARAMETER, new ValueNode<>(parameter));
         annotation.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
         annotation.put(NodeConstants.VISIBLE, new ValueNode<>(visible));
-        annotation.put(NodeConstants.VALUES, new ValueNode<>(values));
+        annotation.put(NodeConstants.VALUES, values);
         parameterAnnotations.add(annotation);
 
         return new ChasmAnnotationVisitor(api, values);
@@ -73,7 +73,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
         ListNode values = new LinkedListNode();
         annotation.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
         annotation.put(NodeConstants.VISIBLE, new ValueNode<>(visible));
-        annotation.put(NodeConstants.VALUES, new ValueNode<>(values));
+        annotation.put(NodeConstants.VALUES, values);
         annotations.add(annotation);
 
         return new ChasmAnnotationVisitor(api, values);

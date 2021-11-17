@@ -420,7 +420,7 @@ public class ChasmClassWriter {
             }
 
             if (value instanceof ValueNode) {
-                visitor.visit(name, value);
+                visitor.visit(name, ((ValueNode<Object>)value).getValue());
             }
             else if (value instanceof ListNode) {
                 AnnotationVisitor arrayVisitor = visitor.visitArray(name);
