@@ -19,9 +19,12 @@ import java.io.StringWriter;
 public class UnmodifiedClassesTest {
     public static String[] classNames() {
         return new String[] {
-                "org.quiltmc.chasm.ExampleClass",
-                "org.quiltmc.chasm.ExampleClass$ExampleAnnotation",
-                "org.quiltmc.chasm.ExampleClass$ExampleRecord",
+                "org.quiltmc.chasm.testclasses.ExampleClass",
+                "org.quiltmc.chasm.testclasses.ExampleClass$ExampleAnnotation",
+                "org.quiltmc.chasm.testclasses.ExampleClass$ExampleRecord",
+                "org.quiltmc.chasm.testclasses.ExampleEnum",
+                "org.quiltmc.chasm.testclasses.SealedTest",
+                "org.quiltmc.chasm.testclasses.SealedTest$SealedExtendsTest",
         };
     }
 

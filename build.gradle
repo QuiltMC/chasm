@@ -10,6 +10,16 @@ repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile.class) {
+    it.targetCompatibility = 17
+    it.sourceCompatibility = 17
+}
+
+tasks.getByName("compileJava") {
+    it.targetCompatibility = 16
+    it.sourceCompatibility = 16
+}
+
 generateGrammarSource {
     maxHeapSize = "64m"
     arguments += ["-visitor", "-long-messages"]
