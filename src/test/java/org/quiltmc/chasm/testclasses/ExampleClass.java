@@ -1,7 +1,9 @@
-package org.quiltmc.chasm;
+package org.quiltmc.chasm.testclasses;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public abstract class ExampleClass {
     public static void publicStaticMethod() {
@@ -32,14 +34,28 @@ public abstract class ExampleClass {
             case 10 -> {
                 String nested = "Test";
                 yield switch (nested) {
-                    case "NotTest" -> {
-                        yield "NotTest";
-                    }
+                    case "NotTest" -> "NotTest";
                     default -> throw new IllegalStateException("Unexpected value: " + "Test");
                 };
             }
             default -> "Not 10";
         };
+    }
+
+    public static int testGenerics() throws ExecutionException, InterruptedException {
+        int output = CompletableFuture.supplyAsync(() -> 5)
+                .thenApply(i -> Integer.toString(i))
+                .thenAccept(System.out::println)
+                .thenApply(v -> 7)
+                .get();
+
+        switch (output) {
+            case 7: output = 10;
+            default:
+                output = 7;
+        }
+
+        return output;
     }
 
     public abstract void annotationTest(@ExampleAnnotation("first") String first, @ExampleAnnotation("second") String second);
@@ -52,4 +68,5 @@ public abstract class ExampleClass {
     public static record ExampleRecord(Integer first, String second) {
 
     }
+
 }
