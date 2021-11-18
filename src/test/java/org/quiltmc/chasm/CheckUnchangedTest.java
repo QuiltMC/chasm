@@ -3,6 +3,7 @@ package org.quiltmc.chasm;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -12,17 +13,14 @@ import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.asm.ChasmClassVisitor;
 import org.quiltmc.chasm.asm.ChasmClassWriter;
 import org.quiltmc.chasm.tree.MapNode;
+import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
 
-public class UnmodifiedClassesTest {
+public class CheckUnchangedTest {
     public static String[] classNames() {
-        return new String[] {
-                "org.quiltmc.chasm.testclasses.ExampleClass",
-                "org.quiltmc.chasm.testclasses.ExampleClass$ExampleAnnotation",
-                "org.quiltmc.chasm.testclasses.ExampleClass$ExampleRecord",
-                "org.quiltmc.chasm.testclasses.ExampleEnum",
-                "org.quiltmc.chasm.testclasses.SealedTest",
-                "org.quiltmc.chasm.testclasses.SealedTest$SealedExtendsTest",
-        };
+        Reflections reflections = new Reflections("org.quiltmc.chasm.tests", Scanners.TypesAnnotated);
+        Set<Class<?>> classes = reflections.get(Scanners.TypesAnnotated.with(CheckUnchanged.class).asClass());
+        return classes.stream().map(Class::getName).toArray(String[]::new);
     }
 
     @ParameterizedTest
@@ -47,6 +45,7 @@ public class UnmodifiedClassesTest {
         TraceClassVisitor resultVisitor = new TraceClassVisitor(new PrintWriter(resultString));
         resultReader.accept(resultVisitor, 0);
 
+        // Pass class through ASM (for equal frames)
         ClassWriter referenceClassWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         reader.accept(referenceClassWriter, 0);
         ClassReader referenceReader = new ClassReader(referenceClassWriter.toByteArray());

@@ -26,7 +26,7 @@ public abstract class Transformation {
         return sources;
     }
 
-    public Transformer getParent() {
+    public final Transformer getParent() {
         return parent;
     }
 }

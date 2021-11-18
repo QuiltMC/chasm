@@ -1,5 +1,8 @@
-package org.quiltmc.chasm.testclasses;
+package org.quiltmc.chasm.tests;
 
+import org.quiltmc.chasm.CheckUnchanged;
+
+@CheckUnchanged
 public enum ExampleEnum {
     A(1), B(2) {
         public String toString() {

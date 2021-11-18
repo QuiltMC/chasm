@@ -1,10 +1,12 @@
-package org.quiltmc.chasm.testclasses;
+package org.quiltmc.chasm.tests;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import org.quiltmc.chasm.CheckUnchanged;
 
+@CheckUnchanged
 public abstract class ExampleClass {
     public static void publicStaticMethod() {
         System.out.println("Hello Chasm!");
@@ -51,6 +53,7 @@ public abstract class ExampleClass {
         switch (output) {
             case 7:
                 output = 10;
+                // fall through
             default:
                 output = 7;
         }
@@ -61,13 +64,14 @@ public abstract class ExampleClass {
     public abstract void annotationTest(@ExampleAnnotation("first") String first,
                                         @ExampleAnnotation("second") String second);
 
+    @CheckUnchanged
     @Retention(RetentionPolicy.RUNTIME)
     @interface ExampleAnnotation {
         String value();
     }
 
+    @CheckUnchanged
     public static record ExampleRecord(Integer first, String second) {
 
     }
-
 }
