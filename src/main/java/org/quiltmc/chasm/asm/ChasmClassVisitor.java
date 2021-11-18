@@ -18,7 +18,7 @@ public class ChasmClassVisitor extends ClassVisitor {
     private final ListNode attributes = new LinkedListNode();
 
     public ChasmClassVisitor() {
-        super(Opcodes.ASM7);
+        super(Opcodes.ASM9);
     }
 
     public MapNode getClassNode() {
