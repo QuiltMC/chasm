@@ -62,7 +62,7 @@ public class ChasmProcessor {
         for(ZipEntry entry : inputJar.stream().toList()) {
             if (entry.getName().endsWith(CLASS_FILE_EXTENSION)) {
                 classReaders.add(new ClassReader(inputJar.getInputStream(entry)));
-            } else if (!entry.isDirectory()) {
+            } else if (entry.isDirectory()) {
                 // Skip directories
             } else {
                 // Copy non-class files directly
