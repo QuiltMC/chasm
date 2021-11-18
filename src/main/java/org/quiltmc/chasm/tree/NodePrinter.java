@@ -1,9 +1,8 @@
 package org.quiltmc.chasm.tree;
 
-import org.quiltmc.chasm.LazyClassNode;
-
 import java.io.PrintStream;
 import java.util.Map;
+import org.quiltmc.chasm.LazyClassNode;
 
 public class NodePrinter {
     private static final String INDENT_STRING = "  ";
@@ -28,12 +27,10 @@ public class NodePrinter {
         if (node instanceof ValueNode valueNode) {
             if (valueNode.getValue() instanceof String) {
                 printStream.print("\"" + valueNode.getValue() + "\"");
-            }
-            else {
+            } else {
                 printStream.print(valueNode.getValue());
             }
-        }
-        else if (node instanceof ListNode) {
+        } else if (node instanceof ListNode) {
             printStream.println("[");
             for (Node entry : (ListNode) node) {
                 printIndent(indent + 1);
@@ -42,12 +39,10 @@ public class NodePrinter {
             }
             printIndent(indent);
             printStream.print("]");
-        }
-        else if (node instanceof MapNode) {
+        } else if (node instanceof MapNode) {
             if (node instanceof LazyClassNode && !expandClasses) {
                 printStream.print("LazyClassNode<" + ((LazyClassNode) node).getClassReader().getClassName() + ">");
-            }
-            else {
+            } else {
                 printStream.println("{");
                 for (Map.Entry<String, Node> entry : ((MapNode) node).entrySet()) {
                     printIndent(indent + 1);
@@ -58,8 +53,7 @@ public class NodePrinter {
                 printIndent(indent);
                 printStream.print("}");
             }
-        }
-        else {
+        } else {
             throw new RuntimeException("Unexpected node type.");
         }
     }

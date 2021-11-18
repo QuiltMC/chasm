@@ -1,8 +1,19 @@
 package org.quiltmc.chasm.asm;
 
-import org.objectweb.asm.*;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Attribute;
+import org.objectweb.asm.ConstantDynamic;
+import org.objectweb.asm.Handle;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.TypePath;
 import org.quiltmc.chasm.NodeConstants;
-import org.quiltmc.chasm.tree.*;
+import org.quiltmc.chasm.tree.LinkedHashMapNode;
+import org.quiltmc.chasm.tree.LinkedListNode;
+import org.quiltmc.chasm.tree.ListNode;
+import org.quiltmc.chasm.tree.MapNode;
+import org.quiltmc.chasm.tree.ValueNode;
 
 public class ChasmMethodVisitor extends MethodVisitor {
     private final MapNode methodNode;
@@ -111,8 +122,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
         if (nextLabels != null) {
             instructionNode.put(NodeConstants.LABELS, nextLabels);
             nextLabels = null;
-        }
-        else {
+        } else {
             instructionNode.put(NodeConstants.LABELS, new LinkedListNode());
         }
 
@@ -197,7 +207,8 @@ public class ChasmMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
+    public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle,
+                                       Object... bootstrapMethodArguments) {
         MapNode instructionNode = new LinkedHashMapNode();
         instructionNode.put(NodeConstants.OPCODE, new ValueNode<>(Opcodes.INVOKEDYNAMIC));
         instructionNode.put(NodeConstants.NAME, new ValueNode<>(name));
@@ -223,8 +234,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
         for (Object arg : bootstrapMethodArguments) {
             if (arg instanceof Handle handle) {
                 argumentsNode.add(getHandleNode(handle));
-            }
-            else if (arg instanceof ConstantDynamic constantDynamic) {
+            } else if (arg instanceof ConstantDynamic constantDynamic) {
                 MapNode constDynamicNode = new LinkedHashMapNode();
                 constDynamicNode.put(NodeConstants.NAME, new ValueNode<>(constantDynamic.getName()));
                 constDynamicNode.put(NodeConstants.DESCRIPTOR, new ValueNode<>(constantDynamic.getDescriptor()));
@@ -235,8 +245,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
                 }
                 constDynamicNode.put(NodeConstants.ARGUMENTS, getArgumentsNode(arguments));
                 argumentsNode.add(constDynamicNode);
-            }
-            else {
+            } else {
                 argumentsNode.add(new ValueNode<>(arg));
             }
         }
@@ -345,7 +354,8 @@ public class ChasmMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public AnnotationVisitor visitTryCatchAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
+    public AnnotationVisitor visitTryCatchAnnotation(int typeRef, TypePath typePath, String descriptor,
+                                                     boolean visible) {
         MapNode tryCatchBlock = (MapNode) tryCatchBlocks.get(tryCatchBlocks.size() - 1);
 
         MapNode annotation = new LinkedHashMapNode();
@@ -363,7 +373,8 @@ public class ChasmMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public void visitLocalVariable(String name, String descriptor, String signature, Label start, Label end, int index) {
+    public void visitLocalVariable(String name, String descriptor, String signature, Label start, Label end,
+                                   int index) {
         // TODO: I think locals could be handled better than this
         MapNode localNode = new LinkedHashMapNode();
         localNode.put(NodeConstants.NAME, new ValueNode<>(name));
@@ -376,7 +387,8 @@ public class ChasmMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public AnnotationVisitor visitLocalVariableAnnotation(int typeRef, TypePath typePath, Label[] start, Label[] end, int[] index, String descriptor, boolean visible) {
+    public AnnotationVisitor visitLocalVariableAnnotation(int typeRef, TypePath typePath, Label[] start, Label[] end,
+                                                          int[] index, String descriptor, boolean visible) {
         // TODO: How to handle this?
         return null;
     }

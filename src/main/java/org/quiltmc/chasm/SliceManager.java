@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.quiltmc.chasm.transformer.NodePath;
 import org.quiltmc.chasm.transformer.SliceTarget;
 import org.quiltmc.chasm.transformer.Target;
@@ -36,7 +35,7 @@ public class SliceManager {
                     toMove.setStartIndex(toMove.getStartIndex() + sizeChange);
                 }
                 if (toMove.getEndIndex() >= target.getEndIndex()) {
-                    toMove.setEndIndex(toMove.getEndIndex() + sizeChange );
+                    toMove.setEndIndex(toMove.getEndIndex() + sizeChange);
                 }
             }
 
@@ -53,8 +52,7 @@ public class SliceManager {
             for (Node entry : replacement) {
                 owner.add(realStart, entry);
             }
-        }
-        else {
+        } else {
             throw new UnsupportedOperationException("Can't place slice in non-list");
         }
     }
@@ -64,7 +62,7 @@ public class SliceManager {
             if (transformation.getTarget() instanceof SliceTarget sliceTarget) {
                 this.addSlice(sliceTarget);
             }
-    
+
             for (Target target : transformation.getSources().values()) {
                 if (target instanceof SliceTarget sliceTarget) {
                     this.addSlice(sliceTarget);

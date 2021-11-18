@@ -3,10 +3,9 @@ package org.quiltmc.chasm.tree;
 import org.quiltmc.chasm.transformer.NodePath;
 
 public class ValueNode<T> implements Node {
-    private NodePath path = null;
     private final T value;
-
     private final boolean immutable;
+    private NodePath path = null;
 
     public ValueNode(T value) {
         this(value, null, false);

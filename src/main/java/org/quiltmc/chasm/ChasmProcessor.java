@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.quiltmc.chasm.asm.ChasmClassWriter;
@@ -29,37 +28,11 @@ public class ChasmProcessor {
 
     private final List<Transformer> transformers = new ArrayList<>();
 
-    public void addTransformer(Transformer transformerNode) {
-        transformers.add(transformerNode);
-    }
-    
-    public void processJar(File inputFile, File outputFile) throws IOException {
-        ZipFile inputJar = new ZipFile(inputFile);
-        ZipOutputStream outputJar = new ZipOutputStream(Files.newOutputStream(outputFile.toPath()));
-
-        List<ClassReader> classReaders = readInputJar(inputJar, outputJar);
-        LinkedHashMapNode classes = generateClassTree(classReaders);
-
-        // Apply transformers
-        TransformationSorter transformations = new TransformationSorter();
-        for (Transformer transformer : transformers) {
-            transformations.addAll(transformer.apply(classes));
-        }
-
-        // Add slices to manager
-        SliceManager sliceManager = new SliceManager(classes);
-        sliceManager.addSlices(transformations);
-
-        applyTransformations(classes, transformations, sliceManager);
-
-        writeOutputJar(outputJar, classes);
-    }
-
     private static List<ClassReader> readInputJar(ZipFile inputJar, ZipOutputStream outputJar)
             throws IOException {
         List<ClassReader> classReaders = new ArrayList<>();
         // Read input jar
-        for(ZipEntry entry : inputJar.stream().toList()) {
+        for (ZipEntry entry : inputJar.stream().toList()) {
             if (entry.getName().endsWith(CLASS_FILE_EXTENSION)) {
                 classReaders.add(new ClassReader(inputJar.getInputStream(entry)));
             } else if (entry.isDirectory()) {
@@ -72,6 +45,7 @@ public class ChasmProcessor {
         }
         return classReaders;
     }
+
     private static LinkedHashMapNode generateClassTree(List<ClassReader> classReaders) {
         // Generate class tree
         LinkedHashMapNode classes = new LinkedHashMapNode();
@@ -116,13 +90,13 @@ public class ChasmProcessor {
     }
 
     private static void applyTransformations(LinkedHashMapNode classes, TransformationSorter transformations,
-                                      SliceManager sliceManager) {
+                                             SliceManager sliceManager) {
         // Apply transformations
         for (Transformation transformation : transformations.get()) {
             // Read requested targets
             Target target = transformation.getTarget();
             Node resolvedTarget = target.resolve(classes);
-            
+
             MapNode resolvedSources = resolveSources(classes, transformation);
 
             // Create replacement node
@@ -132,7 +106,7 @@ public class ChasmProcessor {
             insertTransformationResult(target, classes, sliceManager, replacementNode);
         }
     }
-    
+
     private static void writeOutputJar(ZipOutputStream outputJar,
                                        LinkedHashMapNode classes) throws IOException {
         // Write output jar
@@ -149,6 +123,32 @@ public class ChasmProcessor {
                 throw new RuntimeException("Invalid class node.");
             }
         }
+    }
+
+    public void addTransformer(Transformer transformerNode) {
+        transformers.add(transformerNode);
+    }
+
+    public void processJar(File inputFile, File outputFile) throws IOException {
+        ZipFile inputJar = new ZipFile(inputFile);
+        ZipOutputStream outputJar = new ZipOutputStream(Files.newOutputStream(outputFile.toPath()));
+
+        List<ClassReader> classReaders = readInputJar(inputJar, outputJar);
+        LinkedHashMapNode classes = generateClassTree(classReaders);
+
+        // Apply transformers
+        TransformationSorter transformations = new TransformationSorter();
+        for (Transformer transformer : transformers) {
+            transformations.addAll(transformer.apply(classes));
+        }
+
+        // Add slices to manager
+        SliceManager sliceManager = new SliceManager(classes);
+        sliceManager.addSlices(transformations);
+
+        applyTransformations(classes, transformations, sliceManager);
+
+        writeOutputJar(outputJar, classes);
     }
 
 }

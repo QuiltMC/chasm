@@ -1,10 +1,11 @@
 package org.quiltmc.chasm.transformer;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import org.quiltmc.chasm.tree.ListNode;
 import org.quiltmc.chasm.tree.MapNode;
 import org.quiltmc.chasm.tree.Node;
-
-import java.util.*;
 
 public class NodePath {
     private final List<Object> entries;
@@ -66,13 +67,11 @@ public class NodePath {
     public Node resolve(Node root) {
         Node current = root;
         for (Object entry : entries) {
-            if(entry instanceof Integer indexPathEntry && current instanceof ListNode listNode) {
+            if (entry instanceof Integer indexPathEntry && current instanceof ListNode listNode) {
                 current = listNode.get(indexPathEntry);
-            }
-            else if(entry instanceof String namePathEntry && current instanceof MapNode mapNode) {
+            } else if (entry instanceof String namePathEntry && current instanceof MapNode mapNode) {
                 current = mapNode.get(namePathEntry);
-            }
-            else {
+            } else {
                 throw new UnsupportedOperationException("Can't apply path to given node.");
             }
         }
@@ -82,8 +81,12 @@ public class NodePath {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         NodePath nodePath = (NodePath) o;
         return Objects.equals(entries, nodePath.entries);
     }

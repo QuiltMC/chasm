@@ -1,8 +1,20 @@
 package org.quiltmc.chasm.asm;
 
-import org.objectweb.asm.*;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Attribute;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.ModuleVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.RecordComponentVisitor;
+import org.objectweb.asm.TypePath;
 import org.quiltmc.chasm.NodeConstants;
-import org.quiltmc.chasm.tree.*;
+import org.quiltmc.chasm.tree.LinkedHashMapNode;
+import org.quiltmc.chasm.tree.LinkedListNode;
+import org.quiltmc.chasm.tree.ListNode;
+import org.quiltmc.chasm.tree.MapNode;
+import org.quiltmc.chasm.tree.ValueNode;
 
 public class ChasmClassVisitor extends ClassVisitor {
     private final MapNode classNode = new LinkedHashMapNode();
@@ -163,7 +175,8 @@ public class ChasmClassVisitor extends ClassVisitor {
     }
 
     @Override
-    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
+                                     String[] exceptions) {
         MapNode methodNode = new LinkedHashMapNode();
 
         methodNode.put(NodeConstants.ACCESS, new ValueNode<>(access));

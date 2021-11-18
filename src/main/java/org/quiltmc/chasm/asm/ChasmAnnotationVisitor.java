@@ -2,7 +2,11 @@ package org.quiltmc.chasm.asm;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.quiltmc.chasm.NodeConstants;
-import org.quiltmc.chasm.tree.*;
+import org.quiltmc.chasm.tree.LinkedHashMapNode;
+import org.quiltmc.chasm.tree.LinkedListNode;
+import org.quiltmc.chasm.tree.ListNode;
+import org.quiltmc.chasm.tree.MapNode;
+import org.quiltmc.chasm.tree.ValueNode;
 
 public class ChasmAnnotationVisitor extends AnnotationVisitor {
     private final ListNode values;
@@ -21,11 +25,9 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
                 visitor.visit(null, entry);
             }
             visitor.visitEnd();
-        }
-        else if (name == null) {
+        } else if (name == null) {
             this.values.add(new ValueNode<>(value));
-        }
-        else {
+        } else {
             MapNode valueNode = new LinkedHashMapNode();
             valueNode.put(NodeConstants.NAME, new ValueNode<>(name));
             valueNode.put(NodeConstants.VALUE, new ValueNode<>(value));
@@ -44,8 +46,7 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
             valueNode.put(NodeConstants.NAME, new ValueNode<>(name));
             valueNode.put(NodeConstants.VALUE, enumValueNode);
             this.values.add(valueNode);
-        }
-        else {
+        } else {
             this.values.add(enumValueNode);
         }
     }
@@ -62,8 +63,7 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
             valueNode.put(NodeConstants.NAME, new ValueNode<>(name));
             valueNode.put(NodeConstants.VALUE, annotationValueNode);
             this.values.add(valueNode);
-        }
-        else {
+        } else {
             this.values.add(annotationValueNode);
         }
 
@@ -79,8 +79,7 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
             valueNode.put(NodeConstants.NAME, new ValueNode<>(name));
             valueNode.put(NodeConstants.VALUE, values);
             this.values.add(valueNode);
-        }
-        else {
+        } else {
             this.values.add(values);
         }
 

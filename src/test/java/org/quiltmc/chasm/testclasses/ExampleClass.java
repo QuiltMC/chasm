@@ -13,8 +13,7 @@ public abstract class ExampleClass {
             System.out.println("5 = " + 5);
             int three = 3;
             System.out.println(five + " + " + three + " = " + (five + three));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             five = 0;
         }
@@ -50,7 +49,8 @@ public abstract class ExampleClass {
                 .get();
 
         switch (output) {
-            case 7: output = 10;
+            case 7:
+                output = 10;
             default:
                 output = 7;
         }
@@ -58,7 +58,8 @@ public abstract class ExampleClass {
         return output;
     }
 
-    public abstract void annotationTest(@ExampleAnnotation("first") String first, @ExampleAnnotation("second") String second);
+    public abstract void annotationTest(@ExampleAnnotation("first") String first,
+                                        @ExampleAnnotation("second") String second);
 
     @Retention(RetentionPolicy.RUNTIME)
     @interface ExampleAnnotation {

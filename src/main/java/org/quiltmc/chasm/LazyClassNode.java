@@ -1,13 +1,17 @@
 package org.quiltmc.chasm;
 
-import org.objectweb.asm.ClassReader;
-import org.quiltmc.chasm.asm.ChasmClassVisitor;
-import org.quiltmc.chasm.transformer.NodePath;
-import org.quiltmc.chasm.tree.*;
-
 import java.lang.ref.SoftReference;
 import java.util.AbstractMap;
 import java.util.Set;
+import org.objectweb.asm.ClassReader;
+import org.quiltmc.chasm.asm.ChasmClassVisitor;
+import org.quiltmc.chasm.transformer.NodePath;
+import org.quiltmc.chasm.tree.LinkedHashMapNode;
+import org.quiltmc.chasm.tree.LinkedListNode;
+import org.quiltmc.chasm.tree.ListNode;
+import org.quiltmc.chasm.tree.MapNode;
+import org.quiltmc.chasm.tree.Node;
+import org.quiltmc.chasm.tree.ValueNode;
 
 public class LazyClassNode extends AbstractMap<String, Node> implements MapNode {
     private final ClassReader classReader;

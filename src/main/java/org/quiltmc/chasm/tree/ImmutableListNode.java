@@ -1,12 +1,13 @@
 package org.quiltmc.chasm.tree;
 
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.List;
 import org.quiltmc.chasm.transformer.NodePath;
-
-import java.util.*;
 
 public class ImmutableListNode extends AbstractList<Node> implements ListNode {
     private final List<Node> internal;
-    private NodePath path;
+    private final NodePath path;
 
     public ImmutableListNode(ListNode listNode) {
         this.internal = new ArrayList<>(listNode);

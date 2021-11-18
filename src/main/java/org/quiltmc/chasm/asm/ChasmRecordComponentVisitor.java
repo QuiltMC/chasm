@@ -1,8 +1,15 @@
 package org.quiltmc.chasm.asm;
 
-import org.objectweb.asm.*;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Attribute;
+import org.objectweb.asm.RecordComponentVisitor;
+import org.objectweb.asm.TypePath;
 import org.quiltmc.chasm.NodeConstants;
-import org.quiltmc.chasm.tree.*;
+import org.quiltmc.chasm.tree.LinkedHashMapNode;
+import org.quiltmc.chasm.tree.LinkedListNode;
+import org.quiltmc.chasm.tree.ListNode;
+import org.quiltmc.chasm.tree.MapNode;
+import org.quiltmc.chasm.tree.ValueNode;
 
 public class ChasmRecordComponentVisitor extends RecordComponentVisitor {
     private final ListNode annotations = new LinkedListNode();
@@ -33,7 +40,7 @@ public class ChasmRecordComponentVisitor extends RecordComponentVisitor {
         ListNode values = new LinkedListNode();
         annotation.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
         annotation.put(NodeConstants.VISIBLE, new ValueNode<>(visible));
-        annotation.put(NodeConstants.VALUES, new ValueNode<>(visible));
+        annotation.put(NodeConstants.VALUES, new ValueNode<>(values));
         annotation.put(NodeConstants.TYPE_REF, new ValueNode<>(typeRef));
         annotation.put(NodeConstants.TYPE_PATH, new ValueNode<>(typePath.toString()));
         annotations.add(annotation);

@@ -1,8 +1,7 @@
 package org.quiltmc.chasm.tree;
 
-import org.quiltmc.chasm.transformer.NodePath;
-
 import java.util.HashMap;
+import org.quiltmc.chasm.transformer.NodePath;
 
 public class LinkedHashMapNode extends HashMap<String, Node> implements MapNode {
     private NodePath path = null;

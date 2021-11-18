@@ -1,9 +1,8 @@
 package org.quiltmc.chasm.transformer;
 
+import java.util.Map;
 import org.quiltmc.chasm.tree.MapNode;
 import org.quiltmc.chasm.tree.Node;
-
-import java.util.Map;
 
 public abstract class Transformation {
     private final Transformer parent;

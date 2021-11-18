@@ -1,11 +1,10 @@
 package org.quiltmc.chasm.tree;
 
-import org.quiltmc.chasm.transformer.NodePath;
-
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.quiltmc.chasm.transformer.NodePath;
 
 public class ImmutableMapNode extends AbstractMap<String, Node> implements MapNode {
     private final Map<String, Node> inner;

@@ -24,12 +24,12 @@ public class SliceTarget implements Target {
         return startIndex;
     }
 
-    public int getEndIndex() {
-        return endIndex;
-    }
-
     public void setStartIndex(int startIndex) {
         this.startIndex = startIndex;
+    }
+
+    public int getEndIndex() {
+        return endIndex;
     }
 
     public void setEndIndex(int endIndex) {
@@ -46,8 +46,7 @@ public class SliceTarget implements Target {
                 Object index = nodeTarget.getPath().getEntryAt(this.path.getLength());
                 if (index instanceof Integer intIndex) {
                     return startIndex / 2 <= intIndex && intIndex < endIndex / 2;
-                }
-                else {
+                } else {
                     throw new RuntimeException("Unexpected index type");
                 }
             }
@@ -60,8 +59,7 @@ public class SliceTarget implements Target {
     public boolean overlaps(Target other) {
         if (other instanceof NodeTarget) {
             return false;
-        }
-        else if (other instanceof SliceTarget sliceTarget) {
+        } else if (other instanceof SliceTarget sliceTarget) {
             if (!this.path.equals(sliceTarget.path)) {
                 return false;
             }
@@ -75,8 +73,7 @@ public class SliceTarget implements Target {
             }
 
             return sliceTarget.startIndex < this.endIndex && this.endIndex < sliceTarget.endIndex;
-        }
-        else {
+        } else {
             throw new RuntimeException("Unexpected target type");
         }
     }
@@ -92,8 +89,7 @@ public class SliceTarget implements Target {
                 slice.add(listNode.get(i));
             }
             return slice;
-        }
-        else {
+        } else {
             throw new UnsupportedOperationException("Invalid slice into non-list");
         }
     }

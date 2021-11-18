@@ -2,7 +2,11 @@ package org.quiltmc.chasm.asm;
 
 import org.objectweb.asm.ModuleVisitor;
 import org.quiltmc.chasm.NodeConstants;
-import org.quiltmc.chasm.tree.*;
+import org.quiltmc.chasm.tree.LinkedHashMapNode;
+import org.quiltmc.chasm.tree.LinkedListNode;
+import org.quiltmc.chasm.tree.ListNode;
+import org.quiltmc.chasm.tree.MapNode;
+import org.quiltmc.chasm.tree.ValueNode;
 
 public class ChasmModuleVisitor extends ModuleVisitor {
     private final MapNode moduleNode;
