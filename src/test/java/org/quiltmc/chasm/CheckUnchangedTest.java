@@ -11,7 +11,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.asm.ChasmClassVisitor;
-import org.quiltmc.chasm.asm.ChasmClassWriter;
+import org.quiltmc.chasm.asm.writer.ChasmClassWriter;
 import org.quiltmc.chasm.tree.MapNode;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
