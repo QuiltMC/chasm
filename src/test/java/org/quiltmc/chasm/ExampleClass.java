@@ -27,6 +27,21 @@ public abstract class ExampleClass {
         }
     }
 
+    public static String testSwitch() {
+        return switch ((int) Math.round(Math.random() * 100)) {
+            case 10 -> {
+                String nested = "Test";
+                yield switch (nested) {
+                    case "NotTest" -> {
+                        yield "NotTest";
+                    }
+                    default -> throw new IllegalStateException("Unexpected value: " + "Test");
+                };
+            }
+            default -> "Not 10";
+        };
+    }
+
     public abstract void annotationTest(@ExampleAnnotation("first") String first, @ExampleAnnotation("second") String second);
 
     @Retention(RetentionPolicy.RUNTIME)

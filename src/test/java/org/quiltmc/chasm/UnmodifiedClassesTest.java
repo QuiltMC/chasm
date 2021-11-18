@@ -38,19 +38,23 @@ public class UnmodifiedClassesTest {
 
         // Write class
         ChasmClassWriter resultWriter = new ChasmClassWriter(mapNode);
-        ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-        resultWriter.accept(classWriter);
-        ClassReader resultReader = new ClassReader(classWriter.toByteArray());
+        ClassWriter resultClassWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        resultWriter.accept(resultClassWriter);
+        ClassReader resultReader = new ClassReader(resultClassWriter.toByteArray());
 
         // Write class into string
         StringWriter resultString = new StringWriter();
         TraceClassVisitor resultVisitor = new TraceClassVisitor(new PrintWriter(resultString));
         resultReader.accept(resultVisitor, 0);
 
+        ClassWriter referenceClassWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        reader.accept(referenceClassWriter, 0);
+        ClassReader referenceReader = new ClassReader(referenceClassWriter.toByteArray());
+
         // Write original class into string
         StringWriter referenceString = new StringWriter();
         TraceClassVisitor referenceVisitor = new TraceClassVisitor(new PrintWriter(referenceString));
-        reader.accept(referenceVisitor, 0);
+        referenceReader.accept(referenceVisitor, 0);
 
         // Class shouldn't have changed
         Assertions.assertEquals(referenceString.toString(), resultString.toString());
