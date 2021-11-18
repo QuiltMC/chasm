@@ -1,14 +1,16 @@
 package org.quiltmc.chasm;
 
-import org.quiltmc.chasm.transformer.NodePath;
-import org.quiltmc.chasm.transformer.SliceTarget;
-import org.quiltmc.chasm.tree.ListNode;
-import org.quiltmc.chasm.tree.Node;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.quiltmc.chasm.transformer.NodePath;
+import org.quiltmc.chasm.transformer.SliceTarget;
+import org.quiltmc.chasm.transformer.Target;
+import org.quiltmc.chasm.transformer.Transformation;
+import org.quiltmc.chasm.tree.ListNode;
+import org.quiltmc.chasm.tree.Node;
 
 public class SliceManager {
     private final Map<NodePath, List<SliceTarget>> nodeToSlice = new HashMap<>();
@@ -54,6 +56,20 @@ public class SliceManager {
         }
         else {
             throw new UnsupportedOperationException("Can't place slice in non-list");
+        }
+    }
+
+    void addSlices(TransformationSorter transformations) {
+        for (Transformation transformation : transformations.get()) {
+            if (transformation.getTarget() instanceof SliceTarget sliceTarget) {
+                this.addSlice(sliceTarget);
+            }
+    
+            for (Target target : transformation.getSources().values()) {
+                if (target instanceof SliceTarget sliceTarget) {
+                    this.addSlice(sliceTarget);
+                }
+            }
         }
     }
 }
