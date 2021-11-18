@@ -705,20 +705,25 @@ public class ChasmClassWriter {
                     labels[i] = labelMap.computeIfAbsent(caseLabelString, s -> new Label());
                 }
 
-                // Check if switch can be a table switch
-                boolean isTable = true;
-                for (int i = 0; i < keys.length; i++) {
-                    if (keys[i] != keys[0] + i) {
-                        isTable = false;
-                        break;
-                    }
-                }
-
-                if (isTable) {
-                    visitor.visitTableSwitchInsn(keys[0], keys[0] + keys.length - 1, dflt, labels);
+                if (opcode == Opcodes.LOOKUPSWITCH) {
+                    visitor.visitLookupSwitchInsn(dflt, keys, labels);
                 }
                 else {
-                    visitor.visitLookupSwitchInsn(dflt, keys, labels);
+                    // Check if switch can still be a table switch
+                    boolean canBeTable = true;
+                    for (int i = 0; i < keys.length; i++) {
+                        if (keys[i] != keys[0] + i) {
+                            canBeTable = false;
+                            break;
+                        }
+                    }
+
+                    if (canBeTable) {
+                        visitor.visitTableSwitchInsn(keys[0], keys[0] + keys.length - 1, dflt, labels);
+                    }
+                    else {
+                        visitor.visitLookupSwitchInsn(dflt, keys, labels);
+                    }
                 }
                 break;
             }

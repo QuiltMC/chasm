@@ -14,9 +14,17 @@ public abstract class ExampleClass {
         }
         catch (Exception e) {
             e.printStackTrace();
+            five = 0;
         }
 
         publicStaticMethod();
+
+        switch (five) {
+            case 5:
+                System.out.println("Still 5");
+            default:
+                System.out.println("No longer 5");
+        }
     }
 
     public abstract void annotationTest(@ExampleAnnotation("first") String first, @ExampleAnnotation("second") String second);
