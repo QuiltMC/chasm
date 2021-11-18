@@ -1,6 +1,7 @@
 package org.quiltmc.chasm.tree;
 
 import java.util.LinkedList;
+
 import org.quiltmc.chasm.transformer.NodePath;
 
 public class LinkedListNode extends LinkedList<Node> implements ListNode {

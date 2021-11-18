@@ -2,6 +2,7 @@ package org.quiltmc.chasm.tree;
 
 import java.io.PrintStream;
 import java.util.Map;
+
 import org.quiltmc.chasm.LazyClassNode;
 
 public class NodePrinter {

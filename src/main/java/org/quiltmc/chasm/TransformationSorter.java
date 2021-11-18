@@ -3,6 +3,7 @@ package org.quiltmc.chasm;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+
 import org.quiltmc.chasm.transformer.Transformation;
 
 public class TransformationSorter {

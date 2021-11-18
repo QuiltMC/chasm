@@ -3,6 +3,7 @@ package org.quiltmc.chasm.transformer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 import org.quiltmc.chasm.tree.ListNode;
 import org.quiltmc.chasm.tree.MapNode;
 import org.quiltmc.chasm.tree.Node;

@@ -3,6 +3,7 @@ package org.quiltmc.chasm;
 import java.lang.ref.SoftReference;
 import java.util.AbstractMap;
 import java.util.Set;
+
 import org.objectweb.asm.ClassReader;
 import org.quiltmc.chasm.asm.ChasmClassVisitor;
 import org.quiltmc.chasm.transformer.NodePath;

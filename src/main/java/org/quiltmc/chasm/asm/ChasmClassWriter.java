@@ -2,6 +2,7 @@ package org.quiltmc.chasm.asm;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
