@@ -37,7 +37,17 @@ public class ChasmClassWriter {
 
         // visitSource
         {
-            // Don't care
+            String source = null;
+            if (classNode.containsKey(NodeConstants.SOURCE)) {
+                source = ((ValueNode<String>) classNode.get(NodeConstants.SOURCE)).getValue();
+            }
+
+            String debug = null;
+            if (classNode.containsKey(NodeConstants.DEBUG)) {
+                debug = ((ValueNode<String>) classNode.get(NodeConstants.DEBUG)).getValue();
+            }
+
+            visitor.visitSource(source, debug);
         }
 
         // visitModule
@@ -168,7 +178,7 @@ public class ChasmClassWriter {
         }
 
         // visitInnerClass
-        for (Node n : (ListNode) classNode.get(NodeConstants.PERMITTED_SUBCLASSES)) {
+        for (Node n : (ListNode) classNode.get(NodeConstants.INNER_CLASSES)) {
             MapNode innerClass = (MapNode) n;
             ValueNode<String> name = (ValueNode<String>) innerClass.get(NodeConstants.NAME);
             ValueNode<String> outerName = (ValueNode<String>) innerClass.get(NodeConstants.OUTER_NAME);
@@ -390,7 +400,7 @@ public class ChasmClassWriter {
                 // Don't care
 
                 // visitMaxs
-                // Don't care
+                methodVisitor.visitMaxs(0, 0);
             }
 
             // visitEnd
@@ -449,14 +459,25 @@ public class ChasmClassWriter {
 
     private void visitInstruction(MethodVisitor visitor, MapNode instructionNode, Map<String, Label> labelMap) {
         // visitLabel
-        for (Node n2 : (ListNode) instructionNode.get(NodeConstants.LABELS)) {
+        ListNode labelsNode = (ListNode) instructionNode.get(NodeConstants.LABELS);
+        for (Node n2 : labelsNode) {
             visitor.visitLabel(labelMap.computeIfAbsent(((ValueNode<String>) n2).getValue(), s -> new Label()));
+        }
+
+        if (instructionNode.containsKey(NodeConstants.LINE)) {
+            if (labelsNode.isEmpty()) {
+                throw new RuntimeException("Encountered line number without label.");
+            }
+            int line = ((ValueNode<Integer>) instructionNode.get(NodeConstants.LINE)).getValue();
+            visitor.visitLineNumber(line, labelMap.get(((ValueNode<String>) labelsNode.get(0)).getValue()));
         }
 
         // visit<...>Insn
         int opcode = ((ValueNode<Integer>)instructionNode.get(NodeConstants.OPCODE)).getValue();
         switch (opcode) {
             case Opcodes.NOP:
+                // TODO: This is a hack to strip trailing nops added earlier
+                break;
             case Opcodes.ACONST_NULL:
             case Opcodes.ICONST_M1:
             case Opcodes.ICONST_0:

@@ -9,6 +9,7 @@ public class NodeConstants {
     public static final String ATTRIBUTES = "attributes";
     public static final String CASES = "cases";
     public static final String CODE = "code";
+    public static final String DEBUG = "debug";
     public static final String DEFAULT = "default";
     public static final String DESCRIPTOR = "descriptor";
     public static final String DIMENSIONS = "dimensions";
@@ -28,6 +29,7 @@ public class NodeConstants {
     public static final String KEY = "key";
     public static final String LABEL = "label";
     public static final String LABELS = "labels";
+    public static final String LINE = "line";
     public static final String LOCALS = "locals";
     public static final String MAIN = "main";
     public static final String METHODS = "methods";
@@ -56,6 +58,7 @@ public class NodeConstants {
     public static final String REQUIRES = "requires";
     public static final String SERVICE = "service";
     public static final String SIGNATURE = "signature";
+    public static final String SOURCE = "source";
     public static final String START = "start";
     public static final String SUPER = "super";
     public static final String TAG = "tag";

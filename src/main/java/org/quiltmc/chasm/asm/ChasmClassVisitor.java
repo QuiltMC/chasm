@@ -54,7 +54,13 @@ public class ChasmClassVisitor extends ClassVisitor {
 
     @Override
     public void visitSource(String source, String debug) {
-        // Don't care
+        if (source != null) {
+            classNode.put(NodeConstants.SOURCE, new ValueNode<>(source));
+        }
+
+        if (debug != null) {
+            classNode.put(NodeConstants.DEBUG, new ValueNode<>(debug));
+        }
     }
 
     @Override
@@ -151,6 +157,7 @@ public class ChasmClassVisitor extends ClassVisitor {
         fieldNode.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
         fieldNode.put(NodeConstants.SIGNATURE, new ValueNode<>(signature));
         fieldNode.put(NodeConstants.VALUE, new ValueNode<>(value));
+        fields.add(fieldNode);
 
         return new ChasmFieldVisitor(api, fieldNode);
     }

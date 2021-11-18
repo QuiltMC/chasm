@@ -37,7 +37,7 @@ public class LazyClassNode extends AbstractMap<String, Node> implements MapNode 
         MapNode fullNode = this.fullNode.get();
         if (fullNode == null) {
             ChasmClassVisitor classVisitor = new ChasmClassVisitor();
-            classReader.accept(classVisitor, ClassReader.SKIP_FRAMES);
+            classReader.accept(classVisitor, 0);
             fullNode = classVisitor.getClassNode();
             if (getPath() != null) {
                 fullNode.initializePath(getPath());

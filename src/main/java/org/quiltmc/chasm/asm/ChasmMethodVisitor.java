@@ -19,6 +19,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
     private final ListNode tryCatchBlocks = new LinkedListNode();
 
     private ListNode nextLabels = null;
+    private int nextLineNumber = -1;
 
     public ChasmMethodVisitor(int api, MapNode methodNode) {
         super(api);
@@ -113,6 +114,11 @@ public class ChasmMethodVisitor extends MethodVisitor {
         }
         else {
             instructionNode.put(NodeConstants.LABELS, new LinkedListNode());
+        }
+
+        if (nextLineNumber != -1) {
+            instructionNode.put(NodeConstants.LINE, new ValueNode<>(nextLineNumber));
+            nextLineNumber = -1;
         }
 
         instructionNode.put(NodeConstants.ANNOTATIONS, new LinkedListNode());
@@ -377,7 +383,11 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitLineNumber(int line, Label start) {
-        // Don't care
+        if (nextLineNumber != -1) {
+            throw new RuntimeException("Encountered two consecutive line numbers without a instruction.");
+        }
+
+        nextLineNumber = line;
     }
 
     @Override

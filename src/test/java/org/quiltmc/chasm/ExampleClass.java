@@ -19,10 +19,14 @@ public abstract class ExampleClass {
         publicStaticMethod();
     }
 
-    public abstract void annotationTest(@TestAnnotation("first") String first, @TestAnnotation("second") String second);
+    public abstract void annotationTest(@ExampleAnnotation("first") String first, @ExampleAnnotation("second") String second);
 
     @Retention(RetentionPolicy.RUNTIME)
-    @interface TestAnnotation {
+    @interface ExampleAnnotation {
         String value();
+    }
+
+    public static record ExampleRecord(Integer first, String second) {
+
     }
 }
