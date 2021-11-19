@@ -4,22 +4,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.util.TraceClassVisitor;
-import org.quiltmc.chasm.asm.ChasmClassVisitor;
-import org.quiltmc.chasm.asm.writer.ChasmClassWriter;
 import org.quiltmc.chasm.transformer.Transformer;
-import org.quiltmc.chasm.tree.MapNode;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
@@ -38,7 +33,7 @@ public class CheckTransformedTest {
         ChasmProcessor chasmProcessor = new ChasmProcessor();
 
         InputStream classStream = targetClass.getResourceAsStream(targetClass.getSimpleName() + ".class");
-        byte[] originalClassBytes = classStream.readAllBytes();;
+        byte[] originalClassBytes = classStream.readAllBytes();
         chasmProcessor.addClass(originalClassBytes);
 
         CheckTransformed annotation = targetClass.getAnnotation(CheckTransformed.class);
@@ -57,7 +52,8 @@ public class CheckTransformedTest {
         ClassReader resultClass = null;
         for (byte[] clazz : classBytes) {
             resultClass = new ClassReader(clazz);
-            if (resultClass.getClassName().replace('/', '.').replace('$', '.').equals(targetClass.getName())) {
+            String jvmBinaryName = resultClass.getClassName().replace('/', '.').replace('$', '.');
+            if (jvmBinaryName.equals(targetClass.getName())) {
                 break;
             }
         }
@@ -70,7 +66,8 @@ public class CheckTransformedTest {
         resultClass.accept(resultVisitor, 0);
 
         Class<?> referenceClass = annotation.result();
-        InputStream referenceClassStream = referenceClass.getResourceAsStream(referenceClass.getSimpleName() + ".class");
+        InputStream referenceClassStream =
+                referenceClass.getResourceAsStream(referenceClass.getSimpleName() + ".class");
         ClassReader referenceReader = new ClassReader(originalClassBytes);
 
         // Pass class through ASM (for equal frames)
