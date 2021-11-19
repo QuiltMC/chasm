@@ -64,9 +64,6 @@ public class ChasmClassWriter {
 
         ValueNode<String> signatureNode = (ValueNode<String>) classNode.get(NodeConstants.SIGNATURE);
         String signature = signatureNode == null? null: signatureNode.getValue();
-        if (signature == null) {
-            signature = name;
-        }
         
         ValueNode<String> superClassNode = (ValueNode<String>) classNode.get(NodeConstants.SUPER);
         String superClass = superClassNode == null? "java/lang/Object": superClassNode.getValue();
@@ -138,7 +135,11 @@ public class ChasmClassWriter {
     }
 
     private void visitInnerClasses(ClassVisitor visitor) {
-        for (Node n : (ListNode) classNode.get(NodeConstants.INNER_CLASSES)) {
+        ListNode innerClassesListNode = (ListNode) classNode.get(NodeConstants.INNER_CLASSES);
+        if (innerClassesListNode == null) {
+            return;
+        }
+        for (Node n : innerClassesListNode) {
             MapNode innerClass = (MapNode) n;
             ValueNode<String> name = (ValueNode<String>) innerClass.get(NodeConstants.NAME);
             ValueNode<String> outerName = (ValueNode<String>) innerClass.get(NodeConstants.OUTER_NAME);
@@ -150,26 +151,42 @@ public class ChasmClassWriter {
     }
 
     private void visitPermittedSubclasses(ClassVisitor visitor) {
-        for (Node n : (ListNode) classNode.get(NodeConstants.PERMITTED_SUBCLASSES)) {
+        ListNode permittedSubclassesListNode = (ListNode) classNode.get(NodeConstants.PERMITTED_SUBCLASSES);
+        if (permittedSubclassesListNode == null) {
+            return;
+        }
+        for (Node n : permittedSubclassesListNode) {
             visitor.visitPermittedSubclass(((ValueNode<String>) n).getValue());
         }
     }
 
     private void visitNestMembers(ClassVisitor visitor) {
-        for (Node n : (ListNode) classNode.get(NodeConstants.NEST_MEMBERS)) {
+        ListNode nestMembersListNode = (ListNode) classNode.get(NodeConstants.NEST_MEMBERS);
+        if (nestMembersListNode == null) {
+            return;
+        }
+        for (Node n : nestMembersListNode) {
             visitor.visitNestMember(((ValueNode<String>) n).getValue());
         }
     }
 
     private void visitAttributes(ClassVisitor visitor) {
-        for (Node n : (ListNode) classNode.get(NodeConstants.ATTRIBUTES)) {
+        ListNode attributesListNode = (ListNode) classNode.get(NodeConstants.ATTRIBUTES);
+        if (attributesListNode == null) {
+            return;
+        }
+        for (Node n : attributesListNode) {
             visitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
         }
     }
 
     private void visitAnnotations(ClassVisitor visitor) {
-        for (Node n : (ListNode) classNode.get(NodeConstants.ANNOTATIONS)) {
-            ChasmAnnotationWriter writer = new ChasmAnnotationWriter((MapNode) n);
+        ListNode annotationsListNode = (ListNode) classNode.get(NodeConstants.ANNOTATIONS);
+        if (annotationsListNode == null) {
+            return;
+        }
+        for (Node n : annotationsListNode) {
+            ChasmAnnotationWriter writer = new ChasmAnnotationWriter(n);
             writer.visitAnnotation(visitor::visitAnnotation, visitor::visitTypeAnnotation);
         }
     }
