@@ -31,11 +31,49 @@ public class ChasmFieldWriter {
     }
 
     public void visitField(ClassVisitor visitor) {
-        int access = ((ValueNode<Integer>) fieldNode.get(NodeConstants.ACCESS)).getValue();
+        int access = ((ValueNode<Integer>) fieldNode.get(NodeConstants.ACCESS)).getValue().intValue();
         String name = ((ValueNode<String>) fieldNode.get(NodeConstants.NAME)).getValue();
         String descriptor = ((ValueNode<String>) fieldNode.get(NodeConstants.DESCRIPTOR)).getValue();
-        String signature = ((ValueNode<String>) fieldNode.get(NodeConstants.SIGNATURE)).getValue();
-        Object value = ((ValueNode<Object>) fieldNode.get(NodeConstants.VALUE)).getValue();
+        
+        // 
+        ValueNode<String> signatureNode = (ValueNode<String>) fieldNode.get(NodeConstants.SIGNATURE);
+        String signature = signatureNode == null? null: signatureNode.getValue();
+        if (signature == null) {
+            signature = descriptor;
+        }
+        
+        ValueNode<Object> valueNode = (ValueNode<Object>) fieldNode.get(NodeConstants.VALUE);
+        Object value = valueNode == null? null: valueNode.getValue();
+        if (value == null && descriptor.length() == 1) {
+            switch(descriptor.charAt(0)) {
+                case 'B':
+                    value = Byte.valueOf((byte) 0);
+                    break;
+                case 'C':
+                    value = Character.valueOf('\0');
+                    break;
+                case 'D':
+                    value = Double.valueOf(0.0);
+                    break;
+                case 'F':
+                    value = Float.valueOf(0.0F);
+                    break;
+                case 'I':
+                    value = Integer.valueOf(0);
+                    break;
+                case 'J':
+                    value = Long.valueOf(0);
+                    break;
+                case 'S':
+                    value = Short.valueOf((short) 0);
+                    break;
+                case 'Z':
+                    value = Boolean.FALSE;
+                    break;
+                default:
+                    // Let value stay null
+            }
+        }
 
         FieldVisitor fieldVisitor = visitor.visitField(access, name, descriptor, signature, value);
 
