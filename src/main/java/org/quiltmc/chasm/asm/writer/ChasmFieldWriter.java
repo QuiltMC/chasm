@@ -18,13 +18,21 @@ public class ChasmFieldWriter {
     }
 
     private void visitAttributes(FieldVisitor fieldVisitor) {
-        for (Node n : (ListNode) fieldNode.get(NodeConstants.ATTRIBUTES)) {
+        ListNode attributesListNode = (ListNode) fieldNode.get(NodeConstants.ATTRIBUTES);
+        if (attributesListNode == null) {
+            return;
+        }
+        for (Node n : attributesListNode) {
             fieldVisitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
         }
     }
 
     private void visitAnnotations(FieldVisitor fieldVisitor) {
-        for (Node n : (ListNode) fieldNode.get(NodeConstants.ANNOTATIONS)) {
+        ListNode annotationsListNode = (ListNode) fieldNode.get(NodeConstants.ANNOTATIONS);
+        if (annotationsListNode == null) {
+            return;
+        }
+        for (Node n : annotationsListNode) {
             ChasmAnnotationWriter annotationWriter = new ChasmAnnotationWriter((MapNode) n);
             annotationWriter.visitAnnotation(fieldVisitor::visitAnnotation, fieldVisitor::visitTypeAnnotation);
         }
@@ -35,44 +43,13 @@ public class ChasmFieldWriter {
         String name = ((ValueNode<String>) fieldNode.get(NodeConstants.NAME)).getValue();
         String descriptor = ((ValueNode<String>) fieldNode.get(NodeConstants.DESCRIPTOR)).getValue();
         
-        // 
         ValueNode<String> signatureNode = (ValueNode<String>) fieldNode.get(NodeConstants.SIGNATURE);
         String signature = signatureNode == null? null: signatureNode.getValue();
-        if (signature == null) {
-            signature = descriptor;
-        }
         
         ValueNode<Object> valueNode = (ValueNode<Object>) fieldNode.get(NodeConstants.VALUE);
         Object value = valueNode == null? null: valueNode.getValue();
         if (value == null && descriptor.length() == 1) {
-            switch(descriptor.charAt(0)) {
-                case 'B':
-                    value = Byte.valueOf((byte) 0);
-                    break;
-                case 'C':
-                    value = Character.valueOf('\0');
-                    break;
-                case 'D':
-                    value = Double.valueOf(0.0);
-                    break;
-                case 'F':
-                    value = Float.valueOf(0.0F);
-                    break;
-                case 'I':
-                    value = Integer.valueOf(0);
-                    break;
-                case 'J':
-                    value = Long.valueOf(0);
-                    break;
-                case 'S':
-                    value = Short.valueOf((short) 0);
-                    break;
-                case 'Z':
-                    value = Boolean.FALSE;
-                    break;
-                default:
-                    // Let value stay null
-            }
+            value = getBoxedPrimitiveDefault(descriptor);
         }
 
         FieldVisitor fieldVisitor = visitor.visitField(access, name, descriptor, signature, value);
@@ -85,5 +62,38 @@ public class ChasmFieldWriter {
 
         // visitEnd
         fieldVisitor.visitEnd();
+    }
+
+    private static Object getBoxedPrimitiveDefault(String descriptor) {
+        final Object value;
+        switch(descriptor.charAt(0)) {
+            case 'B':
+                value = Byte.valueOf((byte) 0);
+                break;
+            case 'C':
+                value = Character.valueOf('\0');
+                break;
+            case 'D':
+                value = Double.valueOf(0.0);
+                break;
+            case 'F':
+                value = Float.valueOf(0.0F);
+                break;
+            case 'I':
+                value = Integer.valueOf(0);
+                break;
+            case 'J':
+                value = Long.valueOf(0);
+                break;
+            case 'S':
+                value = Short.valueOf((short) 0);
+                break;
+            case 'Z':
+                value = Boolean.FALSE;
+                break;
+            default:
+                value = null;
+        }
+        return value;
     }
 }
