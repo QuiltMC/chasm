@@ -5,10 +5,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.CLASS)
-public @interface CheckTransformed {
-    Class<?> target();
+import org.quiltmc.chasm.transformer.Transformer;
 
-    Class<?>[] transformer();
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface CheckTransformed {
+    Class<?> result();
+
+    Class<? extends Transformer>[] transformer();
+
+    Class<?>[] classes() default { };
 }

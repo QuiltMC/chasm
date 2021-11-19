@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface ListNode extends Node, List<Node> {
     @Override
-    default Node toImmutable() {
+    default ListNode toImmutable() {
         if (isImmutable()) {
             return this;
         }

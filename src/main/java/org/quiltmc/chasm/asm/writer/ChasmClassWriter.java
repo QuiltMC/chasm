@@ -54,6 +54,7 @@ public class ChasmClassWriter {
         // Unmodified class
         if (classNode instanceof LazyClassNode) {
             ((LazyClassNode) classNode).getClassReader().accept(visitor, 0);
+            return;
         }
 
         // visit

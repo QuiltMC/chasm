@@ -26,11 +26,11 @@ public class NodePath {
     }
 
     public NodePath append(String name) {
-        return append(name);
+        return append((Object) name);
     }
 
     public NodePath append(int index) {
-        return append(index);
+        return append((Object) index);
     }
 
     public int getLength() {
@@ -43,6 +43,10 @@ public class NodePath {
 
     public Object getEntryAt(int index) {
         return entries.get(index);
+    }
+
+    public void setEntryAt(int index, Object value) {
+        entries.set(index, value);
     }
 
     public NodePath getParent() {

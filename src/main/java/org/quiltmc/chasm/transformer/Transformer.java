@@ -2,10 +2,10 @@ package org.quiltmc.chasm.transformer;
 
 import java.util.Collection;
 
-import org.quiltmc.chasm.tree.LinkedHashMapNode;
+import org.quiltmc.chasm.tree.ListNode;
 
 public interface Transformer {
-    Collection<Transformation> apply(LinkedHashMapNode classes);
+    Collection<Transformation> apply(ListNode classes);
 
     String getId();
 }

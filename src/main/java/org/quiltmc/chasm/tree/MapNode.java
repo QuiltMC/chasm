@@ -4,7 +4,7 @@ import java.util.Map;
 
 public interface MapNode extends Node, Map<String, Node> {
     @Override
-    default Node toImmutable() {
+    default MapNode toImmutable() {
         if (isImmutable()) {
             return this;
         }
