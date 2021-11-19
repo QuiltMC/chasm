@@ -41,11 +41,11 @@ public class ChasmClassWriter {
     }
 
     public static Handle getHandle(MapNode handleNode) {
-        int tag = ((ValueNode<Integer>) handleNode.get(NodeConstants.TAG)).getValue().intValue();
+        int tag = ((ValueNode<Integer>) handleNode.get(NodeConstants.TAG)).getValue();
         String owner = ((ValueNode<String>) handleNode.get(NodeConstants.OWNER)).getValue();
         String name = ((ValueNode<String>) handleNode.get(NodeConstants.NAME)).getValue();
         String descriptor = ((ValueNode<String>) handleNode.get(NodeConstants.DESCRIPTOR)).getValue();
-        boolean isInterface = ((ValueNode<Boolean>) handleNode.get(NodeConstants.IS_INTERFACE)).getValue().booleanValue();
+        boolean isInterface = ((ValueNode<Boolean>) handleNode.get(NodeConstants.IS_INTERFACE)).getValue();
 
         return new Handle(tag, owner, name, descriptor, isInterface);
     }
@@ -58,8 +58,8 @@ public class ChasmClassWriter {
         }
 
         // visit
-        int version = ((ValueNode<Integer>) classNode.get(NodeConstants.VERSION)).getValue().intValue();
-        int access = ((ValueNode<Integer>) classNode.get(NodeConstants.ACCESS)).getValue().intValue();
+        int version = ((ValueNode<Integer>) classNode.get(NodeConstants.VERSION)).getValue();
+        int access = ((ValueNode<Integer>) classNode.get(NodeConstants.ACCESS)).getValue();
         String name = ((ValueNode<String>) classNode.get(NodeConstants.NAME)).getValue();
 
         ValueNode<String> signatureNode = (ValueNode<String>) classNode.get(NodeConstants.SIGNATURE);
@@ -146,7 +146,7 @@ public class ChasmClassWriter {
             ValueNode<String> innerName = (ValueNode<String>) innerClass.get(NodeConstants.INNER_NAME);
             ValueNode<Integer> access = (ValueNode<Integer>) innerClass.get(NodeConstants.ACCESS);
 
-            visitor.visitInnerClass(name.getValue(), outerName.getValue(), innerName.getValue(), access.getValue().intValue());
+            visitor.visitInnerClass(name.getValue(), outerName.getValue(), innerName.getValue(), access.getValue());
         }
     }
 

@@ -70,11 +70,11 @@ public class ChasmAnnotationWriter {
         ValueNode<String> typePath = (ValueNode<String>) ((MapNode) annotationNode).get(NodeConstants.TYPE_PATH);
         AnnotationVisitor annotationVisitor;
         if (typeRef == null) {
-            annotationVisitor = visitAnnotation.visitAnnotation(annotationDesc.getValue(), visible.getValue().booleanValue());
+            annotationVisitor = visitAnnotation.visitAnnotation(annotationDesc.getValue(), visible.getValue());
         } else {
-            annotationVisitor = visitTypeAnnotation.visitTypeAnnotation(typeRef.getValue().intValue(),
+            annotationVisitor = visitTypeAnnotation.visitTypeAnnotation(typeRef.getValue(),
                     TypePath.fromString(typePath.getValue()), annotationDesc.getValue(),
-                    visible.getValue().booleanValue());
+                    visible.getValue());
         }
         visitAnnotation(annotationVisitor);
     }
