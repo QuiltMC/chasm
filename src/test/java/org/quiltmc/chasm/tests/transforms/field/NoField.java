@@ -2,6 +2,6 @@ package org.quiltmc.chasm.tests.transforms.field;
 
 import org.quiltmc.chasm.CheckTransformed;
 
-@CheckTransformed(result = OneField.class, transformer = AddField.class)
+@CheckTransformed(expected = "AddFieldToNoField.result", transformer = AddField.class)
 public class NoField {
 }

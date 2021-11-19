@@ -1,10 +1,15 @@
 package org.quiltmc.chasm;
 
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 
@@ -12,7 +17,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.transformer.Transformer;
 import org.reflections.Reflections;
@@ -27,37 +31,49 @@ public class CheckTransformedTest {
 
     @ParameterizedTest
     @MethodSource("getClasses")
-    public void checkClassIdentity(Class<?> targetClass)
-            throws IOException, NoSuchMethodException, InvocationTargetException, InstantiationException,
-            IllegalAccessException {
-        ChasmProcessor chasmProcessor = new ChasmProcessor();
-
-        InputStream classStream = targetClass.getResourceAsStream(targetClass.getSimpleName() + ".class");
-        byte[] originalClassBytes = classStream.readAllBytes();
-        chasmProcessor.addClass(originalClassBytes);
-
+    public void checkClassIdentity(Class<?> targetClass) throws Exception {
+        // Get the annotation
         CheckTransformed annotation = targetClass.getAnnotation(CheckTransformed.class);
 
-        for (Class<?> clazz : annotation.classes()) {
-            InputStream stream = targetClass.getResourceAsStream(clazz.getSimpleName() + ".class");
-            chasmProcessor.addClass(stream.readAllBytes());
-        }
+        // Instantiate the processor
+        ChasmProcessor chasmProcessor = new ChasmProcessor();
 
+        // Load target class
+        InputStream targetClassStream = targetClass.getResourceAsStream(targetClass.getSimpleName() + ".class");
+        assert targetClassStream != null;
+        chasmProcessor.addClass(targetClassStream.readAllBytes());
+
+        // Load and instantiate transformers
         for (Class<? extends Transformer> clazz : annotation.transformer()) {
             Transformer transformer = clazz.getConstructor().newInstance();
             chasmProcessor.addTransformer(transformer);
         }
 
+        // Load additional classes
+        for (Class<?> clazz : annotation.classes()) {
+            InputStream additionalClassStream = targetClass.getResourceAsStream(clazz.getSimpleName() + ".class");
+            assert additionalClassStream != null;
+            chasmProcessor.addClass(additionalClassStream.readAllBytes());
+        }
+
+        // Process the data
         List<byte[]> classBytes = chasmProcessor.process();
+
+        // Find the result class by name
         ClassReader resultClass = null;
         for (byte[] clazz : classBytes) {
+            // Read basic class info
             resultClass = new ClassReader(clazz);
-            String jvmBinaryName = resultClass.getClassName().replace('/', '.').replace('$', '.');
-            if (jvmBinaryName.equals(targetClass.getName())) {
+
+            // Convert the JVM binary name (e.g. org/example/Class$Inner) into
+            // the JLS binary name (e.g. org.example.Class$Inner)
+            String binaryName = resultClass.getClassName().replace('/', '.');
+            if (binaryName.equals(targetClass.getName())) {
                 break;
             }
         }
 
+        // Assert that the result class was found
         Assertions.assertNotNull(resultClass);
 
         // Write class into string
@@ -65,21 +81,27 @@ public class CheckTransformedTest {
         TraceClassVisitor resultVisitor = new TraceClassVisitor(new PrintWriter(resultString));
         resultClass.accept(resultVisitor, 0);
 
-        Class<?> referenceClass = annotation.result();
-        InputStream referenceClassStream =
-                referenceClass.getResourceAsStream(referenceClass.getSimpleName() + ".class");
-        ClassReader referenceReader = new ClassReader(originalClassBytes);
+        // Load the reference file
+        String expectedFile = annotation.expected();
+        InputStream expectedStream = targetClass.getResourceAsStream(expectedFile);
 
-        // Pass class through ASM (for equal frames)
-        ClassWriter referenceClassWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-        referenceReader.accept(referenceClassWriter, 0);
-        referenceReader = new ClassReader(referenceClassWriter.toByteArray());
+        // If it doesn't exist, create it and fail the test
+        if (expectedStream == null) {
+            // Get file location
+            Path dir = Paths.get("src/test/resources", targetClass.getPackageName().replace('.', '/'));
+            Path expectedPath = dir.resolve(expectedFile);
 
-        // Write original class into string
-        StringWriter referenceString = new StringWriter();
-        TraceClassVisitor referenceVisitor = new TraceClassVisitor(new PrintWriter(referenceString));
-        referenceReader.accept(referenceVisitor, 0);
+            // Write result to file
+            Files.createDirectories(expectedPath.getParent());
+            Files.writeString(expectedPath, resultString.toString());
+            Assertions.fail("Created missing expected result: " + expectedFile);
+        } else {
+            // Read string from stream
+            ByteArrayOutputStream expectedBytes = new ByteArrayOutputStream();
+            expectedStream.transferTo(expectedBytes);
 
-        Assertions.assertEquals(referenceString.toString(), resultString.toString());
+            // Assert that the result has the same content as expected
+            Assertions.assertEquals(expectedBytes.toString(), resultString.toString());
+        }
     }
 }

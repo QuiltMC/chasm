@@ -8,7 +8,6 @@ import java.util.Map;
 import org.objectweb.asm.Opcodes;
 import org.quiltmc.chasm.NodeConstants;
 import org.quiltmc.chasm.transformer.SliceTarget;
-import org.quiltmc.chasm.transformer.Target;
 import org.quiltmc.chasm.transformer.Transformation;
 import org.quiltmc.chasm.transformer.Transformer;
 import org.quiltmc.chasm.tree.LinkedHashMapNode;
@@ -38,7 +37,7 @@ public class AddField implements Transformer {
             MapNode classNode = (MapNode) node;
             ListNode fieldsNode = (ListNode) classNode.get(NodeConstants.FIELDS);
             SliceTarget sliceTarget = new SliceTarget(fieldsNode.getPath(), 0, 0);
-            transformations.add(new AddFieldTransformation(this, sliceTarget, newFields));
+            transformations.add(new Transformation(this, sliceTarget, Map.of(), (target, sources) -> newFields));
         }
 
         return transformations;
@@ -47,19 +46,5 @@ public class AddField implements Transformer {
     @Override
     public String getId() {
         return AddField.class.getCanonicalName();
-    }
-
-    private static class AddFieldTransformation extends Transformation {
-        private final ListNode newFields;
-
-        public AddFieldTransformation(Transformer parent, Target target, ListNode newFields) {
-            super(parent, target, Map.of());
-            this.newFields = newFields;
-        }
-
-        @Override
-        public Node apply(Node target, MapNode sources) {
-            return newFields;
-        }
     }
 }

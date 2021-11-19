@@ -2,31 +2,38 @@ package org.quiltmc.chasm.transformer;
 
 import java.util.Map;
 
-import org.quiltmc.chasm.tree.MapNode;
 import org.quiltmc.chasm.tree.Node;
 
-public abstract class Transformation {
+public final class Transformation {
     private final Transformer parent;
     private final Target target;
     private final Map<String, Target> sources;
+    private final Function applyFunction;
 
-    public Transformation(Transformer parent, Target target, Map<String, Target> sources) {
+    public Transformation(Transformer parent, Target target, Map<String, Target> sources, Function applyFunction) {
         this.parent = parent;
         this.target = target;
         this.sources = sources;
+        this.applyFunction = applyFunction;
     }
 
-    public abstract Node apply(Node target, MapNode sources);
+    public Transformer getParent() {
+        return parent;
+    }
 
-    public final Target getTarget() {
+    public Target getTarget() {
         return target;
     }
 
-    public final Map<String, Target> getSources() {
+    public Map<String, Target> getSources() {
         return sources;
     }
 
-    public final Transformer getParent() {
-        return parent;
+    public Node apply(Node target, Map<String, Node> sources) {
+        return applyFunction.apply(target, sources);
+    }
+
+    public interface Function {
+        Node apply(Node target, Map<String, Node> sources);
     }
 }

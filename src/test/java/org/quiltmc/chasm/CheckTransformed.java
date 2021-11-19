@@ -7,12 +7,18 @@ import java.lang.annotation.Target;
 
 import org.quiltmc.chasm.transformer.Transformer;
 
+/**
+ * Indicates that this class should be used for testing class transformations.
+ * A class annotated with this annotation will be transformed by Chasm
+ * given the specified transformers and additional classes.
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CheckTransformed {
-    Class<?> result();
+    String expected();
 
     Class<? extends Transformer>[] transformer();
 
     Class<?>[] classes() default { };
+
 }

@@ -43,8 +43,4 @@ dependencies {
 
 test {
     useJUnitPlatform()
-
-    delete 'test'
-    mkdir 'test'
-    workingDir 'test'
 }
