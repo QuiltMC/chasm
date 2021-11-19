@@ -41,11 +41,11 @@ public class ChasmClassWriter {
     }
 
     public static Handle getHandle(MapNode handleNode) {
-        int tag = ((ValueNode<Integer>) handleNode.get(NodeConstants.TAG)).getValue();
+        int tag = ((ValueNode<Integer>) handleNode.get(NodeConstants.TAG)).getValue().intValue();
         String owner = ((ValueNode<String>) handleNode.get(NodeConstants.OWNER)).getValue();
         String name = ((ValueNode<String>) handleNode.get(NodeConstants.NAME)).getValue();
         String descriptor = ((ValueNode<String>) handleNode.get(NodeConstants.DESCRIPTOR)).getValue();
-        boolean isInterface = ((ValueNode<Boolean>) handleNode.get(NodeConstants.IS_INTERFACE)).getValue();
+        boolean isInterface = ((ValueNode<Boolean>) handleNode.get(NodeConstants.IS_INTERFACE)).getValue().booleanValue();
 
         return new Handle(tag, owner, name, descriptor, isInterface);
     }
@@ -58,13 +58,22 @@ public class ChasmClassWriter {
         }
 
         // visit
-        int version = ((ValueNode<Integer>) classNode.get(NodeConstants.VERSION)).getValue();
-        int access = ((ValueNode<Integer>) classNode.get(NodeConstants.ACCESS)).getValue();
+        int version = ((ValueNode<Integer>) classNode.get(NodeConstants.VERSION)).getValue().intValue();
+        int access = ((ValueNode<Integer>) classNode.get(NodeConstants.ACCESS)).getValue().intValue();
         String name = ((ValueNode<String>) classNode.get(NodeConstants.NAME)).getValue();
-        String signature = ((ValueNode<String>) classNode.get(NodeConstants.SIGNATURE)).getValue();
-        String superClass = ((ValueNode<String>) classNode.get(NodeConstants.SUPER)).getValue();
-        String[] interfaces = ((ListNode) classNode.get(NodeConstants.INTERFACES))
-                .stream().map(n -> ((ValueNode<String>) n).getValue()).toArray(String[]::new);
+
+        ValueNode<String> signatureNode = (ValueNode<String>) classNode.get(NodeConstants.SIGNATURE);
+        String signature = signatureNode == null? null: signatureNode.getValue();
+        if (signature == null) {
+            signature = name;
+        }
+        
+        ValueNode<String> superClassNode = (ValueNode<String>) classNode.get(NodeConstants.SUPER);
+        String superClass = superClassNode == null? "java/lang/Object": superClassNode.getValue();
+        
+        ListNode interfacesNode = (ListNode) classNode.get(NodeConstants.INTERFACES);
+        String[] interfaces = interfacesNode == null? new String[0]:
+                interfacesNode.stream().map(n -> ((ValueNode<String>) n).getValue()).toArray(String[]::new);
 
         visitor.visit(version, access, name, signature, superClass, interfaces);
 
@@ -98,21 +107,30 @@ public class ChasmClassWriter {
         visitInnerClasses(visitor);
 
         // visitRecordComponent
-        for (Node node : (ListNode) classNode.get(NodeConstants.RECORD_COMPONENTS)) {
-            ChasmRecordComponentWriter chasmRecordComponentWriter = new ChasmRecordComponentWriter((MapNode) node);
-            chasmRecordComponentWriter.visitRecordComponent(visitor);
+        ListNode recordComponentListNode = (ListNode) classNode.get(NodeConstants.RECORD_COMPONENTS);
+        if (recordComponentListNode != null) {
+            for (Node node : recordComponentListNode) {
+                ChasmRecordComponentWriter chasmRecordComponentWriter = new ChasmRecordComponentWriter((MapNode) node);
+                chasmRecordComponentWriter.visitRecordComponent(visitor);
+            }
         }
 
         // visitField
-        for (Node node : (ListNode) classNode.get(NodeConstants.FIELDS)) {
-            ChasmFieldWriter chasmFieldWriter = new ChasmFieldWriter((MapNode) node);
-            chasmFieldWriter.visitField(visitor);
+        ListNode fieldListNode = (ListNode) classNode.get(NodeConstants.FIELDS);
+        if (fieldListNode != null) {
+            for (Node node : fieldListNode) {
+                ChasmFieldWriter chasmFieldWriter = new ChasmFieldWriter((MapNode) node);
+                chasmFieldWriter.visitField(visitor);
+            }
         }
 
         // visitMethod
-        for (Node node : (ListNode) classNode.get(NodeConstants.METHODS)) {
-            ChasmMethodWriter chasmMethodWriter = new ChasmMethodWriter((MapNode) node);
-            chasmMethodWriter.visitMethod(visitor);
+        ListNode classListNode = (ListNode) classNode.get(NodeConstants.METHODS);
+        if (classListNode != null) {
+            for (Node node : classListNode) {
+                ChasmMethodWriter chasmMethodWriter = new ChasmMethodWriter((MapNode) node);
+                chasmMethodWriter.visitMethod(visitor);
+            }
         }
 
         // visitEnd
@@ -127,7 +145,7 @@ public class ChasmClassWriter {
             ValueNode<String> innerName = (ValueNode<String>) innerClass.get(NodeConstants.INNER_NAME);
             ValueNode<Integer> access = (ValueNode<Integer>) innerClass.get(NodeConstants.ACCESS);
 
-            visitor.visitInnerClass(name.getValue(), outerName.getValue(), innerName.getValue(), access.getValue());
+            visitor.visitInnerClass(name.getValue(), outerName.getValue(), innerName.getValue(), access.getValue().intValue());
         }
     }
 
