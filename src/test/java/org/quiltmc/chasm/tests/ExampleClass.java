@@ -4,6 +4,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+
 import org.quiltmc.chasm.CheckUnchanged;
 
 @CheckUnchanged
@@ -25,6 +26,7 @@ public abstract class ExampleClass {
         switch (five) {
             case 5:
                 System.out.println("Still 5");
+                break;
             default:
                 System.out.println("No longer 5");
         }
@@ -35,9 +37,9 @@ public abstract class ExampleClass {
             case 10 -> {
                 String nested = "Test";
                 yield switch (nested) {
-                    case "NotTest" -> "NotTest";
-                    default -> throw new IllegalStateException("Unexpected value: " + "Test");
-                };
+                        case "NotTest" -> "NotTest";
+                        default -> throw new IllegalStateException("Unexpected value: " + "Test");
+                    };
             }
             default -> "Not 10";
         };
