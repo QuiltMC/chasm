@@ -39,7 +39,7 @@ public class CheckTransformedTest {
         CheckTransformed annotation = targetClass.getAnnotation(CheckTransformed.class);
 
         for (Class<?> clazz : annotation.classes()) {
-            InputStream stream = targetClass.getResourceAsStream(targetClass.getSimpleName() + ".class");
+            InputStream stream = targetClass.getResourceAsStream(clazz.getSimpleName() + ".class");
             chasmProcessor.addClass(stream.readAllBytes());
         }
 
