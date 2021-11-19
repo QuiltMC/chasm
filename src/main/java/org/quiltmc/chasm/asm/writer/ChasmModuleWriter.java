@@ -18,7 +18,7 @@ public class ChasmModuleWriter {
 
     public void visitModule(ClassVisitor visitor) {
         String name = ((ValueNode<String>) moduleNode.get(NodeConstants.NAME)).getValue();
-        int access = ((ValueNode<Integer>) moduleNode.get(NodeConstants.ACCESS)).getValue().intValue();
+        int access = ((ValueNode<Integer>) moduleNode.get(NodeConstants.ACCESS)).getValue();
         String version = ((ValueNode<String>) moduleNode.get(NodeConstants.VERSION)).getValue();
         
         ModuleVisitor moduleVisitor = visitor.visitModule(name, access, version);
@@ -73,7 +73,7 @@ public class ChasmModuleWriter {
         for (Node n : moduleRequiresListNode) {
             MapNode requireNode = (MapNode) n;
             String reqModule = ((ValueNode<String>) requireNode.get(NodeConstants.MODULE)).getValue();
-            int reqAccess = ((ValueNode<Integer>) requireNode.get(NodeConstants.ACCESS)).getValue().intValue();
+            int reqAccess = ((ValueNode<Integer>) requireNode.get(NodeConstants.ACCESS)).getValue();
             String reqVersion = ((ValueNode<String>) requireNode.get(NodeConstants.VERSION)).getValue();
             moduleVisitor.visitRequire(reqModule, reqAccess, reqVersion);
         }
@@ -96,7 +96,7 @@ public class ChasmModuleWriter {
                     modules[i] = ((ValueNode<String>) reqModules.get(i)).getValue();
                 }
             }
-            moduleVisitor.visitExport(expPackage, expAcccess.intValue(), modules);
+            moduleVisitor.visitExport(expPackage, expAcccess, modules);
         }
     }
 
@@ -117,7 +117,7 @@ public class ChasmModuleWriter {
                     modules[i] = ((ValueNode<String>) openModules.get(i)).getValue();
                 }
             }
-            moduleVisitor.visitOpen(openPackage, openAcccess.intValue(), modules);
+            moduleVisitor.visitOpen(openPackage, openAcccess, modules);
         }
     }
 

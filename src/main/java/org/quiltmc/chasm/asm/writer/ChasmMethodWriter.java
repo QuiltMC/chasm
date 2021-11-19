@@ -1,7 +1,6 @@
 package org.quiltmc.chasm.asm.writer;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -35,12 +34,7 @@ public class ChasmMethodWriter {
         if (instructionsListNode == null) {
             return;
         }
-        Iterator<Node> instructionsNodeIterator = instructionsListNode.iterator();
-        if (!instructionsNodeIterator.hasNext()) {
-            return;
-        }
-        for (Node n = instructionsNodeIterator.next(); instructionsNodeIterator.hasNext();
-                  n = instructionsNodeIterator.next()) {
+        for (Node n : instructionsListNode) {
             // visitLabel
             ListNode labelsNode = (ListNode) ((MapNode) n).get(NodeConstants.LABELS);
             for (Node n2 : labelsNode) {
@@ -52,19 +46,16 @@ public class ChasmMethodWriter {
                 if (labelsNode.isEmpty()) {
                     throw new RuntimeException("Encountered line number without label.");
                 }
-                int line = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.LINE)).getValue().intValue();
+                int line = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.LINE)).getValue();
                 methodVisitor
                         .visitLineNumber(line, labelMap.get(((ValueNode<String>) labelsNode.get(0)).getValue()));
             }
 
             // visit<...>Insn
-            int opcode = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.OPCODE)).getValue().intValue();
+            int opcode = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.OPCODE)).getValue();
             switch (opcode) {
                 case Opcodes.NOP:
-                    if (instructionsNodeIterator.hasNext()) {
-                        // Not a trailing NOP, so write it
-                        methodVisitor.visitInsn(Opcodes.NOP);
-                    }
+                    // TODO Hack to strip the trailing NOP
                     break;
                 case Opcodes.ACONST_NULL:
                 case Opcodes.ICONST_M1:
@@ -180,7 +171,7 @@ public class ChasmMethodWriter {
                 case Opcodes.SIPUSH:
                 case Opcodes.NEWARRAY: {
                     // visitIntInsn
-                    int operand = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.OPERAND)).getValue().intValue();
+                    int operand = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.OPERAND)).getValue();
                     methodVisitor.visitIntInsn(opcode, operand);
                     break;
                 }
@@ -196,7 +187,7 @@ public class ChasmMethodWriter {
                 case Opcodes.ASTORE:
                 case Opcodes.RET: {
                     // visitVarInsn
-                    int varValue = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.VAR)).getValue().intValue();
+                    int varValue = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.VAR)).getValue();
                     methodVisitor.visitVarInsn(opcode, varValue);
                     break;
                 }
@@ -232,7 +223,7 @@ public class ChasmMethodWriter {
                             ((ValueNode<String>) ((MapNode) n).get(NodeConstants.DESCRIPTOR)).getValue();
                     Boolean isInterface =
                             ((ValueNode<Boolean>) ((MapNode) n).get(NodeConstants.IS_INTERFACE)).getValue();
-                    methodVisitor.visitMethodInsn(opcode, owner, name1, descriptor1, isInterface.booleanValue());
+                    methodVisitor.visitMethodInsn(opcode, owner, name1, descriptor1, isInterface);
                     break;
                 }
                 case Opcodes.INVOKEDYNAMIC: {
@@ -278,8 +269,8 @@ public class ChasmMethodWriter {
                 }
                 case Opcodes.IINC: {
                     // visitIincInsn
-                    int var = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.VAR)).getValue().intValue();
-                    int increment = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.INCREMENT)).getValue().intValue();
+                    int var = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.VAR)).getValue();
+                    int increment = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.INCREMENT)).getValue();
                     methodVisitor.visitIincInsn(var, increment);
                     break;
                 }
@@ -294,7 +285,7 @@ public class ChasmMethodWriter {
                     Label[] labels = new Label[cases.size()];
                     for (int i = 0; i < cases.size(); i++) {
                         MapNode caseNode = (MapNode) cases.get(i);
-                        keys[i] = ((ValueNode<Integer>) caseNode.get(NodeConstants.KEY)).getValue().intValue();
+                        keys[i] = ((ValueNode<Integer>) caseNode.get(NodeConstants.KEY)).getValue();
                         String caseLabelString = ((ValueNode<String>) caseNode.get(NodeConstants.LABEL)).getValue();
                         labels[i] = labelMap.computeIfAbsent(caseLabelString, ChasmMethodWriter.labelFunction());
                     }
@@ -324,7 +315,7 @@ public class ChasmMethodWriter {
                     // visitMultiANewArrayInsn
                     String descriptor1 =
                             ((ValueNode<String>) ((MapNode) n).get(NodeConstants.DESCRIPTOR)).getValue();
-                    int dimensions = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.DIMENSIONS)).getValue().intValue();
+                    int dimensions = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.DIMENSIONS)).getValue();
                     methodVisitor.visitMultiANewArrayInsn(descriptor1, dimensions);
                     break;
                 }
@@ -355,7 +346,7 @@ public class ChasmMethodWriter {
             
             String start = ((ValueNode<String>) localNode.get(NodeConstants.START)).getValue();
             String end = ((ValueNode<String>) localNode.get(NodeConstants.END)).getValue();
-            int index = ((ValueNode<Integer>) localNode.get(NodeConstants.INDEX)).getValue().intValue();
+            int index = ((ValueNode<Integer>) localNode.get(NodeConstants.INDEX)).getValue();
 
             Label startLabel = labelMap.get(start);
             Label endLabel = labelMap.get(end);
@@ -432,12 +423,12 @@ public class ChasmMethodWriter {
         }
         for (Node n : parameterAnnotationsListNode) {
             MapNode annotationNode = (MapNode) n;
-            int parameter = ((ValueNode<Integer>) annotationNode.get(NodeConstants.PARAMETER)).getValue().intValue();
+            int parameter = ((ValueNode<Integer>) annotationNode.get(NodeConstants.PARAMETER)).getValue();
             String annotationDesc = ((ValueNode<String>) annotationNode.get(NodeConstants.DESCRIPTOR)).getValue();
             
             ValueNode<Boolean> methodAnnotationVisibilityNode = (ValueNode<Boolean>) annotationNode.get(NodeConstants.VISIBLE);
             boolean visible = methodAnnotationVisibilityNode == null ||
-                methodAnnotationVisibilityNode.getValue().booleanValue();
+                methodAnnotationVisibilityNode.getValue();
 
             ChasmAnnotationWriter writer = new ChasmAnnotationWriter(n);
             AnnotationVisitor annotationVisitor =
@@ -464,13 +455,13 @@ public class ChasmMethodWriter {
         for (Node n : methodParametersNode) {
             MapNode parameterNode = (MapNode) n;
             String parameterName = ((ValueNode<String>) parameterNode.get(NodeConstants.NAME)).getValue();
-            int parameterAccess = ((ValueNode<Integer>) parameterNode.get(NodeConstants.ACCESS)).getValue().intValue();
+            int parameterAccess = ((ValueNode<Integer>) parameterNode.get(NodeConstants.ACCESS)).getValue();
             methodVisitor.visitParameter(parameterName, parameterAccess);
         }
     }
 
     public void visitMethod(ClassVisitor visitor) {
-        int access = ((ValueNode<Integer>) methodNode.get(NodeConstants.ACCESS)).getValue().intValue();
+        int access = ((ValueNode<Integer>) methodNode.get(NodeConstants.ACCESS)).getValue();
         String name = ((ValueNode<String>) methodNode.get(NodeConstants.NAME)).getValue();
         String descriptor = ((ValueNode<String>) methodNode.get(NodeConstants.DESCRIPTOR)).getValue();
         

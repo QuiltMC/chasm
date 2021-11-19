@@ -30,7 +30,7 @@ public class NodePath {
     }
 
     public NodePath append(int index) {
-        return append(Integer.valueOf(index));
+        return append(index);
     }
 
     public int getLength() {
@@ -56,7 +56,7 @@ public class NodePath {
     }
 
     public boolean contains(NodePath other) {
-        if (entries.size() != other.entries.size()) {
+        if (entries.size() < other.entries.size()) {
             return false;
         }
 
@@ -73,7 +73,7 @@ public class NodePath {
         Node current = root;
         for (Object entry : entries) {
             if (entry instanceof Integer indexPathEntry && current instanceof ListNode listNode) {
-                current = listNode.get(indexPathEntry.intValue());
+                current = listNode.get(indexPathEntry);
             } else if (entry instanceof String namePathEntry && current instanceof MapNode mapNode) {
                 current = mapNode.get(namePathEntry);
             } else {
