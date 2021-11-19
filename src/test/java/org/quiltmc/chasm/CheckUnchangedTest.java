@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Set;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -11,7 +12,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.asm.ChasmClassVisitor;
-import org.quiltmc.chasm.asm.ChasmClassWriter;
+import org.quiltmc.chasm.asm.writer.ChasmClassWriter;
 import org.quiltmc.chasm.tree.MapNode;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;

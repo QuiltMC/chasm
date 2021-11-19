@@ -12,7 +12,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
-import org.quiltmc.chasm.asm.ChasmClassWriter;
+import org.quiltmc.chasm.asm.writer.ChasmClassWriter;
 import org.quiltmc.chasm.transformer.NodePath;
 import org.quiltmc.chasm.transformer.NodeTarget;
 import org.quiltmc.chasm.transformer.SliceTarget;
