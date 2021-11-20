@@ -17,9 +17,9 @@ public class ChasmModuleWriter {
     }
 
     public void visitModule(ClassVisitor visitor) {
-        String name = ((ValueNode<String>) moduleNode.get(NodeConstants.NAME)).getValue();
-        int access = ((ValueNode<Integer>) moduleNode.get(NodeConstants.ACCESS)).getValue();
-        String version = ((ValueNode<String>) moduleNode.get(NodeConstants.VERSION)).getValue();
+        String name = moduleNode.get(NodeConstants.NAME).getAsString();
+        int access = moduleNode.get(NodeConstants.ACCESS).getAsInt();
+        String version = moduleNode.get(NodeConstants.VERSION).getAsString();
 
         ModuleVisitor moduleVisitor = visitor.visitModule(name, access, version);
 
@@ -50,22 +50,22 @@ public class ChasmModuleWriter {
 
     private void visitMainClass(ModuleVisitor moduleVisitor) {
         if (moduleNode.containsKey(NodeConstants.MAIN)) {
-            moduleVisitor.visitMainClass(((ValueNode<String>) moduleNode.get(NodeConstants.MAIN)).getValue());
+            moduleVisitor.visitMainClass(moduleNode.get(NodeConstants.MAIN).getAsString());
         }
     }
 
     private void visitPackages(ModuleVisitor moduleVisitor) {
         for (Node n : (ListNode) moduleNode.get(NodeConstants.PACKAGES)) {
-            moduleVisitor.visitPackage(((ValueNode<String>) n).getValue());
+            moduleVisitor.visitPackage(n.getAsString());
         }
     }
 
     private void visitRequires(ModuleVisitor moduleVisitor) {
         for (Node n : (ListNode) moduleNode.get(NodeConstants.REQUIRES)) {
             MapNode requireNode = (MapNode) n;
-            String reqModule = ((ValueNode<String>) requireNode.get(NodeConstants.MODULE)).getValue();
-            Integer reqAccess = ((ValueNode<Integer>) requireNode.get(NodeConstants.ACCESS)).getValue();
-            String reqVersion = ((ValueNode<String>) requireNode.get(NodeConstants.VERSION)).getValue();
+            String reqModule = requireNode.get(NodeConstants.MODULE).getAsString();
+            Integer reqAccess = requireNode.get(NodeConstants.ACCESS).getAsInt();
+            String reqVersion = requireNode.get(NodeConstants.VERSION).getAsString();
             moduleVisitor.visitRequire(reqModule, reqAccess, reqVersion);
         }
     }
@@ -73,14 +73,14 @@ public class ChasmModuleWriter {
     private void visitExports(ModuleVisitor moduleVisitor) {
         for (Node n : (ListNode) moduleNode.get(NodeConstants.EXPORTS)) {
             MapNode exportNode = (MapNode) n;
-            String expPackage = ((ValueNode<String>) exportNode.get(NodeConstants.PACKAGE)).getValue();
-            Integer expAcccess = ((ValueNode<Integer>) exportNode.get(NodeConstants.ACCESS)).getValue();
+            String expPackage = exportNode.get(NodeConstants.PACKAGE).getAsString();
+            Integer expAcccess = exportNode.get(NodeConstants.ACCESS).getAsInt();
             ListNode reqModules = ((ListNode) exportNode.get(NodeConstants.MODULES));
             String[] modules = null;
             if (reqModules != null) {
                 modules = new String[reqModules.size()];
                 for (int i = 0; i < reqModules.size(); i++) {
-                    modules[i] = ((ValueNode<String>) reqModules.get(i)).getValue();
+                    modules[i] = reqModules.get(i).getAsString();
                 }
             }
             moduleVisitor.visitExport(expPackage, expAcccess, modules);
@@ -90,14 +90,14 @@ public class ChasmModuleWriter {
     private void visitOpens(ModuleVisitor moduleVisitor) {
         for (Node n : (ListNode) moduleNode.get(NodeConstants.OPENS)) {
             MapNode openNode = (MapNode) n;
-            String openPackage = ((ValueNode<String>) openNode.get(NodeConstants.PACKAGE)).getValue();
-            Integer openAcccess = ((ValueNode<Integer>) openNode.get(NodeConstants.ACCESS)).getValue();
+            String openPackage = openNode.get(NodeConstants.PACKAGE).getAsString();
+            Integer openAcccess = openNode.get(NodeConstants.ACCESS).getAsInt();
             ListNode openModules = ((ListNode) openNode.get(NodeConstants.MODULES));
             String[] modules = null;
             if (openModules != null) {
                 modules = new String[openModules.size()];
                 for (int i = 0; i < openModules.size(); i++) {
-                    modules[i] = ((ValueNode<String>) openModules.get(i)).getValue();
+                    modules[i] = openModules.get(i).getAsString();
                 }
             }
             moduleVisitor.visitOpen(openPackage, openAcccess, modules);
@@ -106,18 +106,18 @@ public class ChasmModuleWriter {
 
     private void visitUses(ModuleVisitor moduleVisitor) {
         for (Node n : (ListNode) moduleNode.get(NodeConstants.USES)) {
-            moduleVisitor.visitUse(((ValueNode<String>) n).getValue());
+            moduleVisitor.visitUse(n.getAsString());
         }
     }
 
     private void visitProvides(ModuleVisitor moduleVisitor) {
         for (Node n : (ListNode) moduleNode.get(NodeConstants.PROVIDES)) {
             MapNode providesNode = (MapNode) n;
-            String service = ((ValueNode<String>) providesNode.get(NodeConstants.SERVICE)).getValue();
+            String service = providesNode.get(NodeConstants.SERVICE).getAsString();
             ListNode providers = (ListNode) providesNode.get(NodeConstants.PROVIDERS);
             String[] prov = new String[providers.size()];
             for (int i = 0; i < providers.size(); i++) {
-                prov[i] = ((ValueNode<String>) providers.get(i)).getValue();
+                prov[i] = providers.get(i).getAsString();
             }
             moduleVisitor.visitProvide(service, prov);
         }

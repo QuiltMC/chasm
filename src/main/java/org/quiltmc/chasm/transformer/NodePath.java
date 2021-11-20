@@ -100,4 +100,9 @@ public class NodePath {
     public int hashCode() {
         return Objects.hash(entries);
     }
+
+    @Override
+    public String toString() {
+        return String.join(".", entries.stream().map(Object::toString).toList());
+    }
 }

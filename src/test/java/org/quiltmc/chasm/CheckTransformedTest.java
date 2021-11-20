@@ -101,7 +101,8 @@ public class CheckTransformedTest {
             expectedStream.transferTo(expectedBytes);
 
             // Assert that the result has the same content as expected
-            Assertions.assertEquals(expectedBytes.toString(), resultString.toString());
+            Assertions.assertEquals(expectedBytes.toString().replace("\r", ""),
+                    resultString.toString().replace("\r", ""));
         }
     }
 }

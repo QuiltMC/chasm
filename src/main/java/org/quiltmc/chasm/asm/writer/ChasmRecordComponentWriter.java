@@ -25,15 +25,15 @@ public class ChasmRecordComponentWriter {
 
     private void visitAnnotations(RecordComponentVisitor componentVisitor) {
         for (Node n : (ListNode) componentNode.get(NodeConstants.ANNOTATIONS)) {
-            ChasmAnnotationWriter writer = new ChasmAnnotationWriter((MapNode) n);
+            ChasmAnnotationWriter writer = new ChasmAnnotationWriter(n);
             writer.visitAnnotation(componentVisitor::visitAnnotation, componentVisitor::visitTypeAnnotation);
         }
     }
 
     public void visitRecordComponent(ClassVisitor visitor) {
-        String name = ((ValueNode<String>) componentNode.get(NodeConstants.NAME)).getValue();
-        String descriptor = ((ValueNode<String>) componentNode.get(NodeConstants.DESCRIPTOR)).getValue();
-        String signature = ((ValueNode<String>) componentNode.get(NodeConstants.SIGNATURE)).getValue();
+        String name = componentNode.get(NodeConstants.NAME).getAsString();
+        String descriptor = componentNode.get(NodeConstants.DESCRIPTOR).getAsString();
+        String signature = componentNode.get(NodeConstants.SIGNATURE).getAsString();
 
         RecordComponentVisitor componentVisitor = visitor.visitRecordComponent(name, descriptor, signature);
 

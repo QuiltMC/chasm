@@ -16,4 +16,9 @@ public interface ListNode extends Node, List<Node> {
 
         return new ImmutableListNode(newNode);
     }
+
+    @Override
+    default ListNode getAsListNode() {
+        return this;
+    }
 }

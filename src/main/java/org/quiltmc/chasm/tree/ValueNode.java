@@ -48,4 +48,30 @@ public class ValueNode<T> implements Node {
     public boolean isImmutable() {
         return immutable;
     }
+
+    @Override
+    public String getAsString() {
+        return (String) value;
+    }
+
+    @Override
+    public int getAsInt() {
+        return (Integer) value;
+    }
+
+    @Override
+    public boolean getAsBoolean() {
+        return (boolean) value;
+    }
+
+    @Override
+    public Object getAsObject() {
+        return this.getValue();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <N> ValueNode<N> getAsValueNode() {
+        return (ValueNode<N>) this;
+    }
 }

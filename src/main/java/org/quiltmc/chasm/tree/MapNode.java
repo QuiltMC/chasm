@@ -16,4 +16,9 @@ public interface MapNode extends Node, Map<String, Node> {
 
         return new ImmutableMapNode(newNode);
     }
+
+    @Override
+    default MapNode getAsMapNode() {
+        return this;
+    }
 }

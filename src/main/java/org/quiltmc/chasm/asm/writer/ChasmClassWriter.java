@@ -29,8 +29,8 @@ public class ChasmClassWriter {
                 arguments[i] = getHandle((MapNode) argNode);
             } else {
                 MapNode constDynamicNode = (MapNode) argNode;
-                String name = ((ValueNode<String>) constDynamicNode.get(NodeConstants.NAME)).getValue();
-                String descriptor = ((ValueNode<String>) constDynamicNode.get(NodeConstants.DESCRIPTOR)).getValue();
+                String name = constDynamicNode.get(NodeConstants.NAME).getAsString();
+                String descriptor = constDynamicNode.get(NodeConstants.DESCRIPTOR).getAsString();
                 Handle handle = getHandle((MapNode) constDynamicNode.get(NodeConstants.HANDLE));
                 Object[] args = getArguments((ListNode) constDynamicNode.get(NodeConstants.ARGS));
                 arguments[i] = new ConstantDynamic(name, descriptor, handle, args);
@@ -41,11 +41,11 @@ public class ChasmClassWriter {
     }
 
     public static Handle getHandle(MapNode handleNode) {
-        int tag = ((ValueNode<Integer>) handleNode.get(NodeConstants.TAG)).getValue();
-        String owner = ((ValueNode<String>) handleNode.get(NodeConstants.OWNER)).getValue();
-        String name = ((ValueNode<String>) handleNode.get(NodeConstants.NAME)).getValue();
-        String descriptor = ((ValueNode<String>) handleNode.get(NodeConstants.DESCRIPTOR)).getValue();
-        boolean isInterface = ((ValueNode<Boolean>) handleNode.get(NodeConstants.IS_INTERFACE)).getValue();
+        int tag = handleNode.get(NodeConstants.TAG).getAsInt();
+        String owner = handleNode.get(NodeConstants.OWNER).getAsString();
+        String name = handleNode.get(NodeConstants.NAME).getAsString();
+        String descriptor = handleNode.get(NodeConstants.DESCRIPTOR).getAsString();
+        boolean isInterface = handleNode.get(NodeConstants.IS_INTERFACE).getAsBoolean();
 
         return new Handle(tag, owner, name, descriptor, isInterface);
     }
@@ -58,13 +58,13 @@ public class ChasmClassWriter {
         }
 
         // visit
-        int version = ((ValueNode<Integer>) classNode.get(NodeConstants.VERSION)).getValue();
-        int access = ((ValueNode<Integer>) classNode.get(NodeConstants.ACCESS)).getValue();
-        String name = ((ValueNode<String>) classNode.get(NodeConstants.NAME)).getValue();
-        String signature = ((ValueNode<String>) classNode.get(NodeConstants.SIGNATURE)).getValue();
-        String superClass = ((ValueNode<String>) classNode.get(NodeConstants.SUPER)).getValue();
+        int version = classNode.get(NodeConstants.VERSION).getAsInt();
+        int access = classNode.get(NodeConstants.ACCESS).getAsInt();
+        String name = classNode.get(NodeConstants.NAME).getAsString();
+        String signature = classNode.get(NodeConstants.SIGNATURE).getAsString();
+        String superClass = classNode.get(NodeConstants.SUPER).getAsString();
         String[] interfaces = ((ListNode) classNode.get(NodeConstants.INTERFACES))
-                .stream().map(n -> ((ValueNode<String>) n).getValue()).toArray(String[]::new);
+                .stream().map(n -> n.getAsString()).toArray(String[]::new);
 
         visitor.visit(version, access, name, signature, superClass, interfaces);
 
@@ -133,13 +133,13 @@ public class ChasmClassWriter {
 
     private void visitPermittedSubclasses(ClassVisitor visitor) {
         for (Node n : (ListNode) classNode.get(NodeConstants.PERMITTED_SUBCLASSES)) {
-            visitor.visitPermittedSubclass(((ValueNode<String>) n).getValue());
+            visitor.visitPermittedSubclass(n.getAsString());
         }
     }
 
     private void visitNestMembers(ClassVisitor visitor) {
         for (Node n : (ListNode) classNode.get(NodeConstants.NEST_MEMBERS)) {
-            visitor.visitNestMember(((ValueNode<String>) n).getValue());
+            visitor.visitNestMember(n.getAsString());
         }
     }
 
@@ -151,35 +151,35 @@ public class ChasmClassWriter {
 
     private void visitAnnotations(ClassVisitor visitor) {
         for (Node n : (ListNode) classNode.get(NodeConstants.ANNOTATIONS)) {
-            ChasmAnnotationWriter writer = new ChasmAnnotationWriter((MapNode) n);
+            ChasmAnnotationWriter writer = new ChasmAnnotationWriter(n);
             writer.visitAnnotation(visitor::visitAnnotation, visitor::visitTypeAnnotation);
         }
     }
 
     private void visitOuterClass(ClassVisitor visitor) {
         if (classNode.containsKey(NodeConstants.OWNER_CLASS)) {
-            String ownerClass = ((ValueNode<String>) classNode.get(NodeConstants.OWNER_CLASS)).getValue();
-            String ownerMethod = ((ValueNode<String>) classNode.get(NodeConstants.OWNER_METHOD)).getValue();
-            String ownerDescriptor = ((ValueNode<String>) classNode.get(NodeConstants.OWNER_DESCRIPTOR)).getValue();
+            String ownerClass = classNode.get(NodeConstants.OWNER_CLASS).getAsString();
+            String ownerMethod = classNode.get(NodeConstants.OWNER_METHOD).getAsString();
+            String ownerDescriptor = classNode.get(NodeConstants.OWNER_DESCRIPTOR).getAsString();
             visitor.visitOuterClass(ownerClass, ownerMethod, ownerDescriptor);
         }
     }
 
     private void visitNestHost(ClassVisitor visitor) {
         if (classNode.containsKey(NodeConstants.NEST_HOST)) {
-            visitor.visitNestHost(((ValueNode<String>) classNode.get(NodeConstants.NEST_HOST)).getValue());
+            visitor.visitNestHost(classNode.get(NodeConstants.NEST_HOST).getAsString());
         }
     }
 
     private void visitSource(ClassVisitor visitor) {
         String source = null;
         if (classNode.containsKey(NodeConstants.SOURCE)) {
-            source = ((ValueNode<String>) classNode.get(NodeConstants.SOURCE)).getValue();
+            source = classNode.get(NodeConstants.SOURCE).getAsString();
         }
 
         String debug = null;
         if (classNode.containsKey(NodeConstants.DEBUG)) {
-            debug = ((ValueNode<String>) classNode.get(NodeConstants.DEBUG)).getValue();
+            debug = classNode.get(NodeConstants.DEBUG).getAsString();
         }
 
         visitor.visitSource(source, debug);

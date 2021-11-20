@@ -3,7 +3,6 @@ package org.quiltmc.chasm.asm.writer;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.TypePath;
 import org.quiltmc.chasm.NodeConstants;
-import org.quiltmc.chasm.asm.ChasmAnnotationVisitor;
 import org.quiltmc.chasm.tree.ListNode;
 import org.quiltmc.chasm.tree.MapNode;
 import org.quiltmc.chasm.tree.Node;
@@ -30,12 +29,12 @@ public class ChasmAnnotationWriter {
             String name = null;
             if (value instanceof MapNode mapNode && mapNode.containsKey(NodeConstants.NAME)) {
                 // Name-value pairs
-                name = ((ValueNode<String>) mapNode.get(NodeConstants.NAME)).getValue();
+                name = mapNode.get(NodeConstants.NAME).getAsString();
                 value = mapNode.get(NodeConstants.VALUE);
             }
 
             if (value instanceof ValueNode) {
-                visitor.visit(name, ((ValueNode<Object>) value).getValue());
+                visitor.visit(name, value.getAsObject());
             } else if (value instanceof ListNode) {
                 AnnotationVisitor arrayVisitor = visitor.visitArray(name);
 
@@ -43,13 +42,13 @@ public class ChasmAnnotationWriter {
             } else {
                 MapNode mapNode = (MapNode) value;
                 if (mapNode.containsKey(NodeConstants.VALUE)) {
-                    String descriptor = ((ValueNode<String>) mapNode.get(NodeConstants.DESCRIPTOR)).getValue();
-                    String enumValue = ((ValueNode<String>) mapNode.get(NodeConstants.VALUE)).getValue();
+                    String descriptor = mapNode.get(NodeConstants.DESCRIPTOR).getAsString();
+                    String enumValue = mapNode.get(NodeConstants.VALUE).getAsString();
 
                     visitor.visitEnum(name, descriptor, enumValue);
                 } else {
-                    String descriptor = ((ValueNode<String>) mapNode.get(NodeConstants.DESCRIPTOR)).getValue();
-                    ListNode annotationValues = (ListNode) mapNode.get(NodeConstants.VALUES);
+                    String descriptor = mapNode.get(NodeConstants.DESCRIPTOR).getAsString();
+                    ListNode annotationValues = mapNode.get(NodeConstants.VALUES).getAsListNode();
 
                     AnnotationVisitor annotationVisitor = visitor.visitAnnotation(name, descriptor);
                     new ChasmAnnotationWriter(annotationValues).visitAnnotation(annotationVisitor);
