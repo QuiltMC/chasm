@@ -3,10 +3,8 @@ package org.quiltmc.chasm;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-
 import java.util.Optional;
 import java.util.Set;
-
 import java.util.stream.Collectors;
 
 import org.quiltmc.chasm.transformer.Transformation;
@@ -98,12 +96,15 @@ public class TopologicalSorter {
 
             if (!nextVertices.isEmpty()) {
 
-                // Remove dependencies
                 for (Vertex<T> vertex : nextVertices) {
+                    // Remove dependencies
                     for (Vertex<T> dependent : vertex.dependencies) {
                         dependent.dependencies.remove(vertex);
                         dependent.weakDependencies.remove(vertex);
                     }
+
+                    // Remove from remaining vertices
+                    toSort.remove(vertex);
                 }
 
                 // Add to sorted
@@ -137,6 +138,25 @@ public class TopologicalSorter {
         }
 
         return sorted;
+    }
+
+    public enum Dependency {
+        NONE,
+        WEAK,
+        STRONG
+    }
+
+    public interface DependencyProvider<T> {
+        /**
+         * Provides dependency information for two values.
+         * This is unidirectional and only determines how the first value depends on the second.
+         * If the reverse information is needed, the method has to be called with the parameters swapped.
+         *
+         * @param first The dependent value
+         * @param second Teh dependency value
+         * @return How first depends on second
+         */
+        Dependency get(T first, T second);
     }
 
     private static class Vertex<T> {
@@ -182,23 +202,5 @@ public class TopologicalSorter {
             addDependency(dependency);
             this.weakDependencies.add(dependency);
         }
-    }
-
-    public interface DependencyProvider<T> {
-        /**
-         * Provides dependency information for two values.
-         * This is unidirectional and only determines how the first value depends on the second.
-         * If the reverse information is needed, the method has to be called with the parameters swapped.
-         * @param first The dependent value
-         * @param second Teh dependency value
-         * @return How first depends on second
-         */
-        Dependency get(T first, T second);
-    }
-
-    public enum Dependency {
-        NONE,
-        WEAK,
-        STRONG
     }
 }
