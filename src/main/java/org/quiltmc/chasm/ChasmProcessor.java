@@ -36,13 +36,13 @@ public class ChasmProcessor {
     }
 
     public List<byte[]> process() {
-        List<List<Transformer>> rounds = sortTransformers();
+        List<List<Transformer>> rounds = TopologicalSorter.sortTransformers(transformers);
 
         for (List<Transformer> round : rounds) {
             ListNode initialClasses = classes.toImmutable();
 
             List<Transformation> transformations = applyTransformers(round, initialClasses);
-            List<Transformation> sorted = sortTransformations(transformations);
+            List<Transformation> sorted = TopologicalSorter.sortTransformations(transformations);
 
             TransformationApplier transformationApplier = new TransformationApplier(classes, sorted);
             transformationApplier.applyAll();
@@ -61,11 +61,6 @@ public class ChasmProcessor {
         return classBytes;
     }
 
-    private List<List<Transformer>> sortTransformers() {
-        // TODO: Sort transformers based on declared dependencies
-        return List.of(transformers);
-    }
-
     private List<Transformation> applyTransformers(List<Transformer> transformers, ListNode classes) {
         List<Transformation> transformations = new ArrayList<>();
 
@@ -74,11 +69,5 @@ public class ChasmProcessor {
         }
 
         return transformations;
-    }
-
-    private List<Transformation> sortTransformations(List<Transformation> transformations) {
-        TransformationSorter sorter = new TransformationSorter();
-        sorter.addAll(transformations);
-        return sorter.get();
     }
 }
