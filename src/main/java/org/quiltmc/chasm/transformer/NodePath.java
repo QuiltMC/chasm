@@ -30,7 +30,7 @@ public class NodePath {
     }
 
     public NodePath append(int index) {
-        return append(index);
+        return append((Integer) index);
     }
 
     public int getLength() {
