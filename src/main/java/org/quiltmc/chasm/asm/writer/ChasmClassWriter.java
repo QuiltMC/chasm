@@ -63,13 +63,14 @@ public class ChasmClassWriter {
         String name = ((ValueNode<String>) classNode.get(NodeConstants.NAME)).getValue();
 
         ValueNode<String> signatureNode = (ValueNode<String>) classNode.get(NodeConstants.SIGNATURE);
-        String signature = signatureNode == null? null: signatureNode.getValue();
+        String signature = signatureNode == null ? null : signatureNode.getValue();
         
         ValueNode<String> superClassNode = (ValueNode<String>) classNode.get(NodeConstants.SUPER);
-        String superClass = superClassNode == null? "java/lang/Object": superClassNode.getValue();
+        String superClass = superClassNode == null ? "java/lang/Object" : superClassNode.getValue();
         
         ListNode interfacesNode = (ListNode) classNode.get(NodeConstants.INTERFACES);
-        String[] interfaces = interfacesNode == null? new String[0]:
+        String[] interfaces = interfacesNode == null ? new String[0]
+                : 
                 interfacesNode.stream().map(n -> ((ValueNode<String>) n).getValue()).toArray(String[]::new);
 
         visitor.visit(version, access, name, signature, superClass, interfaces);
@@ -122,9 +123,9 @@ public class ChasmClassWriter {
         }
 
         // visitMethod
-        ListNode classListNode = (ListNode) classNode.get(NodeConstants.METHODS);
-        if (classListNode != null) {
-            for (Node node : classListNode) {
+        ListNode methodListNode = (ListNode) classNode.get(NodeConstants.METHODS);
+        if (methodListNode != null) {
+            for (Node node : methodListNode) {
                 ChasmMethodWriter chasmMethodWriter = new ChasmMethodWriter((MapNode) node);
                 chasmMethodWriter.visitMethod(visitor);
             }
@@ -141,12 +142,17 @@ public class ChasmClassWriter {
         }
         for (Node n : innerClassesListNode) {
             MapNode innerClass = (MapNode) n;
-            ValueNode<String> name = (ValueNode<String>) innerClass.get(NodeConstants.NAME);
-            ValueNode<String> outerName = (ValueNode<String>) innerClass.get(NodeConstants.OUTER_NAME);
-            ValueNode<String> innerName = (ValueNode<String>) innerClass.get(NodeConstants.INNER_NAME);
-            ValueNode<Integer> access = (ValueNode<Integer>) innerClass.get(NodeConstants.ACCESS);
+            ValueNode<String> nameNode = (ValueNode<String>) innerClass.get(NodeConstants.NAME);
+            ValueNode<String> outerNameNode = (ValueNode<String>) innerClass.get(NodeConstants.OUTER_NAME);
+            ValueNode<String> innerNameNode = (ValueNode<String>) innerClass.get(NodeConstants.INNER_NAME);
+            ValueNode<Integer> accessNode = (ValueNode<Integer>) innerClass.get(NodeConstants.ACCESS);
 
-            visitor.visitInnerClass(name.getValue(), outerName.getValue(), innerName.getValue(), access.getValue());
+            String name = nameNode.getValue();
+            String outerName = outerNameNode == null ? null : outerNameNode.getValue();
+            String innerName = innerNameNode == null ? null : innerNameNode.getValue();
+            int access = accessNode.getValue(); 
+            
+            visitor.visitInnerClass(name, outerName, innerName, access);
         }
     }
 

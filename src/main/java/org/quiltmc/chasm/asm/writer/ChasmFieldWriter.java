@@ -44,10 +44,10 @@ public class ChasmFieldWriter {
         String descriptor = ((ValueNode<String>) fieldNode.get(NodeConstants.DESCRIPTOR)).getValue();
         
         ValueNode<String> signatureNode = (ValueNode<String>) fieldNode.get(NodeConstants.SIGNATURE);
-        String signature = signatureNode == null? null: signatureNode.getValue();
+        String signature = signatureNode == null ? null : signatureNode.getValue();
         
         ValueNode<Object> valueNode = (ValueNode<Object>) fieldNode.get(NodeConstants.VALUE);
-        Object value = valueNode == null? null: valueNode.getValue();
+        Object value = valueNode == null ? null : valueNode.getValue();
 
         FieldVisitor fieldVisitor = visitor.visitField(access, name, descriptor, signature, value);
 

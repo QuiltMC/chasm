@@ -16,4 +16,5 @@ public interface MapNode extends Node, Map<String, Node> {
 
         return new ImmutableMapNode(newNode);
     }
+    
 }

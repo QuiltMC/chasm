@@ -43,7 +43,7 @@ public class ChasmRecordComponentWriter {
         String descriptor = ((ValueNode<String>) componentNode.get(NodeConstants.DESCRIPTOR)).getValue();
         
         ValueNode<String> signatureNode = (ValueNode<String>) componentNode.get(NodeConstants.SIGNATURE);
-        String signature = signatureNode == null? null: signatureNode.getValue();
+        String signature = signatureNode == null ? null : signatureNode.getValue();
 
         RecordComponentVisitor componentVisitor = visitor.visitRecordComponent(name, descriptor, signature);
 

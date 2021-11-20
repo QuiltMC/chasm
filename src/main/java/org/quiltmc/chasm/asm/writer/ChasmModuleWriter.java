@@ -74,7 +74,9 @@ public class ChasmModuleWriter {
             MapNode requireNode = (MapNode) n;
             String reqModule = ((ValueNode<String>) requireNode.get(NodeConstants.MODULE)).getValue();
             int reqAccess = ((ValueNode<Integer>) requireNode.get(NodeConstants.ACCESS)).getValue();
-            String reqVersion = ((ValueNode<String>) requireNode.get(NodeConstants.VERSION)).getValue();
+            
+            ValueNode<String> versionNode = (ValueNode<String>) requireNode.get(NodeConstants.VERSION);
+            String reqVersion = versionNode == null ? null : versionNode.getValue();
             moduleVisitor.visitRequire(reqModule, reqAccess, reqVersion);
         }
     }
@@ -108,7 +110,8 @@ public class ChasmModuleWriter {
         for (Node n : moduleOpensListNode) {
             MapNode openNode = (MapNode) n;
             String openPackage = ((ValueNode<String>) openNode.get(NodeConstants.PACKAGE)).getValue();
-            Integer openAcccess = ((ValueNode<Integer>) openNode.get(NodeConstants.ACCESS)).getValue();
+            Integer openAccess = ((ValueNode<Integer>) openNode.get(NodeConstants.ACCESS)).getValue();
+            
             ListNode openModules = ((ListNode) openNode.get(NodeConstants.MODULES));
             String[] modules = null;
             if (openModules != null) {
@@ -117,7 +120,8 @@ public class ChasmModuleWriter {
                     modules[i] = ((ValueNode<String>) openModules.get(i)).getValue();
                 }
             }
-            moduleVisitor.visitOpen(openPackage, openAcccess, modules);
+            
+            moduleVisitor.visitOpen(openPackage, openAccess, modules);
         }
     }
 
@@ -133,6 +137,9 @@ public class ChasmModuleWriter {
 
     private void visitProvides(ModuleVisitor moduleVisitor) {
         ListNode moduleProvidesListNode = (ListNode) moduleNode.get(NodeConstants.PROVIDES);
+        if (moduleProvidesListNode == null) {
+            return;
+        }
         for (Node n : moduleProvidesListNode) {
             MapNode providesNode = (MapNode) n;
             String service = ((ValueNode<String>) providesNode.get(NodeConstants.SERVICE)).getValue();
