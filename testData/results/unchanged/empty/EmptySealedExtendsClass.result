@@ -1,0 +1,18 @@
+// class version 61.0 (61)
+// access flags 0x30
+final class unchanged/empty/EmptySealedExtendsClass extends unchanged/empty/EmptySealedClass {
+
+  // compiled from: EmptySealedExtendsClass.java
+
+  // access flags 0x0
+  <init>()V
+   L0
+    LINENUMBER 3 L0
+    ALOAD 0
+    INVOKESPECIAL unchanged/empty/EmptySealedClass.<init> ()V
+    RETURN
+   L1
+    LOCALVARIABLE this Lunchanged/empty/EmptySealedExtendsClass; L0 L1 0
+    MAXSTACK = 1
+    MAXLOCALS = 1
+}
