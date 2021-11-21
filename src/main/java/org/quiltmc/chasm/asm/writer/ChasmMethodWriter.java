@@ -355,7 +355,7 @@ public class ChasmMethodWriter {
 
     private static void visitTryCatchBlocks(MethodVisitor methodVisitor, MapNode codeNode,
             Map<String, Label> labelMap) {
-        var tryCatchBlocksListNode = (ListNode) codeNode.get(NodeConstants.TRY_CATCH_BLOCKS);
+        ListNode tryCatchBlocksListNode = (ListNode) codeNode.get(NodeConstants.TRY_CATCH_BLOCKS);
         if (tryCatchBlocksListNode == null) {
             return;
         }

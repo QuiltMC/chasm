@@ -19,7 +19,7 @@ public class ChasmModuleWriter {
     public void visitModule(ClassVisitor visitor) {
         String name = ((ValueNode<String>) moduleNode.get(NodeConstants.NAME)).getValue();
         int access = ((ValueNode<Integer>) moduleNode.get(NodeConstants.ACCESS)).getValue();
-        var versionNode = (ValueNode<String>) moduleNode.get(NodeConstants.VERSION);
+        ValueNode<String> versionNode = (ValueNode<String>) moduleNode.get(NodeConstants.VERSION);
         String version = versionNode == null ? null : versionNode.getValue();
         
         ModuleVisitor moduleVisitor = visitor.visitModule(name, access, version);
