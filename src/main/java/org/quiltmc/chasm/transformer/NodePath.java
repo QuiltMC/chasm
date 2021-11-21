@@ -56,7 +56,7 @@ public class NodePath {
     }
 
     public boolean contains(NodePath other) {
-        if (entries.size() < other.entries.size()) {
+        if (entries.size() > other.entries.size()) {
             return false;
         }
 
