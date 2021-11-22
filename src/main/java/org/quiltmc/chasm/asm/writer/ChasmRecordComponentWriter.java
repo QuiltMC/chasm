@@ -18,14 +18,22 @@ public class ChasmRecordComponentWriter {
     }
 
     private void visitAttributes(RecordComponentVisitor componentVisitor) {
-        for (Node n : (ListNode) componentNode.get(NodeConstants.ATTRIBUTES)) {
+        ListNode attributesListNode = (ListNode) componentNode.get(NodeConstants.ATTRIBUTES);
+        if (attributesListNode == null) {
+            return;
+        }
+        for (Node n : attributesListNode) {
             componentVisitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
         }
     }
 
     private void visitAnnotations(RecordComponentVisitor componentVisitor) {
-        for (Node n : (ListNode) componentNode.get(NodeConstants.ANNOTATIONS)) {
-            ChasmAnnotationWriter writer = new ChasmAnnotationWriter((MapNode) n);
+        ListNode annotationsListNode = (ListNode) componentNode.get(NodeConstants.ANNOTATIONS);
+        if (annotationsListNode == null) {
+            return;
+        }
+        for (Node n : annotationsListNode) {
+            ChasmAnnotationWriter writer = new ChasmAnnotationWriter(n);
             writer.visitAnnotation(componentVisitor::visitAnnotation, componentVisitor::visitTypeAnnotation);
         }
     }
@@ -33,7 +41,9 @@ public class ChasmRecordComponentWriter {
     public void visitRecordComponent(ClassVisitor visitor) {
         String name = ((ValueNode<String>) componentNode.get(NodeConstants.NAME)).getValue();
         String descriptor = ((ValueNode<String>) componentNode.get(NodeConstants.DESCRIPTOR)).getValue();
-        String signature = ((ValueNode<String>) componentNode.get(NodeConstants.SIGNATURE)).getValue();
+        
+        ValueNode<String> signatureNode = (ValueNode<String>) componentNode.get(NodeConstants.SIGNATURE);
+        String signature = signatureNode == null ? null : signatureNode.getValue();
 
         RecordComponentVisitor componentVisitor = visitor.visitRecordComponent(name, descriptor, signature);
 

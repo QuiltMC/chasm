@@ -30,7 +30,7 @@ public class NodePath {
     }
 
     public NodePath append(int index) {
-        return append((Object) index);
+        return append((Integer) index);
     }
 
     public int getLength() {
@@ -72,10 +72,10 @@ public class NodePath {
     public Node resolve(Node root) {
         Node current = root;
         for (Object entry : entries) {
-            if (entry instanceof Integer indexPathEntry && current instanceof ListNode listNode) {
-                current = listNode.get(indexPathEntry);
-            } else if (entry instanceof String namePathEntry && current instanceof MapNode mapNode) {
-                current = mapNode.get(namePathEntry);
+            if (entry instanceof Integer && current instanceof ListNode) {
+                current = ((ListNode) current).get((Integer) entry);
+            } else if (entry instanceof String && current instanceof MapNode) {
+                current = ((MapNode) current).get((String) entry);
             } else {
                 throw new UnsupportedOperationException("Can't apply path to given node.");
             }

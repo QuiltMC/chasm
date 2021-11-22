@@ -3,7 +3,6 @@ package org.quiltmc.chasm.asm.writer;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.TypePath;
 import org.quiltmc.chasm.NodeConstants;
-import org.quiltmc.chasm.asm.ChasmAnnotationVisitor;
 import org.quiltmc.chasm.tree.ListNode;
 import org.quiltmc.chasm.tree.MapNode;
 import org.quiltmc.chasm.tree.Node;
@@ -25,10 +24,15 @@ public class ChasmAnnotationWriter {
         } else {
             values = (ListNode) annotationNode;
         }
+        if (values == null) {
+            visitor.visitEnd();
+            return;
+        }
 
         for (Node value : values) {
             String name = null;
-            if (value instanceof MapNode mapNode && mapNode.containsKey(NodeConstants.NAME)) {
+            if (value instanceof MapNode && ((MapNode) value).containsKey(NodeConstants.NAME)) {
+                MapNode mapNode = (MapNode) value;
                 // Name-value pairs
                 name = ((ValueNode<String>) mapNode.get(NodeConstants.NAME)).getValue();
                 value = mapNode.get(NodeConstants.VALUE);

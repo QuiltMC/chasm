@@ -232,9 +232,10 @@ public class ChasmMethodVisitor extends MethodVisitor {
     private ListNode getArgumentsNode(Object[] bootstrapMethodArguments) {
         ListNode argumentsNode = new LinkedListNode();
         for (Object arg : bootstrapMethodArguments) {
-            if (arg instanceof Handle handle) {
-                argumentsNode.add(getHandleNode(handle));
-            } else if (arg instanceof ConstantDynamic constantDynamic) {
+            if (arg instanceof Handle) {
+                argumentsNode.add(getHandleNode((Handle) arg));
+            } else if (arg instanceof ConstantDynamic) {
+                ConstantDynamic constantDynamic = (ConstantDynamic) arg;
                 MapNode constDynamicNode = new LinkedHashMapNode();
                 constDynamicNode.put(NodeConstants.NAME, new ValueNode<>(constantDynamic.getName()));
                 constDynamicNode.put(NodeConstants.DESCRIPTOR, new ValueNode<>(constantDynamic.getDescriptor()));

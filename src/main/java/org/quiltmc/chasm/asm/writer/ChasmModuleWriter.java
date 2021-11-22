@@ -19,8 +19,9 @@ public class ChasmModuleWriter {
     public void visitModule(ClassVisitor visitor) {
         String name = ((ValueNode<String>) moduleNode.get(NodeConstants.NAME)).getValue();
         int access = ((ValueNode<Integer>) moduleNode.get(NodeConstants.ACCESS)).getValue();
-        String version = ((ValueNode<String>) moduleNode.get(NodeConstants.VERSION)).getValue();
-
+        ValueNode<String> versionNode = (ValueNode<String>) moduleNode.get(NodeConstants.VERSION);
+        String version = versionNode == null ? null : versionNode.getValue();
+        
         ModuleVisitor moduleVisitor = visitor.visitModule(name, access, version);
 
         // visitMainClass
@@ -55,23 +56,38 @@ public class ChasmModuleWriter {
     }
 
     private void visitPackages(ModuleVisitor moduleVisitor) {
-        for (Node n : (ListNode) moduleNode.get(NodeConstants.PACKAGES)) {
+        // https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.26
+        ListNode packagesListNode = (ListNode) moduleNode.get(NodeConstants.PACKAGES);
+        if (packagesListNode == null) {
+            return;
+        }
+        for (Node n : packagesListNode) {
             moduleVisitor.visitPackage(((ValueNode<String>) n).getValue());
         }
     }
 
     private void visitRequires(ModuleVisitor moduleVisitor) {
-        for (Node n : (ListNode) moduleNode.get(NodeConstants.REQUIRES)) {
+        ListNode moduleRequiresListNode = (ListNode) moduleNode.get(NodeConstants.REQUIRES);
+        if (moduleRequiresListNode == null) {
+            return;
+        }
+        for (Node n : moduleRequiresListNode) {
             MapNode requireNode = (MapNode) n;
             String reqModule = ((ValueNode<String>) requireNode.get(NodeConstants.MODULE)).getValue();
-            Integer reqAccess = ((ValueNode<Integer>) requireNode.get(NodeConstants.ACCESS)).getValue();
-            String reqVersion = ((ValueNode<String>) requireNode.get(NodeConstants.VERSION)).getValue();
+            int reqAccess = ((ValueNode<Integer>) requireNode.get(NodeConstants.ACCESS)).getValue();
+            
+            ValueNode<String> versionNode = (ValueNode<String>) requireNode.get(NodeConstants.VERSION);
+            String reqVersion = versionNode == null ? null : versionNode.getValue();
             moduleVisitor.visitRequire(reqModule, reqAccess, reqVersion);
         }
     }
 
     private void visitExports(ModuleVisitor moduleVisitor) {
-        for (Node n : (ListNode) moduleNode.get(NodeConstants.EXPORTS)) {
+        ListNode moduleExportsListNode = (ListNode) moduleNode.get(NodeConstants.EXPORTS);
+        if (moduleExportsListNode == null) {
+            return;
+        }
+        for (Node n : moduleExportsListNode) {
             MapNode exportNode = (MapNode) n;
             String expPackage = ((ValueNode<String>) exportNode.get(NodeConstants.PACKAGE)).getValue();
             Integer expAcccess = ((ValueNode<Integer>) exportNode.get(NodeConstants.ACCESS)).getValue();
@@ -88,10 +104,15 @@ public class ChasmModuleWriter {
     }
 
     private void visitOpens(ModuleVisitor moduleVisitor) {
-        for (Node n : (ListNode) moduleNode.get(NodeConstants.OPENS)) {
+        ListNode moduleOpensListNode = (ListNode) moduleNode.get(NodeConstants.OPENS);
+        if (moduleOpensListNode == null) {
+            return;
+        }
+        for (Node n : moduleOpensListNode) {
             MapNode openNode = (MapNode) n;
             String openPackage = ((ValueNode<String>) openNode.get(NodeConstants.PACKAGE)).getValue();
-            Integer openAcccess = ((ValueNode<Integer>) openNode.get(NodeConstants.ACCESS)).getValue();
+            Integer openAccess = ((ValueNode<Integer>) openNode.get(NodeConstants.ACCESS)).getValue();
+            
             ListNode openModules = ((ListNode) openNode.get(NodeConstants.MODULES));
             String[] modules = null;
             if (openModules != null) {
@@ -100,18 +121,27 @@ public class ChasmModuleWriter {
                     modules[i] = ((ValueNode<String>) openModules.get(i)).getValue();
                 }
             }
-            moduleVisitor.visitOpen(openPackage, openAcccess, modules);
+            
+            moduleVisitor.visitOpen(openPackage, openAccess, modules);
         }
     }
 
     private void visitUses(ModuleVisitor moduleVisitor) {
-        for (Node n : (ListNode) moduleNode.get(NodeConstants.USES)) {
+        ListNode moduleUsesListNode = (ListNode) moduleNode.get(NodeConstants.USES);
+        if (moduleUsesListNode == null) {
+            return;
+        }
+        for (Node n : moduleUsesListNode) {
             moduleVisitor.visitUse(((ValueNode<String>) n).getValue());
         }
     }
 
     private void visitProvides(ModuleVisitor moduleVisitor) {
-        for (Node n : (ListNode) moduleNode.get(NodeConstants.PROVIDES)) {
+        ListNode moduleProvidesListNode = (ListNode) moduleNode.get(NodeConstants.PROVIDES);
+        if (moduleProvidesListNode == null) {
+            return;
+        }
+        for (Node n : moduleProvidesListNode) {
             MapNode providesNode = (MapNode) n;
             String service = ((ValueNode<String>) providesNode.get(NodeConstants.SERVICE)).getValue();
             ListNode providers = (ListNode) providesNode.get(NodeConstants.PROVIDERS);
