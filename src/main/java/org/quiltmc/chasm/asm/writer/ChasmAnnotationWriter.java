@@ -3,7 +3,6 @@ package org.quiltmc.chasm.asm.writer;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.TypePath;
 import org.quiltmc.chasm.NodeConstants;
-import org.quiltmc.chasm.asm.ChasmAnnotationVisitor;
 import org.quiltmc.chasm.tree.ListNode;
 import org.quiltmc.chasm.tree.MapNode;
 import org.quiltmc.chasm.tree.Node;
@@ -24,6 +23,10 @@ public class ChasmAnnotationWriter {
             values = (ListNode) ((MapNode) annotationNode).get(NodeConstants.VALUES);
         } else {
             values = (ListNode) annotationNode;
+        }
+        if (values == null) {
+            visitor.visitEnd();
+            return;
         }
 
         for (Node value : values) {

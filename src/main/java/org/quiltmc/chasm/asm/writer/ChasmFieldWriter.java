@@ -18,13 +18,21 @@ public class ChasmFieldWriter {
     }
 
     private void visitAttributes(FieldVisitor fieldVisitor) {
-        for (Node n : (ListNode) fieldNode.get(NodeConstants.ATTRIBUTES)) {
+        ListNode attributesListNode = (ListNode) fieldNode.get(NodeConstants.ATTRIBUTES);
+        if (attributesListNode == null) {
+            return;
+        }
+        for (Node n : attributesListNode) {
             fieldVisitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
         }
     }
 
     private void visitAnnotations(FieldVisitor fieldVisitor) {
-        for (Node n : (ListNode) fieldNode.get(NodeConstants.ANNOTATIONS)) {
+        ListNode annotationsListNode = (ListNode) fieldNode.get(NodeConstants.ANNOTATIONS);
+        if (annotationsListNode == null) {
+            return;
+        }
+        for (Node n : annotationsListNode) {
             ChasmAnnotationWriter annotationWriter = new ChasmAnnotationWriter((MapNode) n);
             annotationWriter.visitAnnotation(fieldVisitor::visitAnnotation, fieldVisitor::visitTypeAnnotation);
         }
@@ -34,8 +42,12 @@ public class ChasmFieldWriter {
         int access = ((ValueNode<Integer>) fieldNode.get(NodeConstants.ACCESS)).getValue();
         String name = ((ValueNode<String>) fieldNode.get(NodeConstants.NAME)).getValue();
         String descriptor = ((ValueNode<String>) fieldNode.get(NodeConstants.DESCRIPTOR)).getValue();
-        String signature = ((ValueNode<String>) fieldNode.get(NodeConstants.SIGNATURE)).getValue();
-        Object value = ((ValueNode<Object>) fieldNode.get(NodeConstants.VALUE)).getValue();
+        
+        ValueNode<String> signatureNode = (ValueNode<String>) fieldNode.get(NodeConstants.SIGNATURE);
+        String signature = signatureNode == null ? null : signatureNode.getValue();
+        
+        ValueNode<Object> valueNode = (ValueNode<Object>) fieldNode.get(NodeConstants.VALUE);
+        Object value = valueNode == null ? null : valueNode.getValue();
 
         FieldVisitor fieldVisitor = visitor.visitField(access, name, descriptor, signature, value);
 
