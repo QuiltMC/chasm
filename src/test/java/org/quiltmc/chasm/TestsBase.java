@@ -1,5 +1,18 @@
 package org.quiltmc.chasm;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,18 +22,6 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.api.ChasmProcessor;
 import org.quiltmc.chasm.api.Transformer;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class TestsBase {
     private static final Path TEST_DATA_DIR = Paths.get("src/testData");
@@ -106,7 +107,8 @@ public abstract class TestsBase {
             // Create the test
             Path classFile = testDefinition.getClassFile();
             Path resultFile = testDefinition.getResultFile();
-            DynamicTest test = DynamicTest.dynamicTest(name, Files.exists(resultFile) ? resultFile.toUri() : classFile.toUri(), () -> {
+            URI testSourceUri = Files.exists(resultFile) ? resultFile.toUri() : classFile.toUri();
+            DynamicTest test = DynamicTest.dynamicTest(name, testSourceUri, () -> {
                 setUp();
                 doTest(testDefinition);
                 tearDown();
