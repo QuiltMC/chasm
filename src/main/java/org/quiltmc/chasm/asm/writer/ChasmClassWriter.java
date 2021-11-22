@@ -23,8 +23,8 @@ public class ChasmClassWriter {
         Object[] arguments = new Object[argumentNode.size()];
         for (int i = 0; i < arguments.length; i++) {
             Node argNode = argumentNode.get(i);
-            if (argNode instanceof ValueNode<?> valueNode) {
-                arguments[i] = valueNode.getValue();
+            if (argNode instanceof ValueNode<?>) {
+                arguments[i] = ((ValueNode<?>) argNode).getValue();
             } else if (((MapNode) argNode).containsKey(NodeConstants.TAG)) {
                 arguments[i] = getHandle((MapNode) argNode);
             } else {

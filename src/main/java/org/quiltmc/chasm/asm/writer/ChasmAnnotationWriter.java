@@ -31,7 +31,8 @@ public class ChasmAnnotationWriter {
 
         for (Node value : values) {
             String name = null;
-            if (value instanceof MapNode mapNode && mapNode.containsKey(NodeConstants.NAME)) {
+            if (value instanceof MapNode && ((MapNode) value).containsKey(NodeConstants.NAME)) {
+                MapNode mapNode = (MapNode) value;
                 // Name-value pairs
                 name = ((ValueNode<String>) mapNode.get(NodeConstants.NAME)).getValue();
                 value = mapNode.get(NodeConstants.VALUE);

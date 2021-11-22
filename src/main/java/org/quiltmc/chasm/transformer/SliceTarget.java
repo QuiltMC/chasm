@@ -38,13 +38,15 @@ public class SliceTarget implements Target {
 
     @Override
     public boolean contains(Target other) {
-        if (other instanceof NodeTarget nodeTarget) {
+        if (other instanceof NodeTarget) {
+            NodeTarget nodeTarget = (NodeTarget) other;
             if (nodeTarget.getPath().contains(this.path)) {
                 return false;
             }
             if (this.path.contains(nodeTarget.getPath())) {
                 Object index = nodeTarget.getPath().getEntryAt(this.path.getLength());
-                if (index instanceof Integer intIndex) {
+                if (index instanceof Integer) {
+                    int intIndex = (Integer) index;
                     return startIndex / 2 <= intIndex && intIndex < endIndex / 2;
                 } else {
                     throw new RuntimeException("Unexpected index type");
@@ -59,7 +61,8 @@ public class SliceTarget implements Target {
     public boolean overlaps(Target other) {
         if (other instanceof NodeTarget) {
             return false;
-        } else if (other instanceof SliceTarget sliceTarget) {
+        } else if (other instanceof SliceTarget) {
+            SliceTarget sliceTarget = (SliceTarget) other;
             if (!this.path.equals(sliceTarget.path)) {
                 return false;
             }
@@ -81,12 +84,12 @@ public class SliceTarget implements Target {
     @Override
     public Node resolve(Node root) {
         Node parent = path.resolve(root);
-        if (parent instanceof ListNode listNode) {
+        if (parent instanceof ListNode) {
             ListNode slice = new LinkedListNode();
             int realStart = startIndex / 2;
             int realEnd = endIndex / 2;
             for (int i = realStart; i < realEnd; i++) {
-                slice.add(listNode.get(i));
+                slice.add(((ListNode) parent).get(i));
             }
             return slice;
         } else {

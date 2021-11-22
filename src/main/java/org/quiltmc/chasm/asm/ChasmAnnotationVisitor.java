@@ -19,9 +19,9 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
 
     @Override
     public void visit(String name, Object value) {
-        if (value instanceof Object[] array) {
+        if (value instanceof Object[]) {
             AnnotationVisitor visitor = visitArray(name);
-            for (Object entry : array) {
+            for (Object entry : (Object[]) value) {
                 visitor.visit(null, entry);
             }
             visitor.visitEnd();

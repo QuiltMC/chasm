@@ -17,8 +17,8 @@ checkstyle {
 }
 
 compileJava {
-    sourceCompatibility = 16
-    targetCompatibility = 16
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 }
 
 compileTestJava {
