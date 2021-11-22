@@ -1,12 +1,16 @@
 package org.quiltmc.chasm.internal;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.quiltmc.chasm.api.target.Target;
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.Transformer;
 
@@ -23,7 +27,7 @@ public class TopologicalSorter {
     }
 
     public static List<Transformation> sortTransformations(List<Transformation> transformations) {
-        return sort(transformations, (first, second) -> {
+        List<List<Transformation>> sortedGroups = sort(transformations, (first, second) -> {
             // Strong dependencies inherited from defining Transformer
             if (first.getParent().mustRunAfter(second.getParent().getId())) {
                 return Dependency.STRONG;
@@ -41,8 +45,13 @@ public class TopologicalSorter {
 
             // Case 6b/7b/8b
             // Any contained sources must be resolved first.
-            if (second.getSources().values().stream().anyMatch(first.getTarget()::contains)) {
-                return Dependency.STRONG;
+            /* if (second.getSources().values().stream().anyMatch(first.getTarget()::contains)) {
+             *   return Dependency.STRONG;
+             * } */
+            for (Target secondSourceTarget : second.getSources().values()) {
+                if (first.getTarget().contains(secondSourceTarget)) {
+                    return Dependency.STRONG;
+                }
             }
 
             //Case 2a
@@ -54,26 +63,37 @@ public class TopologicalSorter {
 
             // Case 2b/2c
             // Any overlapping sources must be resolved first.
-            if (second.getSources().values().stream().anyMatch(first.getTarget()::overlaps)) {
-                return Dependency.STRONG;
+            for (Target secondSourceTarget : second.getSources().values()) {
+                if (first.getTarget().overlaps(secondSourceTarget)) {
+                    return Dependency.STRONG;
+                }
             }
 
             //Case 6c/7c/8c
             // Any sources containing a target should be applied after the target if possible.
             // TODO: Re-evaluate if this should be a strong dependency instead
-            if (first.getSources().values().stream().anyMatch(s -> s.contains(second.getTarget()))) {
-                return Dependency.WEAK;
+            for (Target firstSourceTarget : first.getSources().values()) {
+                if (firstSourceTarget.contains(second.getTarget())) {
+                    return Dependency.WEAK;
+                }
             }
 
             return Dependency.NONE;
-        }).stream().flatMap(List::stream).toList();
+        });
+        List<Transformation> sorted = new ArrayList<>(transformations.size());
+        for (List<Transformation> sortedGroup : sortedGroups) {
+            sorted.addAll(sortedGroup);
+        }
+        return sorted;
     }
 
     public static <T> List<List<T>> sort(List<T> list, DependencyProvider<T> dependencyProvider) {
         // Create vertices
         // Note: LinkedHashSet is used to preserve insertion order
-        LinkedHashSet<Vertex<T>> toSort = list.stream().map(Vertex::new)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+        LinkedHashSet<Vertex<T>> toSort = new LinkedHashSet<>(list.size());
+        for (T t : list) {
+            toSort.add(new Vertex<>(t));
+        }
 
         // Determine dependencies
         for (Vertex<T> first : toSort) {
@@ -87,44 +107,50 @@ public class TopologicalSorter {
             }
         }
 
+        NavigableSet<Vertex<T>> verticesByDependancyCount = new TreeSet<>(
+                TopologicalSorter::sortVerticesByDependancyCount);
+        verticesByDependancyCount.addAll(toSort);
         // Note: LinkedHashSet is used to preserve insertion order
         List<List<T>> sorted = new ArrayList<>(toSort.size());
 
         while (!toSort.isEmpty()) {
             // Get all vertices without dependencies
-            List<Vertex<T>> nextVertices = toSort.stream().filter(v -> v.dependencies.isEmpty()).toList();
+            List<Vertex<T>> nextVertices = new ArrayList<>(toSort.size());
+            for (Vertex<T> v : toSort) {
+                if (v.dependencies.isEmpty()) {
+                    nextVertices.add(v);
+                }
+            }
 
             if (!nextVertices.isEmpty()) {
-
                 for (Vertex<T> vertex : nextVertices) {
                     // Remove dependencies
-                    for (Vertex<T> dependent : vertex.dependencies) {
-                        dependent.dependencies.remove(vertex);
-                        dependent.weakDependencies.remove(vertex);
-                    }
+                    vertex.removeDependencies();
 
                     // Remove from remaining vertices
                     toSort.remove(vertex);
+                    verticesByDependancyCount.remove(vertex);
                 }
 
                 // Add to sorted
-                sorted.add(nextVertices.stream().map(Vertex::getValue).toList());
+                List<T> nextVertexValues = new ArrayList<>(nextVertices.size());
+                for (Vertex<T> nextVertex : nextVertices) {
+                    nextVertexValues.add(nextVertex.getValue());
+                }
+                sorted.add(nextVertexValues);
             } else {
-                // TODO: This is definitely not optimal.
-                //  Instead, try to find a Vertex with no hard dependencies and the least soft dependencies.
-                //  Even better: Find all loops and break them all at the same time.
-                // Can't sort, try breaking a weak dependency
-                Optional<Vertex<T>> optNext = toSort.stream().filter(v -> !v.weakDependencies.isEmpty()).findFirst();
-
-                if (optNext.isPresent()) {
-                    Vertex<T> next = optNext.get();
+                //  Try to find a Vertex with no hard dependencies and the least soft dependencies.
+                //  Even better would be: Find all loops and break them all at the same time.
+                Vertex<T> optNext = verticesByDependancyCount.first();
+                if (optNext != null && optNext.dependencies.isEmpty()) {
+                    Vertex<T> next = optNext;
 
                     // Get first weak dependency
                     Vertex<T> toBreak = next.weakDependencies.iterator().next();
 
                     // Emit warning
                     System.err.println("WARNING: Breaking weak dependency: "
-                            + next.getValue().toString() + " dependes on " + toBreak.getValue().toString());
+                            + next.getValue() + " depends on " + toBreak.getValue());
 
                     // Break dependency
                     next.dependencies.remove(toBreak);
@@ -189,6 +215,13 @@ public class TopologicalSorter {
             this.dependents = new LinkedHashSet<>();
         }
 
+        public void removeDependencies() {
+            for (Vertex<T> dependent : this.dependencies) {
+                dependent.dependencies.remove(this);
+                dependent.weakDependencies.remove(this);
+            }
+        }
+
         public T getValue() {
             return value;
         }
@@ -202,5 +235,22 @@ public class TopologicalSorter {
             addDependency(dependency);
             this.weakDependencies.add(dependency);
         }
+
+    }
+
+    private static <T> int sortVerticesByDependancyCount(Vertex<T> a, Vertex<T> b) {
+        int deps = a.dependencies.size();
+        int otherDeps = b.dependencies.size();
+        if (deps != otherDeps) {
+            return Integer.compare(deps, otherDeps);
+        }
+
+        int weakDeps = a.weakDependencies.size();
+        int otherWeakDeps = b.weakDependencies.size();
+        if (weakDeps != otherWeakDeps) {
+            return Integer.compare(weakDeps, otherWeakDeps);
+        }
+
+        return 0;
     }
 }
