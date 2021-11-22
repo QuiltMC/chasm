@@ -7,7 +7,8 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
-import org.quiltmc.chasm.transformer.Transformer;
+import org.quiltmc.chasm.api.ChasmProcessor;
+import org.quiltmc.chasm.api.Transformer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
