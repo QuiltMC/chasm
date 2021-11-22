@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 public abstract class TestsBase {
     private static final Path TEST_DATA_DIR = Paths.get("testData");
     protected final List<TestDefinition> testDefinitions = new ArrayList<>();
-    protected URLClassLoader classLoader;
     protected ChasmProcessor processor;
 
     /**
@@ -59,29 +58,36 @@ public abstract class TestsBase {
 
     protected abstract void registerAll();
 
-    protected final void register(String testClass, String... transformers) {
-        List<String> transformerList = Arrays.stream(transformers).map(this::getFullTransformerClassName)
-                .collect(Collectors.toList());
+    protected final void register(String testClass, Transformer... transformers) {
+        List<Transformer> transformerList = Arrays.asList(transformers);
         testDefinitions.add(new TestDefinition(getFullTestClassName(testClass), transformerList, new ArrayList<>()));
     }
 
-    protected final void register(String testClass, String[] additionalClasses, String... transformers) {
-        List<String> transformerList = Arrays.stream(transformers).map(this::getFullTransformerClassName)
-                .collect(Collectors.toList());
+    protected final void register(String testClass, String[] additionalClasses, Transformer... transformers) {
+        List<Transformer> transformerList = Arrays.asList(transformers);
         List<String> additionalClassesList = Arrays.stream(additionalClasses).map(this::getFullTestClassName)
                 .collect(Collectors.toList());
         testDefinitions.add(new TestDefinition(testClass, transformerList, additionalClassesList));
+    }
+
+    protected final void registerNamed(String testClass, String name, Transformer... transformers) {
+        List<Transformer> transformerList = Arrays.asList(transformers);
+        testDefinitions.add(new TestDefinition(getFullTestClassName(testClass), transformerList, new ArrayList<>(),
+                name));
+    }
+
+    protected final void registerNamed(String testClass, String name, String[] additionalClasses,
+                                  Transformer... transformers) {
+        List<Transformer> transformerList = Arrays.asList(transformers);
+        List<String> additionalClassesList = Arrays.stream(additionalClasses).map(this::getFullTestClassName)
+                .collect(Collectors.toList());
+        testDefinitions.add(new TestDefinition(testClass, transformerList, additionalClassesList, name));
     }
 
     @BeforeEach
     public void setUp() throws MalformedURLException {
         // Instantiate the processor
         processor = new ChasmProcessor();
-
-        // Instantiate a class loader for the transformers
-        if (classLoader == null) {
-            classLoader = new URLClassLoader(new URL[] {TEST_DATA_DIR.resolve("classes").toUri().toURL()});
-        }
     }
 
     @AfterEach
@@ -98,11 +104,7 @@ public abstract class TestsBase {
         // Create a test for each test definition
         List<DynamicTest> tests = new ArrayList<>();
         for (TestDefinition testDefinition : testDefinitions) {
-            // Get the test name
-            String name = testDefinition.testClass;
-            if (name.indexOf('/') != -1) {
-                name = name.substring(name.lastIndexOf('/') + 1);
-            }
+            String name = testDefinition.getName();
 
             // Create the test
             Path classFile = testDefinition.getClassFile();
@@ -132,22 +134,9 @@ public abstract class TestsBase {
             processor.addClass(Files.readAllBytes(additionalClassFile));
         }
 
-        // Load and instantiate transformers
-        for (String transformerClass : testDefinition.transformers) {
-            Path transformerFile = TEST_DATA_DIR.resolve("classes/" + transformerClass + ".class");
-            Assertions.assertTrue(Files.isRegularFile(transformerFile), transformerFile + " does not exist");
-
-            try {
-                // Load the transformer class with a URLClassLoader
-                Class<?> clazz = classLoader.loadClass(transformerClass.replace('/', '.'));
-                // Check that the transformer implements Transformer
-                Assertions.assertTrue(Transformer.class.isAssignableFrom(clazz), transformerClass + " is not a Transformer");
-                Transformer transformer = (Transformer) clazz.getConstructor().newInstance();
-                processor.addTransformer(transformer);
-            } catch (ReflectiveOperationException e) {
-                // Fail under any reflective operation exception
-                Assertions.fail(e);
-            }
+        // Add transformers
+        for (Transformer transformer : testDefinition.transformers) {
+            processor.addTransformer(transformer);
         }
 
         // Process the data
@@ -184,14 +173,12 @@ public abstract class TestsBase {
             Files.createDirectories(referenceFile.getParent());
             Files.writeString(referenceFile, resultString.toString());
 
-            //noinspection ConstantConditions - Using Assumptions.assumeTrue() to abort the test instead of failing it
-            Assumptions.assumeTrue(false, "Reference file " + referenceFile + " did not exist");
+            Assertions.fail("Reference file " + referenceFile + " did not exist");
         } else {
             Assertions.assertTrue(Files.isRegularFile(referenceFile), referenceFile + " does not exist");
 
             // Assert that the result has the same content as expected
-            String expectedContent = Files.readString(referenceFile).replace("\r\n", "\n");
-            Assertions.assertEquals(expectedContent, resultString.toString());
+            Assertions.assertEquals(Files.readString(referenceFile), resultString.toString());
         }
     }
 
@@ -203,24 +190,22 @@ public abstract class TestsBase {
         return getBasePackage() + className;
     }
 
-    protected String getFullTransformerClassName(String className) {
-        if (className.indexOf('/') == -1) {
-            return getBasePackage() + getDefaultTransformerPackage() + className;
-        }
-
-        return getBasePackage() + className;
-    }
-
-    @SuppressWarnings("ClassCanBeRecord")
     static class TestDefinition {
         public final String testClass;
-        public final List<String> transformers;
+        public final List<Transformer> transformers;
         public final List<String> additionalClasses;
+        private String name;
 
-        public TestDefinition(String testClass, List<String> transformers, List<String> additionalClasses) {
+        public TestDefinition(String testClass, List<Transformer> transformers, List<String> additionalClasses) {
             this.testClass = testClass;
             this.transformers = transformers;
             this.additionalClasses = additionalClasses;
+        }
+
+        public TestDefinition(String testClass, List<Transformer> transformers, List<String> additionalClasses,
+                              String name) {
+            this(testClass, transformers, additionalClasses);
+            this.name = name;
         }
 
         public Path getClassFile() {
@@ -228,7 +213,20 @@ public abstract class TestsBase {
         }
 
         public Path getResultFile() {
-            return TEST_DATA_DIR.resolve("results/" + testClass + ".result");
+            return TEST_DATA_DIR.resolve("results/" + getName() + ".result");
+        }
+
+        public String getName() {
+            if (name != null) {
+                return name;
+            }
+
+            String name = testClass;
+            if (name.indexOf('/') != -1) {
+                name = name.substring(name.lastIndexOf('/') + 1);
+            }
+
+            return name;
         }
     }
 }

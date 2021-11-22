@@ -1,5 +1,7 @@
 package org.quiltmc.chasm;
 
+import org.quiltmc.chasm.transformer.field.AddField;
+
 /**
  * Tests for checking transformations.
  */
@@ -16,7 +18,8 @@ public class TransformedTests extends TestsBase {
 
     @Override
     protected void registerAll() {
-        register("field/NoField", "transformer/field/AddField");
-        register("field/OneField", "transformer/field/AddField");
+        AddField addFieldTransformer = new AddField();
+        registerNamed("field/NoField", "AddFieldToNoField", addFieldTransformer);
+        registerNamed("field/OneField", "AddFieldToOneField", addFieldTransformer);
     }
 }
