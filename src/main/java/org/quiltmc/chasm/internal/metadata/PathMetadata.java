@@ -60,12 +60,12 @@ public class PathMetadata implements Metadata {
         return new PathMetadata(newEntries);
     }
 
-    public boolean contains(PathMetadata other) {
-        if (entries.size() > other.entries.size()) {
+    public boolean startsWith(PathMetadata other) {
+        if (other.entries.size() > entries.size()) {
             return false;
         }
 
-        for (int i = 0; i < entries.size(); i++) {
+        for (int i = 0; i < other.entries.size(); i++) {
             if (entries.get(i) != other.entries.get(i)) {
                 return false;
             }

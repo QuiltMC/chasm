@@ -37,11 +37,11 @@ public class TransformationApplier {
             targets.add(transformation.getTarget());
 
             for (Target target : targets) {
-                if (target instanceof SliceTarget && path.contains(((SliceTarget) target).getPath())) {
+                if (target instanceof SliceTarget && ((SliceTarget) target).getPath().startsWith(path)) {
                     affectedTargets.add(target);
                 }
 
-                if (target instanceof NodeTarget && path.contains(((NodeTarget) target).getPath().getParent())) {
+                if (target instanceof NodeTarget && ((NodeTarget) target).getPath().getParent().startsWith(path)) {
                     affectedTargets.add(target);
                 }
             }

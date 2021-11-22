@@ -17,9 +17,9 @@ public class NodeTarget implements Target {
     @Override
     public boolean contains(Target other) {
         if (other instanceof NodeTarget) {
-            return path.contains(((NodeTarget) other).path);
+            return ((NodeTarget) other).getPath().startsWith(this.path);
         } else if (other instanceof SliceTarget) {
-            return path.contains(((SliceTarget) other).getPath());
+            return ((SliceTarget) other).getPath().startsWith(this.path);
         } else {
             throw new RuntimeException("Unexpected Target Type");
         }

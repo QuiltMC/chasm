@@ -42,10 +42,10 @@ public class SliceTarget implements Target {
     public boolean contains(Target other) {
         if (other instanceof NodeTarget) {
             NodeTarget nodeTarget = (NodeTarget) other;
-            if (nodeTarget.getPath().contains(this.path)) {
+            if (this.path.startsWith(nodeTarget.getPath())) {
                 return false;
             }
-            if (this.path.contains(nodeTarget.getPath())) {
+            if (nodeTarget.getPath().startsWith(this.path)) {
                 Object index = nodeTarget.getPath().getEntryAt(this.path.getLength());
                 if (index instanceof Integer) {
                     int intIndex = (Integer) index;
