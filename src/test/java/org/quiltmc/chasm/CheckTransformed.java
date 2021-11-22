@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.quiltmc.chasm.transformer.Transformer;
+import org.quiltmc.chasm.api.Transformer;
 
 /**
  * Indicates that this class should be used for testing class transformations.

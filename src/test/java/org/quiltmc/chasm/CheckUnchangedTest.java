@@ -11,9 +11,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.util.TraceClassVisitor;
-import org.quiltmc.chasm.asm.ChasmClassVisitor;
-import org.quiltmc.chasm.asm.writer.ChasmClassWriter;
-import org.quiltmc.chasm.tree.MapNode;
+import org.quiltmc.chasm.api.tree.MapNode;
+import org.quiltmc.chasm.internal.asm.ChasmClassVisitor;
+import org.quiltmc.chasm.internal.asm.writer.ChasmClassWriter;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 

@@ -6,16 +6,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectweb.asm.Opcodes;
-import org.quiltmc.chasm.NodeConstants;
-import org.quiltmc.chasm.transformer.SliceTarget;
-import org.quiltmc.chasm.transformer.Transformation;
-import org.quiltmc.chasm.transformer.Transformer;
-import org.quiltmc.chasm.tree.LinkedHashMapNode;
-import org.quiltmc.chasm.tree.LinkedListNode;
-import org.quiltmc.chasm.tree.ListNode;
-import org.quiltmc.chasm.tree.MapNode;
-import org.quiltmc.chasm.tree.Node;
-import org.quiltmc.chasm.tree.ValueNode;
+import org.quiltmc.chasm.api.Transformation;
+import org.quiltmc.chasm.api.Transformer;
+import org.quiltmc.chasm.api.target.SliceTarget;
+import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
+import org.quiltmc.chasm.api.tree.LinkedListNode;
+import org.quiltmc.chasm.api.tree.ListNode;
+import org.quiltmc.chasm.api.tree.MapNode;
+import org.quiltmc.chasm.api.tree.Node;
+import org.quiltmc.chasm.api.tree.ValueNode;
+import org.quiltmc.chasm.internal.util.NodeConstants;
 
 public class AddField implements Transformer {
     @Override
@@ -36,7 +36,7 @@ public class AddField implements Transformer {
         for (Node node : classes) {
             MapNode classNode = (MapNode) node;
             ListNode fieldsNode = (ListNode) classNode.get(NodeConstants.FIELDS);
-            SliceTarget sliceTarget = new SliceTarget(fieldsNode.getPath(), 0, 0);
+            SliceTarget sliceTarget = new SliceTarget(fieldsNode, 0, 0);
             transformations.add(new Transformation(this, sliceTarget, Map.of(), (target, sources) -> newFields));
         }
 

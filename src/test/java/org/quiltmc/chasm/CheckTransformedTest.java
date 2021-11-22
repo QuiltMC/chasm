@@ -2,11 +2,8 @@ package org.quiltmc.chasm;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,7 +15,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
-import org.quiltmc.chasm.transformer.Transformer;
+import org.quiltmc.chasm.api.ChasmProcessor;
+import org.quiltmc.chasm.api.Transformer;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
