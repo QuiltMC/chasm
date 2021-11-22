@@ -34,7 +34,7 @@ generateGrammarSource {
 sourceSets {
     testData {
         java {
-            srcDirs file("testData/src")
+            srcDirs file("src/testData/java")
             compileClasspath = sourceSets.main.output + configurations.testCompileClasspath
             runtimeClasspath = sourceSets.main.output + project.configurations.testRuntimeClasspath
         }
@@ -42,7 +42,7 @@ sourceSets {
 }
 
 compileTestDataJava {
-    destinationDir = file("testData/classes")
+    destinationDir = file("src/testData/classes")
     sourceCompatibility = 17
     targetCompatibility = 17
 }

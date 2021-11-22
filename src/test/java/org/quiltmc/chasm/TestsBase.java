@@ -2,7 +2,6 @@ package org.quiltmc.chasm;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -13,9 +12,6 @@ import org.quiltmc.chasm.transformer.Transformer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,7 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class TestsBase {
-    private static final Path TEST_DATA_DIR = Paths.get("testData");
+    private static final Path TEST_DATA_DIR = Paths.get("src/testData");
     protected final List<TestDefinition> testDefinitions = new ArrayList<>();
     protected ChasmProcessor processor;
 
@@ -85,7 +81,7 @@ public abstract class TestsBase {
     }
 
     @BeforeEach
-    public void setUp() throws MalformedURLException {
+    public void setUp() {
         // Instantiate the processor
         processor = new ChasmProcessor();
     }

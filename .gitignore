@@ -5,5 +5,5 @@
 /.project
 /build/
 /test/
-/testData/classes/
+/src/testData/classes/
 /bin/
