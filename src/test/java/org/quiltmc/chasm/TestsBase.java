@@ -157,7 +157,13 @@ public abstract class TestsBase {
 
         // Write class into string
         StringWriter resultString = new StringWriter();
-        TraceClassVisitor resultVisitor = new TraceClassVisitor(new PrintWriter(resultString));
+        TraceClassVisitor resultVisitor = new TraceClassVisitor(new PrintWriter(resultString) {
+            @Override
+            public void println() {
+                // Always use unix-style line endings
+                write('\n');
+            }
+        });
         resultClass.accept(resultVisitor, 0);
 
         // Load the reference file
