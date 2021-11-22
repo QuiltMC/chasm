@@ -31,6 +31,24 @@ generateGrammarSource {
     arguments += ["-visitor", "-long-messages"]
 }
 
+sourceSets {
+    testData {
+        java {
+            srcDirs file("src/testData/java")
+            compileClasspath = sourceSets.main.output + configurations.testCompileClasspath
+            runtimeClasspath = sourceSets.main.output + project.configurations.testRuntimeClasspath
+        }
+    }
+}
+
+compileTestDataJava {
+    destinationDir = file("src/testData/classes")
+    sourceCompatibility = 17
+    targetCompatibility = 17
+}
+
+testClasses.dependsOn("testDataClasses")
+
 dependencies {
     implementation 'org.ow2.asm:asm:9.2'
     antlr 'org.antlr:antlr4:4.9.3'

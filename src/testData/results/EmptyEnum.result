@@ -1,0 +1,72 @@
+// class version 61.0 (61)
+// access flags 0x4031
+// signature Ljava/lang/Enum<Lunchanged/empty/EmptyEnum;>;
+// declaration: unchanged/empty/EmptyEnum extends java.lang.Enum<unchanged.empty.EmptyEnum>
+public final enum unchanged/empty/EmptyEnum extends java/lang/Enum {
+
+  // compiled from: EmptyEnum.java
+
+  // access flags 0x101A
+  private final static synthetic [Lunchanged/empty/EmptyEnum; $VALUES
+
+  // access flags 0x9
+  public static values()[Lunchanged/empty/EmptyEnum;
+   L0
+    LINENUMBER 3 L0
+    GETSTATIC unchanged/empty/EmptyEnum.$VALUES : [Lunchanged/empty/EmptyEnum;
+    INVOKEVIRTUAL [Lunchanged/empty/EmptyEnum;.clone ()Ljava/lang/Object;
+    CHECKCAST [Lunchanged/empty/EmptyEnum;
+    ARETURN
+    MAXSTACK = 1
+    MAXLOCALS = 0
+
+  // access flags 0x9
+  public static valueOf(Ljava/lang/String;)Lunchanged/empty/EmptyEnum;
+   L0
+    LINENUMBER 3 L0
+    LDC Lunchanged/empty/EmptyEnum;.class
+    ALOAD 0
+    INVOKESTATIC java/lang/Enum.valueOf (Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;
+    CHECKCAST unchanged/empty/EmptyEnum
+    ARETURN
+   L1
+    LOCALVARIABLE name Ljava/lang/String; L0 L1 0
+    MAXSTACK = 2
+    MAXLOCALS = 1
+
+  // access flags 0x2
+  // signature ()V
+  // declaration: void <init>()
+  private <init>(Ljava/lang/String;I)V
+   L0
+    LINENUMBER 3 L0
+    ALOAD 0
+    ALOAD 1
+    ILOAD 2
+    INVOKESPECIAL java/lang/Enum.<init> (Ljava/lang/String;I)V
+    RETURN
+   L1
+    LOCALVARIABLE this Lunchanged/empty/EmptyEnum; L0 L1 0
+    MAXSTACK = 3
+    MAXLOCALS = 3
+
+  // access flags 0x100A
+  private static synthetic $values()[Lunchanged/empty/EmptyEnum;
+   L0
+    LINENUMBER 3 L0
+    ICONST_0
+    ANEWARRAY unchanged/empty/EmptyEnum
+    ARETURN
+    MAXSTACK = 1
+    MAXLOCALS = 0
+
+  // access flags 0x8
+  static <clinit>()V
+   L0
+    LINENUMBER 3 L0
+    INVOKESTATIC unchanged/empty/EmptyEnum.$values ()[Lunchanged/empty/EmptyEnum;
+    PUTSTATIC unchanged/empty/EmptyEnum.$VALUES : [Lunchanged/empty/EmptyEnum;
+    RETURN
+    MAXSTACK = 1
+    MAXLOCALS = 0
+}
