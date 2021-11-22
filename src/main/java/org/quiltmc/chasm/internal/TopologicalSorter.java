@@ -107,9 +107,11 @@ public class TopologicalSorter {
             }
         }
 
-        NavigableSet<Vertex<T>> verticesByDependancyCount = new TreeSet<>(
-                TopologicalSorter::sortVerticesByDependancyCount);
-        verticesByDependancyCount.addAll(toSort);
+        List<Vertex<T>> verticesByDependencyCountList = new ArrayList<>(toSort);
+        verticesByDependencyCountList.sort(TopologicalSorter::sortVerticesByDependancyCount);
+        LinkedHashSet<Vertex<T>> verticesByDependencyCount = new LinkedHashSet<>(verticesByDependencyCountList);
+
+        verticesByDependencyCount.addAll(toSort);
         // Note: LinkedHashSet is used to preserve insertion order
         List<List<T>> sorted = new ArrayList<>(toSort.size());
 
@@ -129,7 +131,7 @@ public class TopologicalSorter {
 
                     // Remove from remaining vertices
                     toSort.remove(vertex);
-                    verticesByDependancyCount.remove(vertex);
+                    verticesByDependencyCount.remove(vertex);
                 }
 
                 // Add to sorted
@@ -141,7 +143,8 @@ public class TopologicalSorter {
             } else {
                 //  Try to find a Vertex with no hard dependencies and the least soft dependencies.
                 //  Even better would be: Find all loops and break them all at the same time.
-                Vertex<T> optNext = verticesByDependancyCount.first();
+                Vertex<T> optNext = verticesByDependencyCount.isEmpty() ? null
+                        : verticesByDependencyCount.iterator().next();
                 if (optNext != null && optNext.dependencies.isEmpty()) {
                     Vertex<T> next = optNext;
 
