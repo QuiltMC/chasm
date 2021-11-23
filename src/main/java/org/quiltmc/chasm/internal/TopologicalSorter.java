@@ -76,10 +76,8 @@ public class TopologicalSorter {
     public static <T> List<List<T>> sort(List<T> list, DependencyProvider<T> dependencyProvider) {
         // Create vertices
         // Note: LinkedHashSet is used to preserve insertion order
-        LinkedHashSet<Vertex<T>> toSort = new LinkedHashSet<>(list.size());
-        for (T t : list) {
-            toSort.add(new Vertex<>(t));
-        }
+        LinkedHashSet<Vertex<T>> toSort = list.stream().map(Vertex::new)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
         // Determine dependencies
         for (Vertex<T> first : toSort) {
@@ -103,12 +101,7 @@ public class TopologicalSorter {
 
         while (!toSort.isEmpty()) {
             // Get all vertices without dependencies
-            List<Vertex<T>> nextVertices = new ArrayList<>(toSort.size());
-            for (Vertex<T> v : toSort) {
-                if (v.dependencies.isEmpty()) {
-                    nextVertices.add(v);
-                }
-            }
+            List<Vertex<T>> nextVertices = toSort.stream().filter(v -> v.dependencies.isEmpty()).toList();
 
             if (!nextVertices.isEmpty()) {
                 for (Vertex<T> vertex : nextVertices) {
@@ -121,11 +114,7 @@ public class TopologicalSorter {
                 }
 
                 // Add to sorted
-                List<T> nextVertexValues = new ArrayList<>(nextVertices.size());
-                for (Vertex<T> nextVertex : nextVertices) {
-                    nextVertexValues.add(nextVertex.getValue());
-                }
-                sorted.add(nextVertexValues);
+                sorted.add(nextVertices.stream().map(Vertex::getValue).toList());
             } else {
                 //  Try to find a Vertex with no hard dependencies and the least soft dependencies.
                 //  Even better would be: Find all loops and break them all at the same time.
