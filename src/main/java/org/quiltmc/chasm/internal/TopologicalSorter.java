@@ -58,7 +58,7 @@ public class TopologicalSorter {
 
             // Case 2b/2c
             // Any overlapping sources must be resolved first.
-            if (first.getTarget().overlaps(second.getTarget())) {
+            if (second.getSources().values().stream().anyMatch(first.getTarget()::contains)) {
                 return Dependency.STRONG;
             }
 
