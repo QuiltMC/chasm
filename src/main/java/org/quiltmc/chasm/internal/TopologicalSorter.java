@@ -1,18 +1,13 @@
 package org.quiltmc.chasm.internal;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.NavigableSet;
-import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.Transformer;
-import org.quiltmc.chasm.api.target.Target;
 
 public class TopologicalSorter {
     public static List<List<Transformer>> sortTransformers(List<Transformer> transformers) {
