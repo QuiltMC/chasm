@@ -10,9 +10,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.quiltmc.chasm.api.target.Target;
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.Transformer;
+import org.quiltmc.chasm.api.target.Target;
 
 public class TopologicalSorter {
     public static List<List<Transformer>> sortTransformers(List<Transformer> transformers) {
