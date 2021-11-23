@@ -52,7 +52,7 @@ public class TopologicalSorter {
             //Case 2a
             // Any overlapping target must be applied .
             // Note that this is symmetric, so overlapping targets always form a dependency loop.
-            if (second.getSources().values().stream().anyMatch(first.getTarget()::contains)) {
+            if (first.getTarget().overlaps(second.getTarget())) {
                 return Dependency.STRONG;
             }
 
