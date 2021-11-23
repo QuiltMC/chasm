@@ -43,6 +43,11 @@ public class LazyClassNode extends AbstractMap<String, Node> implements MapNode 
     public MapNode copy() {
         LazyClassNode copy = new LazyClassNode(classReader);
         copy.metadataProvider = metadataProvider.copy();
+
+        for (Entry<String, Node> entry : nonLazyChildren.entrySet()) {
+            copy.nonLazyChildren.put(entry.getKey(), entry.getValue().copy());
+        }
+
         return copy;
     }
 

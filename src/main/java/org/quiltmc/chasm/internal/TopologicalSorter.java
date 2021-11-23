@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.Transformer;
+import org.quiltmc.chasm.api.tree.ValueNode;
 
 public class TopologicalSorter {
     public static List<List<Transformer>> sortTransformers(List<Transformer> transformers) {
@@ -78,6 +79,10 @@ public class TopologicalSorter {
         // Determine dependencies
         for (Vertex<T> first : toSort) {
             for (Vertex<T> second : toSort) {
+                if (first == second) {
+                    continue;
+                }
+
                 Dependency dependency = dependencyProvider.get(first.getValue(), second.getValue());
                 if (dependency == Dependency.STRONG) {
                     first.addDependency(second);

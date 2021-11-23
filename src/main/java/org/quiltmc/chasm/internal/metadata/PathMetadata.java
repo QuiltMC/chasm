@@ -2,6 +2,7 @@ package org.quiltmc.chasm.internal.metadata;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
@@ -46,7 +47,7 @@ public class PathMetadata extends ArrayList<PathMetadata.Entry> implements Metad
         }
 
         for (int i = 0; i < other.size(); i++) {
-            if (this.get(i).equals(other.get(i))) {
+            if (!this.get(i).equals(other.get(i))) {
                 return false;
             }
         }
@@ -67,6 +68,11 @@ public class PathMetadata extends ArrayList<PathMetadata.Entry> implements Metad
         }
 
         return current;
+    }
+
+    @Override
+    public String toString() {
+        return String.join("/", this.stream().map(e -> e.value.toString()).toArray(String[]::new));
     }
 
     public static class Entry {
