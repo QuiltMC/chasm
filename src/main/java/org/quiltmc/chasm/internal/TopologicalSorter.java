@@ -27,14 +27,14 @@ public class TopologicalSorter {
     }
 
     public static List<Transformation> sortTransformations(List<Transformation> transformations) {
-        List<List<Transformation>> sortedGroups = sort(transformations, (first, second) -> {
+        return sort(transformations, (first, second) -> {
             // Strong dependencies inherited from defining Transformer
             if (first.getParent().mustRunAfter(second.getParent().getId())) {
                 return Dependency.STRONG;
             }
 
             if (second.getParent().mustRunBefore(first.getParent().getId())) {
-                return Dependency.STRONG;
+                return Dependency.STRONG; 
             }
 
             // Case 6a/7a/8a
@@ -48,43 +48,32 @@ public class TopologicalSorter {
             /* if (second.getSources().values().stream().anyMatch(first.getTarget()::contains)) {
              *   return Dependency.STRONG;
              * } */
-            for (Target secondSourceTarget : second.getSources().values()) {
-                if (first.getTarget().contains(secondSourceTarget)) {
-                    return Dependency.STRONG;
-                }
+            if (first.getParent().mustRunAfter(second.getParent().getId())) {
+                return Dependency.STRONG;
             }
-
+            
             //Case 2a
             // Any overlapping target must be applied .
             // Note that this is symmetric, so overlapping targets always form a dependency loop.
-            if (first.getTarget().overlaps(second.getTarget())) {
+            if (second.getSources().values().stream().anyMatch(first.getTarget()::contains)) {
                 return Dependency.STRONG;
             }
 
             // Case 2b/2c
             // Any overlapping sources must be resolved first.
-            for (Target secondSourceTarget : second.getSources().values()) {
-                if (first.getTarget().overlaps(secondSourceTarget)) {
-                    return Dependency.STRONG;
-                }
+            if (second.getSources().values().stream().anyMatch(first.getTarget()::overlaps)) {
+                return Dependency.STRONG;
             }
 
             //Case 6c/7c/8c
             // Any sources containing a target should be applied after the target if possible.
             // TODO: Re-evaluate if this should be a strong dependency instead
-            for (Target firstSourceTarget : first.getSources().values()) {
-                if (firstSourceTarget.contains(second.getTarget())) {
-                    return Dependency.WEAK;
-                }
+            if (first.getSources().values().stream().anyMatch(s -> s.contains(second.getTarget()))) {
+                return Dependency.WEAK;
             }
 
             return Dependency.NONE;
-        });
-        List<Transformation> sorted = new ArrayList<>(transformations.size());
-        for (List<Transformation> sortedGroup : sortedGroups) {
-            sorted.addAll(sortedGroup);
-        }
-        return sorted;
+        }).stream().flatMap(List::stream).toList();
     }
 
     public static <T> List<List<T>> sort(List<T> list, DependencyProvider<T> dependencyProvider) {
