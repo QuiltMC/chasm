@@ -4,7 +4,7 @@ plugins {
     id 'checkstyle'
 }
 
-group 'org.example'
+group 'org.quiltmc'
 version '1.0-SNAPSHOT'
 
 repositories {
