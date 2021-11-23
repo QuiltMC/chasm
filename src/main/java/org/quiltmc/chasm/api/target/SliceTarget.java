@@ -42,13 +42,14 @@ public class SliceTarget implements Target {
     public boolean contains(Target other) {
         if (other instanceof NodeTarget) {
             NodeTarget nodeTarget = (NodeTarget) other;
-            if (this.path.startsWith(nodeTarget.getPath())) {
+            PathMetadata targetPath = nodeTarget.getPath();
+            if (this.path.startsWith(targetPath)) {
                 return false;
             }
             if (nodeTarget.getPath().startsWith(this.path)) {
-                Object index = nodeTarget.getPath().getEntryAt(this.path.getLength());
-                if (index instanceof Integer) {
-                    int intIndex = (Integer) index;
+                PathMetadata.Entry index = targetPath.get(this.path.size());
+                if (index.isInteger()) {
+                    int intIndex = index.asInteger();
                     return startIndex / 2 <= intIndex && intIndex < endIndex / 2;
                 } else {
                     throw new RuntimeException("Unexpected index type");

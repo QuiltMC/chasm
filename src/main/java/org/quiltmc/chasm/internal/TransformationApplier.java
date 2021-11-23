@@ -41,7 +41,7 @@ public class TransformationApplier {
                     affectedTargets.add(target);
                 }
 
-                if (target instanceof NodeTarget && ((NodeTarget) target).getPath().getParent().startsWith(path)) {
+                if (target instanceof NodeTarget && ((NodeTarget) target).getPath().parent().startsWith(path)) {
                     affectedTargets.add(target);
                 }
             }
@@ -79,23 +79,25 @@ public class TransformationApplier {
     }
 
     private void replaceNode(NodeTarget nodeTarget, Node replacement) {
-        int classIndex = (Integer) nodeTarget.getPath().getEntryAt(0);
+        PathMetadata targetPath = nodeTarget.getPath();
+
+        int classIndex = targetPath.get(0).asInteger();
         if (classes.get(classIndex) instanceof LazyClassNode) {
             classes.set(classIndex, ((LazyClassNode) classes.get(classIndex)).getFullNode());
         }
 
-        Node parentNode = nodeTarget.getPath().getParent().resolve(classes);
-        Object index = nodeTarget.getPath().getLastEntry();
+        Node parentNode = targetPath.parent().resolve(classes);
+        PathMetadata.Entry entry = targetPath.get(targetPath.size() - 1);
 
-        if (parentNode instanceof ListNode && index instanceof Integer) {
+        if (parentNode instanceof ListNode && entry.isInteger()) {
             ListNode parentList = (ListNode) parentNode;
-            parentList.set((int) index, replacement);
+            parentList.set(entry.asInteger(), replacement);
             return;
         }
 
-        if (parentNode instanceof MapNode && index instanceof String) {
+        if (parentNode instanceof MapNode && entry.isString()) {
             MapNode parentList = (MapNode) parentNode;
-            parentList.put((String) index, replacement);
+            parentList.put(entry.asString(), replacement);
             return;
         }
 
@@ -103,7 +105,9 @@ public class TransformationApplier {
     }
 
     private void replaceSlice(SliceTarget sliceTarget, ListNode replacement) {
-        int classIndex = (Integer) sliceTarget.getPath().getEntryAt(0);
+        PathMetadata targetPath = sliceTarget.getPath();
+
+        int classIndex = targetPath.get(0).asInteger();
         if (classes.get(classIndex) instanceof LazyClassNode) {
             classes.set(classIndex, ((LazyClassNode) classes.get(classIndex)).getFullNode());
         }
@@ -123,17 +127,17 @@ public class TransformationApplier {
 
         // Move all slice indices affected by this
         List<Target> affectedTargets =
-                this.affectedTargets.computeIfAbsent(sliceTarget.getPath(), this::getAffectedTargets);
+                this.affectedTargets.computeIfAbsent(targetPath, this::getAffectedTargets);
         for (Target target : affectedTargets) {
             if (target instanceof NodeTarget) {
-                movePathIndex(((NodeTarget) target).getPath(), sliceTarget.getPath().getLength(), end, change);
+                movePathIndex(((NodeTarget) target).getPath(), targetPath.size(), end, change);
             }
 
             if (target instanceof SliceTarget) {
                 if (((SliceTarget) target).getPath().equals(sliceTarget.getPath())) {
                     moveSliceIndex((SliceTarget) target, end, change);
                 } else {
-                    movePathIndex(((SliceTarget) target).getPath(), sliceTarget.getPath().getLength(), end, change);
+                    movePathIndex(((SliceTarget) target).getPath(), targetPath.size(), end, change);
                 }
             }
         }
@@ -150,9 +154,9 @@ public class TransformationApplier {
     }
 
     private void movePathIndex(PathMetadata path, int pathIndex, int endIndex, int amount) {
-        int originalIndex = (Integer) path.getEntryAt(pathIndex);
+        int originalIndex = path.get(pathIndex).asInteger();
         if (originalIndex >= endIndex) {
-            path.setEntryAt(pathIndex, originalIndex + amount);
+            path.set(pathIndex, new PathMetadata.Entry(originalIndex + amount));
         }
     }
 

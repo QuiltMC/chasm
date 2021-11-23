@@ -1,72 +1,52 @@
 package org.quiltmc.chasm.internal.metadata;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 
-public class PathMetadata implements Metadata {
-    private final List<Object> entries;
-
+public class PathMetadata extends ArrayList<PathMetadata.Entry> implements Metadata {
     public PathMetadata() {
-        this.entries = new ArrayList<>();
     }
 
-    private PathMetadata(List<Object> entries) {
-        this.entries = new ArrayList<>(entries);
+    private PathMetadata(PathMetadata entries) {
+        super(entries);
     }
 
     @Override
     public PathMetadata copy() {
-        return new PathMetadata(entries);
+        return new PathMetadata(this);
     }
 
-    private PathMetadata append(Object entry) {
-        List<Object> newIndices = new ArrayList<>(entries);
-        newIndices.add(entry);
-        return new PathMetadata(newIndices);
+    private PathMetadata append(Entry entry) {
+        PathMetadata path = new PathMetadata(this);
+        path.add(entry);
+        return path;
     }
 
     public PathMetadata append(String name) {
-        return append((Object) name);
+        return append(new Entry(name));
     }
 
     public PathMetadata append(int index) {
-        return append((Integer) index);
+        return append(new Entry(index));
     }
 
-    public int getLength() {
-        return entries.size();
-    }
-
-    public Object getLastEntry() {
-        return entries.get(entries.size() - 1);
-    }
-
-    public Object getEntryAt(int index) {
-        return entries.get(index);
-    }
-
-    public void setEntryAt(int index, Object value) {
-        entries.set(index, value);
-    }
-
-    public PathMetadata getParent() {
-        List<Object> newEntries = new ArrayList<>(entries);
-        newEntries.remove(newEntries.size() - 1);
-        return new PathMetadata(newEntries);
+    public PathMetadata parent() {
+        PathMetadata path = new PathMetadata(this);
+        path.remove(path.size() - 1);
+        return path;
     }
 
     public boolean startsWith(PathMetadata other) {
-        if (other.entries.size() > entries.size()) {
+        if (other.size() > this.size()) {
             return false;
         }
 
-        for (int i = 0; i < other.entries.size(); i++) {
-            if (entries.get(i) != other.entries.get(i)) {
+        for (int i = 0; i < other.size(); i++) {
+            if (this.get(i).equals(other.get(i))) {
                 return false;
             }
         }
@@ -76,11 +56,11 @@ public class PathMetadata implements Metadata {
 
     public Node resolve(Node root) {
         Node current = root;
-        for (Object entry : entries) {
-            if (entry instanceof Integer && current instanceof ListNode) {
-                current = ((ListNode) current).get((Integer) entry);
-            } else if (entry instanceof String && current instanceof MapNode) {
-                current = ((MapNode) current).get((String) entry);
+        for (Entry entry : this) {
+            if (entry.isInteger() && current instanceof ListNode) {
+                current = ((ListNode) current).get(entry.asInteger());
+            } else if (entry.isString() && current instanceof MapNode) {
+                current = ((MapNode) current).get(entry.asString());
             } else {
                 throw new UnsupportedOperationException("Can't apply path to given node.");
             }
@@ -89,20 +69,48 @@ public class PathMetadata implements Metadata {
         return current;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        PathMetadata path = (PathMetadata) o;
-        return Objects.equals(entries, path.entries);
-    }
+    public static class Entry {
+        private final Object value;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(entries);
+        public Entry(int value) {
+            this.value = value;
+        }
+
+        public Entry(String value) {
+            this.value = value;
+        }
+
+        public boolean isInteger() {
+            return value instanceof Integer;
+        }
+
+        public boolean isString() {
+            return value instanceof String;
+        }
+
+        public int asInteger() {
+            return (Integer) value;
+        }
+
+        public String asString() {
+            return (String) value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Entry entry = (Entry) o;
+            return Objects.equals(value, entry.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
+        }
     }
 }
