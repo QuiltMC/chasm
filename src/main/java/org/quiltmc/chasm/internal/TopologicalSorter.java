@@ -58,7 +58,7 @@ public class TopologicalSorter {
 
             // Case 2b/2c
             // Any overlapping sources must be resolved first.
-            if (second.getSources().values().stream().anyMatch(first.getTarget()::contains)) {
+            if (second.getSources().values().stream().anyMatch(first.getTarget()::overlaps)) {
                 return Dependency.STRONG;
             }
 
@@ -92,7 +92,7 @@ public class TopologicalSorter {
         }
 
         List<Vertex<T>> verticesByDependencyCountList = new ArrayList<>(toSort);
-        verticesByDependencyCountList.sort(TopologicalSorter::sortVerticesByDependancyCount);
+        verticesByDependencyCountList.sort(TopologicalSorter::compareVerticesByDependancyCount);
         LinkedHashSet<Vertex<T>> verticesByDependencyCount = new LinkedHashSet<>(verticesByDependencyCountList);
 
         verticesByDependencyCount.addAll(toSort);
@@ -216,7 +216,7 @@ public class TopologicalSorter {
 
     }
 
-    private static <T> int sortVerticesByDependancyCount(Vertex<T> a, Vertex<T> b) {
+    private static <T> int compareVerticesByDependancyCount(Vertex<T> a, Vertex<T> b) {
         int deps = a.dependencies.size();
         int otherDeps = b.dependencies.size();
         if (deps != otherDeps) {
