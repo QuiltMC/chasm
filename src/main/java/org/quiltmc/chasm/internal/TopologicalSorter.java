@@ -34,7 +34,7 @@ public class TopologicalSorter {
             }
 
             if (second.getParent().mustRunBefore(first.getParent().getId())) {
-                return Dependency.STRONG; 
+                return Dependency.STRONG;
             }
 
             // Case 6a/7a/8a
@@ -45,10 +45,7 @@ public class TopologicalSorter {
 
             // Case 6b/7b/8b
             // Any contained sources must be resolved first.
-            /* if (second.getSources().values().stream().anyMatch(first.getTarget()::contains)) {
-             *   return Dependency.STRONG;
-             * } */
-            if (first.getParent().mustRunAfter(second.getParent().getId())) {
+            if (second.getSources().values().stream().anyMatch(first.getTarget()::contains)) {
                 return Dependency.STRONG;
             }
             
@@ -61,7 +58,7 @@ public class TopologicalSorter {
 
             // Case 2b/2c
             // Any overlapping sources must be resolved first.
-            if (second.getSources().values().stream().anyMatch(first.getTarget()::overlaps)) {
+            if (first.getTarget().overlaps(second.getTarget())) {
                 return Dependency.STRONG;
             }
 
