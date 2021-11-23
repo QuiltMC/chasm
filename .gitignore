@@ -2,3 +2,9 @@
 /.idea/
 /build/
 /test/
+
+/.settings/
+/bin/
+/test/
+/.project
+/.classpath
