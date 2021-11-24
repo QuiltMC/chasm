@@ -1,0 +1,20 @@
+name: Checkstyle
+
+on: pull_request
+
+jobs:
+  checkstyle_job:
+    runs-on: ubuntu-latest
+    name: Checkstyle
+    steps:
+      - name: Checkout Branch
+        uses: actions/checkout@v2
+      - name: Run Checkstyle
+        uses: nikitasavinov/checkstyle-action@master
+        with:
+          level: error
+          reporter: 'github-pr-review'
+          checkstyle_config: "/home/runner/work/chasm/chasm/config/checkstyle/checkstyle.xml"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_error: true
+          checkstyle_version: 9.1
