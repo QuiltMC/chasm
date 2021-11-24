@@ -20,12 +20,13 @@ public class SliceTarget implements Target {
 
     /**
      * This constructor creates a {@link SliceTarget} of the passed {@link ListNode}.
-     * 
+     *
      * @param listNode The {@link ListNode} to slice.
-     * 
+     *
      * @param start The first index of the {@link ListNode} included in the {@link SliceTarget}.
-     * 
-     * @param end The first index after the {@code start} of the {@link ListNode} not included in the {@link SliceTarget}. 
+     *
+     * @param end The first index after the {@code start} of the {@link ListNode}
+     *           not included in the {@link SliceTarget}. 
      */
     public SliceTarget(ListNode listNode, int start, int end) {
         this.path = listNode.getMetadata().get(PathMetadata.class);
@@ -44,8 +45,8 @@ public class SliceTarget implements Target {
     }
 
     /**
-     * A getter for this {@link SliceTarget}'s slice start index
-     * 
+     * A getter for this {@link SliceTarget}'s slice start index.
+     *
      * @return The start index of this {@link SliceTarget}' slice.
      */
     public int getStartIndex() {
@@ -55,7 +56,7 @@ public class SliceTarget implements Target {
 
     /**
      * A setter for this {@link SliceTarget}'s slice start index.
-     * 
+     *
      * @param startIndex The new start index for this {@link SliceTarget}'s slice.
      */
     public void setStartIndex(int startIndex) {
@@ -64,7 +65,7 @@ public class SliceTarget implements Target {
 
     /**
      * A getter for this {@link SliceTarget}'s slice end index.
-     * 
+     *
      * @return The end index of this {@link SliceTarget}'s slice.
      */
     public int getEndIndex() {
@@ -73,7 +74,7 @@ public class SliceTarget implements Target {
 
     /**
      * A setter for this {@link SliceTarget}'s slice end index. 
-     * 
+     *
      * @param endIndex The new end index for this {@link SliceTarget}'s slice.
      */
     public void setEndIndex(int endIndex) {

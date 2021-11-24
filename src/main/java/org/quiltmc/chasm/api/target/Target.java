@@ -26,9 +26,9 @@ public interface Target {
 
     /**
      * This method navigates the CHASM tree starting at the given {@link Node}.
-     * 
+     *
      * @param root The root {@link Node} to navigate from.
-     * 
+     *
      * @return The {@link Node} this {@link Target} led to.
      */
     Node resolve(Node root);

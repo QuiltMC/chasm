@@ -12,7 +12,7 @@ public class NodeTarget implements Target {
     /**
      * This constructor makes a new {@link NodeTarget} that targets the passed node,
      * using the {@link Node}'s attached {@link PathMetadata}.
-     * 
+     *
      * @param target The {@link Node} to target.
      */
     public NodeTarget(Node target) {
@@ -21,7 +21,7 @@ public class NodeTarget implements Target {
 
     /**
      * A getter for the {@link PathMetadata} of this {@link NodeTarget}.
-     * 
+     *
      * @return This {@link NodeTarget}'s {@link PathMetadata}.
      */
     public PathMetadata getPath() {

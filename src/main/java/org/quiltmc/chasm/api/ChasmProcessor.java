@@ -36,7 +36,7 @@ public class ChasmProcessor {
     /**
      * A method that adds the passed {@link Transformer} to this {@link ChasmProcessor}'s
      *           list of {@link Transformer}s.
-     * 
+     *
      * @param transformer A {@link Transformer} to add to this {@link ChasmProcessor}'s
      *           list of {@link Transformer}s to transform classes with.
      */
@@ -47,7 +47,7 @@ public class ChasmProcessor {
     /**
      * A method that adds the passed class {@code byte[]} to this {@link ChasmProcessor}'s
      *          list of classes to transform.
-     * 
+     *
      * @param classBytes A class {@code byte[]} to transform.
      */
     public void addClass(byte[] classBytes) {
@@ -59,7 +59,7 @@ public class ChasmProcessor {
     /**
      * This method transforms this {@link ChasmProcessor}'s list of classes according
      *          to this {@link ChasmProcessor}'s list of {@link Transformer}s.
-     * 
+     *
      * @return The list of transformed classes, as a {@link List} of {@code byte[]}s.
      */
     public List<byte[]> process() {

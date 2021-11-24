@@ -16,7 +16,7 @@ public class ValueNode<T> implements Node {
     /**
      * This simple constructor takes the T value to wrap,
      * and stores it in a newly created {@link ValueNode}.
-     * 
+     *
      * @param value The T value to wrap.
      */
     public ValueNode(T value) {
@@ -25,7 +25,7 @@ public class ValueNode<T> implements Node {
 
     /**
      * This method gets the wrapped value.
-     * 
+     *
      * @return The wrapped {@link Object} value.
      */
     public T getValue() {
