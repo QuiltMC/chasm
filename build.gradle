@@ -7,30 +7,6 @@ plugins {
 group 'org.quiltmc'
 version '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-}
-
-checkstyle {
-    toolVersion "9.1"
-    ignoreFailures(false)
-}
-
-compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-}
-
-compileTestJava {
-    sourceCompatibility = 17
-    targetCompatibility = 17
-}
-
-generateGrammarSource {
-    maxHeapSize = "64m"
-    arguments += ["-visitor", "-long-messages"]
-}
-
 sourceSets {
     testData {
         java {
@@ -41,13 +17,46 @@ sourceSets {
     }
 }
 
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+compileTestJava {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
 compileTestDataJava {
-    destinationDir = file("src/testData/classes")
-    sourceCompatibility = 17
-    targetCompatibility = 17
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    destinationDirectory.dir("src/testData/classes")
 }
 
 testClasses.dependsOn("testDataClasses")
+
+checkstyle {
+    toolVersion "9.1"
+    ignoreFailures(false)
+}
+
+generateGrammarSource {
+    maxHeapSize = "64m"
+    arguments += ["-visitor", "-long-messages"]
+}
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
     implementation 'org.ow2.asm:asm:9.2'

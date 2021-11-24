@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.Transformer;
-import org.quiltmc.chasm.api.tree.ValueNode;
 
 public class TopologicalSorter {
     public static List<List<Transformer>> sortTransformers(List<Transformer> transformers) {
@@ -67,7 +66,7 @@ public class TopologicalSorter {
             }
 
             return Dependency.NONE;
-        }).stream().flatMap(List::stream).toList();
+        }).stream().flatMap(List::stream).collect(Collectors.toList());
     }
 
     public static <T> List<List<T>> sort(List<T> list, DependencyProvider<T> dependencyProvider) {
@@ -97,7 +96,8 @@ public class TopologicalSorter {
 
         while (!toSort.isEmpty()) {
             // Get all vertices without dependencies
-            List<Vertex<T>> nextVertices = toSort.stream().filter(v -> v.dependencies.isEmpty()).toList();
+            List<Vertex<T>> nextVertices =
+                    toSort.stream().filter(v -> v.dependencies.isEmpty()).collect(Collectors.toList());
 
             if (!nextVertices.isEmpty()) {
 
@@ -113,7 +113,7 @@ public class TopologicalSorter {
                 }
 
                 // Add to sorted
-                sorted.add(nextVertices.stream().map(Vertex::getValue).toList());
+                sorted.add(nextVertices.stream().map(Vertex::getValue).collect(Collectors.toList()));
             } else {
                 // TODO: This is definitely not optimal.
                 //  Instead, try to find a Vertex with no hard dependencies and the least soft dependencies.
