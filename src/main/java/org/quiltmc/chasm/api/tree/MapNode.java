@@ -3,7 +3,7 @@ package org.quiltmc.chasm.api.tree;
 import java.util.Map;
 
 /**
- * A CHASM tree {@link Node} with {@link String}-named child {@link Node}s.
+ * Name child {@link Node}s with {@link String} names in this CHASM tree {@link Node}.
  */
 public interface MapNode extends Node, Map<String, Node> {
     @Override

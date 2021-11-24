@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import org.quiltmc.chasm.internal.metadata.MetadataProvider;
 
 /**
- * A {@link ListNode} implemented using a {@link LinkedList}.
+ * Use a {@link LinkedList} to implement a {@link ListNode}.
  */
 public class LinkedListNode extends LinkedList<Node> implements ListNode {
     private MetadataProvider metadataProvider = new MetadataProvider();

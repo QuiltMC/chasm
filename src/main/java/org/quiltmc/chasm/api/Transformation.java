@@ -6,7 +6,7 @@ import org.quiltmc.chasm.api.target.Target;
 import org.quiltmc.chasm.api.tree.Node;
 
 /**
- * This class transforms a {@link Target} {@link Node} using the {@link Node}'s sources, and a {@link Function}.
+ * Transform a {@link Target} {@link Node} using the {@link Node}'s sources, and a {@link Function}.
  */
 public final class Transformation {
     private final Transformer parent;
@@ -15,7 +15,7 @@ public final class Transformation {
     private final Function applyFunction;
 
     /**
-     * This constructor makes a new {@link Transformation} with the given
+     * Make a new {@link Transformation} with the given
      *  {@link Transformer} parent, {@link Target}, {@link Target} sources, and {@link Function}.
      *
      * @param parent The {@link Transformer} parent of the new {@link Transformation}.
@@ -34,7 +34,7 @@ public final class Transformation {
     }
 
     /**
-     * A getter for this {@link Transformation}'s parent {@link Transformer}.
+     * Get this {@link Transformation}'s parent {@link Transformer}.
      *
      * @return The parent {@link Transformer} of this {@link Transformation}.
      */
@@ -43,7 +43,7 @@ public final class Transformation {
     }
 
     /**
-     * A getter for this {@link Transformation}'s {@link Target}.
+     * Get this {@link Transformation}'s {@link Target}.
      *
      * @return The {@link Target} of this {@link Transformation}.
      */
@@ -52,7 +52,7 @@ public final class Transformation {
     }
 
     /**
-     * A getter for this {@link Transformation}'s map of named source {@link Target}s.
+     * Get this {@link Transformation}'s map of named source {@link Target}s.
      *
      * @return This {@link Transformation}'s sources as a {@link Map} from name {@link String} to {@link Target} source.
      */
@@ -61,7 +61,7 @@ public final class Transformation {
     }
 
     /**
-     * This method applies this {@link Transformation} to the given {@link Node},
+     * Apply this {@link Transformation} to the given {@link Node},
      *                 possibly using its {@link Node} sources.
      *
      * @param targetNode A {@link Node} to apply this {@link Transformation} to.
@@ -75,12 +75,12 @@ public final class Transformation {
     }
 
     /**
-     * A function that transforms the passed {@link Node}, possibly using its sources.
+     * Transform the passed {@link Node}, possibly using its sources.
      */
     @FunctionalInterface
     public interface Function {
         /**
-         * This method applies this {@link Function} to the given {@link Node},
+         * Apply this {@link Function} to the given {@link Node},
          *              possibly using its {@link Node} sources.
          *
          * @param targetNode A {@link Node} to transform.

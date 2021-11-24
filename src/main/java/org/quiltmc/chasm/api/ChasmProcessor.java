@@ -17,8 +17,7 @@ import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.util.PathInitializer;
 
 /**
- * A {@link ChasmProcessor} transforms a list of classes, according to
- * a {@link List} of {@link Transformer}s.
+ * Transform a list of classes, according to a {@link List} of {@link Transformer}s.
  */
 public class ChasmProcessor {
     private final List<Transformer> transformers = new ArrayList<>();
@@ -26,7 +25,7 @@ public class ChasmProcessor {
     private final ListNode classes;
 
     /**
-     * This default constructor creates a new, empty {@link ChasmProcessor}
+     * Create a new, empty {@link ChasmProcessor}
      *   with no {@link Transformer}s and no classes to transform.
      */
     public ChasmProcessor() {
@@ -34,7 +33,7 @@ public class ChasmProcessor {
     }
 
     /**
-     * A method that adds the passed {@link Transformer} to this {@link ChasmProcessor}'s
+     * Add the passed {@link Transformer} to this {@link ChasmProcessor}'s
      *           list of {@link Transformer}s.
      *
      * @param transformer A {@link Transformer} to add to this {@link ChasmProcessor}'s
@@ -45,7 +44,7 @@ public class ChasmProcessor {
     }
 
     /**
-     * A method that adds the passed class {@code byte[]} to this {@link ChasmProcessor}'s
+     * Add the passed class {@code byte[]} to this {@link ChasmProcessor}'s
      *          list of classes to transform.
      *
      * @param classBytes A class {@code byte[]} to transform.
@@ -57,7 +56,7 @@ public class ChasmProcessor {
     }
 
     /**
-     * This method transforms this {@link ChasmProcessor}'s list of classes according
+     * Transform this {@link ChasmProcessor}'s list of classes according
      *          to this {@link ChasmProcessor}'s list of {@link Transformer}s.
      *
      * @return The list of transformed classes, as a {@link List} of {@code byte[]}s.

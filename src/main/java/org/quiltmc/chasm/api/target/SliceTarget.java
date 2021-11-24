@@ -8,8 +8,9 @@ import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 
 /**
- * A {@link Target} that slices a {@link ListNode}.
- * A slice of a list is a contiguous subset of the list, like {@link List#subList}.
+ * Slice a {@link ListNode}, as a {@link Target}.
+ *
+ * <p>A slice of a list is a contiguous subset of the list, like {@link List#subList}.
  */
 public class SliceTarget implements Target {
     private final PathMetadata path;
@@ -19,7 +20,7 @@ public class SliceTarget implements Target {
     private int endIndex;
 
     /**
-     * This constructor creates a {@link SliceTarget} of the passed {@link ListNode}.
+     * Create a {@link SliceTarget} of the passed {@link ListNode}.
      *
      * @param listNode The {@link ListNode} to slice.
      *
@@ -36,7 +37,7 @@ public class SliceTarget implements Target {
     }
 
     /**
-     * A getter for this {@link SliceTarget}'s {@link PathMetadata}.
+     * Get this {@link SliceTarget}'s {@link PathMetadata}.
      *
      * @return The {@link PathMetadata} of this {@link SliceTarget}.
      */
@@ -45,7 +46,7 @@ public class SliceTarget implements Target {
     }
 
     /**
-     * A getter for this {@link SliceTarget}'s slice start index.
+     * Get this {@link SliceTarget}'s slice start index.
      *
      * @return The start index of this {@link SliceTarget}' slice.
      */
@@ -55,7 +56,7 @@ public class SliceTarget implements Target {
 
 
     /**
-     * A setter for this {@link SliceTarget}'s slice start index.
+     * Set this {@link SliceTarget}'s slice start index.
      *
      * @param startIndex The new start index for this {@link SliceTarget}'s slice.
      */
@@ -64,7 +65,7 @@ public class SliceTarget implements Target {
     }
 
     /**
-     * A getter for this {@link SliceTarget}'s slice end index.
+     * Get this {@link SliceTarget}'s slice end index.
      *
      * @return The end index of this {@link SliceTarget}'s slice.
      */
@@ -73,7 +74,7 @@ public class SliceTarget implements Target {
     }
 
     /**
-     * A setter for this {@link SliceTarget}'s slice end index. 
+     * Set this {@link SliceTarget}'s slice end index. 
      *
      * @param endIndex The new end index for this {@link SliceTarget}'s slice.
      */

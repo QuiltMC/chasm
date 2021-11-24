@@ -3,11 +3,11 @@ package org.quiltmc.chasm.api.target;
 import org.quiltmc.chasm.api.tree.Node;
 
 /**
- * A {@link Target} encapsulates a range of {@link Node}s in a CHASM tree.
+ * Navigate a CHASM tree to a {@link Target}ed range of {@link Node}s.
  */
 public interface Target {
     /**
-     * True if this {@link Target} fully contains the other.
+     * Check if this {@link Target} fully contains the other.
      *
      * @param other The other {@link Target} to check against.
      *
@@ -16,20 +16,21 @@ public interface Target {
     boolean contains(Target other);
 
     /**
-     * True if the {@link Target}s overlap, but neither fully contains the other {@link Target}.
+     * Check if the {@link Target}s only overlap.
      *
      * @param other The other {@link Target} to check against.
      *
-     * @return True if this {@link Target} overlaps the other.
+     * @return True if this {@link Target} overlaps the other {@link Target}, but neither
+     *          fully contains the other {@link Target}.
      */
     boolean overlaps(Target other);
 
     /**
-     * This method navigates the CHASM tree starting at the given {@link Node}.
+     * Navigate the CHASM tree starting at the given {@link Node}.
      *
      * @param root The root {@link Node} to navigate from.
      *
-     * @return The {@link Node} this {@link Target} led to.
+     * @return A {@link Node} containing the {@link Target} range of {@link Node}s.
      */
     Node resolve(Node root);
 }

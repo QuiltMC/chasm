@@ -3,10 +3,11 @@ package org.quiltmc.chasm.api.tree;
 import org.quiltmc.chasm.internal.metadata.MetadataProvider;
 
 /**
- * A {@link ValueNode} wraps a T value as a {@link Node} for use in a CHASM tree.
- * Usually wraps an {@link Integer} or {@link String}.
+ * Wrap a T value as a {@link Node} for use in a CHASM tree.
  *
- * @param <T> The type of value wrapped by this {@link Node}
+ * <p>Usually wraps an {@link Integer} or {@link String}.
+ *
+ * @param <T> The type of value wrapped by this {@link ValueNode}.
  */
 public class ValueNode<T> implements Node {
     private MetadataProvider metadataProvider = new MetadataProvider();
@@ -14,8 +15,7 @@ public class ValueNode<T> implements Node {
     private final T value;
 
     /**
-     * This simple constructor takes the T value to wrap,
-     * and stores it in a newly created {@link ValueNode}.
+     * Wrap the given T value in a newly created {@link ValueNode}.
      *
      * @param value The T value to wrap.
      */
@@ -24,9 +24,9 @@ public class ValueNode<T> implements Node {
     }
 
     /**
-     * This method gets the wrapped value.
+     * Get the wrapped T value.
      *
-     * @return The wrapped {@link Object} value.
+     * @return The wrapped T value.
      */
     public T getValue() {
         return value;
