@@ -16,25 +16,52 @@ import org.quiltmc.chasm.internal.asm.writer.ChasmClassWriter;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.util.PathInitializer;
 
+/**
+ * A {@link ChasmProcessor} transforms a list of classes, according to
+ * a {@link List} of {@link Transformer}s.
+ */
 public class ChasmProcessor {
     private final List<Transformer> transformers = new ArrayList<>();
 
     private final ListNode classes;
 
+    /**
+     * This default constructor creates a new, empty {@link ChasmProcessor}
+     *   with no {@link Transformer}s and no classes to transform.
+     */
     public ChasmProcessor() {
         classes = new LinkedListNode();
     }
 
+    /**
+     * A method that adds the passed {@link Transformer} to this {@link ChasmProcessor}'s
+     *           list of {@link Transformer}s.
+     * 
+     * @param transformer A {@link Transformer} to add to this {@link ChasmProcessor}'s
+     *           list of {@link Transformer}s to transform classes with.
+     */
     public void addTransformer(Transformer transformer) {
         transformers.add(transformer);
     }
 
+    /**
+     * A method that adds the passed class {@code byte[]} to this {@link ChasmProcessor}'s
+     *          list of classes to transform.
+     * 
+     * @param classBytes A class {@code byte[]} to transform.
+     */
     public void addClass(byte[] classBytes) {
         ClassReader classReader = new ClassReader(classBytes);
         LazyClassNode classNode = new LazyClassNode(classReader);
         classes.add(classNode);
     }
 
+    /**
+     * This method transforms this {@link ChasmProcessor}'s list of classes according
+     *          to this {@link ChasmProcessor}'s list of {@link Transformer}s.
+     * 
+     * @return The list of transformed classes, as a {@link List} of {@code byte[]}s.
+     */
     public List<byte[]> process() {
         PathInitializer.initialize(classes, new PathMetadata());
 
@@ -60,7 +87,7 @@ public class ChasmProcessor {
         return classBytes;
     }
 
-    private List<Transformation> applyTransformers(List<Transformer> transformers, ListNode classes) {
+    private static List<Transformation> applyTransformers(List<Transformer> transformers, ListNode classes) {
         List<Transformation> transformations = new ArrayList<>();
 
         for (Transformer transformer : transformers) {

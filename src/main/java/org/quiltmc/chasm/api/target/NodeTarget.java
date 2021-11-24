@@ -3,13 +3,27 @@ package org.quiltmc.chasm.api.target;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 
+/**
+ * A {@link Target} that navigates to a subtree of a {@link Node}.
+ */
 public class NodeTarget implements Target {
     private final PathMetadata path;
 
+    /**
+     * This constructor makes a new {@link NodeTarget} that targets the passed node,
+     * using the {@link Node}'s attached {@link PathMetadata}.
+     * 
+     * @param target The {@link Node} to target.
+     */
     public NodeTarget(Node target) {
         this.path = target.getMetadata().get(PathMetadata.class);
     }
 
+    /**
+     * A getter for the {@link PathMetadata} of this {@link NodeTarget}.
+     * 
+     * @return This {@link NodeTarget}'s {@link PathMetadata}.
+     */
     public PathMetadata getPath() {
         return path;
     }

@@ -1,10 +1,13 @@
 package org.quiltmc.chasm.api.tree;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import org.quiltmc.chasm.internal.metadata.MetadataProvider;
 
-public class LinkedHashMapNode extends HashMap<String, Node> implements MapNode {
+/**
+ * A {@link MapNode} implemented using a {@link LinkedHashMap}.
+ */
+public class LinkedHashMapNode extends LinkedHashMap<String, Node> implements MapNode {
     private MetadataProvider metadataProvider = new MetadataProvider();
 
     @Override

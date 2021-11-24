@@ -3,6 +3,9 @@ package org.quiltmc.chasm.api.tree;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.internal.metadata.MetadataProvider;
 
+/**
+ * This interface marks a compliant {@link Node} of a CHASM tree.
+ */
 public interface Node {
     /**
      * Creates a deep copy of this {@link Node}.
