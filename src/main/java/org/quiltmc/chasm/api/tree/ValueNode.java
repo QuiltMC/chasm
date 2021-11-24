@@ -15,7 +15,7 @@ public class ValueNode<T> implements Node {
     private final T value;
 
     /**
-     * Wrap the given T value in a newly created {@link ValueNode}.
+     * Wrap the given T value in a new {@link ValueNode}.
      *
      * @param value The T value to wrap.
      */

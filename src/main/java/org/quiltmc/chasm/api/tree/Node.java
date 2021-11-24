@@ -11,7 +11,7 @@ public interface Node {
      * Create a deep copy of this {@link Node}.
      *
      * <p>This means that any containing node should also be copied,
-     *           as well as the metadata of this Node.
+     *           as well as the metadata of all Nodes copied by this method.
      *
      * @return A recursive copy of this {@link Node}.
      */
