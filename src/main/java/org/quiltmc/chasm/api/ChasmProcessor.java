@@ -9,20 +9,25 @@ import org.quiltmc.chasm.api.tree.LinkedListNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
+import org.quiltmc.chasm.api.util.SuperClassProvider;
+import org.quiltmc.chasm.internal.ChasmSuperClassProvider;
 import org.quiltmc.chasm.internal.LazyClassNode;
 import org.quiltmc.chasm.internal.TransformationApplier;
 import org.quiltmc.chasm.internal.TransformationSorter;
 import org.quiltmc.chasm.internal.TransformerSorter;
+import org.quiltmc.chasm.internal.asm.ChasmClassWriter;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.tree.reader.ClassNodeReader;
 import org.quiltmc.chasm.internal.util.PathInitializer;
 
 public class ChasmProcessor {
-    private final List<Transformer> transformers = new ArrayList<>();
+    private final SuperClassProvider superClassProvider;
 
     private final ListNode classes;
+    private final List<Transformer> transformers = new ArrayList<>();
 
-    public ChasmProcessor() {
+    public ChasmProcessor(SuperClassProvider superClassProvider) {
+        this.superClassProvider = superClassProvider;
         classes = new LinkedListNode();
     }
 
@@ -53,7 +58,7 @@ public class ChasmProcessor {
             MapNode classNode = (MapNode) node;
 
             ClassNodeReader chasmWriter = new ClassNodeReader(classNode);
-            ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+            ClassWriter classWriter = new ChasmClassWriter(new ChasmSuperClassProvider(superClassProvider, classes));
             chasmWriter.accept(classWriter);
             classBytes.add(classWriter.toByteArray());
         }
