@@ -1,9 +1,7 @@
 package org.quiltmc.chasm.api.target;
 
-import org.quiltmc.chasm.api.tree.LinkedListNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.Node;
-import org.quiltmc.chasm.internal.metadata.PathMetadata;
 
 public class SliceTarget implements Target {
     private final Node target;

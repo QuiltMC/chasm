@@ -33,7 +33,7 @@ public class ChasmFieldWriter {
             return;
         }
         for (Node n : annotationsListNode) {
-            ChasmAnnotationWriter annotationWriter = new ChasmAnnotationWriter((MapNode) n);
+            ChasmAnnotationWriter annotationWriter = new ChasmAnnotationWriter(n);
             annotationWriter.visitAnnotation(fieldVisitor::visitAnnotation, fieldVisitor::visitTypeAnnotation);
         }
     }

@@ -1,10 +1,5 @@
 package org.quiltmc.chasm.internal;
 
-import org.quiltmc.chasm.api.Transformation;
-import org.quiltmc.chasm.api.target.SliceTarget;
-import org.quiltmc.chasm.api.target.Target;
-import org.quiltmc.chasm.internal.metadata.PathMetadata;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,6 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.quiltmc.chasm.api.Transformation;
+import org.quiltmc.chasm.api.target.SliceTarget;
+import org.quiltmc.chasm.api.target.Target;
+import org.quiltmc.chasm.internal.metadata.PathMetadata;
 
 public class TransformationSorter {
     public static List<Transformation> sort(Collection<Transformation> transformations) {

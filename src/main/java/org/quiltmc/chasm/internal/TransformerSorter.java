@@ -1,7 +1,5 @@
 package org.quiltmc.chasm.internal;
 
-import org.quiltmc.chasm.api.Transformer;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -11,6 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.quiltmc.chasm.api.Transformer;
 
 public class TransformerSorter {
     public static List<List<Transformer>> sort(Collection<Transformer> transformers) {

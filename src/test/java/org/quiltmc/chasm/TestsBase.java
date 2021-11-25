@@ -75,7 +75,7 @@ public abstract class TestsBase {
     }
 
     protected final void registerNamed(String testClass, String name, String[] additionalClasses,
-                                  Transformer... transformers) {
+                                       Transformer... transformers) {
         List<Transformer> transformerList = Arrays.asList(transformers);
         List<String> additionalClassesList = Arrays.stream(additionalClasses).map(this::getFullTestClassName)
                 .collect(Collectors.toList());
