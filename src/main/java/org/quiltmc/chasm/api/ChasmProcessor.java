@@ -1,6 +1,7 @@
 package org.quiltmc.chasm.api;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.objectweb.asm.ClassReader;
@@ -10,8 +11,9 @@ import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.internal.LazyClassNode;
-import org.quiltmc.chasm.internal.TopologicalSorter;
 import org.quiltmc.chasm.internal.TransformationApplier;
+import org.quiltmc.chasm.internal.TransformationSorter;
+import org.quiltmc.chasm.internal.TransformerSorter;
 import org.quiltmc.chasm.internal.asm.writer.ChasmClassWriter;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.util.PathInitializer;
@@ -38,10 +40,10 @@ public class ChasmProcessor {
     public List<byte[]> process() {
         PathInitializer.initialize(classes, new PathMetadata());
 
-        List<List<Transformer>> rounds = TopologicalSorter.sortTransformers(transformers);
+        List<List<Transformer>> rounds = TransformerSorter.sort(transformers);
         for (List<Transformer> round : rounds) {
             List<Transformation> transformations = applyTransformers(round, classes);
-            List<Transformation> sorted = TopologicalSorter.sortTransformations(transformations);
+            List<Transformation> sorted = TransformationSorter.sort(transformations);
 
             TransformationApplier transformationApplier = new TransformationApplier(classes, sorted);
             transformationApplier.applyAll();
