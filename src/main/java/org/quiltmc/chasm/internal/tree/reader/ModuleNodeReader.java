@@ -1,4 +1,4 @@
-package org.quiltmc.chasm.internal.asm.writer;
+package org.quiltmc.chasm.internal.tree.reader;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ModuleVisitor;
@@ -9,10 +9,10 @@ import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
 @SuppressWarnings("unchecked")
-public class ChasmModuleWriter {
+public class ModuleNodeReader {
     private final MapNode moduleNode;
 
-    public ChasmModuleWriter(MapNode moduleNode) {
+    public ModuleNodeReader(MapNode moduleNode) {
         this.moduleNode = moduleNode;
     }
 

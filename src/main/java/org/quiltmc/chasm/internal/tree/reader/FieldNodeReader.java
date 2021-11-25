@@ -1,4 +1,4 @@
-package org.quiltmc.chasm.internal.asm.writer;
+package org.quiltmc.chasm.internal.tree.reader;
 
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -10,10 +10,10 @@ import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
 @SuppressWarnings("unchecked")
-public class ChasmFieldWriter {
+public class FieldNodeReader {
     private final MapNode fieldNode;
 
-    public ChasmFieldWriter(MapNode fieldNode) {
+    public FieldNodeReader(MapNode fieldNode) {
         this.fieldNode = fieldNode;
     }
 
@@ -33,7 +33,7 @@ public class ChasmFieldWriter {
             return;
         }
         for (Node n : annotationsListNode) {
-            ChasmAnnotationWriter annotationWriter = new ChasmAnnotationWriter(n);
+            AnnotationNodeReader annotationWriter = new AnnotationNodeReader(n);
             annotationWriter.visitAnnotation(fieldVisitor::visitAnnotation, fieldVisitor::visitTypeAnnotation);
         }
     }

@@ -1,4 +1,4 @@
-package org.quiltmc.chasm.internal.asm.writer;
+package org.quiltmc.chasm.internal.tree.reader;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.TypePath;
@@ -9,10 +9,10 @@ import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
 @SuppressWarnings("unchecked")
-public class ChasmAnnotationWriter {
+public class AnnotationNodeReader {
     private final Node annotationNode;
 
-    public ChasmAnnotationWriter(Node annotationNode) {
+    public AnnotationNodeReader(Node annotationNode) {
         this.annotationNode = annotationNode;
     }
 
@@ -43,7 +43,7 @@ public class ChasmAnnotationWriter {
             } else if (value instanceof ListNode) {
                 AnnotationVisitor arrayVisitor = visitor.visitArray(name);
 
-                new ChasmAnnotationWriter(value).visitAnnotation(arrayVisitor);
+                new AnnotationNodeReader(value).visitAnnotation(arrayVisitor);
             } else {
                 MapNode mapNode = (MapNode) value;
                 if (mapNode.containsKey(NodeConstants.VALUE)) {
@@ -56,7 +56,7 @@ public class ChasmAnnotationWriter {
                     ListNode annotationValues = (ListNode) mapNode.get(NodeConstants.VALUES);
 
                     AnnotationVisitor annotationVisitor = visitor.visitAnnotation(name, descriptor);
-                    new ChasmAnnotationWriter(annotationValues).visitAnnotation(annotationVisitor);
+                    new AnnotationNodeReader(annotationValues).visitAnnotation(annotationVisitor);
                 }
             }
         }

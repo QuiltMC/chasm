@@ -1,9 +1,7 @@
-package org.quiltmc.chasm.internal.asm.writer;
+package org.quiltmc.chasm.internal.tree.reader;
 
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ConstantDynamic;
-import org.objectweb.asm.Handle;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
@@ -12,42 +10,11 @@ import org.quiltmc.chasm.internal.LazyClassNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
 @SuppressWarnings("unchecked")
-public class ChasmClassWriter {
+public class ClassNodeReader {
     private final MapNode classNode;
 
-    public ChasmClassWriter(MapNode classNode) {
+    public ClassNodeReader(MapNode classNode) {
         this.classNode = classNode;
-    }
-
-    public static Object[] getArguments(ListNode argumentNode) {
-        Object[] arguments = new Object[argumentNode.size()];
-        for (int i = 0; i < arguments.length; i++) {
-            Node argNode = argumentNode.get(i);
-            if (argNode instanceof ValueNode<?>) {
-                arguments[i] = ((ValueNode<?>) argNode).getValue();
-            } else if (((MapNode) argNode).containsKey(NodeConstants.TAG)) {
-                arguments[i] = getHandle((MapNode) argNode);
-            } else {
-                MapNode constDynamicNode = (MapNode) argNode;
-                String name = ((ValueNode<String>) constDynamicNode.get(NodeConstants.NAME)).getValue();
-                String descriptor = ((ValueNode<String>) constDynamicNode.get(NodeConstants.DESCRIPTOR)).getValue();
-                Handle handle = getHandle((MapNode) constDynamicNode.get(NodeConstants.HANDLE));
-                Object[] args = getArguments((ListNode) constDynamicNode.get(NodeConstants.ARGS));
-                arguments[i] = new ConstantDynamic(name, descriptor, handle, args);
-            }
-        }
-
-        return arguments;
-    }
-
-    public static Handle getHandle(MapNode handleNode) {
-        int tag = ((ValueNode<Integer>) handleNode.get(NodeConstants.TAG)).getValue();
-        String owner = ((ValueNode<String>) handleNode.get(NodeConstants.OWNER)).getValue();
-        String name = ((ValueNode<String>) handleNode.get(NodeConstants.NAME)).getValue();
-        String descriptor = ((ValueNode<String>) handleNode.get(NodeConstants.DESCRIPTOR)).getValue();
-        boolean isInterface = ((ValueNode<Boolean>) handleNode.get(NodeConstants.IS_INTERFACE)).getValue();
-
-        return new Handle(tag, owner, name, descriptor, isInterface);
     }
 
     public void accept(ClassVisitor visitor) {
@@ -80,7 +47,7 @@ public class ChasmClassWriter {
 
         // visitModule
         if (classNode.containsKey(NodeConstants.MODULE)) {
-            ChasmModuleWriter moduleWriter = new ChasmModuleWriter((MapNode) classNode.get(NodeConstants.MODULE));
+            ModuleNodeReader moduleWriter = new ModuleNodeReader((MapNode) classNode.get(NodeConstants.MODULE));
             moduleWriter.visitModule(visitor);
         }
         // visitNestHost
@@ -108,8 +75,8 @@ public class ChasmClassWriter {
         ListNode recordComponentListNode = (ListNode) classNode.get(NodeConstants.RECORD_COMPONENTS);
         if (recordComponentListNode != null) {
             for (Node node : recordComponentListNode) {
-                ChasmRecordComponentWriter chasmRecordComponentWriter = new ChasmRecordComponentWriter((MapNode) node);
-                chasmRecordComponentWriter.visitRecordComponent(visitor);
+                RecordComponentNodeReader recordComponentNodeReader = new RecordComponentNodeReader((MapNode) node);
+                recordComponentNodeReader.visitRecordComponent(visitor);
             }
         }
 
@@ -117,8 +84,8 @@ public class ChasmClassWriter {
         ListNode fieldListNode = (ListNode) classNode.get(NodeConstants.FIELDS);
         if (fieldListNode != null) {
             for (Node node : fieldListNode) {
-                ChasmFieldWriter chasmFieldWriter = new ChasmFieldWriter((MapNode) node);
-                chasmFieldWriter.visitField(visitor);
+                FieldNodeReader fieldNodeReader = new FieldNodeReader((MapNode) node);
+                fieldNodeReader.visitField(visitor);
             }
         }
 
@@ -126,8 +93,8 @@ public class ChasmClassWriter {
         ListNode methodListNode = (ListNode) classNode.get(NodeConstants.METHODS);
         if (methodListNode != null) {
             for (Node node : methodListNode) {
-                ChasmMethodWriter chasmMethodWriter = new ChasmMethodWriter((MapNode) node);
-                chasmMethodWriter.visitMethod(visitor);
+                MethodNodeReader methodNodeReader = new MethodNodeReader((MapNode) node);
+                methodNodeReader.visitMethod(visitor);
             }
         }
 
@@ -192,7 +159,7 @@ public class ChasmClassWriter {
             return;
         }
         for (Node n : annotationsListNode) {
-            ChasmAnnotationWriter writer = new ChasmAnnotationWriter(n);
+            AnnotationNodeReader writer = new AnnotationNodeReader(n);
             writer.visitAnnotation(visitor::visitAnnotation, visitor::visitTypeAnnotation);
         }
     }

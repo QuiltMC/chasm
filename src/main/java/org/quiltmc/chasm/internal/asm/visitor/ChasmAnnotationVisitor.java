@@ -1,4 +1,4 @@
-package org.quiltmc.chasm.internal.asm;
+package org.quiltmc.chasm.internal.asm.visitor;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;

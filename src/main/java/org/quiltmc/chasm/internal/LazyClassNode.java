@@ -11,7 +11,7 @@ import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
-import org.quiltmc.chasm.internal.asm.ChasmClassVisitor;
+import org.quiltmc.chasm.internal.asm.visitor.ChasmClassVisitor;
 import org.quiltmc.chasm.internal.metadata.MetadataProvider;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.util.NodeConstants;

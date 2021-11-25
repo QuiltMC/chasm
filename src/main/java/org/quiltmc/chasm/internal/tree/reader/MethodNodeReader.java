@@ -1,4 +1,4 @@
-package org.quiltmc.chasm.internal.asm.writer;
+package org.quiltmc.chasm.internal.tree.reader;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,6 +6,7 @@ import java.util.Map;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -17,11 +18,42 @@ import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
 @SuppressWarnings("unchecked")
-public class ChasmMethodWriter {
+public class MethodNodeReader {
     private final MapNode methodNode;
 
-    public ChasmMethodWriter(MapNode methodNode) {
+    public MethodNodeReader(MapNode methodNode) {
         this.methodNode = methodNode;
+    }
+
+    public static Object[] getArguments(ListNode argumentNode) {
+        Object[] arguments = new Object[argumentNode.size()];
+        for (int i = 0; i < arguments.length; i++) {
+            Node argNode = argumentNode.get(i);
+            if (argNode instanceof ValueNode<?>) {
+                arguments[i] = ((ValueNode<?>) argNode).getValue();
+            } else if (((MapNode) argNode).containsKey(NodeConstants.TAG)) {
+                arguments[i] = getHandle((MapNode) argNode);
+            } else {
+                MapNode constDynamicNode = (MapNode) argNode;
+                String name = ((ValueNode<String>) constDynamicNode.get(NodeConstants.NAME)).getValue();
+                String descriptor = ((ValueNode<String>) constDynamicNode.get(NodeConstants.DESCRIPTOR)).getValue();
+                Handle handle = getHandle((MapNode) constDynamicNode.get(NodeConstants.HANDLE));
+                Object[] args = getArguments((ListNode) constDynamicNode.get(NodeConstants.ARGS));
+                arguments[i] = new ConstantDynamic(name, descriptor, handle, args);
+            }
+        }
+
+        return arguments;
+    }
+
+    public static Handle getHandle(MapNode handleNode) {
+        int tag = ((ValueNode<Integer>) handleNode.get(NodeConstants.TAG)).getValue();
+        String owner = ((ValueNode<String>) handleNode.get(NodeConstants.OWNER)).getValue();
+        String name = ((ValueNode<String>) handleNode.get(NodeConstants.NAME)).getValue();
+        String descriptor = ((ValueNode<String>) handleNode.get(NodeConstants.DESCRIPTOR)).getValue();
+        boolean isInterface = ((ValueNode<Boolean>) handleNode.get(NodeConstants.IS_INTERFACE)).getValue();
+
+        return new Handle(tag, owner, name, descriptor, isInterface);
     }
 
     private static Label obtainLabel(Map<String, Label> labelMap, String labelName) {
@@ -225,9 +257,8 @@ public class ChasmMethodWriter {
                     String name1 = ((ValueNode<String>) ((MapNode) n).get(NodeConstants.NAME)).getValue();
                     String descriptor1 =
                             ((ValueNode<String>) ((MapNode) n).get(NodeConstants.DESCRIPTOR)).getValue();
-                    Handle handle = ChasmClassWriter.getHandle((MapNode) ((MapNode) n).get(NodeConstants.HANDLE));
-                    Object[] arguments =
-                            ChasmClassWriter.getArguments((ListNode) ((MapNode) n).get(NodeConstants.ARGUMENTS));
+                    Handle handle = getHandle((MapNode) ((MapNode) n).get(NodeConstants.HANDLE));
+                    Object[] arguments = getArguments((ListNode) ((MapNode) n).get(NodeConstants.ARGUMENTS));
                     methodVisitor.visitInvokeDynamicInsn(name1, descriptor1, handle, arguments);
                     break;
                 }
@@ -319,7 +350,7 @@ public class ChasmMethodWriter {
 
             // visitInsnAnnotation
             for (Node n1 : (ListNode) ((MapNode) n).get(NodeConstants.ANNOTATIONS)) {
-                ChasmAnnotationWriter writer = new ChasmAnnotationWriter(n1);
+                AnnotationNodeReader writer = new AnnotationNodeReader(n1);
                 writer.visitAnnotation(null, methodVisitor::visitTypeAnnotation);
             }
         }
@@ -347,7 +378,7 @@ public class ChasmMethodWriter {
 
             // visitTryCatchBlockAnnotations
             for (Node n2 : (ListNode) tryCatchBlock.get(NodeConstants.ANNOTATIONS)) {
-                ChasmAnnotationWriter writer = new ChasmAnnotationWriter(n2);
+                AnnotationNodeReader writer = new AnnotationNodeReader(n2);
                 writer.visitAnnotation(null, methodVisitor::visitTryCatchAnnotation);
             }
         }
@@ -391,7 +422,7 @@ public class ChasmMethodWriter {
         ListNode methodAnnotationsNode = (ListNode) methodNode.get(NodeConstants.ANNOTATIONS);
         if (methodAnnotationsNode != null) {
             for (Node n : methodAnnotationsNode) {
-                ChasmAnnotationWriter writer = new ChasmAnnotationWriter(n);
+                AnnotationNodeReader writer = new AnnotationNodeReader(n);
                 writer.visitAnnotation(methodVisitor::visitAnnotation, methodVisitor::visitTypeAnnotation);
             }
         }
@@ -400,8 +431,8 @@ public class ChasmMethodWriter {
     private void visitAnnotationDefault(MethodVisitor methodVisitor) {
         if (methodNode.containsKey(NodeConstants.ANNOTATION_DEFAULT)) {
             AnnotationVisitor annotationVisitor = methodVisitor.visitAnnotationDefault();
-            ChasmAnnotationWriter writer =
-                    new ChasmAnnotationWriter(methodNode.get(NodeConstants.ANNOTATION_DEFAULT));
+            AnnotationNodeReader writer =
+                    new AnnotationNodeReader(methodNode.get(NodeConstants.ANNOTATION_DEFAULT));
             writer.visitAnnotation(annotationVisitor);
         }
     }
@@ -426,7 +457,7 @@ public class ChasmMethodWriter {
             boolean visible = methodAnnotationVisibilityNode == null
                     || methodAnnotationVisibilityNode.getValue();
 
-            ChasmAnnotationWriter writer = new ChasmAnnotationWriter(n);
+            AnnotationNodeReader writer = new AnnotationNodeReader(n);
             AnnotationVisitor annotationVisitor =
                     methodVisitor.visitParameterAnnotation(parameter, annotationDesc, visible);
             writer.visitAnnotation(annotationVisitor);
