@@ -33,7 +33,7 @@ compileTestDataJava {
     javaCompiler = javaToolchains.compilerFor {
         languageVersion = JavaLanguageVersion.of(17)
     }
-    destinationDirectory.dir("src/testData/classes")
+    destinationDirectory.set(file("src/testData/classes"))
 }
 
 testClasses.dependsOn("testDataClasses")
