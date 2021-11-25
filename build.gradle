@@ -10,7 +10,6 @@ version '1.0-SNAPSHOT'
 sourceSets {
     testData {
         java {
-            srcDirs file("src/testData/java")
             compileClasspath = sourceSets.main.output + configurations.testCompileClasspath
             runtimeClasspath = sourceSets.main.output + project.configurations.testRuntimeClasspath
         }
@@ -33,7 +32,6 @@ compileTestDataJava {
     javaCompiler = javaToolchains.compilerFor {
         languageVersion = JavaLanguageVersion.of(17)
     }
-    destinationDirectory.set(file("src/testData/classes"))
 }
 
 testClasses.dependsOn("testDataClasses")

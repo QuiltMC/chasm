@@ -24,7 +24,9 @@ import org.quiltmc.chasm.api.ChasmProcessor;
 import org.quiltmc.chasm.api.Transformer;
 
 public abstract class TestsBase {
-    private static final Path TEST_DATA_DIR = Paths.get("src/testData");
+    private static final Path TEST_CLASSES_DIR = Paths.get("build/classes/java/testData");
+    private static final Path TEST_RESULTS_DIR = Paths.get("src/testData/results");
+
     protected final List<TestDefinition> testDefinitions = new ArrayList<>();
     protected ChasmProcessor processor;
 
@@ -128,7 +130,7 @@ public abstract class TestsBase {
 
         // Load any additional classes
         for (String additionalClass : testDefinition.additionalClasses) {
-            Path additionalClassFile = TEST_DATA_DIR.resolve(additionalClass + ".class");
+            Path additionalClassFile = TEST_CLASSES_DIR.resolve(additionalClass + ".class");
             Assertions.assertTrue(Files.isRegularFile(additionalClassFile), additionalClassFile + " does not exist");
             processor.addClass(Files.readAllBytes(additionalClassFile));
         }
@@ -214,11 +216,11 @@ public abstract class TestsBase {
         }
 
         public Path getClassFile() {
-            return TEST_DATA_DIR.resolve("classes/" + testClass + ".class");
+            return TEST_CLASSES_DIR.resolve(testClass + ".class");
         }
 
         public Path getResultFile() {
-            return TEST_DATA_DIR.resolve("results/" + getName() + ".result");
+            return TEST_RESULTS_DIR.resolve(getName() + ".result");
         }
 
         public String getName() {
