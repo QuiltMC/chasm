@@ -19,7 +19,7 @@ jobs:
         with:
           level: error
           reporter: 'github-pr-check'
-          checkstyle_config: "/home/runner/work/chasm/chasm/config/checkstyle/checkstyle.xml"
+          checkstyle_config: '${{ github.workspace }}/config/checkstyle/checkstyle.xml'
           github_token: ${{ secrets.GITHUB_TOKEN }}
           fail_on_error: true
           checkstyle_version: 9.1
