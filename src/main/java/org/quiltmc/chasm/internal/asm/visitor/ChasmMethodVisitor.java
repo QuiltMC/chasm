@@ -9,7 +9,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.TypePath;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
-import org.quiltmc.chasm.api.tree.LinkedListNode;
+import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.ValueNode;
@@ -18,16 +18,16 @@ import org.quiltmc.chasm.internal.util.NodeConstants;
 public class ChasmMethodVisitor extends MethodVisitor {
     private final MapNode methodNode;
 
-    private final ListNode parameters = new LinkedListNode();
+    private final ListNode parameters = new ArrayListNode();
 
-    private final ListNode annotations = new LinkedListNode();
-    private final ListNode parameterAnnotations = new LinkedListNode();
-    private final ListNode attributes = new LinkedListNode();
+    private final ListNode annotations = new ArrayListNode();
+    private final ListNode parameterAnnotations = new ArrayListNode();
+    private final ListNode attributes = new ArrayListNode();
 
     private final MapNode code = new LinkedHashMapNode();
-    private final ListNode instructions = new LinkedListNode();
-    private final ListNode locals = new LinkedListNode();
-    private final ListNode tryCatchBlocks = new LinkedListNode();
+    private final ListNode instructions = new ArrayListNode();
+    private final ListNode locals = new ArrayListNode();
+    private final ListNode tryCatchBlocks = new ArrayListNode();
 
     private ListNode nextLabels = null;
     private int nextLineNumber = -1;
@@ -59,7 +59,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
     @Override
     public AnnotationVisitor visitParameterAnnotation(int parameter, String descriptor, boolean visible) {
         MapNode annotation = new LinkedHashMapNode();
-        ListNode values = new LinkedListNode();
+        ListNode values = new ArrayListNode();
         annotation.put(NodeConstants.PARAMETER, new ValueNode<>(parameter));
         annotation.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
         annotation.put(NodeConstants.VISIBLE, new ValueNode<>(visible));
@@ -72,7 +72,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
         MapNode annotationDefault = new LinkedHashMapNode();
-        ListNode values = new LinkedListNode();
+        ListNode values = new ArrayListNode();
         methodNode.put(NodeConstants.ANNOTATION_DEFAULT, annotationDefault);
         methodNode.put(NodeConstants.VALUES, values);
 
@@ -82,7 +82,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
     @Override
     public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
         MapNode annotation = new LinkedHashMapNode();
-        ListNode values = new LinkedListNode();
+        ListNode values = new ArrayListNode();
         annotation.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
         annotation.put(NodeConstants.VISIBLE, new ValueNode<>(visible));
         annotation.put(NodeConstants.VALUES, values);
@@ -94,7 +94,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
     @Override
     public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
         MapNode annotation = new LinkedHashMapNode();
-        ListNode values = new LinkedListNode();
+        ListNode values = new ArrayListNode();
         annotation.put(NodeConstants.TYPE_REF, new ValueNode<>(typeRef));
         annotation.put(NodeConstants.TYPE_PATH, new ValueNode<>(typePath.toString()));
         annotation.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
@@ -123,7 +123,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
             instructionNode.put(NodeConstants.LABELS, nextLabels);
             nextLabels = null;
         } else {
-            instructionNode.put(NodeConstants.LABELS, new LinkedListNode());
+            instructionNode.put(NodeConstants.LABELS, new ArrayListNode());
         }
 
         if (nextLineNumber != -1) {
@@ -131,13 +131,13 @@ public class ChasmMethodVisitor extends MethodVisitor {
             nextLineNumber = -1;
         }
 
-        instructionNode.put(NodeConstants.ANNOTATIONS, new LinkedListNode());
+        instructionNode.put(NodeConstants.ANNOTATIONS, new ArrayListNode());
     }
 
     @Override
     public void visitLabel(Label label) {
         if (nextLabels == null) {
-            nextLabels = new LinkedListNode();
+            nextLabels = new ArrayListNode();
         }
 
         nextLabels.add(new ValueNode<>(label.toString()));
@@ -230,7 +230,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
     }
 
     private ListNode getArgumentsNode(Object[] bootstrapMethodArguments) {
-        ListNode argumentsNode = new LinkedListNode();
+        ListNode argumentsNode = new ArrayListNode();
         for (Object arg : bootstrapMethodArguments) {
             if (arg instanceof Handle) {
                 argumentsNode.add(getHandleNode((Handle) arg));
@@ -286,7 +286,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
         MapNode instructionNode = new LinkedHashMapNode();
         instructionNode.put(NodeConstants.OPCODE, new ValueNode<>(Opcodes.TABLESWITCH));
         instructionNode.put(NodeConstants.DEFAULT, new ValueNode<>(dflt.toString()));
-        ListNode cases = new LinkedListNode();
+        ListNode cases = new ArrayListNode();
         for (int i = 0; i < labels.length; i++) {
             MapNode caseNode = new LinkedHashMapNode();
             caseNode.put(NodeConstants.KEY, new ValueNode<>(min + i));
@@ -303,7 +303,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
         MapNode instructionNode = new LinkedHashMapNode();
         instructionNode.put(NodeConstants.OPCODE, new ValueNode<>(Opcodes.LOOKUPSWITCH));
         instructionNode.put(NodeConstants.DEFAULT, new ValueNode<>(dflt.toString()));
-        ListNode cases = new LinkedListNode();
+        ListNode cases = new ArrayListNode();
         for (int i = 0; i < labels.length; i++) {
             MapNode caseNode = new LinkedHashMapNode();
             caseNode.put(NodeConstants.KEY, new ValueNode<>(keys[i]));
@@ -330,7 +330,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
         MapNode instructionNode = (MapNode) instructions.get(instructions.size() - 1);
 
         MapNode annotation = new LinkedHashMapNode();
-        ListNode values = new LinkedListNode();
+        ListNode values = new ArrayListNode();
         annotation.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
         annotation.put(NodeConstants.VISIBLE, new ValueNode<>(visible));
         annotation.put(NodeConstants.VALUES, new ValueNode<>(values));
@@ -350,7 +350,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
         tryCatchBlock.put(NodeConstants.END, new ValueNode<>(end.toString()));
         tryCatchBlock.put(NodeConstants.HANDLER, new ValueNode<>(handler.toString()));
         tryCatchBlock.put(NodeConstants.TYPE, new ValueNode<>(type));
-        tryCatchBlock.put(NodeConstants.ANNOTATIONS, new LinkedListNode());
+        tryCatchBlock.put(NodeConstants.ANNOTATIONS, new ArrayListNode());
         tryCatchBlocks.add(tryCatchBlock);
     }
 
@@ -360,7 +360,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
         MapNode tryCatchBlock = (MapNode) tryCatchBlocks.get(tryCatchBlocks.size() - 1);
 
         MapNode annotation = new LinkedHashMapNode();
-        ListNode values = new LinkedListNode();
+        ListNode values = new ArrayListNode();
         annotation.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
         annotation.put(NodeConstants.VISIBLE, new ValueNode<>(visible));
         annotation.put(NodeConstants.VALUES, new ValueNode<>(values));

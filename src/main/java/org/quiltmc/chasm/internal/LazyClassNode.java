@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.objectweb.asm.ClassReader;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
-import org.quiltmc.chasm.api.tree.LinkedListNode;
+import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
@@ -32,7 +32,7 @@ public class LazyClassNode extends AbstractMap<String, Node> implements MapNode 
         this.nonLazyChildren.put(NodeConstants.NAME, new ValueNode<>(reader.getClassName()));
         this.nonLazyChildren.put(NodeConstants.SUPER, new ValueNode<>(reader.getSuperName()));
 
-        ListNode interfaces = new LinkedListNode();
+        ListNode interfaces = new ArrayListNode();
         for (String iface : reader.getInterfaces()) {
             interfaces.add(new ValueNode<>(iface));
         }

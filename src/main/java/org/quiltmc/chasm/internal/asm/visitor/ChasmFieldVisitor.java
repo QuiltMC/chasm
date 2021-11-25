@@ -5,7 +5,7 @@ import org.objectweb.asm.Attribute;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.TypePath;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
-import org.quiltmc.chasm.api.tree.LinkedListNode;
+import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.ValueNode;
@@ -13,8 +13,8 @@ import org.quiltmc.chasm.internal.util.NodeConstants;
 
 public class ChasmFieldVisitor extends FieldVisitor {
 
-    private final ListNode annotations = new LinkedListNode();
-    private final ListNode attributes = new LinkedListNode();
+    private final ListNode annotations = new ArrayListNode();
+    private final ListNode attributes = new ArrayListNode();
 
     public ChasmFieldVisitor(int api, MapNode fieldNode) {
         super(api);
@@ -26,7 +26,7 @@ public class ChasmFieldVisitor extends FieldVisitor {
     @Override
     public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
         MapNode annotation = new LinkedHashMapNode();
-        ListNode values = new LinkedListNode();
+        ListNode values = new ArrayListNode();
         annotation.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
         annotation.put(NodeConstants.VISIBLE, new ValueNode<>(visible));
         annotation.put(NodeConstants.VALUES, values);
@@ -38,7 +38,7 @@ public class ChasmFieldVisitor extends FieldVisitor {
     @Override
     public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
         MapNode annotation = new LinkedHashMapNode();
-        ListNode values = new LinkedListNode();
+        ListNode values = new ArrayListNode();
         annotation.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
         annotation.put(NodeConstants.VISIBLE, new ValueNode<>(visible));
         annotation.put(NodeConstants.VALUES, new ValueNode<>(values));

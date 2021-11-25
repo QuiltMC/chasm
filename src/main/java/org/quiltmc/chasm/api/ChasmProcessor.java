@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
-import org.quiltmc.chasm.api.tree.LinkedListNode;
+import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
@@ -28,7 +28,7 @@ public class ChasmProcessor {
 
     public ChasmProcessor(SuperClassProvider superClassProvider) {
         this.superClassProvider = superClassProvider;
-        classes = new LinkedListNode();
+        classes = new ArrayListNode();
     }
 
     public void addTransformer(Transformer transformer) {

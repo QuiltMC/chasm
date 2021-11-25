@@ -2,7 +2,7 @@ package org.quiltmc.chasm.internal.asm.visitor;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
-import org.quiltmc.chasm.api.tree.LinkedListNode;
+import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.ValueNode;
@@ -54,7 +54,7 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
     @Override
     public AnnotationVisitor visitAnnotation(String name, String descriptor) {
         MapNode annotationValueNode = new LinkedHashMapNode();
-        ListNode values = new LinkedListNode();
+        ListNode values = new ArrayListNode();
         annotationValueNode.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
         annotationValueNode.put(NodeConstants.VALUES, values);
 
@@ -72,7 +72,7 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
 
     @Override
     public AnnotationVisitor visitArray(String name) {
-        ListNode values = new LinkedListNode();
+        ListNode values = new ArrayListNode();
 
         if (name != null) {
             MapNode valueNode = new LinkedHashMapNode();

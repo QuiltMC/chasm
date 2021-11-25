@@ -10,7 +10,7 @@ import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.Transformer;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
-import org.quiltmc.chasm.api.tree.LinkedListNode;
+import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
@@ -26,10 +26,10 @@ public class AddField implements Transformer {
         newFieldNode.put(NodeConstants.DESCRIPTOR, new ValueNode<>("I"));
         newFieldNode.put(NodeConstants.SIGNATURE, new ValueNode<>(null));
         newFieldNode.put(NodeConstants.VALUE, new ValueNode<>(null));
-        newFieldNode.put(NodeConstants.ANNOTATIONS, new LinkedListNode());
-        newFieldNode.put(NodeConstants.ATTRIBUTES, new LinkedListNode());
+        newFieldNode.put(NodeConstants.ANNOTATIONS, new ArrayListNode());
+        newFieldNode.put(NodeConstants.ATTRIBUTES, new ArrayListNode());
 
-        ListNode newFields = new LinkedListNode();
+        ListNode newFields = new ArrayListNode();
         newFields.add(newFieldNode);
 
         List<Transformation> transformations = new ArrayList<>();

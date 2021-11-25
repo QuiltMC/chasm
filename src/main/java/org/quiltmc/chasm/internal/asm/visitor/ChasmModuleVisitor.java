@@ -2,7 +2,7 @@ package org.quiltmc.chasm.internal.asm.visitor;
 
 import org.objectweb.asm.ModuleVisitor;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
-import org.quiltmc.chasm.api.tree.LinkedListNode;
+import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.ValueNode;
@@ -11,12 +11,12 @@ import org.quiltmc.chasm.internal.util.NodeConstants;
 public class ChasmModuleVisitor extends ModuleVisitor {
     private final MapNode moduleNode;
 
-    private final ListNode packages = new LinkedListNode();
-    private final ListNode requires = new LinkedListNode();
-    private final ListNode exports = new LinkedListNode();
-    private final ListNode opens = new LinkedListNode();
-    private final ListNode uses = new LinkedListNode();
-    private final ListNode provides = new LinkedListNode();
+    private final ListNode packages = new ArrayListNode();
+    private final ListNode requires = new ArrayListNode();
+    private final ListNode exports = new ArrayListNode();
+    private final ListNode opens = new ArrayListNode();
+    private final ListNode uses = new ArrayListNode();
+    private final ListNode provides = new ArrayListNode();
 
     public ChasmModuleVisitor(int api, MapNode moduleNode) {
         super(api);
@@ -55,7 +55,7 @@ public class ChasmModuleVisitor extends ModuleVisitor {
         exportNode.put(NodeConstants.PACKAGE, new ValueNode<>(packaze));
         exportNode.put(NodeConstants.ACCESS, new ValueNode<>(access));
         if (modules != null) {
-            ListNode modulesNode = new LinkedListNode();
+            ListNode modulesNode = new ArrayListNode();
             for (String m : modules) {
                 modulesNode.add(new ValueNode<>(m));
             }
@@ -70,7 +70,7 @@ public class ChasmModuleVisitor extends ModuleVisitor {
         openNode.put(NodeConstants.PACKAGE, new ValueNode<>(packaze));
         openNode.put(NodeConstants.ACCESS, new ValueNode<>(access));
         if (modules != null) {
-            ListNode modulesNode = new LinkedListNode();
+            ListNode modulesNode = new ArrayListNode();
             for (String m : modules) {
                 modulesNode.add(new ValueNode<>(m));
             }
@@ -88,7 +88,7 @@ public class ChasmModuleVisitor extends ModuleVisitor {
     public void visitProvide(String service, String... providers) {
         MapNode provideNode = new LinkedHashMapNode();
         provideNode.put(NodeConstants.SERVICE, new ValueNode<>(service));
-        ListNode providersNode = new LinkedListNode();
+        ListNode providersNode = new ArrayListNode();
         for (String provider : providers) {
             providersNode.add(new ValueNode<>(provider));
         }

@@ -10,7 +10,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.RecordComponentVisitor;
 import org.objectweb.asm.TypePath;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
-import org.quiltmc.chasm.api.tree.LinkedListNode;
+import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.ValueNode;
@@ -18,16 +18,16 @@ import org.quiltmc.chasm.internal.util.NodeConstants;
 
 public class ChasmClassVisitor extends ClassVisitor {
     private final MapNode classNode = new LinkedHashMapNode();
-    private final ListNode fields = new LinkedListNode();
-    private final ListNode methods = new LinkedListNode();
-    private final ListNode recordComponents = new LinkedListNode();
+    private final ListNode fields = new ArrayListNode();
+    private final ListNode methods = new ArrayListNode();
+    private final ListNode recordComponents = new ArrayListNode();
 
-    private final ListNode nestMembers = new LinkedListNode();
-    private final ListNode permittedSubclasses = new LinkedListNode();
-    private final ListNode innerClasses = new LinkedListNode();
+    private final ListNode nestMembers = new ArrayListNode();
+    private final ListNode permittedSubclasses = new ArrayListNode();
+    private final ListNode innerClasses = new ArrayListNode();
 
-    private final ListNode annotations = new LinkedListNode();
-    private final ListNode attributes = new LinkedListNode();
+    private final ListNode annotations = new ArrayListNode();
+    private final ListNode attributes = new ArrayListNode();
 
     public ChasmClassVisitor() {
         super(Opcodes.ASM9);
@@ -46,7 +46,7 @@ public class ChasmClassVisitor extends ClassVisitor {
         classNode.put(NodeConstants.SIGNATURE, new ValueNode<>(signature));
         classNode.put(NodeConstants.SUPER, new ValueNode<>(superName));
 
-        ListNode interfacesNode = new LinkedListNode();
+        ListNode interfacesNode = new ArrayListNode();
         for (String iface : interfaces) {
             interfacesNode.add(new ValueNode<>(iface));
         }
@@ -101,7 +101,7 @@ public class ChasmClassVisitor extends ClassVisitor {
     @Override
     public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
         MapNode annotation = new LinkedHashMapNode();
-        ListNode values = new LinkedListNode();
+        ListNode values = new ArrayListNode();
         annotation.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
         annotation.put(NodeConstants.VISIBLE, new ValueNode<>(visible));
         annotation.put(NodeConstants.VALUES, values);
@@ -113,7 +113,7 @@ public class ChasmClassVisitor extends ClassVisitor {
     @Override
     public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
         MapNode annotation = new LinkedHashMapNode();
-        ListNode values = new LinkedListNode();
+        ListNode values = new ArrayListNode();
         annotation.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
         annotation.put(NodeConstants.VISIBLE, new ValueNode<>(visible));
         annotation.put(NodeConstants.TYPE_REF, new ValueNode<>(typeRef));
@@ -184,7 +184,7 @@ public class ChasmClassVisitor extends ClassVisitor {
         methodNode.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
         methodNode.put(NodeConstants.SIGNATURE, new ValueNode<>(signature));
 
-        ListNode exceptionsNode = new LinkedListNode();
+        ListNode exceptionsNode = new ArrayListNode();
         if (exceptions != null) {
             for (String exception : exceptions) {
                 exceptionsNode.add(new ValueNode<>(exception));
