@@ -2,6 +2,11 @@ name: Checkstyle
 
 on: pull_request
 
+permissions:
+  checks: write
+  contents: read
+  pull-requests: read
+
 jobs:
   checkstyle_job:
     runs-on: ubuntu-latest
