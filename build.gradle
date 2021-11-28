@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id 'antlr'
     id 'checkstyle'
 }
 
@@ -41,18 +40,12 @@ checkstyle {
     ignoreFailures(false)
 }
 
-generateGrammarSource {
-    maxHeapSize = "64m"
-    arguments += ["-visitor", "-long-messages"]
-}
-
 repositories {
     mavenCentral()
 }
 
 dependencies {
     implementation 'org.ow2.asm:asm:9.2'
-    antlr 'org.antlr:antlr4:4.9.3'
 
     compileOnly 'org.jetbrains:annotations:23.0.0'
 

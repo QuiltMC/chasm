@@ -1,8 +1,8 @@
 package org.quiltmc.chasm.internal.asm.visitor;
 
 import org.objectweb.asm.ModuleVisitor;
-import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
+import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.ValueNode;

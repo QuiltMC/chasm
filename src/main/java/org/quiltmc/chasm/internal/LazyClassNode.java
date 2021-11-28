@@ -5,8 +5,8 @@ import java.util.AbstractMap;
 import java.util.Set;
 
 import org.objectweb.asm.ClassReader;
-import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
+import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
