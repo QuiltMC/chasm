@@ -64,12 +64,14 @@ public class MethodNodeReader {
         for (Node n : (ListNode) codeNode.get(NodeConstants.INSTRUCTIONS)) {
             // visitLabel
             ListNode labelsNode = (ListNode) ((MapNode) n).get(NodeConstants.LABELS);
-            for (Node n2 : labelsNode) {
-                methodVisitor.visitLabel(obtainLabel(labelMap, ((ValueNode<String>) n2).getValue()));
+            if (labelsNode != null) {
+                for (Node n2 : labelsNode) {
+                    methodVisitor.visitLabel(obtainLabel(labelMap, ((ValueNode<String>) n2).getValue()));
+                }
             }
 
             if (((MapNode) n).containsKey(NodeConstants.LINE)) {
-                if (labelsNode.isEmpty()) {
+                if (labelsNode == null || labelsNode.isEmpty()) {
                     throw new RuntimeException("Encountered line number without label.");
                 }
                 int line = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.LINE)).getValue();
