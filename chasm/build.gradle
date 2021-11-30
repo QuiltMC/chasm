@@ -3,7 +3,7 @@ plugins {
     id 'checkstyle'
 }
 
-group 'org.quiltmc'
+group 'org.quiltmc.chasm'
 version '1.0-SNAPSHOT'
 
 sourceSets {
