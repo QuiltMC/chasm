@@ -45,6 +45,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.slf4j:slf4j-api:1.8.0-beta4'
     implementation 'org.ow2.asm:asm:9.2'
 
     compileOnly 'org.jetbrains:annotations:23.0.0'

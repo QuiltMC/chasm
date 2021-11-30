@@ -1,6 +1,7 @@
 package org.quiltmc.chasm.internal.tree.reader;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.objectweb.asm.AnnotationVisitor;
@@ -61,26 +62,27 @@ public class MethodNodeReader {
     }
 
     private static void visitInstructions(MethodVisitor methodVisitor, MapNode codeNode, Map<String, Label> labelMap) {
-        for (Node n : (ListNode) codeNode.get(NodeConstants.INSTRUCTIONS)) {
+        for (Node rawInstruction : (ListNode) codeNode.get(NodeConstants.INSTRUCTIONS)) {
+            MapNode instruction = (MapNode) rawInstruction;
             // visitLabel
-            ListNode labelsNode = (ListNode) ((MapNode) n).get(NodeConstants.LABELS);
+            ListNode labelsNode = (ListNode) ((MapNode) rawInstruction).get(NodeConstants.LABELS);
             if (labelsNode != null) {
                 for (Node n2 : labelsNode) {
                     methodVisitor.visitLabel(obtainLabel(labelMap, ((ValueNode<String>) n2).getValue()));
                 }
             }
 
-            if (((MapNode) n).containsKey(NodeConstants.LINE)) {
+            if (instruction.containsKey(NodeConstants.LINE)) {
                 if (labelsNode == null || labelsNode.isEmpty()) {
                     throw new RuntimeException("Encountered line number without label.");
                 }
-                int line = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.LINE)).getValue();
+                int line = ((ValueNode<Integer>) instruction.get(NodeConstants.LINE)).getValue();
                 methodVisitor
                         .visitLineNumber(line, labelMap.get(((ValueNode<String>) labelsNode.get(0)).getValue()));
             }
 
             // visit<...>Insn
-            int opcode = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.OPCODE)).getValue();
+            int opcode = ((ValueNode<Integer>) instruction.get(NodeConstants.OPCODE)).getValue();
             switch (opcode) {
                 case Opcodes.NOP:
                     // TODO Hack to strip the trailing NOP
@@ -199,7 +201,7 @@ public class MethodNodeReader {
                 case Opcodes.SIPUSH:
                 case Opcodes.NEWARRAY: {
                     // visitIntInsn
-                    int operand = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.OPERAND)).getValue();
+                    int operand = ((ValueNode<Integer>) instruction.get(NodeConstants.OPERAND)).getValue();
                     methodVisitor.visitIntInsn(opcode, operand);
                     break;
                 }
@@ -215,7 +217,7 @@ public class MethodNodeReader {
                 case Opcodes.ASTORE:
                 case Opcodes.RET: {
                     // visitVarInsn
-                    int varIndex = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.VAR)).getValue();
+                    int varIndex = ((ValueNode<Integer>) instruction.get(NodeConstants.VAR)).getValue();
                     methodVisitor.visitVarInsn(opcode, varIndex);
                     break;
                 }
@@ -224,7 +226,7 @@ public class MethodNodeReader {
                 case Opcodes.CHECKCAST:
                 case Opcodes.INSTANCEOF: {
                     // visitTypeInsn
-                    String type = ((ValueNode<String>) ((MapNode) n).get(NodeConstants.TYPE)).getValue();
+                    String type = ((ValueNode<String>) instruction.get(NodeConstants.TYPE)).getValue();
                     methodVisitor.visitTypeInsn(opcode, type);
                     break;
                 }
@@ -233,10 +235,10 @@ public class MethodNodeReader {
                 case Opcodes.GETFIELD:
                 case Opcodes.PUTFIELD: {
                     // visitFieldInsn
-                    String owner = ((ValueNode<String>) ((MapNode) n).get(NodeConstants.OWNER)).getValue();
-                    String name1 = ((ValueNode<String>) ((MapNode) n).get(NodeConstants.NAME)).getValue();
+                    String owner = ((ValueNode<String>) instruction.get(NodeConstants.OWNER)).getValue();
+                    String name1 = ((ValueNode<String>) instruction.get(NodeConstants.NAME)).getValue();
                     String descriptor1 =
-                            ((ValueNode<String>) ((MapNode) n).get(NodeConstants.DESCRIPTOR)).getValue();
+                            ((ValueNode<String>) instruction.get(NodeConstants.DESCRIPTOR)).getValue();
                     methodVisitor.visitFieldInsn(opcode, owner, name1, descriptor1);
                     break;
                 }
@@ -245,22 +247,22 @@ public class MethodNodeReader {
                 case Opcodes.INVOKESTATIC:
                 case Opcodes.INVOKEINTERFACE: {
                     // visitMethodInsns
-                    String owner = ((ValueNode<String>) ((MapNode) n).get(NodeConstants.OWNER)).getValue();
-                    String name1 = ((ValueNode<String>) ((MapNode) n).get(NodeConstants.NAME)).getValue();
+                    String owner = ((ValueNode<String>) instruction.get(NodeConstants.OWNER)).getValue();
+                    String name1 = ((ValueNode<String>) instruction.get(NodeConstants.NAME)).getValue();
                     String descriptor1 =
-                            ((ValueNode<String>) ((MapNode) n).get(NodeConstants.DESCRIPTOR)).getValue();
+                            ((ValueNode<String>) instruction.get(NodeConstants.DESCRIPTOR)).getValue();
                     Boolean isInterface =
-                            ((ValueNode<Boolean>) ((MapNode) n).get(NodeConstants.IS_INTERFACE)).getValue();
+                            ((ValueNode<Boolean>) instruction.get(NodeConstants.IS_INTERFACE)).getValue();
                     methodVisitor.visitMethodInsn(opcode, owner, name1, descriptor1, isInterface);
                     break;
                 }
                 case Opcodes.INVOKEDYNAMIC: {
                     // visitInvokeDynamicInsn
-                    String name1 = ((ValueNode<String>) ((MapNode) n).get(NodeConstants.NAME)).getValue();
+                    String name1 = ((ValueNode<String>) instruction.get(NodeConstants.NAME)).getValue();
                     String descriptor1 =
-                            ((ValueNode<String>) ((MapNode) n).get(NodeConstants.DESCRIPTOR)).getValue();
-                    Handle handle = getHandle((MapNode) ((MapNode) n).get(NodeConstants.HANDLE));
-                    Object[] arguments = getArguments((ListNode) ((MapNode) n).get(NodeConstants.ARGUMENTS));
+                            ((ValueNode<String>) instruction.get(NodeConstants.DESCRIPTOR)).getValue();
+                    Handle handle = getHandle((MapNode) instruction.get(NodeConstants.HANDLE));
+                    Object[] arguments = getArguments((ListNode) instruction.get(NodeConstants.ARGUMENTS));
                     methodVisitor.visitInvokeDynamicInsn(name1, descriptor1, handle, arguments);
                     break;
                 }
@@ -283,21 +285,21 @@ public class MethodNodeReader {
                 case Opcodes.IFNULL:
                 case Opcodes.IFNONNULL: {
                     // visitJumpInsns
-                    String labelString = ((ValueNode<String>) ((MapNode) n).get(NodeConstants.TARGET)).getValue();
+                    String labelString = ((ValueNode<String>) instruction.get(NodeConstants.TARGET)).getValue();
                     Label label = obtainLabel(labelMap, labelString);
                     methodVisitor.visitJumpInsn(opcode, label);
                     break;
                 }
                 case Opcodes.LDC: {
                     // visitLdcInsn
-                    Object value = ((ValueNode<Object>) ((MapNode) n).get(NodeConstants.VALUE)).getValue();
+                    Object value = ((ValueNode<Object>) instruction.get(NodeConstants.VALUE)).getValue();
                     methodVisitor.visitLdcInsn(value);
                     break;
                 }
                 case Opcodes.IINC: {
                     // visitIincInsn
-                    int varIndex = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.VAR)).getValue();
-                    int increment = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.INCREMENT)).getValue();
+                    int varIndex = ((ValueNode<Integer>) instruction.get(NodeConstants.VAR)).getValue();
+                    int increment = ((ValueNode<Integer>) instruction.get(NodeConstants.INCREMENT)).getValue();
                     methodVisitor.visitIincInsn(varIndex, increment);
                     break;
                 }
@@ -305,9 +307,9 @@ public class MethodNodeReader {
                 case Opcodes.LOOKUPSWITCH: {
                     // visitTableSwitchInsn / visitLookupSwitchInsn
                     String defaultString =
-                            ((ValueNode<String>) ((MapNode) n).get(NodeConstants.DEFAULT)).getValue();
+                            ((ValueNode<String>) instruction.get(NodeConstants.DEFAULT)).getValue();
                     Label dflt = obtainLabel(labelMap, defaultString);
-                    ListNode cases = (ListNode) ((MapNode) n).get(NodeConstants.CASES);
+                    ListNode cases = (ListNode) instruction.get(NodeConstants.CASES);
                     int[] keys = new int[cases.size()];
                     Label[] labels = new Label[cases.size()];
                     for (int i = 0; i < cases.size(); i++) {
@@ -341,8 +343,8 @@ public class MethodNodeReader {
                 case Opcodes.MULTIANEWARRAY: {
                     // visitMultiANewArrayInsn
                     String descriptor1 =
-                            ((ValueNode<String>) ((MapNode) n).get(NodeConstants.DESCRIPTOR)).getValue();
-                    int dimensions = ((ValueNode<Integer>) ((MapNode) n).get(NodeConstants.DIMENSIONS)).getValue();
+                            ((ValueNode<String>) instruction.get(NodeConstants.DESCRIPTOR)).getValue();
+                    int dimensions = ((ValueNode<Integer>) instruction.get(NodeConstants.DIMENSIONS)).getValue();
                     methodVisitor.visitMultiANewArrayInsn(descriptor1, dimensions);
                     break;
                 }
@@ -351,9 +353,12 @@ public class MethodNodeReader {
             }
 
             // visitInsnAnnotation
-            for (Node n1 : (ListNode) ((MapNode) n).get(NodeConstants.ANNOTATIONS)) {
-                AnnotationNodeReader writer = new AnnotationNodeReader(n1);
-                writer.visitAnnotation(null, methodVisitor::visitTypeAnnotation);
+            ListNode annotations = (ListNode) instruction.get(NodeConstants.ANNOTATIONS);
+            if (annotations != null) {
+                for (Node annotation : annotations) {
+                    AnnotationNodeReader writer = new AnnotationNodeReader(annotation);
+                    writer.visitAnnotation(null, methodVisitor::visitTypeAnnotation);
+                }
             }
         }
     }
@@ -415,8 +420,11 @@ public class MethodNodeReader {
     }
 
     private void visitAttributes(MethodVisitor methodVisitor) {
-        for (Node n : (ListNode) methodNode.get(NodeConstants.ATTRIBUTES)) {
-            methodVisitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
+        ListNode methodAttributesNode = (ListNode) methodNode.get(NodeConstants.ATTRIBUTES);
+        if (methodAttributesNode != null) {
+            for (Node n : methodAttributesNode) {
+                methodVisitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
+            }
         }
     }
 

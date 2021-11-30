@@ -1,10 +1,11 @@
 package org.quiltmc.chasm.api.tree;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.quiltmc.chasm.internal.metadata.MetadataProvider;
 
-public class LinkedHashMapNode extends HashMap<String, Node> implements MapNode {
+public class LinkedHashMapNode extends LinkedHashMap<String, Node> implements MapNode {
     private MetadataProvider metadataProvider = new MetadataProvider();
 
     @Override
@@ -12,7 +13,7 @@ public class LinkedHashMapNode extends HashMap<String, Node> implements MapNode 
         LinkedHashMapNode copy = new LinkedHashMapNode();
         copy.metadataProvider = metadataProvider.copy();
 
-        for (Entry<String, Node> entry : this.entrySet()) {
+        for (Map.Entry<String, Node> entry : this.entrySet()) {
             copy.put(entry.getKey(), entry.getValue().copy());
         }
 

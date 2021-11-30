@@ -19,8 +19,12 @@ import org.quiltmc.chasm.internal.asm.ChasmClassWriter;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.tree.reader.ClassNodeReader;
 import org.quiltmc.chasm.internal.util.PathInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ChasmProcessor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChasmProcessor.class);
+
     private final SuperClassProvider superClassProvider;
 
     private final ListNode classes;
@@ -42,17 +46,28 @@ public class ChasmProcessor {
     }
 
     public List<byte[]> process() {
+        LOGGER.info("Processing {} classes...", classes.size());
+
+        LOGGER.info("Initializing paths...");
         PathInitializer.initialize(classes, new PathMetadata());
 
+        LOGGER.info("Sorting {} transformers...", transformers.size());
         List<List<Transformer>> rounds = TransformerSorter.sort(transformers);
+
+        LOGGER.info("Applying transformers in {} rounds:", rounds.size());
         for (List<Transformer> round : rounds) {
+            LOGGER.info("Applying {} transformers...", round.size());
             List<Transformation> transformations = applyTransformers(round, classes);
+
+            LOGGER.info("Sorting {} transformations...", transformations.size());
             List<Transformation> sorted = TransformationSorter.sort(transformations);
 
+            LOGGER.info("Applying transformations...");
             TransformationApplier transformationApplier = new TransformationApplier(classes, sorted);
             transformationApplier.applyAll();
         }
 
+        LOGGER.info("Writing {} classes...", classes.size());
         List<byte[]> classBytes = new ArrayList<>();
         for (Node node : classes) {
             MapNode classNode = (MapNode) node;
@@ -63,6 +78,7 @@ public class ChasmProcessor {
             classBytes.add(classWriter.toByteArray());
         }
 
+        LOGGER.info("Processing done!");
         return classBytes;
     }
 
