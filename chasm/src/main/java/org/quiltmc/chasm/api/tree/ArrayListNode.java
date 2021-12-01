@@ -13,7 +13,7 @@ public class ArrayListNode extends ArrayList<Node> implements ListNode {
 
     @Override
     public ArrayListNode copy() {
-        var copy = new ArrayListNode();
+        ArrayListNode copy = new ArrayListNode();
         copy.metadataProvider = this.metadataProvider.copy();
 
         for (Node entry : this) {

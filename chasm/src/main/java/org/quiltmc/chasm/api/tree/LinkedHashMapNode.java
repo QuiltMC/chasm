@@ -13,7 +13,7 @@ public class LinkedHashMapNode extends LinkedHashMap<String, Node> implements Ma
 
     @Override
     public LinkedHashMapNode copy() {
-        var copy = new LinkedHashMapNode();
+        LinkedHashMapNode copy = new LinkedHashMapNode();
         copy.metadataProvider = this.metadataProvider.copy();
 
         for (Map.Entry<String, Node> entry : this.entrySet()) {

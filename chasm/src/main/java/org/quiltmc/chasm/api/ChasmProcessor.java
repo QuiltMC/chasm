@@ -36,8 +36,8 @@ public class ChasmProcessor {
     /**
      * Create a new {@link ChasmProcessor} using the given {@link SuperClassProvider}.
      *
-     * @param superClassProvider A {@link SuperClassProvider} to supply parents of the classes to be transformed that are not
-     *                           being transformed and supply parents of classes that are not being transformed.
+     * @param superClassProvider A {@link SuperClassProvider} to supply parents of classes that are not being
+     *                               transformed.
      */
     public ChasmProcessor(SuperClassProvider superClassProvider) {
         this.superClassProvider = superClassProvider;
@@ -62,8 +62,8 @@ public class ChasmProcessor {
      * @param classBytes A class {@code byte[]} to transform.
      */
     public void addClass(byte[] classBytes) {
-        var classReader = new ClassReader(classBytes);
-        var classNode = new LazyClassNode(classReader);
+        ClassReader classReader = new ClassReader(classBytes);
+        LazyClassNode classNode = new LazyClassNode(classReader);
         this.classes.add(classNode);
     }
 
@@ -80,28 +80,29 @@ public class ChasmProcessor {
         PathInitializer.initialize(this.classes, new PathMetadata());
 
         LOGGER.info("Sorting {} transformers...", this.transformers.size());
-        var rounds = TransformerSorter.sort(this.transformers);
+        List<List<Transformer>> rounds = TransformerSorter.sort(this.transformers);
 
         LOGGER.info("Applying transformers in {} rounds:", rounds.size());
         for (List<Transformer> round : rounds) {
             LOGGER.info("Applying {} transformers...", round.size());
-            var transformations = applyTransformers(round, this.classes);
+            List<Transformation> transformations = applyTransformers(round, this.classes);
 
             LOGGER.info("Sorting {} transformations...", transformations.size());
-            var sorted = TransformationSorter.sort(transformations);
+            List<Transformation> sorted = TransformationSorter.sort(transformations);
 
             LOGGER.info("Applying transformations...");
-            var transformationApplier = new TransformationApplier(this.classes, sorted);
+            TransformationApplier transformationApplier = new TransformationApplier(this.classes, sorted);
             transformationApplier.applyAll();
         }
 
         LOGGER.info("Writing {} classes...", this.classes.size());
         List<byte[]> classBytes = new ArrayList<>();
         for (Node node : this.classes) {
-            var classNode = (MapNode) node;
+            MapNode classNode = (MapNode) node;
 
-            var chasmWriter = new ClassNodeReader(classNode);
-            ClassWriter classWriter = new ChasmClassWriter(new ChasmSuperClassProvider(this.superClassProvider, this.classes));
+            ClassNodeReader chasmWriter = new ClassNodeReader(classNode);
+            ClassWriter classWriter = new ChasmClassWriter(
+                    new ChasmSuperClassProvider(this.superClassProvider, this.classes));
             chasmWriter.accept(classWriter);
             classBytes.add(classWriter.toByteArray());
         }

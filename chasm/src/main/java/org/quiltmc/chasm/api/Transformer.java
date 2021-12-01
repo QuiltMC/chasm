@@ -6,7 +6,24 @@ import java.util.Set;
 
 import org.quiltmc.chasm.api.tree.ListNode;
 
+/**
+ * Bulk-instantiate {@link Transformation}s of classes.
+ *
+ * <p>{@link Transformer}s also have a {@link String} ID for use in occasionally
+ * hard-coding relative {@link Transformer} ordering.
+ */
 public interface Transformer {
+    /**
+     * Apply this {@link Transformer} to the given {@link ListNode} of classes,
+     * resulting in a {@link Collection} of {@link Transformation}s.
+     *
+     * @param classes The {@link ListNode} of classes to possibly instantiate this
+     *            {@link Transformer} on.
+     *
+     * @return The {@link Collection} of {@link Transformation}s this
+     *             {@link Transformer}
+     *             created from the given {@link ListNode} of classes.
+     */
     Collection<Transformation> apply(ListNode classes);
 
     /**
