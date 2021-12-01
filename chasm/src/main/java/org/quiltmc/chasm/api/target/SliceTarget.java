@@ -30,13 +30,13 @@ public class SliceTarget implements Target {
      */
     public SliceTarget(ListNode target, int start, int end) {
         this.target = target;
-        this.startIndex = start;
-        this.endIndex = end;
+        startIndex = start;
+        endIndex = end;
     }
 
     @Override
     public Node getTarget() {
-        return this.target;
+        return target;
     }
 
     /**
@@ -45,7 +45,7 @@ public class SliceTarget implements Target {
      * @return The start index of this {@link SliceTarget}' slice.
      */
     public int getStartIndex() {
-        return this.startIndex;
+        return startIndex;
     }
 
     /**
@@ -63,7 +63,7 @@ public class SliceTarget implements Target {
      * @return The end index of this {@link SliceTarget}'s slice.
      */
     public int getEndIndex() {
-        return this.endIndex;
+        return endIndex;
     }
 
     /**

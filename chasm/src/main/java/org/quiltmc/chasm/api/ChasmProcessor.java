@@ -41,7 +41,7 @@ public class ChasmProcessor {
      */
     public ChasmProcessor(SuperClassProvider superClassProvider) {
         this.superClassProvider = superClassProvider;
-        this.classes = new ArrayListNode();
+        classes = new ArrayListNode();
     }
 
     /**
@@ -52,7 +52,7 @@ public class ChasmProcessor {
      *           list of {@link Transformer}s to transform classes with.
      */
     public void addTransformer(Transformer transformer) {
-        this.transformers.add(transformer);
+        transformers.add(transformer);
     }
 
     /**
@@ -64,7 +64,7 @@ public class ChasmProcessor {
     public void addClass(byte[] classBytes) {
         ClassReader classReader = new ClassReader(classBytes);
         LazyClassNode classNode = new LazyClassNode(classReader);
-        this.classes.add(classNode);
+        classes.add(classNode);
     }
 
     /**
@@ -74,35 +74,35 @@ public class ChasmProcessor {
      * @return The list of transformed classes, as a {@link List} of {@code byte[]}s.
      */
     public List<byte[]> process() {
-        LOGGER.info("Processing {} classes...", this.classes.size());
+        LOGGER.info("Processing {} classes...", classes.size());
 
         LOGGER.info("Initializing paths...");
-        PathInitializer.initialize(this.classes, new PathMetadata());
+        PathInitializer.initialize(classes, new PathMetadata());
 
-        LOGGER.info("Sorting {} transformers...", this.transformers.size());
-        List<List<Transformer>> rounds = TransformerSorter.sort(this.transformers);
+        LOGGER.info("Sorting {} transformers...", transformers.size());
+        List<List<Transformer>> rounds = TransformerSorter.sort(transformers);
 
         LOGGER.info("Applying transformers in {} rounds:", rounds.size());
         for (List<Transformer> round : rounds) {
             LOGGER.info("Applying {} transformers...", round.size());
-            List<Transformation> transformations = applyTransformers(round, this.classes);
+            List<Transformation> transformations = applyTransformers(round, classes);
 
             LOGGER.info("Sorting {} transformations...", transformations.size());
             List<Transformation> sorted = TransformationSorter.sort(transformations);
 
             LOGGER.info("Applying transformations...");
-            TransformationApplier transformationApplier = new TransformationApplier(this.classes, sorted);
+            TransformationApplier transformationApplier = new TransformationApplier(classes, sorted);
             transformationApplier.applyAll();
         }
 
-        LOGGER.info("Writing {} classes...", this.classes.size());
+        LOGGER.info("Writing {} classes...", classes.size());
         List<byte[]> classBytes = new ArrayList<>();
-        for (Node node : this.classes) {
+        for (Node node : classes) {
             MapNode classNode = (MapNode) node;
 
             ClassNodeReader chasmWriter = new ClassNodeReader(classNode);
             ClassWriter classWriter = new ChasmClassWriter(
-                    new ChasmSuperClassProvider(this.superClassProvider, this.classes));
+                    new ChasmSuperClassProvider(superClassProvider, classes));
             chasmWriter.accept(classWriter);
             classBytes.add(classWriter.toByteArray());
         }

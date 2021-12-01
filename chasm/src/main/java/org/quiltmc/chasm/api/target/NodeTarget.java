@@ -21,6 +21,6 @@ public class NodeTarget implements Target {
 
     @Override
     public Node getTarget() {
-        return this.target;
+        return target;
     }
 }

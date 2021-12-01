@@ -14,7 +14,7 @@ public class ArrayListNode extends ArrayList<Node> implements ListNode {
     @Override
     public ArrayListNode copy() {
         ArrayListNode copy = new ArrayListNode();
-        copy.metadataProvider = this.metadataProvider.copy();
+        copy.metadataProvider = metadataProvider.copy();
 
         for (Node entry : this) {
             copy.add(entry.copy());
@@ -25,6 +25,6 @@ public class ArrayListNode extends ArrayList<Node> implements ListNode {
 
     @Override
     public MetadataProvider getMetadata() {
-        return this.metadataProvider;
+        return metadataProvider;
     }
 }
