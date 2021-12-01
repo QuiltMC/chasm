@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+    id 'antlr'
+    id 'checkstyle'
+}
+
+group 'org.quiltmc.chasm'
+version '1.0-SNAPSHOT'
+
+compileJava {
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+compileTestJava {
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+generateGrammarSource {
+    maxHeapSize = "64m"
+    arguments += ["-visitor", "-long-messages"]
+}
+
+checkstyle {
+    toolVersion "9.1"
+    ignoreFailures(false)
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':chasm')
+
+    antlr 'org.antlr:antlr4:4.9.3'
+
+    testImplementation 'org.ow2.asm:asm-util:9.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
