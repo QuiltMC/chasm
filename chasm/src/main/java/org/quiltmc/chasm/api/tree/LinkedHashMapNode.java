@@ -14,9 +14,9 @@ public class LinkedHashMapNode extends LinkedHashMap<String, Node> implements Ma
     @Override
     public LinkedHashMapNode copy() {
         LinkedHashMapNode copy = new LinkedHashMapNode();
-        copy.metadataProvider = this.metadataProvider.copy();
+        copy.metadataProvider = metadataProvider.copy();
 
-        for (Map.Entry<String, Node> entry : this.entrySet()) {
+        for (Map.Entry<String, Node> entry : entrySet()) {
             copy.put(entry.getKey(), entry.getValue().copy());
         }
 
@@ -25,6 +25,6 @@ public class LinkedHashMapNode extends LinkedHashMap<String, Node> implements Ma
 
     @Override
     public MetadataProvider getMetadata() {
-        return this.metadataProvider;
+        return metadataProvider;
     }
 }
