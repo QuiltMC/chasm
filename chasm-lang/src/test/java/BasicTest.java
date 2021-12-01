@@ -30,10 +30,10 @@ public class BasicTest {
                     call_fib: $.fibonacci(46),
                     curry: first -> second -> first - second,
                     call_curry: $.curry(5)(3),
-                    list: [ 1, "two", false, { name: "object" }, none],
-                    list_index: $.list[1],
-                    map_member: $.list[3].name,
-                    map_index: $.list[3]["name"]
+                    list: [1, "two", false, { name: "object" }, none],
+                    list_index: $.list.[1],
+                    map_member: $.list.[3].name,
+                    map_index: $.list.[3].["name"]
                 }
                 """;
 
@@ -53,7 +53,7 @@ public class BasicTest {
                 {
                     id: "exampleTransformer",
                     target_name: "TestClass",
-                    target_class: (classes<c -> c.name = $.target_name>)[0],
+                    target_class: classes.<c -> c.name = $.target_name>.[0],
                     transformations: [
                         {
                             target: {
@@ -61,22 +61,24 @@ public class BasicTest {
                                 start: 0,
                                 end: 0,
                             },
-                            apply: args -> [{
-                                access: 1,
-                                name: "returnThis",
-                                descriptor: "()LTestClass;",
-                                code: {
-                                    instructions: [
-                                        {
-                                            opcode: 25,
-                                            var: 0
-                                        },
-                                        {
-                                            opcode: 176,
-                                        },
-                                    ],
-                                },
-                            }]
+                            apply: args -> [
+                                {
+                                    access: 1,
+                                    name: "returnThis",
+                                    descriptor: "()LTestClass;",
+                                    code: {
+                                        instructions: [
+                                            {
+                                                opcode: 25,
+                                                var: 0
+                                            },
+                                            {
+                                                opcode: 176,
+                                            },
+                                        ],
+                                    },
+                                }
+                            ]
                         },
                     ],
                 }

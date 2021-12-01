@@ -11,8 +11,8 @@ file
 expression
     : IDENTIFIER # ReferenceExpression
     | expression '.' IDENTIFIER # MemberExpression
-    | expression '[' expression ']' # IndexExpression
-    | expression '<' expression '>' # FilterExpression
+    | expression '.' '[' expression ']' # IndexExpression
+    | expression '.' '<' expression '>' # FilterExpression
     | expression '(' expression ')' # CallExpression
     | map # MapExpression
     | list # ListExpression
