@@ -70,7 +70,8 @@ public class AnnotationNodeReader {
         ValueNode typePath = (ValueNode) ((MapNode) annotationNode).get(NodeConstants.TYPE_PATH);
         AnnotationVisitor annotationVisitor;
         if (typeRef == null) {
-            annotationVisitor = visitAnnotation.visitAnnotation(annotationDesc.getValueAsString(), visible.getValueAsBoolean());
+            annotationVisitor = visitAnnotation.visitAnnotation(annotationDesc.getValueAsString(),
+                    visible.getValueAsBoolean());
         } else {
             annotationVisitor = visitTypeAnnotation.visitTypeAnnotation(typeRef.getValueAsInt(),
                     TypePath.fromString(typePath.getValueAsString()), annotationDesc.getValueAsString(),

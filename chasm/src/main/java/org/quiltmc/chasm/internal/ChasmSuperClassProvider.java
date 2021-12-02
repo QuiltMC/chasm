@@ -23,7 +23,8 @@ public class ChasmSuperClassProvider implements SuperClassProvider {
             MapNode classNode = (MapNode) node;
             ValueNode className = (ValueNode) classNode.get(NodeConstants.NAME);
             ValueNode superName = (ValueNode) classNode.get(NodeConstants.SUPER);
-            classNameToSuperClass.put(className.getValueAsString(), superName == null ? OBJECT : superName.getValueAsString());
+            classNameToSuperClass.put(className.getValueAsString(),
+                    superName == null ? OBJECT : superName.getValueAsString());
         }
     }
 

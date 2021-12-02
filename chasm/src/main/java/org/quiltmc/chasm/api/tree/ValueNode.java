@@ -19,7 +19,8 @@ public class ValueNode implements Node {
             return null;
         }
         if (!type.isInstance(value)) {
-            throw new IllegalStateException("Value is not of expected type " + type + ", but is " + value.getClass() + "!");
+            throw new IllegalStateException("Value is not of expected type " + type
+                    + ", but is " + value.getClass() + "!");
         }
         return type.cast(value);
     }
