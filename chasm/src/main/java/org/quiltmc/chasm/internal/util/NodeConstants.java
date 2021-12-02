@@ -28,8 +28,8 @@ public class NodeConstants {
     public static final String IS_INTERFACE = "isInterface";
     public static final String KEY = "key";
     public static final String LABEL = "label";
-    public static final String LABELS = "labels";
     public static final String LINE = "line";
+    public static final String LINE_NUMBERS = "lineNumbers";
     public static final String LOCALS = "locals";
     public static final String MAIN = "main";
     public static final String METHODS = "methods";

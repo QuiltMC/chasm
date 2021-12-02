@@ -63,21 +63,12 @@ public class MethodNodeReader {
     private static void visitInstructions(MethodVisitor methodVisitor, MapNode codeNode, Map<String, Label> labelMap) {
         for (Node rawInstruction : (ListNode) codeNode.get(NodeConstants.INSTRUCTIONS)) {
             MapNode instruction = (MapNode) rawInstruction;
-            // visitLabel
-            ListNode labelsNode = (ListNode) ((MapNode) rawInstruction).get(NodeConstants.LABELS);
-            if (labelsNode != null) {
-                for (Node n2 : labelsNode) {
-                    methodVisitor.visitLabel(obtainLabel(labelMap, ((ValueNode<String>) n2).getValue()));
-                }
-            }
 
-            if (instruction.containsKey(NodeConstants.LINE)) {
-                if (labelsNode == null || labelsNode.isEmpty()) {
-                    throw new RuntimeException("Encountered line number without label.");
-                }
-                int line = ((ValueNode<Integer>) instruction.get(NodeConstants.LINE)).getValue();
-                methodVisitor
-                        .visitLineNumber(line, labelMap.get(((ValueNode<String>) labelsNode.get(0)).getValue()));
+            // visitLabel
+            if (instruction.containsKey(NodeConstants.LABEL)) {
+                String label = ((ValueNode<String>) instruction.get(NodeConstants.LABEL)).getValue();
+                methodVisitor.visitLabel(obtainLabel(labelMap, label));
+                continue;
             }
 
             // visit<...>Insn
@@ -418,6 +409,21 @@ public class MethodNodeReader {
         }
     }
 
+    private void visitLineNumbers(MethodVisitor methodVisitor, MapNode codeNode, Map<String, Label> labelMap) {
+        ListNode lineNumbers = (ListNode) codeNode.get(NodeConstants.LINE_NUMBERS);
+        if (lineNumbers != null) {
+            for (Node n : lineNumbers) {
+                MapNode lineNumber = (MapNode) n;
+                int line = ((ValueNode<Integer>) lineNumber.get(NodeConstants.LINE)).getValue();
+                String labelName = ((ValueNode<String>) lineNumber.get(NodeConstants.LABEL)).getValue();
+                Label label = labelMap.get(labelName);
+                if (label != null) {
+                    methodVisitor.visitLineNumber(line, label);
+                }
+            }
+        }
+    }
+
     private void visitAttributes(MethodVisitor methodVisitor) {
         ListNode methodAttributesNode = (ListNode) methodNode.get(NodeConstants.ATTRIBUTES);
         if (methodAttributesNode != null) {
@@ -541,7 +547,7 @@ public class MethodNodeReader {
             visitLocalVariables(methodVisitor, codeNode, labelMap);
 
             // visitLineNumber
-            // Don't care
+            visitLineNumbers(methodVisitor, codeNode, labelMap);
 
             // visitMaxs
             methodVisitor.visitMaxs(0, 0);
