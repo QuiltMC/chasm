@@ -5,10 +5,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.quiltmc.chasm.lang.ReductionContext;
+import org.quiltmc.chasm.lang.op.Addable;
 import org.quiltmc.chasm.lang.op.Indexable;
 import org.quiltmc.chasm.lang.op.Iterable;
 
-public class ListExpression implements Expression, Indexable, Iterable {
+public class ListExpression implements Expression, Indexable, Iterable, Addable {
     private final List<Expression> entries;
 
     public ListExpression(List<Expression> entries) {
@@ -63,5 +64,17 @@ public class ListExpression implements Expression, Indexable, Iterable {
     @Override
     public Iterator<Expression> iterate() {
         return entries.iterator();
+    }
+
+    @Override
+    public boolean canAdd(Expression expression) {
+        return expression instanceof ListExpression;
+    }
+
+    @Override
+    public Expression add(Expression expression) {
+        List<Expression> newEntries = new ArrayList<>(entries);
+        newEntries.addAll(((ListExpression) expression).entries);
+        return new ListExpression(newEntries);
     }
 }

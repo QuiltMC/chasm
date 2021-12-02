@@ -3,6 +3,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
@@ -11,6 +12,9 @@ import org.quiltmc.chasm.api.util.ClassLoaderSuperClassProvider;
 import org.quiltmc.chasm.lang.ChasmLang;
 import org.quiltmc.chasm.lang.ChasmLangTransformer;
 import org.quiltmc.chasm.lang.ReductionContext;
+import org.quiltmc.chasm.lang.ast.Expression;
+import org.quiltmc.chasm.lang.ast.IntegerExpression;
+import org.quiltmc.chasm.lang.ast.ListExpression;
 import org.quiltmc.chasm.lang.ast.MapExpression;
 
 public class BasicTest {
@@ -33,12 +37,13 @@ public class BasicTest {
                     list: [1, "two", false, { name: "object" }, none],
                     list_index: $.list.[1],
                     map_member: $.list.[3].name,
-                    map_index: $.list.[3].["name"]
+                    map_index: $.list.[3].["name"],
+                    concat: [1, 2] + [3, 4],
                 }
                 """;
 
         MapExpression map = ChasmLang.parse(test);
-        MapExpression reduced = map.reduce(new ReductionContext());
+        MapExpression reduced = (MapExpression) new ReductionContext().reduce(map);
     }
 
     @Test
@@ -94,5 +99,168 @@ public class BasicTest {
         reader.accept(resultVisitor, 0);
 
         System.out.println(resultString);
+    }
+
+    @Test
+    public void testBrainfuck() {
+        String test = """
+                {
+                    data_size: 20,
+                    init_list: args -> args.length = 0 ? [] :
+                        [args.value] + $.init_list({value: args.value, length: args.length - 1}),
+                    init: {
+                        ptr: 0,
+                        data: $.init_list({
+                            value: 0,
+                            length: $.data_size
+                        }),
+                        pc: 0,
+                        program: "
+                            ++++++++++[>+++++++>++++++++++>+++>+<<<<-]
+                            >++.>+.+++++++..+++.>++.<<+++++++++++++++.
+                            >.+++.------.--------.>+.",
+                        out: []
+                    },
+                    set: args ->
+                        args.start = args.length ? args.result : $.set({
+                            start: args.start + 1,
+                            result: args.result + [args.start = args.index ? args.value : args.list.[args.start]],
+                            list: args.list,
+                            length: args.length,
+                            index: args.index,
+                            value: args.value
+                        }),
+                    jmp_forward: args ->
+                        args.depth = 0 ? args.pc :
+                        args.program.[args.pc] = "[" ? $.jmp_forward({
+                            depth: args.depth + 1,
+                            program: args.program,
+                            pc: args.pc + 1
+                        }) :
+                        args.program.[args.pc] = "]" ? $.jmp_forward({
+                            depth: args.depth - 1,
+                            program: args.program,
+                            pc: args.pc + 1
+                        }) :
+                        $.jmp_forward({
+                            depth: args.depth,
+                            program: args.program,
+                            pc: args.pc + 1
+                        }),
+                    jmp_back: args ->
+                        args.depth = 0 ? args.pc + 2 :
+                        args.program.[args.pc] = "[" ?  $.jmp_back({
+                            depth: args.depth - 1,
+                            program: args.program,
+                            pc: args.pc - 1
+                        }) :
+                        args.program.[args.pc] = "]" ? $.jmp_back({
+                            depth: args.depth + 1,
+                            program: args.program,
+                            pc: args.pc - 1
+                        }) :
+                        $.jmp_back({
+                            depth: args.depth,
+                            program: args.program,
+                            pc: args.pc - 1
+                        }),
+                    run: state ->
+                        state.program.[state.pc] = none ? state.out :
+                        state.program.[state.pc] = ">" ? $.run({
+                            ptr: state.ptr + 1,
+                            data: state.data,
+                            pc: state.pc + 1,
+                            program: state.program,
+                            out: state.out
+                        }) :
+                        state.program.[state.pc] = "<" ? $.run({
+                            ptr: state.ptr - 1,
+                            data: state.data,
+                            pc: state.pc + 1,
+                            program: state.program,
+                            out: state.out
+                        }) :
+                        state.program.[state.pc] = "." ? $.run({
+                            ptr: state.ptr,
+                            data: state.data,
+                            pc: state.pc + 1,
+                            program: state.program,
+                            out: state.out + [state.data.[state.ptr]]
+                        }) :
+                        state.program.[state.pc] = "+" ? $.run({
+                            ptr: state.ptr,
+                            data: $.set({
+                                start: 0,
+                                result: [],
+                                list: state.data,
+                                length: $.data_size,
+                                index: state.ptr,
+                                value: state.data.[state.ptr] + 1
+                            }),
+                            pc: state.pc + 1,
+                            program: state.program,
+                            out: state.out
+                        }) :
+                        state.program.[state.pc] = "-" ? $.run({
+                            ptr: state.ptr,
+                            data: $.set({
+                                start: 0,
+                                result: [],
+                                list: state.data,
+                                length: $.data_size,
+                                index: state.ptr,
+                                value: state.data.[state.ptr] - 1
+                            }),
+                            pc: state.pc + 1,
+                            program: state.program,
+                            out: state.out
+                        }) :
+                        state.program.[state.pc] = "[" ? $.run({
+                            ptr: state.ptr,
+                            data: state.data,
+                            pc: state.data.[state.ptr] = 0 ?
+                                $.jmp_forward({
+                                    depth: 1,
+                                    pc: state.pc + 1,
+                                    program: state.program
+                                }) :
+                                state.pc + 1,
+                            program: state.program,
+                            out: state.out
+                        }) :
+                        state.program.[state.pc] = "]" ? $.run({
+                            ptr: state.ptr,
+                            data: state.data,
+                            pc: state.data.[state.ptr] = 0 ?
+                                state.pc + 1 :
+                                $.jmp_back({
+                                    depth: 1,
+                                    pc: state.pc - 1,
+                                    program: state.program
+                                }),
+                            program: state.program,
+                            out: state.out
+                        }) :
+                        $.run({
+                            ptr: state.ptr,
+                            data: state.data,
+                            pc: state.pc + 1,
+                            program: state.program,
+                            out: state.out
+                        }),
+                    result: $.run($.init)
+                }
+                """;
+
+        MapExpression map = ChasmLang.parse(test);
+        MapExpression reduced = (MapExpression) new ReductionContext().reduce(map);
+        List<Expression> expressions = ((ListExpression) reduced.get("result")).getEntries();
+        char[] chars = new char[expressions.size()];
+        for (int i = 0; i < expressions.size(); i++) {
+            IntegerExpression integerExpression = (IntegerExpression) expressions.get(i);
+            chars[i] = (char) integerExpression.getValue().intValue();
+        }
+        String result = String.valueOf(chars);
+        Assertions.assertEquals("Hello World!", result);
     }
 }
