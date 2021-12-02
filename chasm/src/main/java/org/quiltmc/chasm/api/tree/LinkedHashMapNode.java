@@ -12,12 +12,12 @@ public class LinkedHashMapNode extends LinkedHashMap<String, Node> implements Ma
     private MetadataProvider metadataProvider = new MetadataProvider();
 
     @Override
-    public LinkedHashMapNode copy() {
+    public LinkedHashMapNode asImmutable() {
         LinkedHashMapNode copy = new LinkedHashMapNode();
         copy.metadataProvider = metadataProvider.copy();
 
         for (Map.Entry<String, Node> entry : entrySet()) {
-            copy.put(entry.getKey(), entry.getValue().copy());
+            copy.put(entry.getKey(), entry.getValue().asImmutable());
         }
 
         return copy;

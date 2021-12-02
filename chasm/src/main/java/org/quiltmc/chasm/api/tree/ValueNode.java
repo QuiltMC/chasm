@@ -32,7 +32,7 @@ public class ValueNode<T> implements Node {
     }
 
     @Override
-    public ValueNode<T> copy() {
+    public ValueNode<T> asImmutable() {
         ValueNode<T> copy = new ValueNode<>(value);
         copy.metadataProvider = metadataProvider.copy();
         return copy;

@@ -1,5 +1,9 @@
 package org.quiltmc.chasm.internal.metadata;
 
 public interface Metadata {
-    Metadata copy();
+    FrozenMetadata freeze();
+
+    default Metadata thaw() {
+        return this;
+    }
 }

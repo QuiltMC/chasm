@@ -40,12 +40,12 @@ public class LazyClassNode extends AbstractMap<String, Node> implements MapNode 
     }
 
     @Override
-    public MapNode copy() {
+    public MapNode asImmutable() {
         LazyClassNode copy = new LazyClassNode(classReader);
         copy.metadataProvider = metadataProvider.copy();
 
         for (Entry<String, Node> entry : nonLazyChildren.entrySet()) {
-            copy.nonLazyChildren.put(entry.getKey(), entry.getValue().copy());
+            copy.nonLazyChildren.put(entry.getKey(), entry.getValue().asImmutable());
         }
 
         return copy;

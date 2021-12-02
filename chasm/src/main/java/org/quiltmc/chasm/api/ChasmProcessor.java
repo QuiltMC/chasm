@@ -116,7 +116,7 @@ public class ChasmProcessor {
 
         for (Transformer transformer : transformers) {
             // TODO: Replace copy with immutability
-            transformations.addAll(transformer.apply(classes.copy()));
+            transformations.addAll(transformer.apply(classes.asImmutable()));
         }
 
         return transformations;

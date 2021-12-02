@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.target.Target;
+import org.quiltmc.chasm.internal.metadata.PathEntry;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 
 public class TransformationSorter {
@@ -110,11 +111,11 @@ public class TransformationSorter {
 
     private static void recurseTargets(List<TargetInfo> targets, int depth, Set<TargetInfo> enclosingTargets) {
         // Group by path
-        Map<PathMetadata.Entry, List<TargetInfo>> childrenByKey = new LinkedHashMap<>();
+        Map<PathEntry, List<TargetInfo>> childrenByKey = new LinkedHashMap<>();
         for (TargetInfo target : targets) {
             PathMetadata path = target.getPath();
-            PathMetadata.Entry entry = path.size() > depth ? path.get(depth) : null;
-            childrenByKey.computeIfAbsent(entry, e -> new ArrayList<>());
+            PathEntry pathEntry = path.size() > depth ? path.get(depth) : null;
+            childrenByKey.computeIfAbsent(pathEntry, e -> new ArrayList<>());
         }
 
         // All Targets targeting the current node
@@ -204,8 +205,8 @@ public class TransformationSorter {
 
                 if (index % 2 != 0) {
                     // Convert slice index to node index
-                    PathMetadata.Entry entry = new PathMetadata.Entry(index / 2);
-                    List<TargetInfo> children = childrenByKey.getOrDefault(entry, Collections.emptyList());
+                    PathEntry pathEntry = new PathEntry(index / 2);
+                    List<TargetInfo> children = childrenByKey.getOrDefault(pathEntry, Collections.emptyList());
                     recurseTargets(children, depth + 1, enclosingTargets);
                 }
 

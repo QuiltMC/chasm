@@ -38,7 +38,7 @@ public class MapExpression implements Expression, Indexable {
         Map<String, Expression> copies = new LinkedHashMap<>();
 
         for (Map.Entry<String, Expression> entry : entries.entrySet()) {
-            copies.put(entry.getKey(), entry.getValue().copy());
+            copies.put(entry.getKey(), entry.getValue().asImmutable());
         }
 
         return new MapExpression(copies);

@@ -7,5 +7,5 @@ import java.util.Map;
  */
 public interface MapNode extends Node, Map<String, Node> {
     @Override
-    MapNode copy();
+    MapNode asImmutable();
 }

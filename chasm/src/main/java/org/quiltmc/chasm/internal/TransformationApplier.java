@@ -13,6 +13,7 @@ import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
+import org.quiltmc.chasm.internal.metadata.PathEntry;
 import org.quiltmc.chasm.internal.metadata.OriginMetadata;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 
@@ -69,7 +70,7 @@ public class TransformationApplier {
         MapNode sources = resolveSources(transformation);
 
         // TODO: Replace copies with immutability
-        Node replacement = transformation.apply(target.copy(), sources.copy()).copy();
+        Node replacement = transformation.apply(target.asImmutable(), sources.asImmutable()).asImmutable();
         replacement.getMetadata().put(OriginMetadata.class, new OriginMetadata(transformation));
 
         replaceTarget(transformation.getTarget(), replacement);
@@ -95,17 +96,17 @@ public class TransformationApplier {
         }
 
         Node parentNode = targetPath.parent().resolve(classes);
-        PathMetadata.Entry entry = targetPath.get(targetPath.size() - 1);
+        PathEntry pathEntry = targetPath.get(targetPath.size() - 1);
 
-        if (parentNode instanceof ListNode && entry.isInteger()) {
+        if (parentNode instanceof ListNode && pathEntry.isInteger()) {
             ListNode parentList = (ListNode) parentNode;
-            parentList.set(entry.asInteger(), replacement);
+            parentList.set(pathEntry.asInteger(), replacement);
             return;
         }
 
-        if (parentNode instanceof MapNode && entry.isString()) {
+        if (parentNode instanceof MapNode && pathEntry.isString()) {
             MapNode parentList = (MapNode) parentNode;
-            parentList.put(entry.asString(), replacement);
+            parentList.put(pathEntry.asString(), replacement);
             return;
         }
 
@@ -164,7 +165,7 @@ public class TransformationApplier {
     private void movePathIndex(PathMetadata path, int pathIndex, int endIndex, int amount) {
         int originalIndex = path.get(pathIndex).asInteger();
         if (originalIndex >= endIndex) {
-            path.set(pathIndex, new PathMetadata.Entry(originalIndex + amount));
+            path.set(pathIndex, new PathEntry(originalIndex + amount));
         }
     }
 
@@ -182,11 +183,11 @@ public class TransformationApplier {
         Node currentNode = classes;
         PathMetadata path = getPath(target);
 
-        for (PathMetadata.Entry entry : path) {
-            if (currentNode instanceof ListNode && entry.isInteger()) {
-                currentNode = ((ListNode) currentNode).get(entry.asInteger());
-            } else if (currentNode instanceof MapNode && entry.isString()) {
-                currentNode = ((MapNode) currentNode).get(entry.asString());
+        for (PathEntry pathEntry : path) {
+            if (currentNode instanceof ListNode && pathEntry.isInteger()) {
+                currentNode = ((ListNode) currentNode).get(pathEntry.asInteger());
+            } else if (currentNode instanceof MapNode && pathEntry.isString()) {
+                currentNode = ((MapNode) currentNode).get(pathEntry.asString());
             } else {
                 throw new RuntimeException("Can't resolve path " + path);
             }

@@ -1,6 +1,7 @@
 package org.quiltmc.chasm.api.tree;
 
 import org.jetbrains.annotations.ApiStatus;
+import org.quiltmc.chasm.internal.metadata.Metadata;
 import org.quiltmc.chasm.internal.metadata.MetadataProvider;
 
 /**
@@ -8,14 +9,24 @@ import org.quiltmc.chasm.internal.metadata.MetadataProvider;
  */
 public interface Node {
     /**
-     * Create a deep copy of this {@link Node}.
+     * Get an immutable version of this {@link Node}.
      *
-     * <p>This means that any containing node should also be copied,
-     *           as well as the metadata of all Nodes copied by this method.
+     * <p>This means that all children and {@link Metadata} of the returned
+     * {@link Node} must also be immutable.
+     * Only immutable children are allowed in order to avoid callers mutating using saved references.
      *
-     * @return A recursive copy of this {@link Node}.
+     * @return An immutable version of this {@link Node}.
      */
-    Node copy();
+    FrozenNode asImmutable();
+
+    /**
+     * Get a mutable version of this {@link Node}.
+     *
+     * @return A mutable version of the current {@link Node}.
+     */
+    default Node asMutable() {
+        return this;
+    }
 
     /**
      * Return the {@link MetadataProvider} of this node.

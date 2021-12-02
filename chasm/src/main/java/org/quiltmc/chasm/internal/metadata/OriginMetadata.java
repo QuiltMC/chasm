@@ -2,7 +2,7 @@ package org.quiltmc.chasm.internal.metadata;
 
 import org.quiltmc.chasm.api.Transformation;
 
-public class OriginMetadata implements Metadata {
+public class OriginMetadata implements FrozenMetadata {
     private final String transformerId;
 
     public OriginMetadata(Transformation origin) {
@@ -13,8 +13,13 @@ public class OriginMetadata implements Metadata {
         this.transformerId = transformerId;
     }
 
+    public String transformerID() {
+        return transformerId;
+    }
+
     @Override
-    public OriginMetadata copy() {
-        return new OriginMetadata(transformerId);
+    public Metadata thaw() {
+        // Can't be thawed
+        return this;
     }
 }
