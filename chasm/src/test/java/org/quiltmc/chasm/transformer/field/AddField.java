@@ -21,11 +21,11 @@ public class AddField implements Transformer {
     @Override
     public Collection<Transformation> apply(ListNode classes) {
         MapNode newFieldNode = new LinkedHashMapNode();
-        newFieldNode.put(NodeConstants.ACCESS, new ValueNode<>(Opcodes.ACC_PUBLIC));
-        newFieldNode.put(NodeConstants.NAME, new ValueNode<>("field1"));
-        newFieldNode.put(NodeConstants.DESCRIPTOR, new ValueNode<>("I"));
-        newFieldNode.put(NodeConstants.SIGNATURE, new ValueNode<>(null));
-        newFieldNode.put(NodeConstants.VALUE, new ValueNode<>(null));
+        newFieldNode.put(NodeConstants.ACCESS, new ValueNode(Opcodes.ACC_PUBLIC));
+        newFieldNode.put(NodeConstants.NAME, new ValueNode("field1"));
+        newFieldNode.put(NodeConstants.DESCRIPTOR, new ValueNode("I"));
+        newFieldNode.put(NodeConstants.SIGNATURE, new ValueNode(null));
+        newFieldNode.put(NodeConstants.VALUE, new ValueNode(null));
         newFieldNode.put(NodeConstants.ANNOTATIONS, new ArrayListNode());
         newFieldNode.put(NodeConstants.ATTRIBUTES, new ArrayListNode());
 

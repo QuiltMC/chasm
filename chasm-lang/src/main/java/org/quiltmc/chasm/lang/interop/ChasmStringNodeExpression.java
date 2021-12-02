@@ -4,15 +4,15 @@ import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.lang.ast.StringExpression;
 
 public class ChasmStringNodeExpression extends StringExpression implements ChasmNodeExpression {
-    private final ValueNode<String> node;
+    private final ValueNode node;
 
-    public ChasmStringNodeExpression(ValueNode<String> node) {
-        super(node.getValue());
+    public ChasmStringNodeExpression(ValueNode node) {
+        super(node.getValueAsString());
         this.node = node;
     }
 
     @Override
-    public ValueNode<String> getNode() {
+    public ValueNode getNode() {
         return node;
     }
 }

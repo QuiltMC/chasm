@@ -16,15 +16,14 @@ public class ChasmSuperClassProvider implements SuperClassProvider {
     private final SuperClassProvider parent;
     private final Map<String, String> classNameToSuperClass = new HashMap<>();
 
-    @SuppressWarnings("unchecked")
     public ChasmSuperClassProvider(SuperClassProvider parent, ListNode classes) {
         this.parent = parent;
 
         for (Node node : classes) {
             MapNode classNode = (MapNode) node;
-            ValueNode<String> className = (ValueNode<String>) classNode.get(NodeConstants.NAME);
-            ValueNode<String> superName = (ValueNode<String>) classNode.get(NodeConstants.SUPER);
-            classNameToSuperClass.put(className.getValue(), superName == null ? OBJECT : superName.getValue());
+            ValueNode className = (ValueNode) classNode.get(NodeConstants.NAME);
+            ValueNode superName = (ValueNode) classNode.get(NodeConstants.SUPER);
+            classNameToSuperClass.put(className.getValueAsString(), superName == null ? OBJECT : superName.getValueAsString());
         }
     }
 

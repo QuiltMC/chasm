@@ -8,7 +8,6 @@ import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
-@SuppressWarnings("unchecked")
 public class AnnotationNodeReader {
     private final Node annotationNode;
 
@@ -34,12 +33,12 @@ public class AnnotationNodeReader {
             if (value instanceof MapNode && ((MapNode) value).containsKey(NodeConstants.NAME)) {
                 MapNode mapNode = (MapNode) value;
                 // Name-value pairs
-                name = ((ValueNode<String>) mapNode.get(NodeConstants.NAME)).getValue();
+                name = ((ValueNode) mapNode.get(NodeConstants.NAME)).getValueAsString();
                 value = mapNode.get(NodeConstants.VALUE);
             }
 
             if (value instanceof ValueNode) {
-                visitor.visit(name, ((ValueNode<Object>) value).getValue());
+                visitor.visit(name, ((ValueNode) value).getValue());
             } else if (value instanceof ListNode) {
                 AnnotationVisitor arrayVisitor = visitor.visitArray(name);
 
@@ -47,12 +46,12 @@ public class AnnotationNodeReader {
             } else {
                 MapNode mapNode = (MapNode) value;
                 if (mapNode.containsKey(NodeConstants.VALUE)) {
-                    String descriptor = ((ValueNode<String>) mapNode.get(NodeConstants.DESCRIPTOR)).getValue();
-                    String enumValue = ((ValueNode<String>) mapNode.get(NodeConstants.VALUE)).getValue();
+                    String descriptor = ((ValueNode) mapNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
+                    String enumValue = ((ValueNode) mapNode.get(NodeConstants.VALUE)).getValueAsString();
 
                     visitor.visitEnum(name, descriptor, enumValue);
                 } else {
-                    String descriptor = ((ValueNode<String>) mapNode.get(NodeConstants.DESCRIPTOR)).getValue();
+                    String descriptor = ((ValueNode) mapNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
                     ListNode annotationValues = (ListNode) mapNode.get(NodeConstants.VALUES);
 
                     AnnotationVisitor annotationVisitor = visitor.visitAnnotation(name, descriptor);
@@ -65,17 +64,17 @@ public class AnnotationNodeReader {
     }
 
     public void visitAnnotation(VisitAnnotation visitAnnotation, VisitTypeAnnotation visitTypeAnnotation) {
-        ValueNode<String> annotationDesc = (ValueNode<String>) ((MapNode) annotationNode).get(NodeConstants.DESCRIPTOR);
-        ValueNode<Boolean> visible = (ValueNode<Boolean>) ((MapNode) annotationNode).get(NodeConstants.VISIBLE);
-        ValueNode<Integer> typeRef = (ValueNode<Integer>) ((MapNode) annotationNode).get(NodeConstants.TYPE_REF);
-        ValueNode<String> typePath = (ValueNode<String>) ((MapNode) annotationNode).get(NodeConstants.TYPE_PATH);
+        ValueNode annotationDesc = (ValueNode) ((MapNode) annotationNode).get(NodeConstants.DESCRIPTOR);
+        ValueNode visible = (ValueNode) ((MapNode) annotationNode).get(NodeConstants.VISIBLE);
+        ValueNode typeRef = (ValueNode) ((MapNode) annotationNode).get(NodeConstants.TYPE_REF);
+        ValueNode typePath = (ValueNode) ((MapNode) annotationNode).get(NodeConstants.TYPE_PATH);
         AnnotationVisitor annotationVisitor;
         if (typeRef == null) {
-            annotationVisitor = visitAnnotation.visitAnnotation(annotationDesc.getValue(), visible.getValue());
+            annotationVisitor = visitAnnotation.visitAnnotation(annotationDesc.getValueAsString(), visible.getValueAsBoolean());
         } else {
-            annotationVisitor = visitTypeAnnotation.visitTypeAnnotation(typeRef.getValue(),
-                    TypePath.fromString(typePath.getValue()), annotationDesc.getValue(),
-                    visible.getValue());
+            annotationVisitor = visitTypeAnnotation.visitTypeAnnotation(typeRef.getValueAsInt(),
+                    TypePath.fromString(typePath.getValueAsString()), annotationDesc.getValueAsString(),
+                    visible.getValueAsBoolean());
         }
         visitAnnotation(annotationVisitor);
     }

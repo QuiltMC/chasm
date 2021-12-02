@@ -29,8 +29,8 @@ public class TreePrinter {
     }
 
     private void print(Node node, int indent) {
-        if (node instanceof ValueNode<?>) {
-            ValueNode<?> valueNode = (ValueNode<?>) node;
+        if (node instanceof ValueNode) {
+            ValueNode valueNode = (ValueNode) node;
             if (valueNode.getValue() instanceof String) {
                 printStream.print("\"" + valueNode.getValue() + "\"");
             } else {

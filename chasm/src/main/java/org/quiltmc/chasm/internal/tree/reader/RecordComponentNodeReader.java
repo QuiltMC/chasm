@@ -9,7 +9,6 @@ import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
-@SuppressWarnings("unchecked")
 public class RecordComponentNodeReader {
     private final MapNode componentNode;
 
@@ -23,7 +22,7 @@ public class RecordComponentNodeReader {
             return;
         }
         for (Node n : attributesListNode) {
-            componentVisitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
+            componentVisitor.visitAttribute(((ValueNode) n).getValueAs(Attribute.class));
         }
     }
 
@@ -39,11 +38,11 @@ public class RecordComponentNodeReader {
     }
 
     public void visitRecordComponent(ClassVisitor visitor) {
-        String name = ((ValueNode<String>) componentNode.get(NodeConstants.NAME)).getValue();
-        String descriptor = ((ValueNode<String>) componentNode.get(NodeConstants.DESCRIPTOR)).getValue();
+        String name = ((ValueNode) componentNode.get(NodeConstants.NAME)).getValueAsString();
+        String descriptor = ((ValueNode) componentNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
 
-        ValueNode<String> signatureNode = (ValueNode<String>) componentNode.get(NodeConstants.SIGNATURE);
-        String signature = signatureNode == null ? null : signatureNode.getValue();
+        ValueNode signatureNode = (ValueNode) componentNode.get(NodeConstants.SIGNATURE);
+        String signature = signatureNode == null ? null : signatureNode.getValueAsString();
 
         RecordComponentVisitor componentVisitor = visitor.visitRecordComponent(name, descriptor, signature);
 
