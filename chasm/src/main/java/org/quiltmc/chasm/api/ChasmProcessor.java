@@ -70,7 +70,7 @@ public class ChasmProcessor {
         LOGGER.info("Writing {} classes...", classes.size());
         List<byte[]> classBytes = new ArrayList<>();
         for (Node node : classes) {
-            MapNode classNode = (MapNode) node;
+            MapNode classNode = Node.asMap(node);
 
             ClassNodeReader chasmWriter = new ClassNodeReader(classNode);
             ClassWriter classWriter = new ChasmClassWriter(new ChasmSuperClassProvider(superClassProvider, classes));

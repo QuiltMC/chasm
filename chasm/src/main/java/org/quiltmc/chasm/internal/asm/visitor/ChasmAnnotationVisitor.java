@@ -26,11 +26,11 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
             }
             visitor.visitEnd();
         } else if (name == null) {
-            this.values.add(new ValueNode<>(value));
+            this.values.add(new ValueNode(value));
         } else {
             MapNode valueNode = new LinkedHashMapNode();
-            valueNode.put(NodeConstants.NAME, new ValueNode<>(name));
-            valueNode.put(NodeConstants.VALUE, new ValueNode<>(value));
+            valueNode.put(NodeConstants.NAME, new ValueNode(name));
+            valueNode.put(NodeConstants.VALUE, new ValueNode(value));
             this.values.add(valueNode);
         }
     }
@@ -38,12 +38,12 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
     @Override
     public void visitEnum(String name, String descriptor, String value) {
         MapNode enumValueNode = new LinkedHashMapNode();
-        enumValueNode.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
-        enumValueNode.put(NodeConstants.VALUE, new ValueNode<>(value));
+        enumValueNode.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
+        enumValueNode.put(NodeConstants.VALUE, new ValueNode(value));
 
         if (name != null) {
             MapNode valueNode = new LinkedHashMapNode();
-            valueNode.put(NodeConstants.NAME, new ValueNode<>(name));
+            valueNode.put(NodeConstants.NAME, new ValueNode(name));
             valueNode.put(NodeConstants.VALUE, enumValueNode);
             this.values.add(valueNode);
         } else {
@@ -55,12 +55,12 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
     public AnnotationVisitor visitAnnotation(String name, String descriptor) {
         MapNode annotationValueNode = new LinkedHashMapNode();
         ListNode values = new ArrayListNode();
-        annotationValueNode.put(NodeConstants.DESCRIPTOR, new ValueNode<>(descriptor));
+        annotationValueNode.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
         annotationValueNode.put(NodeConstants.VALUES, values);
 
         if (name != null) {
             MapNode valueNode = new LinkedHashMapNode();
-            valueNode.put(NodeConstants.NAME, new ValueNode<>(name));
+            valueNode.put(NodeConstants.NAME, new ValueNode(name));
             valueNode.put(NodeConstants.VALUE, annotationValueNode);
             this.values.add(valueNode);
         } else {
@@ -76,7 +76,7 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
 
         if (name != null) {
             MapNode valueNode = new LinkedHashMapNode();
-            valueNode.put(NodeConstants.NAME, new ValueNode<>(name));
+            valueNode.put(NodeConstants.NAME, new ValueNode(name));
             valueNode.put(NodeConstants.VALUE, values);
             this.values.add(valueNode);
         } else {

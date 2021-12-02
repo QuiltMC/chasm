@@ -9,7 +9,6 @@ import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.internal.LazyClassNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
-@SuppressWarnings("unchecked")
 public class ClassNodeReader {
     private final MapNode classNode;
 
@@ -25,20 +24,20 @@ public class ClassNodeReader {
         }
 
         // visit
-        int version = ((ValueNode<Integer>) classNode.get(NodeConstants.VERSION)).getValue();
-        int access = ((ValueNode<Integer>) classNode.get(NodeConstants.ACCESS)).getValue();
-        String name = ((ValueNode<String>) classNode.get(NodeConstants.NAME)).getValue();
+        int version = Node.asValue(classNode.get(NodeConstants.VERSION)).getValueAsInt();
+        int access = Node.asValue(classNode.get(NodeConstants.ACCESS)).getValueAsInt();
+        String name = Node.asValue(classNode.get(NodeConstants.NAME)).getValueAsString();
 
-        ValueNode<String> signatureNode = (ValueNode<String>) classNode.get(NodeConstants.SIGNATURE);
-        String signature = signatureNode == null ? null : signatureNode.getValue();
+        ValueNode signatureNode = Node.asValue(classNode.get(NodeConstants.SIGNATURE));
+        String signature = signatureNode == null ? null : signatureNode.getValueAsString();
 
-        ValueNode<String> superClassNode = (ValueNode<String>) classNode.get(NodeConstants.SUPER);
-        String superClass = superClassNode == null ? "java/lang/Object" : superClassNode.getValue();
+        ValueNode superClassNode = Node.asValue(classNode.get(NodeConstants.SUPER));
+        String superClass = superClassNode == null ? "java/lang/Object" : superClassNode.getValueAsString();
 
-        ListNode interfacesNode = (ListNode) classNode.get(NodeConstants.INTERFACES);
+        ListNode interfacesNode = Node.asList(classNode.get(NodeConstants.INTERFACES));
         String[] interfaces = interfacesNode == null ? new String[0]
                 :
-                interfacesNode.stream().map(n -> ((ValueNode<String>) n).getValue()).toArray(String[]::new);
+                interfacesNode.stream().map(n -> Node.asValue(n).getValueAsString()).toArray(String[]::new);
 
         visitor.visit(version, access, name, signature, superClass, interfaces);
 
@@ -47,7 +46,7 @@ public class ClassNodeReader {
 
         // visitModule
         if (classNode.containsKey(NodeConstants.MODULE)) {
-            ModuleNodeReader moduleWriter = new ModuleNodeReader((MapNode) classNode.get(NodeConstants.MODULE));
+            ModuleNodeReader moduleWriter = new ModuleNodeReader(Node.asMap(classNode.get(NodeConstants.MODULE)));
             moduleWriter.visitModule(visitor);
         }
         // visitNestHost
@@ -72,28 +71,28 @@ public class ClassNodeReader {
         visitInnerClasses(visitor);
 
         // visitRecordComponent
-        ListNode recordComponentListNode = (ListNode) classNode.get(NodeConstants.RECORD_COMPONENTS);
+        ListNode recordComponentListNode = Node.asList(classNode.get(NodeConstants.RECORD_COMPONENTS));
         if (recordComponentListNode != null) {
             for (Node node : recordComponentListNode) {
-                RecordComponentNodeReader recordComponentNodeReader = new RecordComponentNodeReader((MapNode) node);
+                RecordComponentNodeReader recordComponentNodeReader = new RecordComponentNodeReader(Node.asMap(node));
                 recordComponentNodeReader.visitRecordComponent(visitor);
             }
         }
 
         // visitField
-        ListNode fieldListNode = (ListNode) classNode.get(NodeConstants.FIELDS);
+        ListNode fieldListNode = Node.asList(classNode.get(NodeConstants.FIELDS));
         if (fieldListNode != null) {
             for (Node node : fieldListNode) {
-                FieldNodeReader fieldNodeReader = new FieldNodeReader((MapNode) node);
+                FieldNodeReader fieldNodeReader = new FieldNodeReader(Node.asMap(node));
                 fieldNodeReader.visitField(visitor);
             }
         }
 
         // visitMethod
-        ListNode methodListNode = (ListNode) classNode.get(NodeConstants.METHODS);
+        ListNode methodListNode = Node.asList(classNode.get(NodeConstants.METHODS));
         if (methodListNode != null) {
             for (Node node : methodListNode) {
-                MethodNodeReader methodNodeReader = new MethodNodeReader((MapNode) node);
+                MethodNodeReader methodNodeReader = new MethodNodeReader(Node.asMap(node));
                 methodNodeReader.visitMethod(visitor);
             }
         }
@@ -103,58 +102,58 @@ public class ClassNodeReader {
     }
 
     private void visitInnerClasses(ClassVisitor visitor) {
-        ListNode innerClassesListNode = (ListNode) classNode.get(NodeConstants.INNER_CLASSES);
+        ListNode innerClassesListNode = Node.asList(classNode.get(NodeConstants.INNER_CLASSES));
         if (innerClassesListNode == null) {
             return;
         }
         for (Node n : innerClassesListNode) {
-            MapNode innerClass = (MapNode) n;
-            ValueNode<String> nameNode = (ValueNode<String>) innerClass.get(NodeConstants.NAME);
-            ValueNode<String> outerNameNode = (ValueNode<String>) innerClass.get(NodeConstants.OUTER_NAME);
-            ValueNode<String> innerNameNode = (ValueNode<String>) innerClass.get(NodeConstants.INNER_NAME);
-            ValueNode<Integer> accessNode = (ValueNode<Integer>) innerClass.get(NodeConstants.ACCESS);
+            MapNode innerClass = Node.asMap(n);
+            ValueNode nameNode = Node.asValue(innerClass.get(NodeConstants.NAME));
+            ValueNode outerNameNode = Node.asValue(innerClass.get(NodeConstants.OUTER_NAME));
+            ValueNode innerNameNode = Node.asValue(innerClass.get(NodeConstants.INNER_NAME));
+            ValueNode accessNode = Node.asValue(innerClass.get(NodeConstants.ACCESS));
 
-            String name = nameNode.getValue();
-            String outerName = outerNameNode == null ? null : outerNameNode.getValue();
-            String innerName = innerNameNode == null ? null : innerNameNode.getValue();
-            int access = accessNode.getValue();
+            String name = nameNode.getValueAsString();
+            String outerName = outerNameNode == null ? null : outerNameNode.getValueAsString();
+            String innerName = innerNameNode == null ? null : innerNameNode.getValueAsString();
+            int access = accessNode.getValueAsInt();
 
             visitor.visitInnerClass(name, outerName, innerName, access);
         }
     }
 
     private void visitPermittedSubclasses(ClassVisitor visitor) {
-        ListNode permittedSubclassesListNode = (ListNode) classNode.get(NodeConstants.PERMITTED_SUBCLASSES);
+        ListNode permittedSubclassesListNode = Node.asList(classNode.get(NodeConstants.PERMITTED_SUBCLASSES));
         if (permittedSubclassesListNode == null) {
             return;
         }
         for (Node n : permittedSubclassesListNode) {
-            visitor.visitPermittedSubclass(((ValueNode<String>) n).getValue());
+            visitor.visitPermittedSubclass(Node.asValue(n).getValueAsString());
         }
     }
 
     private void visitNestMembers(ClassVisitor visitor) {
-        ListNode nestMembersListNode = (ListNode) classNode.get(NodeConstants.NEST_MEMBERS);
+        ListNode nestMembersListNode = Node.asList(classNode.get(NodeConstants.NEST_MEMBERS));
         if (nestMembersListNode == null) {
             return;
         }
         for (Node n : nestMembersListNode) {
-            visitor.visitNestMember(((ValueNode<String>) n).getValue());
+            visitor.visitNestMember(Node.asValue(n).getValueAsString());
         }
     }
 
     private void visitAttributes(ClassVisitor visitor) {
-        ListNode attributesListNode = (ListNode) classNode.get(NodeConstants.ATTRIBUTES);
+        ListNode attributesListNode = Node.asList(classNode.get(NodeConstants.ATTRIBUTES));
         if (attributesListNode == null) {
             return;
         }
         for (Node n : attributesListNode) {
-            visitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
+            visitor.visitAttribute(Node.asValue(n).getValueAs(Attribute.class));
         }
     }
 
     private void visitAnnotations(ClassVisitor visitor) {
-        ListNode annotationsListNode = (ListNode) classNode.get(NodeConstants.ANNOTATIONS);
+        ListNode annotationsListNode = Node.asList(classNode.get(NodeConstants.ANNOTATIONS));
         if (annotationsListNode == null) {
             return;
         }
@@ -166,28 +165,28 @@ public class ClassNodeReader {
 
     private void visitOuterClass(ClassVisitor visitor) {
         if (classNode.containsKey(NodeConstants.OWNER_CLASS)) {
-            String ownerClass = ((ValueNode<String>) classNode.get(NodeConstants.OWNER_CLASS)).getValue();
-            String ownerMethod = ((ValueNode<String>) classNode.get(NodeConstants.OWNER_METHOD)).getValue();
-            String ownerDescriptor = ((ValueNode<String>) classNode.get(NodeConstants.OWNER_DESCRIPTOR)).getValue();
+            String ownerClass = Node.asValue(classNode.get(NodeConstants.OWNER_CLASS)).getValueAsString();
+            String ownerMethod = Node.asValue(classNode.get(NodeConstants.OWNER_METHOD)).getValueAsString();
+            String ownerDescriptor = Node.asValue(classNode.get(NodeConstants.OWNER_DESCRIPTOR)).getValueAsString();
             visitor.visitOuterClass(ownerClass, ownerMethod, ownerDescriptor);
         }
     }
 
     private void visitNestHost(ClassVisitor visitor) {
         if (classNode.containsKey(NodeConstants.NEST_HOST)) {
-            visitor.visitNestHost(((ValueNode<String>) classNode.get(NodeConstants.NEST_HOST)).getValue());
+            visitor.visitNestHost(Node.asValue(classNode.get(NodeConstants.NEST_HOST)).getValueAsString());
         }
     }
 
     private void visitSource(ClassVisitor visitor) {
         String source = null;
         if (classNode.containsKey(NodeConstants.SOURCE)) {
-            source = ((ValueNode<String>) classNode.get(NodeConstants.SOURCE)).getValue();
+            source = Node.asValue(classNode.get(NodeConstants.SOURCE)).getValueAsString();
         }
 
         String debug = null;
         if (classNode.containsKey(NodeConstants.DEBUG)) {
-            debug = ((ValueNode<String>) classNode.get(NodeConstants.DEBUG)).getValue();
+            debug = Node.asValue(classNode.get(NodeConstants.DEBUG)).getValueAsString();
         }
 
         visitor.visitSource(source, debug);

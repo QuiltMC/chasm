@@ -9,7 +9,6 @@ import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
-@SuppressWarnings("unchecked")
 public class RecordComponentNodeReader {
     private final MapNode componentNode;
 
@@ -18,17 +17,17 @@ public class RecordComponentNodeReader {
     }
 
     private void visitAttributes(RecordComponentVisitor componentVisitor) {
-        ListNode attributesListNode = (ListNode) componentNode.get(NodeConstants.ATTRIBUTES);
+        ListNode attributesListNode = Node.asList(componentNode.get(NodeConstants.ATTRIBUTES));
         if (attributesListNode == null) {
             return;
         }
         for (Node n : attributesListNode) {
-            componentVisitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
+            componentVisitor.visitAttribute(Node.asValue(n).getValueAs(Attribute.class));
         }
     }
 
     private void visitAnnotations(RecordComponentVisitor componentVisitor) {
-        ListNode annotationsListNode = (ListNode) componentNode.get(NodeConstants.ANNOTATIONS);
+        ListNode annotationsListNode = Node.asList(componentNode.get(NodeConstants.ANNOTATIONS));
         if (annotationsListNode == null) {
             return;
         }
@@ -39,11 +38,11 @@ public class RecordComponentNodeReader {
     }
 
     public void visitRecordComponent(ClassVisitor visitor) {
-        String name = ((ValueNode<String>) componentNode.get(NodeConstants.NAME)).getValue();
-        String descriptor = ((ValueNode<String>) componentNode.get(NodeConstants.DESCRIPTOR)).getValue();
+        String name = Node.asValue(componentNode.get(NodeConstants.NAME)).getValueAsString();
+        String descriptor = Node.asValue(componentNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
 
-        ValueNode<String> signatureNode = (ValueNode<String>) componentNode.get(NodeConstants.SIGNATURE);
-        String signature = signatureNode == null ? null : signatureNode.getValue();
+        ValueNode signatureNode = Node.asValue(componentNode.get(NodeConstants.SIGNATURE));
+        String signature = signatureNode == null ? null : signatureNode.getValueAsString();
 
         RecordComponentVisitor componentVisitor = visitor.visitRecordComponent(name, descriptor, signature);
 

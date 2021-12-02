@@ -4,15 +4,15 @@ import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.lang.ast.BooleanExpression;
 
 public class ChasmBooleanNodeExpression extends BooleanExpression implements ChasmNodeExpression {
-    private final ValueNode<Boolean> node;
+    private final ValueNode node;
 
-    public ChasmBooleanNodeExpression(ValueNode<Boolean> node) {
-        super(node.getValue());
+    public ChasmBooleanNodeExpression(ValueNode node) {
+        super(node.getValueAsBoolean());
         this.node = node;
     }
 
     @Override
-    public ValueNode<Boolean> getNode() {
+    public ValueNode getNode() {
         return node;
     }
 }
