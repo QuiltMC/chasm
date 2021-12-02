@@ -58,9 +58,9 @@ public class PathMetadata extends ArrayList<PathMetadata.Entry> implements Metad
         Node current = root;
         for (Entry entry : this) {
             if (entry.isInteger() && current instanceof ListNode) {
-                current = ((ListNode) current).get(entry.asInteger());
+                current = Node.asList(current).get(entry.asInteger());
             } else if (entry.isString() && current instanceof MapNode) {
-                current = ((MapNode) current).get(entry.asString());
+                current = Node.asMap(current).get(entry.asString());
             } else {
                 throw new UnsupportedOperationException("Can't apply path to given node.");
             }

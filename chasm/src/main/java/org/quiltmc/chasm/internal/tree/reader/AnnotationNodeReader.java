@@ -19,9 +19,9 @@ public class AnnotationNodeReader {
     public void visitAnnotation(AnnotationVisitor visitor) {
         ListNode values;
         if (annotationNode instanceof MapNode) {
-            values = (ListNode) ((MapNode) annotationNode).get(NodeConstants.VALUES);
+            values = Node.asList(Node.asMap(annotationNode).get(NodeConstants.VALUES));
         } else {
-            values = (ListNode) annotationNode;
+            values = Node.asList(annotationNode);
         }
         if (values == null) {
             visitor.visitEnd();
@@ -30,29 +30,29 @@ public class AnnotationNodeReader {
 
         for (Node value : values) {
             String name = null;
-            if (value instanceof MapNode && ((MapNode) value).containsKey(NodeConstants.NAME)) {
-                MapNode mapNode = (MapNode) value;
+            if (value instanceof MapNode && (Node.asMap(value)).containsKey(NodeConstants.NAME)) {
+                MapNode mapNode = Node.asMap(value);
                 // Name-value pairs
-                name = ((ValueNode) mapNode.get(NodeConstants.NAME)).getValueAsString();
+                name = Node.asValue(mapNode.get(NodeConstants.NAME)).getValueAsString();
                 value = mapNode.get(NodeConstants.VALUE);
             }
 
             if (value instanceof ValueNode) {
-                visitor.visit(name, ((ValueNode) value).getValue());
+                visitor.visit(name, Node.asValue(value).getValue());
             } else if (value instanceof ListNode) {
                 AnnotationVisitor arrayVisitor = visitor.visitArray(name);
 
                 new AnnotationNodeReader(value).visitAnnotation(arrayVisitor);
             } else {
-                MapNode mapNode = (MapNode) value;
+                MapNode mapNode = Node.asMap(value);
                 if (mapNode.containsKey(NodeConstants.VALUE)) {
-                    String descriptor = ((ValueNode) mapNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
-                    String enumValue = ((ValueNode) mapNode.get(NodeConstants.VALUE)).getValueAsString();
+                    String descriptor = Node.asValue(mapNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
+                    String enumValue = Node.asValue(mapNode.get(NodeConstants.VALUE)).getValueAsString();
 
                     visitor.visitEnum(name, descriptor, enumValue);
                 } else {
-                    String descriptor = ((ValueNode) mapNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
-                    ListNode annotationValues = (ListNode) mapNode.get(NodeConstants.VALUES);
+                    String descriptor = Node.asValue(mapNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
+                    ListNode annotationValues = Node.asList(mapNode.get(NodeConstants.VALUES));
 
                     AnnotationVisitor annotationVisitor = visitor.visitAnnotation(name, descriptor);
                     new AnnotationNodeReader(annotationValues).visitAnnotation(annotationVisitor);
@@ -64,10 +64,10 @@ public class AnnotationNodeReader {
     }
 
     public void visitAnnotation(VisitAnnotation visitAnnotation, VisitTypeAnnotation visitTypeAnnotation) {
-        ValueNode annotationDesc = (ValueNode) ((MapNode) annotationNode).get(NodeConstants.DESCRIPTOR);
-        ValueNode visible = (ValueNode) ((MapNode) annotationNode).get(NodeConstants.VISIBLE);
-        ValueNode typeRef = (ValueNode) ((MapNode) annotationNode).get(NodeConstants.TYPE_REF);
-        ValueNode typePath = (ValueNode) ((MapNode) annotationNode).get(NodeConstants.TYPE_PATH);
+        ValueNode annotationDesc = Node.asValue(Node.asMap(annotationNode).get(NodeConstants.DESCRIPTOR));
+        ValueNode visible = Node.asValue(Node.asMap(annotationNode).get(NodeConstants.VISIBLE));
+        ValueNode typeRef = Node.asValue(Node.asMap(annotationNode).get(NodeConstants.TYPE_REF));
+        ValueNode typePath = Node.asValue(Node.asMap(annotationNode).get(NodeConstants.TYPE_PATH));
         AnnotationVisitor annotationVisitor;
         if (typeRef == null) {
             annotationVisitor = visitAnnotation.visitAnnotation(annotationDesc.getValueAsString(),

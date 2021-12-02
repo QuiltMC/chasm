@@ -44,21 +44,21 @@ public abstract class ConversionHelper {
 
     public static Expression convert(Node node) {
         if (node instanceof MapNode) {
-            return new ChasmMapNodeExpression((MapNode) node);
+            return new ChasmMapNodeExpression(Node.asMap(node));
         }
         if (node instanceof ListNode) {
-            return new ChasmListNodeExpression((ListNode) node);
+            return new ChasmListNodeExpression(Node.asList(node));
         }
         if (node instanceof ValueNode) {
-            Object value = ((ValueNode) node).getValue();
+            Object value = Node.asValue(node).getValue();
             if (value instanceof String) {
-                return new ChasmStringNodeExpression((ValueNode) node);
+                return new ChasmStringNodeExpression(Node.asValue(node));
             }
             if (value instanceof Integer) {
-                return new ChasmIntegerNodeExpression((ValueNode) node);
+                return new ChasmIntegerNodeExpression(Node.asValue(node));
             }
             if (value instanceof BooleanExpression) {
-                return new ChasmBooleanNodeExpression((ValueNode) node);
+                return new ChasmBooleanNodeExpression(Node.asValue(node));
             }
         }
 

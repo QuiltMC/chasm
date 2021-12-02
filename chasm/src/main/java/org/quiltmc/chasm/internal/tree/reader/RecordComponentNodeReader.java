@@ -17,17 +17,17 @@ public class RecordComponentNodeReader {
     }
 
     private void visitAttributes(RecordComponentVisitor componentVisitor) {
-        ListNode attributesListNode = (ListNode) componentNode.get(NodeConstants.ATTRIBUTES);
+        ListNode attributesListNode = Node.asList(componentNode.get(NodeConstants.ATTRIBUTES));
         if (attributesListNode == null) {
             return;
         }
         for (Node n : attributesListNode) {
-            componentVisitor.visitAttribute(((ValueNode) n).getValueAs(Attribute.class));
+            componentVisitor.visitAttribute(Node.asValue(n).getValueAs(Attribute.class));
         }
     }
 
     private void visitAnnotations(RecordComponentVisitor componentVisitor) {
-        ListNode annotationsListNode = (ListNode) componentNode.get(NodeConstants.ANNOTATIONS);
+        ListNode annotationsListNode = Node.asList(componentNode.get(NodeConstants.ANNOTATIONS));
         if (annotationsListNode == null) {
             return;
         }
@@ -38,10 +38,10 @@ public class RecordComponentNodeReader {
     }
 
     public void visitRecordComponent(ClassVisitor visitor) {
-        String name = ((ValueNode) componentNode.get(NodeConstants.NAME)).getValueAsString();
-        String descriptor = ((ValueNode) componentNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
+        String name = Node.asValue(componentNode.get(NodeConstants.NAME)).getValueAsString();
+        String descriptor = Node.asValue(componentNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
 
-        ValueNode signatureNode = (ValueNode) componentNode.get(NodeConstants.SIGNATURE);
+        ValueNode signatureNode = Node.asValue(componentNode.get(NodeConstants.SIGNATURE));
         String signature = signatureNode == null ? null : signatureNode.getValueAsString();
 
         RecordComponentVisitor componentVisitor = visitor.visitRecordComponent(name, descriptor, signature);

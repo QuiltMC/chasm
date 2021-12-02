@@ -30,14 +30,14 @@ public abstract class PathInitializer {
                 initialize(fullNode, path);
             }
         } else if (root instanceof MapNode) {
-            MapNode mapNode = (MapNode) root;
+            MapNode mapNode = Node.asMap(root);
 
             // Recursively set the path for all entries
             for (Map.Entry<String, Node> entry : mapNode.entrySet()) {
                 initialize(entry.getValue(), path.append(entry.getKey()));
             }
         } else if (root instanceof ListNode) {
-            ListNode listNode = (ListNode) root;
+            ListNode listNode = Node.asList(root);
 
             // Recursively set the path for all entries
             for (int i = 0; i < listNode.size(); i++) {

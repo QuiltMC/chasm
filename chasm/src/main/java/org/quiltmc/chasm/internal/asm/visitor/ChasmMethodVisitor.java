@@ -12,6 +12,7 @@ import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
+import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
@@ -296,7 +297,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     @Override
     public AnnotationVisitor visitInsnAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
-        MapNode instructionNode = (MapNode) instructions.get(instructions.size() - 1);
+        MapNode instructionNode = Node.asMap(instructions.get(instructions.size() - 1));
 
         MapNode annotation = new LinkedHashMapNode();
         ListNode values = new ArrayListNode();
@@ -306,8 +307,8 @@ public class ChasmMethodVisitor extends MethodVisitor {
         annotation.put(NodeConstants.TYPE_REF, new ValueNode(typeRef));
         annotation.put(NodeConstants.TYPE_PATH, new ValueNode(typePath.toString()));
 
-        ListNode annotations = (ListNode) instructionNode
-                .computeIfAbsent(NodeConstants.ANNOTATIONS, s -> new ArrayListNode());
+        ListNode annotations = Node.asList(Node.asMap(instructionNode)
+                .computeIfAbsent(NodeConstants.ANNOTATIONS, s -> new ArrayListNode()));
         annotations.add(annotation);
 
         return new ChasmAnnotationVisitor(api, values);
@@ -327,7 +328,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
     @Override
     public AnnotationVisitor visitTryCatchAnnotation(int typeRef, TypePath typePath, String descriptor,
                                                      boolean visible) {
-        MapNode tryCatchBlock = (MapNode) tryCatchBlocks.get(tryCatchBlocks.size() - 1);
+        MapNode tryCatchBlock = Node.asMap(tryCatchBlocks.get(tryCatchBlocks.size() - 1));
 
         MapNode annotation = new LinkedHashMapNode();
         ListNode values = new ArrayListNode();
@@ -337,7 +338,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
         annotation.put(NodeConstants.TYPE_REF, new ValueNode(typeRef));
         annotation.put(NodeConstants.TYPE_PATH, new ValueNode(typePath.toString()));
 
-        ListNode annotations = (ListNode) tryCatchBlock.get(NodeConstants.ANNOTATIONS);
+        ListNode annotations = Node.asList(tryCatchBlock.get(NodeConstants.ANNOTATIONS));
         annotations.add(annotation);
 
         return new ChasmAnnotationVisitor(api, values);
