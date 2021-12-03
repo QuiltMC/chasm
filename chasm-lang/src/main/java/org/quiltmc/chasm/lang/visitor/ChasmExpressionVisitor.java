@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.objectweb.asm.Type;
 import org.quiltmc.chasm.lang.antlr.ChasmBaseVisitor;
 import org.quiltmc.chasm.lang.antlr.ChasmParser;
 import org.quiltmc.chasm.lang.ast.BinaryExpression;
@@ -21,6 +22,7 @@ import org.quiltmc.chasm.lang.ast.NoneExpression;
 import org.quiltmc.chasm.lang.ast.ReferenceExpression;
 import org.quiltmc.chasm.lang.ast.StringExpression;
 import org.quiltmc.chasm.lang.ast.TernaryExpression;
+import org.quiltmc.chasm.lang.ast.TypeExpression;
 
 public class ChasmExpressionVisitor extends ChasmBaseVisitor<Expression> {
     @Override
@@ -75,6 +77,13 @@ public class ChasmExpressionVisitor extends ChasmBaseVisitor<Expression> {
         String rawValue = ctx.STRING().getText();
         String value = rawValue.substring(1, rawValue.length() - 1);
         return new StringExpression(value);
+    }
+
+    @Override
+    public Expression visitTypeExpression(ChasmParser.TypeExpressionContext ctx) {
+        String rawValue = ctx.TYPE().getText();
+        Type value = Type.getType(rawValue.substring(2, rawValue.length() - 1));
+        return new TypeExpression(value);
     }
 
     @Override

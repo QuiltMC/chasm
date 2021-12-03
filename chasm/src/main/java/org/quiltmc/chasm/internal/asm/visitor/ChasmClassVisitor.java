@@ -178,22 +178,9 @@ public class ChasmClassVisitor extends ClassVisitor {
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
                                      String[] exceptions) {
         MapNode methodNode = new LinkedHashMapNode();
-
-        methodNode.put(NodeConstants.ACCESS, new ValueNode(access));
-        methodNode.put(NodeConstants.NAME, new ValueNode(name));
-        methodNode.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
-        methodNode.put(NodeConstants.SIGNATURE, new ValueNode(signature));
-
-        ListNode exceptionsNode = new ArrayListNode();
-        if (exceptions != null) {
-            for (String exception : exceptions) {
-                exceptionsNode.add(new ValueNode(exception));
-            }
-        }
-        methodNode.put(NodeConstants.EXCEPTIONS, exceptionsNode);
         methods.add(methodNode);
 
-        return new ChasmMethodVisitor(api, methodNode);
+        return new ChasmMethodVisitor(api, methodNode, access, name, descriptor, signature, exceptions);
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
@@ -22,7 +23,6 @@ public class ChasmMethodVisitor extends MethodVisitor {
     private final ListNode parameters = new ArrayListNode();
 
     private final ListNode annotations = new ArrayListNode();
-    private final ListNode parameterAnnotations = new ArrayListNode();
     private final ListNode attributes = new ArrayListNode();
 
     private final MapNode code = new LinkedHashMapNode();
@@ -32,39 +32,76 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     private final ListNode lineNumbers = new ArrayListNode();
 
-    public ChasmMethodVisitor(int api, MapNode methodNode) {
-        super(api);
+    private int visitedParameterCount = 0;
+    private int parameterAnnotationOffset = 0;
+    private int visibleParameterAnnotationOffset = 0;
 
+    public ChasmMethodVisitor(int api, MapNode methodNode, int access, String name, String descriptor, String signature,
+                              String[] exceptions) {
+        super(api);
         this.methodNode = methodNode;
 
+        methodNode.put(NodeConstants.ACCESS, new ValueNode(access));
+        methodNode.put(NodeConstants.NAME, new ValueNode(name));
+
         methodNode.put(NodeConstants.PARAMETERS, parameters);
+        Type[] argumentTypes = Type.getArgumentTypes(descriptor);
+        for (int i = 0; i < argumentTypes.length; i++) {
+            MapNode parameterNode = new LinkedHashMapNode();
+            parameterNode.put(NodeConstants.TYPE, new ValueNode(argumentTypes[i]));
+            parameterNode.put(NodeConstants.NAME, new ValueNode("arg" + i));
+            this.parameters.add(parameterNode);
+        }
+
+        Type returnType = Type.getReturnType(descriptor);
+        methodNode.put(NodeConstants.RETURN_TYPE, new ValueNode(returnType));
+
+        methodNode.put(NodeConstants.SIGNATURE, new ValueNode(signature));
+
+        ListNode exceptionsNode = new ArrayListNode();
+        if (exceptions != null) {
+            for (String exception : exceptions) {
+                exceptionsNode.add(new ValueNode(exception));
+            }
+        }
+        methodNode.put(NodeConstants.EXCEPTIONS, exceptionsNode);
+
         methodNode.put(NodeConstants.ANNOTATIONS, annotations);
-        methodNode.put(NodeConstants.PARAMETER_ANNOTATIONS, parameterAnnotations);
         methodNode.put(NodeConstants.ATTRIBUTES, attributes);
     }
 
     @Override
     public void visitParameter(String name, int access) {
-        MapNode parameterNode = new LinkedHashMapNode();
-        parameterNode.put(NodeConstants.NAME, new ValueNode(name));
+        MapNode parameterNode = Node.asMap(this.parameters.get(visitedParameterCount++));
+        if (name != null) {
+            parameterNode.put(NodeConstants.NAME, new ValueNode(name));
+        }
         parameterNode.put(NodeConstants.ACCESS, new ValueNode(access));
-        parameters.add(parameterNode);
     }
 
     @Override
     public void visitAnnotableParameterCount(int parameterCount, boolean visible) {
-        // Don't care, inferred from actual parameter annotation count
+        // We simply right-align the annotations, assuming that non-annotable parameters are always at the start.
+        if (visible) {
+            visibleParameterAnnotationOffset = this.parameters.size() - parameterCount;
+        } else {
+            parameterAnnotationOffset = this.parameters.size() - parameterCount;
+        }
     }
 
     @Override
     public AnnotationVisitor visitParameterAnnotation(int parameter, String descriptor, boolean visible) {
         MapNode annotation = new LinkedHashMapNode();
         ListNode values = new ArrayListNode();
-        annotation.put(NodeConstants.PARAMETER, new ValueNode(parameter));
         annotation.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
         annotation.put(NodeConstants.VISIBLE, new ValueNode(visible));
         annotation.put(NodeConstants.VALUES, values);
-        parameterAnnotations.add(annotation);
+
+        int actualIndex = parameter + (visible ? visibleParameterAnnotationOffset : parameterAnnotationOffset);
+        MapNode parameterNode = Node.asMap(this.parameters.get(actualIndex));
+        ListNode annotations =
+                Node.asList(parameterNode.computeIfAbsent(NodeConstants.ANNOTATIONS, s -> new ArrayListNode()));
+        annotations.add(annotation);
 
         return new ChasmAnnotationVisitor(api, values);
     }

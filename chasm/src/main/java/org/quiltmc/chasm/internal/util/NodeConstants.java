@@ -48,14 +48,13 @@ public class NodeConstants {
     public static final String OWNER_METHOD = "ownerMethod";
     public static final String PACKAGE = "package";
     public static final String PACKAGES = "packages";
-    public static final String PARAMETER = "parameter";
     public static final String PARAMETERS = "parameters";
-    public static final String PARAMETER_ANNOTATIONS = "parameterAnnotations";
     public static final String PERMITTED_SUBCLASSES = "permittedSubclasses";
     public static final String PROVIDERS = "providers";
     public static final String PROVIDES = "provides";
     public static final String RECORD_COMPONENTS = "recordComponents";
     public static final String REQUIRES = "requires";
+    public static final String RETURN_TYPE = "returnType";
     public static final String SERVICE = "service";
     public static final String SIGNATURE = "signature";
     public static final String SOURCE = "source";

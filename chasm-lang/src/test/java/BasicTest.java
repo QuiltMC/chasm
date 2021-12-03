@@ -70,7 +70,8 @@ public class BasicTest {
                                 {
                                     access: 1,
                                     name: "returnThis",
-                                    descriptor: "()LTestClass;",
+                                    parameters: [],
+                                    returnType: T"LTestClass;",
                                     code: {
                                         instructions: [
                                             {

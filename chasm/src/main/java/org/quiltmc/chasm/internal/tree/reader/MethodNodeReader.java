@@ -11,6 +11,7 @@ import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
@@ -452,59 +453,57 @@ public class MethodNodeReader {
     }
 
     private void visitParameterAnnotations(MethodVisitor methodVisitor) {
-        // visitParameterAnnotation
-        int visibleCount = 0;
-        int invisibleCount = 0;
-        ListNode parameterAnnotationsListNode = Node.asList(methodNode.get(NodeConstants.PARAMETER_ANNOTATIONS));
-        if (parameterAnnotationsListNode == null) {
-            methodVisitor.visitAnnotableParameterCount(0, true);
-            methodVisitor.visitAnnotableParameterCount(0, false);
-            return;
-        }
-        for (Node n : parameterAnnotationsListNode) {
-            MapNode annotationNode = Node.asMap(n);
-            int parameter = Node.asValue(annotationNode.get(NodeConstants.PARAMETER)).getValueAsInt();
-            String annotationDesc = Node.asValue(annotationNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
-
-            ValueNode methodAnnotationVisibilityNode = (ValueNode) annotationNode
-                    .get(NodeConstants.VISIBLE);
-            boolean visible = methodAnnotationVisibilityNode == null
-                    || methodAnnotationVisibilityNode.getValueAsBoolean();
-
-            AnnotationNodeReader writer = new AnnotationNodeReader(n);
-            AnnotationVisitor annotationVisitor =
-                    methodVisitor.visitParameterAnnotation(parameter, annotationDesc, visible);
-            writer.visitAnnotation(annotationVisitor);
-
-            if (visible) {
-                visibleCount++;
-            } else {
-                invisibleCount++;
-            }
-        }
+        ListNode parameters = Node.asList(methodNode.get(NodeConstants.PARAMETERS));
 
         // visitAnnotableParameterCount
-        methodVisitor.visitAnnotableParameterCount(visibleCount, true);
-        methodVisitor.visitAnnotableParameterCount(invisibleCount, false);
+        // We make all parameters annotable
+        methodVisitor.visitAnnotableParameterCount(parameters.size(), true);
+        methodVisitor.visitAnnotableParameterCount(parameters.size(), false);
+
+        // visitParameterAnnotation
+        for (int i = 0; i < parameters.size(); i++) {
+            MapNode parameterNode = Node.asMap(parameters.get(i));
+            ListNode annotations = Node.asList(parameterNode.get(NodeConstants.ANNOTATIONS));
+            if (annotations != null) {
+                for (Node node : annotations) {
+                    MapNode annotationNode = Node.asMap(node);
+                    String descriptor = Node.asValue(annotationNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
+                    ValueNode visible = Node.asValue(annotationNode.get(NodeConstants.VISIBLE));
+
+                    AnnotationNodeReader reader = new AnnotationNodeReader(node);
+                    AnnotationVisitor visitor = methodVisitor.visitParameterAnnotation(i, descriptor,
+                            visible == null || visible.getValueAsBoolean());
+                    reader.visitAnnotation(visitor);
+                }
+            }
+        }
     }
 
     private void visitParameters(MethodVisitor methodVisitor) {
         ListNode methodParametersNode = Node.asList(methodNode.get(NodeConstants.PARAMETERS));
-        if (methodParametersNode == null) {
-            return;
-        }
         for (Node n : methodParametersNode) {
             MapNode parameterNode = Node.asMap(n);
-            String parameterName = Node.asValue(parameterNode.get(NodeConstants.NAME)).getValueAsString();
-            int parameterAccess = Node.asValue(parameterNode.get(NodeConstants.ACCESS)).getValueAsInt();
-            methodVisitor.visitParameter(parameterName, parameterAccess);
+            ValueNode nameNode = Node.asValue(parameterNode.get(NodeConstants.NAME));
+            ValueNode indexNode = Node.asValue(parameterNode.get(NodeConstants.ACCESS));
+            methodVisitor.visitParameter(
+                    nameNode == null ? null : nameNode.getValueAsString(),
+                    indexNode == null ? 0 : indexNode.getValueAsInt()
+            );
         }
     }
 
     public void visitMethod(ClassVisitor visitor) {
         int access = Node.asValue(methodNode.get(NodeConstants.ACCESS)).getValueAsInt();
         String name = Node.asValue(methodNode.get(NodeConstants.NAME)).getValueAsString();
-        String descriptor = Node.asValue(methodNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
+
+        Type returnType = Node.asValue(methodNode.get(NodeConstants.RETURN_TYPE)).getValueAs(Type.class);
+        ListNode parameters = Node.asList(methodNode.get(NodeConstants.PARAMETERS));
+        Type[] parameterTypes = new Type[parameters.size()];
+        for (int i = 0; i < parameters.size(); i++) {
+            MapNode parameterNode = Node.asMap(parameters.get(i));
+            parameterTypes[i] = Node.asValue(parameterNode.get(NodeConstants.TYPE)).getValueAs(Type.class);
+        }
+        String descriptor = Type.getMethodDescriptor(returnType, parameterTypes);
 
         ValueNode signatureNode = Node.asValue(methodNode.get(NodeConstants.SIGNATURE));
         String signature = signatureNode == null ? null : signatureNode.getValueAsString();
@@ -517,6 +516,7 @@ public class MethodNodeReader {
         // visitParameter
         visitParameters(methodVisitor);
 
+        // visitAnnotableParameterCount/visitParameterAnnotation
         visitParameterAnnotations(methodVisitor);
 
         // visitAnnotationDefault

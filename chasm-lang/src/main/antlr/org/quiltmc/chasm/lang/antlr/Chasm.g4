@@ -27,6 +27,7 @@ expression
 
 literal
     : STRING # StringExpression
+    | TYPE # TypeExpression
     | INTEGER # IntegerExpression
     | BOOLEAN # BooleanExpression
     | NONE # NoneExpression
@@ -51,6 +52,7 @@ OPERATOR: '+' | '-' | '*' | '/';
 BOOLEAN: 'true' | 'false';
 NONE: 'none';
 
+TYPE: 'T"' .*? '"';
 STRING: '"' .*? '"';
 INTEGER: [+-]? [0-9]+;
 IDENTIFIER: [_$a-zA-Z] [_a-zA-Z0-9]*;
