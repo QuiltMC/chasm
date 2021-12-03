@@ -1,0 +1,146 @@
+{
+    data_size: 20,
+    init_list: args -> args.length = 0 ? [] :
+        [args.value] + $.init_list({value: args.value, length: args.length - 1}),
+    init: {
+        ptr: 0,
+        data: $.init_list({
+            value: 0,
+            length: $.data_size
+        }),
+        pc: 0,
+        program: "
+            ++++++++++[>+++++++>++++++++++>+++>+<<<<-]
+            >++.>+.+++++++..+++.>++.<<+++++++++++++++.
+            >.+++.------.--------.>+.",
+        out: []
+    },
+    set: args ->
+        args.start = args.length ? args.result : $.set({
+            start: args.start + 1,
+            result: args.result + [args.start = args.index ? args.value : args.list.[args.start]],
+            list: args.list,
+            length: args.length,
+            index: args.index,
+            value: args.value
+        }),
+    jmp_forward: args ->
+        args.depth = 0 ? args.pc :
+        args.program.[args.pc] = "[" ? $.jmp_forward({
+            depth: args.depth + 1,
+            program: args.program,
+            pc: args.pc + 1
+        }) :
+        args.program.[args.pc] = "]" ? $.jmp_forward({
+            depth: args.depth - 1,
+            program: args.program,
+            pc: args.pc + 1
+        }) :
+        $.jmp_forward({
+            depth: args.depth,
+            program: args.program,
+            pc: args.pc + 1
+        }),
+    jmp_back: args ->
+        args.depth = 0 ? args.pc + 2 :
+        args.program.[args.pc] = "[" ?  $.jmp_back({
+            depth: args.depth - 1,
+            program: args.program,
+            pc: args.pc - 1
+        }) :
+        args.program.[args.pc] = "]" ? $.jmp_back({
+            depth: args.depth + 1,
+            program: args.program,
+            pc: args.pc - 1
+        }) :
+        $.jmp_back({
+            depth: args.depth,
+            program: args.program,
+            pc: args.pc - 1
+        }),
+    run: state ->
+        state.program.[state.pc] = none ? state.out :
+        state.program.[state.pc] = ">" ? $.run({
+            ptr: state.ptr + 1,
+            data: state.data,
+            pc: state.pc + 1,
+            program: state.program,
+            out: state.out
+        }) :
+        state.program.[state.pc] = "<" ? $.run({
+            ptr: state.ptr - 1,
+            data: state.data,
+            pc: state.pc + 1,
+            program: state.program,
+            out: state.out
+        }) :
+        state.program.[state.pc] = "." ? $.run({
+            ptr: state.ptr,
+            data: state.data,
+            pc: state.pc + 1,
+            program: state.program,
+            out: state.out + [state.data.[state.ptr]]
+        }) :
+        state.program.[state.pc] = "+" ? $.run({
+            ptr: state.ptr,
+            data: $.set({
+                start: 0,
+                result: [],
+                list: state.data,
+                length: $.data_size,
+                index: state.ptr,
+                value: state.data.[state.ptr] + 1
+            }),
+            pc: state.pc + 1,
+            program: state.program,
+            out: state.out
+        }) :
+        state.program.[state.pc] = "-" ? $.run({
+            ptr: state.ptr,
+            data: $.set({
+                start: 0,
+                result: [],
+                list: state.data,
+                length: $.data_size,
+                index: state.ptr,
+                value: state.data.[state.ptr] - 1
+            }),
+            pc: state.pc + 1,
+            program: state.program,
+            out: state.out
+        }) :
+        state.program.[state.pc] = "[" ? $.run({
+            ptr: state.ptr,
+            data: state.data,
+            pc: state.data.[state.ptr] = 0 ?
+                $.jmp_forward({
+                    depth: 1,
+                    pc: state.pc + 1,
+                    program: state.program
+                }) :
+                state.pc + 1,
+            program: state.program,
+            out: state.out
+        }) :
+        state.program.[state.pc] = "]" ? $.run({
+            ptr: state.ptr,
+            data: state.data,
+            pc: state.data.[state.ptr] = 0 ?
+                state.pc + 1 :
+                $.jmp_back({
+                    depth: 1,
+                    pc: state.pc - 1,
+                    program: state.program
+                }),
+            program: state.program,
+            out: state.out
+        }) :
+        $.run({
+            ptr: state.ptr,
+            data: state.data,
+            pc: state.pc + 1,
+            program: state.program,
+            out: state.out
+        }),
+    result: $.run($.init)
+}

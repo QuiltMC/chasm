@@ -7,6 +7,15 @@ plugins {
 group 'org.quiltmc.chasm'
 version '1.0-SNAPSHOT'
 
+sourceSets {
+    testData {
+        java {
+            compileClasspath = sourceSets.main.output + configurations.testCompileClasspath
+            runtimeClasspath = sourceSets.main.output + project.configurations.testRuntimeClasspath
+        }
+    }
+}
+
 compileJava {
     javaCompiler = javaToolchains.compilerFor {
         languageVersion = JavaLanguageVersion.of(8)
@@ -18,6 +27,14 @@ compileTestJava {
         languageVersion = JavaLanguageVersion.of(17)
     }
 }
+
+compileTestDataJava {
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+testClasses.dependsOn("testDataClasses")
 
 generateGrammarSource {
     maxHeapSize = "64m"

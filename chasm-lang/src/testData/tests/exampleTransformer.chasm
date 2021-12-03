@@ -1,0 +1,33 @@
+{
+    id: "exampleTransformer",
+    target_name: "pkg/TestClass",
+    target_class: classes.<c -> c.name = $.target_name>.[0],
+    transformations: [
+        {
+            target: {
+                node: $.target_class.methods,
+                start: 0,
+                end: 0,
+            },
+            apply: args -> [
+                {
+                    access: 1,
+                    name: "returnThis",
+                    parameters: [],
+                    returnType: T"LTestClass;",
+                    code: {
+                        instructions: [
+                            {
+                                opcode: 25,
+                                var: 0
+                            },
+                            {
+                                opcode: 176,
+                            },
+                        ],
+                    },
+                }
+            ]
+        },
+    ],
+}
