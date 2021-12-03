@@ -4,13 +4,12 @@
 package org.quiltmc.chasm.internal.metadata;
 
 import java.util.Collection;
-import java.util.List;
 import org.quiltmc.chasm.internal.tree.frozencollection.ImmutableArrayList;
 
 /**
  *
  */
-public class FrozenPathMetadata extends ImmutableArrayList<PathEntry> implements FrozenMetadata, List<PathEntry> {
+public class FrozenPathMetadata extends ImmutableArrayList<PathEntry> implements FrozenMetadata {
 
 
     /**

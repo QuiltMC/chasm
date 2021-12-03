@@ -29,6 +29,11 @@ public class FrozenArrayListNode extends ImmutableArrayList<FrozenNode> implemen
     }
 
     @Override
+    public FrozenArrayListNode asImmutable() {
+        return this;
+    }
+
+    @Override
     public ListNode<Node> asMutable() {
         return new ArrayListNode(this);
     }

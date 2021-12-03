@@ -23,17 +23,23 @@ public class TransformationApplier {
 
     private final Map<PathMetadata, List<Target>> affectedTargets;
 
-    public TransformationApplier(ListNode classes, List<Transformation> transformations) {
+    public TransformationApplier(ListNode<Node> classes, List<Transformation> transformations) {
         this.classes = classes;
         this.transformations = transformations;
 
         affectedTargets = new HashMap<>();
     }
 
+    @SuppressWarnings("serial")
+    private static final class MissingPathException extends RuntimeException {
+        public MissingPathException() {
+            super("Node in specified target is missing path information.");
+        }
+    }
     private static PathMetadata getPath(Target target) {
         PathMetadata path = (PathMetadata) target.getTarget().getMetadata().get(PathMetadata.class);
         if (path == null) {
-            throw new RuntimeException("Node in specified target is missing path information.");
+            throw new MissingPathException();
         }
         return path;
     }
@@ -69,9 +75,7 @@ public class TransformationApplier {
         Node target = resolveTarget(transformation.getTarget());
         MapNode<Node> sources = resolveSources(transformation);
 
-        // TODO: Replace copies with immutability
-        Node replacement = transformation.apply(target.asImmutable(), sources.asImmutable()).asImmutable();
-        // What? replacement is immutable and this tries to mutate it.
+        Node replacement = transformation.apply(target.asImmutable(), sources.asImmutable()).asMutable();
         replacement.getMetadata().put(new OriginMetadata(transformation));
 
         replaceTarget(transformation.getTarget(), replacement);

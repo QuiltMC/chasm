@@ -3,6 +3,7 @@ package org.quiltmc.chasm.api;
 import java.util.Map;
 
 import org.quiltmc.chasm.api.target.Target;
+import org.quiltmc.chasm.api.tree.FrozenNode;
 import org.quiltmc.chasm.api.tree.Node;
 
 /**
@@ -70,7 +71,7 @@ public final class Transformation {
      *
      * @return The {@link Node} resulting from applying this {@link Transformation}.
      */
-    public Node apply(Node targetNode, Map<String, ? extends Node> nodeSources) {
+    public FrozenNode apply(FrozenNode targetNode, Map<String, ? extends FrozenNode> nodeSources) {
         return applyFunction.apply(targetNode, nodeSources);
     }
 
@@ -89,6 +90,6 @@ public final class Transformation {
          *
          * @return The {@link Node} resulting from transforming the given {@link Node}.
          */
-        Node apply(Node targetNode, Map<String, ? extends Node> nodeSources);
+        FrozenNode apply(FrozenNode targetNode, Map<String, ? extends FrozenNode> nodeSources);
     }
 }

@@ -4,8 +4,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
+import org.quiltmc.chasm.api.tree.FrozenListNode;
+import org.quiltmc.chasm.api.tree.FrozenNode;
 import org.quiltmc.chasm.api.tree.ListNode;
-import org.quiltmc.chasm.api.tree.Node;
 
 /**
  * Bulk-instantiate {@link Transformation}s of classes.
@@ -25,7 +26,7 @@ public interface Transformer {
      *             {@link Transformer}
      *             created from the given {@link ListNode} of classes.
      */
-    Collection<Transformation> apply(ListNode<? extends Node> classes);
+    Collection<Transformation> apply(FrozenListNode<? extends FrozenNode> classes);
 
     /**
      * The ID of this {@link Transformer}.

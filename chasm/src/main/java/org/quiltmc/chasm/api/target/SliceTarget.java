@@ -28,7 +28,7 @@ public class SliceTarget implements Target {
      * @param end The first index after the {@code start} of the {@link ListNode}
      *            not included in the {@link SliceTarget}.
      */
-    public SliceTarget(ListNode target, int start, int end) {
+    public SliceTarget(ListNode<? extends Node> target, int start, int end) {
         this.target = target;
         startIndex = start;
         endIndex = end;

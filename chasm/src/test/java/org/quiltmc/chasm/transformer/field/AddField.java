@@ -10,6 +10,8 @@ import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.Transformer;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
+import org.quiltmc.chasm.api.tree.FrozenListNode;
+import org.quiltmc.chasm.api.tree.FrozenNode;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
@@ -32,13 +34,14 @@ public class AddField implements Transformer {
 
         ListNode<Node> newFields = new ArrayListNode();
         newFields.add(newFieldNode);
+        FrozenListNode<FrozenNode> frozenNewFields = newFields.asImmutable();
 
         List<Transformation> transformations = new ArrayList<>();
         for (Node node : classes) {
             MapNode<Node> classNode = (MapNode<Node>) node;
             ListNode<Node> fieldsNode = (ListNode<Node>) classNode.get(NodeConstants.FIELDS);
             SliceTarget sliceTarget = new SliceTarget(fieldsNode, 0, 0);
-            transformations.add(new Transformation(this, sliceTarget, Map.of(), (target, sources) -> newFields));
+            transformations.add(new Transformation(this, sliceTarget, Map.of(), (target, sources) -> frozenNewFields));
         }
 
         return transformations;

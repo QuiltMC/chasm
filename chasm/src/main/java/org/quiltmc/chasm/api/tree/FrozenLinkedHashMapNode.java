@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.quiltmc.chasm.internal.metadata.FrozenMetadataProvider;
 import org.quiltmc.chasm.internal.tree.frozencollection.AbstractImmutableCollection;
+import org.quiltmc.chasm.internal.tree.frozencollection.FrozenArrayIterator;
 
 public class FrozenLinkedHashMapNode implements FrozenMapNode {
     private static final String FROZEN_LINKED_HASH_MAP_NODES_ARE_IMMUTABLE = "FrozenLinkedHashMapNodes are immutable.";
@@ -222,7 +223,6 @@ public class FrozenLinkedHashMapNode implements FrozenMapNode {
                     nextIndex++;
                     return LazyFrozenEntrySet.this.getFrozenEntryAt(index);
                 }
-
             };
         }
 
@@ -287,22 +287,7 @@ public class FrozenLinkedHashMapNode implements FrozenMapNode {
 
         @Override
         public Iterator<String> iterator() {
-            return new Iterator<>() {
-                private int nextIndex = 0;
-                @Override
-                public boolean hasNext() {
-                    return nextIndex < iterationOrder.length;
-                }
-                @Override
-                public String next() {
-                    if (nextIndex >= iterationOrder.length) {
-                        throw new NoSuchElementException();
-                    }
-                    int index = nextIndex;
-                    nextIndex++;
-                    return iterationOrder[index];
-                }
-            };
+            return new FrozenArrayIterator<>(iterationOrder);
         }
 
         @Override

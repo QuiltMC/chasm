@@ -27,4 +27,8 @@ public class FrozenValueNode<T> extends ValueNode<T> implements FrozenNode {
         return (FrozenMetadataProvider) super.getMetadata();
     }
 
+    @Override
+    public FrozenValueNode<T> asImmutable() {
+        return this;
+    }
 }
