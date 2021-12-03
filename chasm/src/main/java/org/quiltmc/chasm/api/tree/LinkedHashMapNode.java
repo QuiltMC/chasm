@@ -25,7 +25,7 @@ public class LinkedHashMapNode extends LinkedHashMap<String, Node> implements Ma
             Node thawedValue = value.asMutable();
             LinkedHashMapNode.this.put(key, thawedValue);
         }
-        metadataProvider = f.getMetadata();
+        metadataProvider = f.getMetadata().thaw();
     }
 
     @Override

@@ -24,7 +24,7 @@ public final class Transformation {
      *
      * @param sources The named {@link Target} sources of the new {@link Transformation}.
      *
-     * @param applyFunction The {@link Node}-transforming {@link Function} of the new {@link Transformation}.  
+     * @param applyFunction The {@link Node}-transforming {@link Function} of the new {@link Transformation}.
      */
     public Transformation(Transformer parent, Target target, Map<String, Target> sources, Function applyFunction) {
         this.parent = parent;
@@ -70,7 +70,7 @@ public final class Transformation {
      *
      * @return The {@link Node} resulting from applying this {@link Transformation}.
      */
-    public Node apply(Node targetNode, Map<String, Node> nodeSources) {
+    public Node apply(Node targetNode, Map<String, ? extends Node> nodeSources) {
         return applyFunction.apply(targetNode, nodeSources);
     }
 
@@ -89,6 +89,6 @@ public final class Transformation {
          *
          * @return The {@link Node} resulting from transforming the given {@link Node}.
          */
-        Node apply(Node targetNode, Map<String, Node> nodeSources);
+        Node apply(Node targetNode, Map<String, ? extends Node> nodeSources);
     }
 }

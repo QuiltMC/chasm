@@ -11,9 +11,9 @@ import org.quiltmc.chasm.internal.util.NodeConstants;
 
 @SuppressWarnings("unchecked")
 public class ClassNodeReader {
-    private final MapNode classNode;
+    private final MapNode<Node> classNode;
 
-    public ClassNodeReader(MapNode classNode) {
+    public ClassNodeReader(MapNode<Node> classNode) {
         this.classNode = classNode;
     }
 
@@ -35,7 +35,7 @@ public class ClassNodeReader {
         ValueNode<String> superClassNode = (ValueNode<String>) classNode.get(NodeConstants.SUPER);
         String superClass = superClassNode == null ? "java/lang/Object" : superClassNode.getValue();
 
-        ListNode interfacesNode = (ListNode) classNode.get(NodeConstants.INTERFACES);
+        ListNode<Node> interfacesNode = (ListNode<Node>) classNode.get(NodeConstants.INTERFACES);
         String[] interfaces = interfacesNode == null ? new String[0]
                 :
                 interfacesNode.stream().map(n -> ((ValueNode<String>) n).getValue()).toArray(String[]::new);
@@ -47,7 +47,7 @@ public class ClassNodeReader {
 
         // visitModule
         if (classNode.containsKey(NodeConstants.MODULE)) {
-            ModuleNodeReader moduleWriter = new ModuleNodeReader((MapNode) classNode.get(NodeConstants.MODULE));
+            ModuleNodeReader moduleWriter = new ModuleNodeReader((MapNode<Node>) classNode.get(NodeConstants.MODULE));
             moduleWriter.visitModule(visitor);
         }
         // visitNestHost
@@ -72,28 +72,29 @@ public class ClassNodeReader {
         visitInnerClasses(visitor);
 
         // visitRecordComponent
-        ListNode recordComponentListNode = (ListNode) classNode.get(NodeConstants.RECORD_COMPONENTS);
+        ListNode<Node> recordComponentListNode = (ListNode<Node>) classNode.get(NodeConstants.RECORD_COMPONENTS);
         if (recordComponentListNode != null) {
             for (Node node : recordComponentListNode) {
-                RecordComponentNodeReader recordComponentNodeReader = new RecordComponentNodeReader((MapNode) node);
+                RecordComponentNodeReader recordComponentNodeReader = new RecordComponentNodeReader(
+                        (MapNode<Node>) node);
                 recordComponentNodeReader.visitRecordComponent(visitor);
             }
         }
 
         // visitField
-        ListNode fieldListNode = (ListNode) classNode.get(NodeConstants.FIELDS);
+        ListNode<Node> fieldListNode = (ListNode<Node>) classNode.get(NodeConstants.FIELDS);
         if (fieldListNode != null) {
             for (Node node : fieldListNode) {
-                FieldNodeReader fieldNodeReader = new FieldNodeReader((MapNode) node);
+                FieldNodeReader fieldNodeReader = new FieldNodeReader((MapNode<Node>) node);
                 fieldNodeReader.visitField(visitor);
             }
         }
 
         // visitMethod
-        ListNode methodListNode = (ListNode) classNode.get(NodeConstants.METHODS);
+        ListNode<Node> methodListNode = (ListNode<Node>) classNode.get(NodeConstants.METHODS);
         if (methodListNode != null) {
             for (Node node : methodListNode) {
-                MethodNodeReader methodNodeReader = new MethodNodeReader((MapNode) node);
+                MethodNodeReader methodNodeReader = new MethodNodeReader((MapNode<Node>) node);
                 methodNodeReader.visitMethod(visitor);
             }
         }
@@ -103,12 +104,12 @@ public class ClassNodeReader {
     }
 
     private void visitInnerClasses(ClassVisitor visitor) {
-        ListNode innerClassesListNode = (ListNode) classNode.get(NodeConstants.INNER_CLASSES);
+        ListNode<Node> innerClassesListNode = (ListNode<Node>) classNode.get(NodeConstants.INNER_CLASSES);
         if (innerClassesListNode == null) {
             return;
         }
         for (Node n : innerClassesListNode) {
-            MapNode innerClass = (MapNode) n;
+            MapNode<Node> innerClass = (MapNode<Node>) n;
             ValueNode<String> nameNode = (ValueNode<String>) innerClass.get(NodeConstants.NAME);
             ValueNode<String> outerNameNode = (ValueNode<String>) innerClass.get(NodeConstants.OUTER_NAME);
             ValueNode<String> innerNameNode = (ValueNode<String>) innerClass.get(NodeConstants.INNER_NAME);
@@ -124,7 +125,7 @@ public class ClassNodeReader {
     }
 
     private void visitPermittedSubclasses(ClassVisitor visitor) {
-        ListNode permittedSubclassesListNode = (ListNode) classNode.get(NodeConstants.PERMITTED_SUBCLASSES);
+        ListNode<Node> permittedSubclassesListNode = (ListNode<Node>) classNode.get(NodeConstants.PERMITTED_SUBCLASSES);
         if (permittedSubclassesListNode == null) {
             return;
         }
@@ -134,7 +135,7 @@ public class ClassNodeReader {
     }
 
     private void visitNestMembers(ClassVisitor visitor) {
-        ListNode nestMembersListNode = (ListNode) classNode.get(NodeConstants.NEST_MEMBERS);
+        ListNode<Node> nestMembersListNode = (ListNode<Node>) classNode.get(NodeConstants.NEST_MEMBERS);
         if (nestMembersListNode == null) {
             return;
         }
@@ -144,7 +145,7 @@ public class ClassNodeReader {
     }
 
     private void visitAttributes(ClassVisitor visitor) {
-        ListNode attributesListNode = (ListNode) classNode.get(NodeConstants.ATTRIBUTES);
+        ListNode<Node> attributesListNode = (ListNode<Node>) classNode.get(NodeConstants.ATTRIBUTES);
         if (attributesListNode == null) {
             return;
         }
@@ -154,7 +155,7 @@ public class ClassNodeReader {
     }
 
     private void visitAnnotations(ClassVisitor visitor) {
-        ListNode annotationsListNode = (ListNode) classNode.get(NodeConstants.ANNOTATIONS);
+        ListNode<Node> annotationsListNode = (ListNode<Node>) classNode.get(NodeConstants.ANNOTATIONS);
         if (annotationsListNode == null) {
             return;
         }

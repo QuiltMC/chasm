@@ -42,14 +42,14 @@ public class MetadataProvider<M extends Metadata> implements Iterable<M> {
         return metadata.size();
     }
 
-    public FrozenMetadataProvider<FrozenMetadata> freeze() {
+    public FrozenMetadataProvider freeze() {
         Map<Class<? extends FrozenMetadata>, FrozenMetadata> frozenMap = new HashMap<>(this.metadata.size());
         for (M data : this.metadata.values()) {
             FrozenMetadata frozenData = data.freeze();
             frozenMap.put(frozenData.getClass(), frozenData);
         }
 
-        return new FrozenMetadataProvider<>(frozenMap);
+        return new FrozenMetadataProvider(frozenMap);
     }
 
     @SuppressWarnings("unchecked")

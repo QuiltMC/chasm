@@ -18,9 +18,10 @@ import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
 public class AddField implements Transformer {
+    @SuppressWarnings("unchecked")
     @Override
-    public Collection<Transformation> apply(ListNode classes) {
-        MapNode newFieldNode = new LinkedHashMapNode();
+    public Collection<Transformation> apply(ListNode<? extends Node> classes) {
+        MapNode<Node> newFieldNode = new LinkedHashMapNode();
         newFieldNode.put(NodeConstants.ACCESS, new ValueNode<>(Opcodes.ACC_PUBLIC));
         newFieldNode.put(NodeConstants.NAME, new ValueNode<>("field1"));
         newFieldNode.put(NodeConstants.DESCRIPTOR, new ValueNode<>("I"));
@@ -29,13 +30,13 @@ public class AddField implements Transformer {
         newFieldNode.put(NodeConstants.ANNOTATIONS, new ArrayListNode());
         newFieldNode.put(NodeConstants.ATTRIBUTES, new ArrayListNode());
 
-        ListNode newFields = new ArrayListNode();
+        ListNode<Node> newFields = new ArrayListNode();
         newFields.add(newFieldNode);
 
         List<Transformation> transformations = new ArrayList<>();
         for (Node node : classes) {
-            MapNode classNode = (MapNode) node;
-            ListNode fieldsNode = (ListNode) classNode.get(NodeConstants.FIELDS);
+            MapNode<Node> classNode = (MapNode<Node>) node;
+            ListNode<Node> fieldsNode = (ListNode<Node>) classNode.get(NodeConstants.FIELDS);
             SliceTarget sliceTarget = new SliceTarget(fieldsNode, 0, 0);
             transformations.add(new Transformation(this, sliceTarget, Map.of(), (target, sources) -> newFields));
         }

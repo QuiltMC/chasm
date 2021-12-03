@@ -11,14 +11,14 @@ import org.quiltmc.chasm.internal.util.NodeConstants;
 
 @SuppressWarnings("unchecked")
 public class FieldNodeReader {
-    private final MapNode fieldNode;
+    private final MapNode<Node> fieldNode;
 
-    public FieldNodeReader(MapNode fieldNode) {
+    public FieldNodeReader(MapNode<Node> fieldNode) {
         this.fieldNode = fieldNode;
     }
 
     private void visitAttributes(FieldVisitor fieldVisitor) {
-        ListNode attributesListNode = (ListNode) fieldNode.get(NodeConstants.ATTRIBUTES);
+        ListNode<Node> attributesListNode = (ListNode<Node>) fieldNode.get(NodeConstants.ATTRIBUTES);
         if (attributesListNode == null) {
             return;
         }
@@ -28,7 +28,7 @@ public class FieldNodeReader {
     }
 
     private void visitAnnotations(FieldVisitor fieldVisitor) {
-        ListNode annotationsListNode = (ListNode) fieldNode.get(NodeConstants.ANNOTATIONS);
+        ListNode<Node> annotationsListNode = (ListNode<Node>) fieldNode.get(NodeConstants.ANNOTATIONS);
         if (annotationsListNode == null) {
             return;
         }

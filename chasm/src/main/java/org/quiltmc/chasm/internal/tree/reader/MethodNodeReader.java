@@ -19,26 +19,26 @@ import org.quiltmc.chasm.internal.util.NodeConstants;
 
 @SuppressWarnings("unchecked")
 public class MethodNodeReader {
-    private final MapNode methodNode;
+    private final MapNode<Node> methodNode;
 
-    public MethodNodeReader(MapNode methodNode) {
+    public MethodNodeReader(MapNode<Node> methodNode) {
         this.methodNode = methodNode;
     }
 
-    public static Object[] getArguments(ListNode argumentNode) {
+    public static Object[] getArguments(ListNode<Node> argumentNode) {
         Object[] arguments = new Object[argumentNode.size()];
         for (int i = 0; i < arguments.length; i++) {
             Node argNode = argumentNode.get(i);
             if (argNode instanceof ValueNode<?>) {
                 arguments[i] = ((ValueNode<?>) argNode).getValue();
-            } else if (((MapNode) argNode).containsKey(NodeConstants.TAG)) {
-                arguments[i] = getHandle((MapNode) argNode);
+            } else if (((MapNode<Node>) argNode).containsKey(NodeConstants.TAG)) {
+                arguments[i] = getHandle((MapNode<Node>) argNode);
             } else {
-                MapNode constDynamicNode = (MapNode) argNode;
+                MapNode<Node> constDynamicNode = (MapNode<Node>) argNode;
                 String name = ((ValueNode<String>) constDynamicNode.get(NodeConstants.NAME)).getValue();
                 String descriptor = ((ValueNode<String>) constDynamicNode.get(NodeConstants.DESCRIPTOR)).getValue();
-                Handle handle = getHandle((MapNode) constDynamicNode.get(NodeConstants.HANDLE));
-                Object[] args = getArguments((ListNode) constDynamicNode.get(NodeConstants.ARGS));
+                Handle handle = getHandle((MapNode<Node>) constDynamicNode.get(NodeConstants.HANDLE));
+                Object[] args = getArguments((ListNode<Node>) constDynamicNode.get(NodeConstants.ARGS));
                 arguments[i] = new ConstantDynamic(name, descriptor, handle, args);
             }
         }
@@ -46,7 +46,7 @@ public class MethodNodeReader {
         return arguments;
     }
 
-    public static Handle getHandle(MapNode handleNode) {
+    public static Handle getHandle(MapNode<Node> handleNode) {
         int tag = ((ValueNode<Integer>) handleNode.get(NodeConstants.TAG)).getValue();
         String owner = ((ValueNode<String>) handleNode.get(NodeConstants.OWNER)).getValue();
         String name = ((ValueNode<String>) handleNode.get(NodeConstants.NAME)).getValue();
@@ -60,11 +60,11 @@ public class MethodNodeReader {
         return labelMap.computeIfAbsent(labelName, unusedLabelName -> new Label());
     }
 
-    private static void visitInstructions(MethodVisitor methodVisitor, MapNode codeNode, Map<String, Label> labelMap) {
-        for (Node rawInstruction : (ListNode) codeNode.get(NodeConstants.INSTRUCTIONS)) {
-            MapNode instruction = (MapNode) rawInstruction;
+    private static void visitInstructions(MethodVisitor methodVisitor, MapNode<Node> codeNode, Map<String, Label> labelMap) {
+        for (Node rawInstruction : (ListNode<Node>) codeNode.get(NodeConstants.INSTRUCTIONS)) {
+            MapNode<Node> instruction = (MapNode<Node>) rawInstruction;
             // visitLabel
-            ListNode labelsNode = (ListNode) ((MapNode) rawInstruction).get(NodeConstants.LABELS);
+            ListNode<Node> labelsNode = (ListNode<Node>) ((MapNode<Node>) rawInstruction).get(NodeConstants.LABELS);
             if (labelsNode != null) {
                 for (Node n2 : labelsNode) {
                     methodVisitor.visitLabel(obtainLabel(labelMap, ((ValueNode<String>) n2).getValue()));
@@ -260,8 +260,8 @@ public class MethodNodeReader {
                     String name1 = ((ValueNode<String>) instruction.get(NodeConstants.NAME)).getValue();
                     String descriptor1 =
                             ((ValueNode<String>) instruction.get(NodeConstants.DESCRIPTOR)).getValue();
-                    Handle handle = getHandle((MapNode) instruction.get(NodeConstants.HANDLE));
-                    Object[] arguments = getArguments((ListNode) instruction.get(NodeConstants.ARGUMENTS));
+                    Handle handle = getHandle((MapNode<Node>) instruction.get(NodeConstants.HANDLE));
+                    Object[] arguments = getArguments((ListNode<Node>) instruction.get(NodeConstants.ARGUMENTS));
                     methodVisitor.visitInvokeDynamicInsn(name1, descriptor1, handle, arguments);
                     break;
                 }
@@ -308,11 +308,11 @@ public class MethodNodeReader {
                     String defaultString =
                             ((ValueNode<String>) instruction.get(NodeConstants.DEFAULT)).getValue();
                     Label dflt = obtainLabel(labelMap, defaultString);
-                    ListNode cases = (ListNode) instruction.get(NodeConstants.CASES);
+                    ListNode<Node> cases = (ListNode<Node>) instruction.get(NodeConstants.CASES);
                     int[] keys = new int[cases.size()];
                     Label[] labels = new Label[cases.size()];
                     for (int i = 0; i < cases.size(); i++) {
-                        MapNode caseNode = (MapNode) cases.get(i);
+                        MapNode<Node> caseNode = (MapNode<Node>) cases.get(i);
                         keys[i] = ((ValueNode<Integer>) caseNode.get(NodeConstants.KEY)).getValue();
                         String caseLabelString = ((ValueNode<String>) caseNode.get(NodeConstants.LABEL)).getValue();
                         labels[i] = obtainLabel(labelMap, caseLabelString);
@@ -352,7 +352,7 @@ public class MethodNodeReader {
             }
 
             // visitInsnAnnotation
-            ListNode annotations = (ListNode) instruction.get(NodeConstants.ANNOTATIONS);
+            ListNode<Node> annotations = (ListNode<Node>) instruction.get(NodeConstants.ANNOTATIONS);
             if (annotations != null) {
                 for (Node annotation : annotations) {
                     AnnotationNodeReader writer = new AnnotationNodeReader(annotation);
@@ -362,14 +362,14 @@ public class MethodNodeReader {
         }
     }
 
-    private static void visitTryCatchBlocks(MethodVisitor methodVisitor, MapNode codeNode,
+    private static void visitTryCatchBlocks(MethodVisitor methodVisitor, MapNode<Node> codeNode,
                                             Map<String, Label> labelMap) {
-        ListNode tryCatchBlocksListNode = (ListNode) codeNode.get(NodeConstants.TRY_CATCH_BLOCKS);
+        ListNode<Node> tryCatchBlocksListNode = (ListNode<Node>) codeNode.get(NodeConstants.TRY_CATCH_BLOCKS);
         if (tryCatchBlocksListNode == null) {
             return;
         }
         for (Node n : tryCatchBlocksListNode) {
-            MapNode tryCatchBlock = (MapNode) n;
+            MapNode<Node> tryCatchBlock = (MapNode<Node>) n;
 
             String start = ((ValueNode<String>) tryCatchBlock.get(NodeConstants.START)).getValue();
             String end = ((ValueNode<String>) tryCatchBlock.get(NodeConstants.END)).getValue();
@@ -383,20 +383,20 @@ public class MethodNodeReader {
             methodVisitor.visitTryCatchBlock(startLabel, endLabel, handlerLabel, type);
 
             // visitTryCatchBlockAnnotations
-            for (Node n2 : (ListNode) tryCatchBlock.get(NodeConstants.ANNOTATIONS)) {
+            for (Node n2 : (ListNode<Node>) tryCatchBlock.get(NodeConstants.ANNOTATIONS)) {
                 AnnotationNodeReader writer = new AnnotationNodeReader(n2);
                 writer.visitAnnotation(null, methodVisitor::visitTryCatchAnnotation);
             }
         }
     }
 
-    private void visitLocalVariables(MethodVisitor methodVisitor, MapNode codeNode, Map<String, Label> labelMap) {
-        ListNode codeLocalsNode = (ListNode) codeNode.get(NodeConstants.LOCALS);
+    private void visitLocalVariables(MethodVisitor methodVisitor, MapNode<Node> codeNode, Map<String, Label> labelMap) {
+        ListNode<Node> codeLocalsNode = (ListNode<Node>) codeNode.get(NodeConstants.LOCALS);
         if (codeLocalsNode == null) {
             return;
         }
         for (Node n : codeLocalsNode) {
-            MapNode localNode = (MapNode) n;
+            MapNode<Node> localNode = (MapNode<Node>) n;
             String localName = ((ValueNode<String>) localNode.get(NodeConstants.NAME)).getValue();
             String localDesc = ((ValueNode<String>) localNode.get(NodeConstants.DESCRIPTOR)).getValue();
 
@@ -419,7 +419,7 @@ public class MethodNodeReader {
     }
 
     private void visitAttributes(MethodVisitor methodVisitor) {
-        ListNode methodAttributesNode = (ListNode) methodNode.get(NodeConstants.ATTRIBUTES);
+        ListNode<Node> methodAttributesNode = (ListNode<Node>) methodNode.get(NodeConstants.ATTRIBUTES);
         if (methodAttributesNode != null) {
             for (Node n : methodAttributesNode) {
                 methodVisitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
@@ -428,7 +428,7 @@ public class MethodNodeReader {
     }
 
     private void visitAnnotations(MethodVisitor methodVisitor) {
-        ListNode methodAnnotationsNode = (ListNode) methodNode.get(NodeConstants.ANNOTATIONS);
+        ListNode<Node> methodAnnotationsNode = (ListNode<Node>) methodNode.get(NodeConstants.ANNOTATIONS);
         if (methodAnnotationsNode != null) {
             for (Node n : methodAnnotationsNode) {
                 AnnotationNodeReader writer = new AnnotationNodeReader(n);
@@ -450,14 +450,15 @@ public class MethodNodeReader {
         // visitParameterAnnotation
         int visibleCount = 0;
         int invisibleCount = 0;
-        ListNode parameterAnnotationsListNode = (ListNode) methodNode.get(NodeConstants.PARAMETER_ANNOTATIONS);
+        ListNode<Node> parameterAnnotationsListNode = (ListNode<Node>) methodNode
+                .get(NodeConstants.PARAMETER_ANNOTATIONS);
         if (parameterAnnotationsListNode == null) {
             methodVisitor.visitAnnotableParameterCount(0, true);
             methodVisitor.visitAnnotableParameterCount(0, false);
             return;
         }
         for (Node n : parameterAnnotationsListNode) {
-            MapNode annotationNode = (MapNode) n;
+            MapNode<Node> annotationNode = (MapNode<Node>) n;
             int parameter = ((ValueNode<Integer>) annotationNode.get(NodeConstants.PARAMETER)).getValue();
             String annotationDesc = ((ValueNode<String>) annotationNode.get(NodeConstants.DESCRIPTOR)).getValue();
 
@@ -484,12 +485,12 @@ public class MethodNodeReader {
     }
 
     private void visitParameters(MethodVisitor methodVisitor) {
-        ListNode methodParametersNode = (ListNode) methodNode.get(NodeConstants.PARAMETERS);
+        ListNode<Node> methodParametersNode = (ListNode<Node>) methodNode.get(NodeConstants.PARAMETERS);
         if (methodParametersNode == null) {
             return;
         }
         for (Node n : methodParametersNode) {
-            MapNode parameterNode = (MapNode) n;
+            MapNode<Node> parameterNode = (MapNode<Node>) n;
             String parameterName = ((ValueNode<String>) parameterNode.get(NodeConstants.NAME)).getValue();
             int parameterAccess = ((ValueNode<Integer>) parameterNode.get(NodeConstants.ACCESS)).getValue();
             methodVisitor.visitParameter(parameterName, parameterAccess);
@@ -504,7 +505,7 @@ public class MethodNodeReader {
         ValueNode<String> signatureNode = (ValueNode<String>) methodNode.get(NodeConstants.SIGNATURE);
         String signature = signatureNode == null ? null : signatureNode.getValue();
 
-        ListNode exceptionsNode = (ListNode) methodNode.get(NodeConstants.EXCEPTIONS);
+        ListNode<Node> exceptionsNode = (ListNode<Node>) methodNode.get(NodeConstants.EXCEPTIONS);
         String[] exceptions = exceptionsNode == null ? new String[0]
                 : exceptionsNode.stream().map(n -> ((ValueNode<String>) n).getValue()).toArray(String[]::new);
         MethodVisitor methodVisitor = visitor.visitMethod(access, name, descriptor, signature, exceptions);
@@ -525,7 +526,7 @@ public class MethodNodeReader {
 
         // visitCode
         if (methodNode.containsKey(NodeConstants.CODE)) {
-            MapNode codeNode = (MapNode) methodNode.get(NodeConstants.CODE);
+            MapNode<Node> codeNode = (MapNode<Node>) methodNode.get(NodeConstants.CODE);
             Map<String, Label> labelMap = new HashMap<>();
 
             // visitFrame

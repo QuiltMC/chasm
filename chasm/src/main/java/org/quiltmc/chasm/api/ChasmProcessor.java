@@ -6,6 +6,8 @@ import java.util.List;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
+import org.quiltmc.chasm.api.tree.FrozenListNode;
+import org.quiltmc.chasm.api.tree.FrozenNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
@@ -30,7 +32,7 @@ public class ChasmProcessor {
 
     private final SuperClassProvider superClassProvider;
 
-    private final ListNode classes;
+    private final ListNode<Node> classes;
     private final List<Transformer> transformers = new ArrayList<>();
 
     /**
@@ -73,6 +75,7 @@ public class ChasmProcessor {
      *
      * @return The list of transformed classes, as a {@link List} of {@code byte[]}s.
      */
+    @SuppressWarnings("unchecked")
     public List<byte[]> process() {
         LOGGER.info("Processing {} classes...", classes.size());
 
@@ -98,7 +101,7 @@ public class ChasmProcessor {
         LOGGER.info("Writing {} classes...", classes.size());
         List<byte[]> classBytes = new ArrayList<>();
         for (Node node : classes) {
-            MapNode classNode = (MapNode) node;
+            MapNode<Node> classNode = (MapNode<Node>) node;
 
             ClassNodeReader chasmWriter = new ClassNodeReader(classNode);
             ClassWriter classWriter = new ChasmClassWriter(
@@ -111,12 +114,12 @@ public class ChasmProcessor {
         return classBytes;
     }
 
-    private static List<Transformation> applyTransformers(List<Transformer> transformers, ListNode classes) {
+    private static List<Transformation> applyTransformers(List<Transformer> transformers, ListNode<Node> classes) {
         List<Transformation> transformations = new ArrayList<>();
 
+        FrozenListNode<FrozenNode> frozenClasses = classes.asImmutable();
         for (Transformer transformer : transformers) {
-            // TODO: Replace copy with immutability
-            transformations.addAll(transformer.apply(classes.asImmutable()));
+            transformations.addAll(transformer.apply(frozenClasses));
         }
 
         return transformations;

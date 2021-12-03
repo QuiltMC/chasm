@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.quiltmc.chasm.internal.metadata.FrozenMetadata;
 import org.quiltmc.chasm.internal.metadata.FrozenMetadataProvider;
+import org.quiltmc.chasm.internal.tree.frozencollection.AbstractImmutableCollection;
 
 public class FrozenLinkedHashMapNode implements FrozenMapNode {
     private static final String FROZEN_LINKED_HASH_MAP_NODES_ARE_IMMUTABLE = "FrozenLinkedHashMapNodes are immutable.";
-    private final FrozenMetadataProvider<FrozenMetadata> metadata;
+    private final FrozenMetadataProvider metadata;
     private final Map<String, FrozenNode> map;
     private final String[] iterationOrder;
     private LazyFrozenEntrySet entrySet;
@@ -116,12 +116,18 @@ public class FrozenLinkedHashMapNode implements FrozenMapNode {
 
     @Override
     public Set<String> keySet() {
-        return new FrozenLinkedKeySet();
+        if (keySet == null) {
+            keySet = new FrozenLinkedKeySet();
+        }
+        return keySet;
     }
 
     @Override
     public Collection<FrozenNode> values() {
-        return new FrozenLinkedValueCollection();
+        if (valueCollection == null) {
+            return new FrozenLinkedValueCollection();
+        }
+        return valueCollection;
     }
 
     @Override
@@ -196,7 +202,7 @@ public class FrozenLinkedHashMapNode implements FrozenMapNode {
             if (frozenEntries == null) {
                 frozenEntries = new FrozenEntry[iterationOrder.length];
             }
-            return new Iterator<Entry<String, FrozenNode>>() {
+            return new Iterator<>() {
                 private int nextIndex;
                 {
                     nextIndex = 0;
@@ -281,7 +287,7 @@ public class FrozenLinkedHashMapNode implements FrozenMapNode {
 
         @Override
         public Iterator<String> iterator() {
-            return new Iterator<String>() {
+            return new Iterator<>() {
                 private int nextIndex = 0;
                 @Override
                 public boolean hasNext() {
@@ -345,7 +351,7 @@ public class FrozenLinkedHashMapNode implements FrozenMapNode {
 
         @Override
         public Iterator<FrozenNode> iterator() {
-            return new Iterator<FrozenNode>() {
+            return new Iterator<>() {
                 private int nextIndex;
 
                 @Override

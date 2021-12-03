@@ -48,13 +48,14 @@ public class PathMetadata extends ArrayList<PathEntry> implements Metadata {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     public Node resolve(Node root) {
         Node current = root;
         for (PathEntry pathEntry : this) {
             if (pathEntry.isInteger() && current instanceof ListNode) {
-                current = ((ListNode) current).get(pathEntry.asInteger());
+                current = ((ListNode<Node>) current).get(pathEntry.asInteger());
             } else if (pathEntry.isString() && current instanceof MapNode) {
-                current = ((MapNode) current).get(pathEntry.toString());
+                current = ((MapNode<Node>) current).get(pathEntry.toString());
             } else {
                 throw new UnsupportedOperationException("Can't apply path to given node.");
             }

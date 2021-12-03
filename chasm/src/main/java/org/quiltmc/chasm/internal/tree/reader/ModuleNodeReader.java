@@ -10,9 +10,9 @@ import org.quiltmc.chasm.internal.util.NodeConstants;
 
 @SuppressWarnings("unchecked")
 public class ModuleNodeReader {
-    private final MapNode moduleNode;
+    private final MapNode<Node> moduleNode;
 
-    public ModuleNodeReader(MapNode moduleNode) {
+    public ModuleNodeReader(MapNode<Node> moduleNode) {
         this.moduleNode = moduleNode;
     }
 
@@ -57,7 +57,7 @@ public class ModuleNodeReader {
 
     private void visitPackages(ModuleVisitor moduleVisitor) {
         // https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.7.26
-        ListNode packagesListNode = (ListNode) moduleNode.get(NodeConstants.PACKAGES);
+        ListNode<Node> packagesListNode = (ListNode<Node>) moduleNode.get(NodeConstants.PACKAGES);
         if (packagesListNode == null) {
             return;
         }
@@ -67,12 +67,12 @@ public class ModuleNodeReader {
     }
 
     private void visitRequires(ModuleVisitor moduleVisitor) {
-        ListNode moduleRequiresListNode = (ListNode) moduleNode.get(NodeConstants.REQUIRES);
+        ListNode<Node> moduleRequiresListNode = (ListNode<Node>) moduleNode.get(NodeConstants.REQUIRES);
         if (moduleRequiresListNode == null) {
             return;
         }
         for (Node n : moduleRequiresListNode) {
-            MapNode requireNode = (MapNode) n;
+            MapNode<Node> requireNode = (MapNode<Node>) n;
             String reqModule = ((ValueNode<String>) requireNode.get(NodeConstants.MODULE)).getValue();
             int reqAccess = ((ValueNode<Integer>) requireNode.get(NodeConstants.ACCESS)).getValue();
 
@@ -83,15 +83,15 @@ public class ModuleNodeReader {
     }
 
     private void visitExports(ModuleVisitor moduleVisitor) {
-        ListNode moduleExportsListNode = (ListNode) moduleNode.get(NodeConstants.EXPORTS);
+        ListNode<Node> moduleExportsListNode = (ListNode<Node>) moduleNode.get(NodeConstants.EXPORTS);
         if (moduleExportsListNode == null) {
             return;
         }
         for (Node n : moduleExportsListNode) {
-            MapNode exportNode = (MapNode) n;
+            MapNode<Node> exportNode = (MapNode<Node>) n;
             String expPackage = ((ValueNode<String>) exportNode.get(NodeConstants.PACKAGE)).getValue();
             Integer expAcccess = ((ValueNode<Integer>) exportNode.get(NodeConstants.ACCESS)).getValue();
-            ListNode reqModules = ((ListNode) exportNode.get(NodeConstants.MODULES));
+            ListNode<Node> reqModules = ((ListNode<Node>) exportNode.get(NodeConstants.MODULES));
             String[] modules = null;
             if (reqModules != null) {
                 modules = new String[reqModules.size()];
@@ -104,16 +104,16 @@ public class ModuleNodeReader {
     }
 
     private void visitOpens(ModuleVisitor moduleVisitor) {
-        ListNode moduleOpensListNode = (ListNode) moduleNode.get(NodeConstants.OPENS);
+        ListNode<Node> moduleOpensListNode = (ListNode<Node>) moduleNode.get(NodeConstants.OPENS);
         if (moduleOpensListNode == null) {
             return;
         }
         for (Node n : moduleOpensListNode) {
-            MapNode openNode = (MapNode) n;
+            MapNode<Node> openNode = (MapNode<Node>) n;
             String openPackage = ((ValueNode<String>) openNode.get(NodeConstants.PACKAGE)).getValue();
             Integer openAccess = ((ValueNode<Integer>) openNode.get(NodeConstants.ACCESS)).getValue();
 
-            ListNode openModules = ((ListNode) openNode.get(NodeConstants.MODULES));
+            ListNode<Node> openModules = ((ListNode<Node>) openNode.get(NodeConstants.MODULES));
             String[] modules = null;
             if (openModules != null) {
                 modules = new String[openModules.size()];
@@ -127,7 +127,7 @@ public class ModuleNodeReader {
     }
 
     private void visitUses(ModuleVisitor moduleVisitor) {
-        ListNode moduleUsesListNode = (ListNode) moduleNode.get(NodeConstants.USES);
+        ListNode<Node> moduleUsesListNode = (ListNode<Node>) moduleNode.get(NodeConstants.USES);
         if (moduleUsesListNode == null) {
             return;
         }
@@ -137,14 +137,14 @@ public class ModuleNodeReader {
     }
 
     private void visitProvides(ModuleVisitor moduleVisitor) {
-        ListNode moduleProvidesListNode = (ListNode) moduleNode.get(NodeConstants.PROVIDES);
+        ListNode<Node> moduleProvidesListNode = (ListNode<Node>) moduleNode.get(NodeConstants.PROVIDES);
         if (moduleProvidesListNode == null) {
             return;
         }
         for (Node n : moduleProvidesListNode) {
-            MapNode providesNode = (MapNode) n;
+            MapNode<Node> providesNode = (MapNode<Node>) n;
             String service = ((ValueNode<String>) providesNode.get(NodeConstants.SERVICE)).getValue();
-            ListNode providers = (ListNode) providesNode.get(NodeConstants.PROVIDERS);
+            ListNode<Node> providers = (ListNode<Node>) providesNode.get(NodeConstants.PROVIDERS);
             String[] prov = new String[providers.size()];
             for (int i = 0; i < providers.size(); i++) {
                 prov[i] = ((ValueNode<String>) providers.get(i)).getValue();

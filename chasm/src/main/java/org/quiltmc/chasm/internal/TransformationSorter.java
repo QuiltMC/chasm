@@ -83,12 +83,15 @@ public class TransformationSorter {
 
         // Add explicit dependencies
         for (TransformationInfo transformation : transformations) {
-            for (String id : transformation.get().getParent().mustRunAfter(byTransformerId.keySet())) {
+            Iterable<String> mustRunAfterIDs = transformation.get().getParent().mustRunAfter(byTransformerId.keySet());
+            for (String id : mustRunAfterIDs) {
                 for (TransformationInfo other : byTransformerId.get(id)) {
                     transformation.addDependency(other);
                 }
             }
-            for (String id : transformation.get().getParent().mustRunBefore(byTransformerId.keySet())) {
+            Iterable<String> mustRunBeforeIDs = transformation.get().getParent()
+                    .mustRunBefore(byTransformerId.keySet());
+            for (String id : mustRunBeforeIDs) {
                 for (TransformationInfo other : byTransformerId.get(id)) {
                     other.addDependency(transformation);
                 }
@@ -236,7 +239,7 @@ public class TransformationSorter {
             this.target = target;
             this.type = type;
 
-            this.path = target.getTarget().getMetadata().get(PathMetadata.class);
+            path = (PathMetadata) target.getTarget().getMetadata().get(PathMetadata.class);
         }
 
         public PathMetadata getPath() {
@@ -253,11 +256,11 @@ public class TransformationSorter {
 
         public void addDependency(TargetInfo other) {
             // A source always depends on a target softly
-            if (this.type == TargetType.SOURCE && other.type == TargetType.TARGET) {
+            if (type == TargetType.SOURCE && other.type == TargetType.TARGET) {
                 parent.addSoftDependency(other.parent);
             }
             // A target always has hard dependencies
-            if (this.type == TargetType.TARGET) {
+            if (type == TargetType.TARGET) {
                 parent.addDependency(other.parent);
             }
         }
@@ -281,12 +284,12 @@ public class TransformationSorter {
         }
 
         public void addDependency(TransformationInfo other) {
-            this.dependencies.add(other);
+            dependencies.add(other);
             other.dependents.add(this);
         }
 
         public void addSoftDependency(TransformationInfo other) {
-            this.softDependencies.add(other);
+            softDependencies.add(other);
             other.softDependents.add(this);
         }
 

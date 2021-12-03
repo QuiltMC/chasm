@@ -18,7 +18,7 @@ import org.quiltmc.chasm.internal.metadata.OriginMetadata;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 
 public class TransformationApplier {
-    private final ListNode classes;
+    private final ListNode<Node> classes;
     private final List<Transformation> transformations;
 
     private final Map<PathMetadata, List<Target>> affectedTargets;
@@ -27,11 +27,11 @@ public class TransformationApplier {
         this.classes = classes;
         this.transformations = transformations;
 
-        this.affectedTargets = new HashMap<>();
+        affectedTargets = new HashMap<>();
     }
 
     private static PathMetadata getPath(Target target) {
-        PathMetadata path = target.getTarget().getMetadata().get(PathMetadata.class);
+        PathMetadata path = (PathMetadata) target.getTarget().getMetadata().get(PathMetadata.class);
         if (path == null) {
             throw new RuntimeException("Node in specified target is missing path information.");
         }
@@ -67,20 +67,22 @@ public class TransformationApplier {
 
     private void applyTransformation(Transformation transformation) {
         Node target = resolveTarget(transformation.getTarget());
-        MapNode sources = resolveSources(transformation);
+        MapNode<Node> sources = resolveSources(transformation);
 
         // TODO: Replace copies with immutability
         Node replacement = transformation.apply(target.asImmutable(), sources.asImmutable()).asImmutable();
-        replacement.getMetadata().put(OriginMetadata.class, new OriginMetadata(transformation));
+        // What? replacement is immutable and this tries to mutate it.
+        replacement.getMetadata().put(new OriginMetadata(transformation));
 
         replaceTarget(transformation.getTarget(), replacement);
     }
 
+    @SuppressWarnings("unchecked")
     private void replaceTarget(Target target, Node replacement) {
         if (target instanceof NodeTarget) {
             replaceNode((NodeTarget) target, replacement);
         } else if (target instanceof SliceTarget && replacement instanceof ListNode) {
-            replaceSlice((SliceTarget) target, (ListNode) replacement);
+            replaceSlice((SliceTarget) target, (ListNode<Node>) replacement);
         } else {
             throw new RuntimeException("Invalid replacement for target");
         }
@@ -99,21 +101,23 @@ public class TransformationApplier {
         PathEntry pathEntry = targetPath.get(targetPath.size() - 1);
 
         if (parentNode instanceof ListNode && pathEntry.isInteger()) {
-            ListNode parentList = (ListNode) parentNode;
+            @SuppressWarnings("unchecked")
+            ListNode<Node> parentList = (ListNode<Node>) parentNode;
             parentList.set(pathEntry.asInteger(), replacement);
             return;
         }
 
         if (parentNode instanceof MapNode && pathEntry.isString()) {
-            MapNode parentList = (MapNode) parentNode;
-            parentList.put(pathEntry.asString(), replacement);
+            @SuppressWarnings("unchecked")
+            MapNode<Node> parentList = (MapNode<Node>) parentNode;
+            parentList.put(pathEntry.toString(), replacement);
             return;
         }
 
         throw new RuntimeException("Invalid index into node.");
     }
 
-    private void replaceSlice(SliceTarget sliceTarget, ListNode replacement) {
+    private void replaceSlice(SliceTarget sliceTarget, ListNode<Node> replacement) {
         PathMetadata targetPath = getPath(sliceTarget);
 
         int classIndex = targetPath.get(0).asInteger();
@@ -127,7 +131,8 @@ public class TransformationApplier {
             throw new UnsupportedOperationException("Replacement for slice target must be a list node.");
         }
 
-        ListNode parentList = (ListNode) parentNode;
+        @SuppressWarnings("unchecked")
+        ListNode<Node> parentList = (ListNode<Node>) parentNode;
 
         int change = parentList.size() - replacement.size();
         int start = sliceTarget.getStartIndex() / 2;
@@ -179,15 +184,16 @@ public class TransformationApplier {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Node resolveTarget(Target target) {
         Node currentNode = classes;
         PathMetadata path = getPath(target);
 
         for (PathEntry pathEntry : path) {
             if (currentNode instanceof ListNode && pathEntry.isInteger()) {
-                currentNode = ((ListNode) currentNode).get(pathEntry.asInteger());
+                currentNode = ((ListNode<Node>) currentNode).get(pathEntry.asInteger());
             } else if (currentNode instanceof MapNode && pathEntry.isString()) {
-                currentNode = ((MapNode) currentNode).get(pathEntry.asString());
+                currentNode = ((MapNode<Node>) currentNode).get(pathEntry.toString());
             } else {
                 throw new RuntimeException("Can't resolve path " + path);
             }
@@ -196,8 +202,8 @@ public class TransformationApplier {
         return currentNode;
     }
 
-    private MapNode resolveSources(Transformation transformation) {
-        MapNode resolvedSources = new LinkedHashMapNode();
+    private MapNode<Node> resolveSources(Transformation transformation) {
+        MapNode<Node> resolvedSources = new LinkedHashMapNode();
         for (Map.Entry<String, Target> source : transformation.getSources().entrySet()) {
             resolvedSources.put(source.getKey(), resolveTarget(source.getValue()));
         }

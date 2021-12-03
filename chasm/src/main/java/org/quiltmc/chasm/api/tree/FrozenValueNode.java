@@ -3,7 +3,6 @@
  */
 package org.quiltmc.chasm.api.tree;
 
-import org.quiltmc.chasm.internal.metadata.FrozenMetadata;
 import org.quiltmc.chasm.internal.metadata.FrozenMetadataProvider;
 
 /**
@@ -24,8 +23,8 @@ public class FrozenValueNode<T> extends ValueNode<T> implements FrozenNode {
     }
 
     @Override
-    public FrozenMetadataProvider<FrozenMetadata> getMetadata() {
-        return (FrozenMetadataProvider<FrozenMetadata>) super.getMetadata();
+    public FrozenMetadataProvider getMetadata() {
+        return (FrozenMetadataProvider) super.getMetadata();
     }
 
 }
