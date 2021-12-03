@@ -5,7 +5,13 @@ import java.util.List;
 /**
  * Store a {@link List} of child {@link Node}s in a CHASM tree {@link Node}.
  */
-public interface ListNode extends Node, List<Node> {
+public interface ListNode<N extends Node> extends Node, List<N> {
     @Override
-    ListNode asImmutable();
+    FrozenListNode<FrozenNode> asImmutable();
+
+    @Override
+    @SuppressWarnings("unchecked")
+    default ListNode<Node> asMutable() {
+        return (ListNode<Node>) this;
+    }
 }

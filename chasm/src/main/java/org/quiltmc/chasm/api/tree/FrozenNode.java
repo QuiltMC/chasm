@@ -1,5 +1,8 @@
 package org.quiltmc.chasm.api.tree;
 
+import org.jetbrains.annotations.ApiStatus;
+import org.quiltmc.chasm.internal.metadata.FrozenMetadataProvider;
+
 /**
  * This interface marks {@link FrozenNode}s in a CHASM tree.
  *
@@ -12,4 +15,7 @@ public interface FrozenNode extends Node {
     default FrozenNode asImmutable() {
         return this;
     }
+
+    @ApiStatus.Internal
+    FrozenMetadataProvider getMetadata();
 }

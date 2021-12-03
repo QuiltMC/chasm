@@ -17,11 +17,11 @@ public class ChasmSuperClassProvider implements SuperClassProvider {
     private final Map<String, String> classNameToSuperClass = new HashMap<>();
 
     @SuppressWarnings("unchecked")
-    public ChasmSuperClassProvider(SuperClassProvider parent, ListNode classes) {
+    public ChasmSuperClassProvider(SuperClassProvider parent, ListNode<? extends Node> classes) {
         this.parent = parent;
 
         for (Node node : classes) {
-            MapNode classNode = (MapNode) node;
+            MapNode<Node> classNode = (MapNode<Node>) node;
             ValueNode<String> className = (ValueNode<String>) classNode.get(NodeConstants.NAME);
             ValueNode<String> superName = (ValueNode<String>) classNode.get(NodeConstants.SUPER);
             classNameToSuperClass.put(className.getValue(), superName == null ? OBJECT : superName.getValue());

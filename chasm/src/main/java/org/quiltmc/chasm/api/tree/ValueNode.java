@@ -1,5 +1,6 @@
 package org.quiltmc.chasm.api.tree;
 
+import org.quiltmc.chasm.internal.metadata.Metadata;
 import org.quiltmc.chasm.internal.metadata.MetadataProvider;
 
 /**
@@ -11,7 +12,7 @@ import org.quiltmc.chasm.internal.metadata.MetadataProvider;
  */
 public class ValueNode<T> implements Node {
     private final T value;
-    private MetadataProvider metadataProvider = new MetadataProvider();
+    private MetadataProvider<? extends Metadata> metadataProvider = new MetadataProvider<>();
 
     /**
      * Wrap the given T value in a new {@link ValueNode}.
@@ -20,6 +21,11 @@ public class ValueNode<T> implements Node {
      */
     public ValueNode(T value) {
         this.value = value;
+    }
+
+    protected ValueNode(T value, MetadataProvider<? extends Metadata> metadata) {
+        this.value = value;
+        this.metadataProvider = new MetadataProvider<>(metadata);
     }
 
     /**
@@ -32,14 +38,17 @@ public class ValueNode<T> implements Node {
     }
 
     @Override
-    public ValueNode<T> asImmutable() {
-        ValueNode<T> copy = new ValueNode<>(value);
-        copy.metadataProvider = metadataProvider.copy();
-        return copy;
+    public FrozenValueNode<T> asImmutable() {
+        return new FrozenValueNode<>(this);
     }
 
     @Override
     public MetadataProvider getMetadata() {
         return metadataProvider;
+    }
+
+    @Override
+    public ValueNode<T> asMutable() {
+        return this;
     }
 }

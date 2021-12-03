@@ -5,7 +5,13 @@ import java.util.Map;
 /**
  * Name child {@link Node}s with {@link String} names in this CHASM tree {@link Node}.
  */
-public interface MapNode extends Node, Map<String, Node> {
+public interface MapNode<N extends Node> extends Node, Map<String, N> {
     @Override
-    MapNode asImmutable();
+    FrozenMapNode asImmutable();
+
+    @Override
+    @SuppressWarnings("unchecked")
+    default MapNode<Node> asMutable() {
+        return (MapNode<Node>) this;
+    }
 }

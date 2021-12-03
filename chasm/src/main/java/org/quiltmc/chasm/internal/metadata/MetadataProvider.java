@@ -16,6 +16,14 @@ public class MetadataProvider<M extends Metadata> implements Iterable<M> {
     }
 
     @SuppressWarnings("unchecked")
+    public MetadataProvider(MetadataProvider<? extends M> metadata) {
+        this.metadata = new HashMap<>(metadata.size());
+        for (M m : metadata.metadata.values()) {
+            MetadataProvider.this.put((M) m.thaw());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public <T extends M> void put(T data) {
         metadata.put((Class<? extends T>) data.getClass(), data);
     }

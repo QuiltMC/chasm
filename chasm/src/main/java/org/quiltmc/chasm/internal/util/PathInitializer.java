@@ -10,11 +10,12 @@ import org.quiltmc.chasm.internal.metadata.PathMetadata;
 
 public abstract class PathInitializer {
     private PathInitializer() {
+
     }
 
     public static void initialize(Node root, PathMetadata path) {
         // Set the path for the root
-        root.getMetadata().put(PathMetadata.class, path);
+        root.getMetadata().put(path);
 
         if (root instanceof LazyClassNode) {
             LazyClassNode lazyClassNode = (LazyClassNode) root;
@@ -25,19 +26,21 @@ public abstract class PathInitializer {
             }
 
             // Set the path for all lazy entries if they are loaded
-            MapNode fullNode = lazyClassNode.getFullNodeOrNull();
+            MapNode<Node> fullNode = lazyClassNode.getFullNodeOrNull();
             if (fullNode != null) {
                 initialize(fullNode, path);
             }
         } else if (root instanceof MapNode) {
-            MapNode mapNode = (MapNode) root;
+            @SuppressWarnings("unchecked")
+            MapNode<Node> mapNode = (MapNode<Node>) root;
 
             // Recursively set the path for all entries
             for (Map.Entry<String, Node> entry : mapNode.entrySet()) {
                 initialize(entry.getValue(), path.append(entry.getKey()));
             }
         } else if (root instanceof ListNode) {
-            ListNode listNode = (ListNode) root;
+            @SuppressWarnings("unchecked")
+            ListNode<Node> listNode = (ListNode<Node>) root;
 
             // Recursively set the path for all entries
             for (int i = 0; i < listNode.size(); i++) {
