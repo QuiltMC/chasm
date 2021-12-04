@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -25,11 +27,31 @@ public class LangTransformerTests extends LangTestsBase<LangTransformerTests.Tes
     }
 
     private void register(String testFile, String targetClass) {
-        testDefinitions.add(new TestDefinition(testFile, targetClass));
+        testDefinitions.add(new TestDefinition(testFile, targetClass, new ArrayList<>()));
+    }
+
+    private void register(String testFile, String targetClass, String... additionalClasses) {
+        List<String> additionalClassesList = Arrays.asList(additionalClasses);
+        testDefinitions.add(new TestDefinition(testFile, targetClass, additionalClassesList));
+    }
+
+    private void register(String testFile, String targetClass, List<String> additionalClasses,
+                          List<String> additionalTransformers) {
+        testDefinitions.add(new TestDefinition(testFile, targetClass, additionalClasses, additionalTransformers));
     }
 
     private void registerNamed(String name, String testFile, String targetClass) {
-        testDefinitions.add(new TestDefinition(testFile, name, targetClass));
+        testDefinitions.add(new TestDefinition(testFile, name, targetClass, new ArrayList<>()));
+    }
+
+    private void registerNamed(String name, String testFile, String targetClass, String... additionalClasses) {
+        List<String> additionalClassesList = Arrays.asList(additionalClasses);
+        testDefinitions.add(new TestDefinition(testFile, name, targetClass, additionalClassesList));
+    }
+
+    private void registerNamed(String name, String testFile, String targetClass, List<String> additionalClasses,
+                               List<String> additionalTransformers) {
+        testDefinitions.add(new TestDefinition(testFile, name, targetClass, additionalClasses, additionalTransformers));
     }
 
     @BeforeEach
@@ -50,11 +72,27 @@ public class LangTransformerTests extends LangTestsBase<LangTransformerTests.Tes
         Assertions.assertTrue(Files.isRegularFile(targetClass), targetClass + " does not exist");
         processor.addClass(Files.readAllBytes(targetClass));
 
+        // Load the additional classes
+        for (String additionalClass : testDefinition.additionalClasses) {
+            Path additionalClassFile = getTestClass(additionalClass);
+            Assertions.assertTrue(Files.isRegularFile(additionalClassFile), additionalClassFile + " does not exist");
+            processor.addClass(Files.readAllBytes(additionalClassFile));
+        }
+
         // Create and load the transformer
         Path transformerFile = testDefinition.getTestFile();
         Assertions.assertTrue(Files.isRegularFile(transformerFile), transformerFile + " does not exist");
         ChasmLangTransformer transformer = ChasmLangTransformer.parse(transformerFile);
         processor.addTransformer(transformer);
+
+        // Create and load the additional transformers
+        for (String additionalTransformer : testDefinition.additionalTransformers) {
+            Path additionalTransformerFile = BaseTestDefinition.getTestFile(additionalTransformer);
+            Assertions.assertTrue(Files.isRegularFile(additionalTransformerFile),
+                    additionalTransformerFile + " does not exist");
+            ChasmLangTransformer transformer2 = ChasmLangTransformer.parse(additionalTransformerFile);
+            processor.addTransformer(transformer2);
+        }
 
         // Process the data
         List<byte[]> processedClasses = processor.process();
@@ -107,15 +145,31 @@ public class LangTransformerTests extends LangTestsBase<LangTransformerTests.Tes
 
     static class TestDefinition extends BaseTestDefinition {
         public final String targetClass;
+        public final List<String> additionalClasses;
+        public final List<String> additionalTransformers;
 
-        protected TestDefinition(String testFile, String targetClass) {
-            super(testFile);
-            this.targetClass = targetClass;
+        protected TestDefinition(String testFile, String targetClass, List<String> additionalClasses) {
+            this(testFile, targetClass, additionalClasses, new ArrayList<>());
         }
 
-        protected TestDefinition(String testFile, String name, String targetClass) {
+        protected TestDefinition(String testFile, String targetClass, List<String> additionalClasses,
+                                 List<String> additionalTransformers) {
+            super(testFile);
+            this.targetClass = targetClass;
+            this.additionalClasses = additionalClasses;
+            this.additionalTransformers = additionalTransformers;
+        }
+
+        protected TestDefinition(String testFile, String name, String targetClass, List<String> additionalClasses) {
+            this(testFile, name, targetClass, additionalClasses, new ArrayList<>());
+        }
+
+        protected TestDefinition(String testFile, String name, String targetClass, List<String> additionalClasses,
+                                 List<String> additionalTransformers) {
             super(testFile, name);
             this.targetClass = targetClass;
+            this.additionalClasses = additionalClasses;
+            this.additionalTransformers = additionalTransformers;
         }
     }
 }

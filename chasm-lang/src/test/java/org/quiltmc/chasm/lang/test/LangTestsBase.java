@@ -75,8 +75,12 @@ public abstract class LangTestsBase<T extends LangTestsBase.BaseTestDefinition> 
             this.name = name;
         }
 
-        public Path getTestFile() {
+        public static Path getTestFile(String testFile) {
             return TEST_FILES_DIR.resolve(testFile + ".chasm");
+        }
+
+        public Path getTestFile() {
+            return getTestFile(testFile);
         }
 
         public Path getResultFile() {
