@@ -7,7 +7,7 @@ import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
-import org.quiltmc.chasm.internal.LazyClassNode;
+import org.quiltmc.chasm.internal.LazyClassMapNode;
 
 public class TreePrinter {
     private static final String INDENT_STRING = "  ";
@@ -47,8 +47,8 @@ public class TreePrinter {
             printIndent(indent);
             printStream.print("]");
         } else if (node instanceof MapNode) {
-            if (node instanceof LazyClassNode && !expandClasses) {
-                printStream.print("LazyClassNode<" + ((LazyClassNode) node).getClassReader().getClassName() + ">");
+            if (node instanceof LazyClassMapNode && !expandClasses) {
+                printStream.print("LazyClassNode<" + ((LazyClassMapNode) node).getClassReader().getClassName() + ">");
             } else {
                 printStream.println("{");
                 for (Map.Entry<String, Node> entry : ((MapNode<Node>) node).entrySet()) {

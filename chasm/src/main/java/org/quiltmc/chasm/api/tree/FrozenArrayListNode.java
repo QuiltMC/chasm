@@ -24,7 +24,7 @@ public class FrozenArrayListNode extends ImmutableArrayList<FrozenNode> implemen
     }
 
     @Override
-    public FrozenMetadataProvider getMetadata() {
+    public FrozenMetadataProvider getFrozenMetadata() {
         return metadata;
     }
 

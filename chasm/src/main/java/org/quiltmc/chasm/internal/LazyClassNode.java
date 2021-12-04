@@ -18,9 +18,8 @@ import org.quiltmc.chasm.internal.metadata.Metadata;
 import org.quiltmc.chasm.internal.metadata.MetadataProvider;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.util.NodeConstants;
-import org.quiltmc.chasm.internal.util.PathInitializer;
 
-public class LazyClassNode extends AbstractMap<String, Node> implements MapNode<Node> {
+public class LazyClassNode extends AbstractMap<String, Node> implements LazyClassMapNode<Node> {
     private final ClassReader classReader;
     private final MapNode<Node> nonLazyChildren;
     private MetadataProvider<Metadata> metadataProvider = new MetadataProvider<>();
@@ -54,27 +53,38 @@ public class LazyClassNode extends AbstractMap<String, Node> implements MapNode<
         return metadataProvider;
     }
 
-    public MapNode<Node> getFullNodeOrNull() {
+    @Override
+    public MapNode<Node> pollFullNode() {
         return fullNodeRef.get();
     }
 
+    @Override
     public MapNode<Node> getFullNode() {
         MapNode<Node> fullNode = fullNodeRef.get();
         if (fullNode == null) {
-            ChasmClassVisitor classVisitor = new ChasmClassVisitor();
-            classReader.accept(classVisitor, 0);
-            fullNode = classVisitor.getClassNode();
-
-            if (getMetadata().get(PathMetadata.class) != null) {
-                PathInitializer.initialize(fullNode, getMetadata().get(PathMetadata.class));
-            }
-
+            fullNode = makeFullNode(classReader, metadataProvider);
             fullNodeRef = new SoftReference<>(fullNode);
         }
 
         return fullNode;
     }
 
+    static MapNode<Node> makeFullNode(ClassReader classReader,
+            MetadataProvider<Metadata> metadata) {
+
+        ChasmClassVisitor classVisitor = new ChasmClassVisitor();
+        classReader.accept(classVisitor, 0);
+        MapNode<Node> fullNode = classVisitor.getClassNode();
+
+        PathMetadata pathMetadata = metadata.get(PathMetadata.class);
+        if (pathMetadata != null) {
+            fullNode.updatePath(pathMetadata);
+        }
+
+        return fullNode;
+    }
+
+    @Override
     public ClassReader getClassReader() {
         return classReader;
     }
@@ -102,6 +112,7 @@ public class LazyClassNode extends AbstractMap<String, Node> implements MapNode<
         return getFullNode().entrySet();
     }
 
+    @Override
     public Set<Map.Entry<String, Node>> getNonLazyEntrySet() {
         return nonLazyChildren.entrySet();
     }

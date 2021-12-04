@@ -97,8 +97,8 @@ public class TransformationApplier {
         PathMetadata targetPath = getPath(nodeTarget);
 
         int classIndex = targetPath.get(0).asInteger();
-        if (classes.get(classIndex) instanceof LazyClassNode) {
-            classes.set(classIndex, ((LazyClassNode) classes.get(classIndex)).getFullNode());
+        if (classes.get(classIndex) instanceof LazyClassMapNode) {
+            classes.set(classIndex, ((LazyClassMapNode) classes.get(classIndex)).getFullNode());
         }
 
         Node parentNode = targetPath.parent().resolve(classes);
@@ -125,8 +125,8 @@ public class TransformationApplier {
         PathMetadata targetPath = getPath(sliceTarget);
 
         int classIndex = targetPath.get(0).asInteger();
-        if (classes.get(classIndex) instanceof LazyClassNode) {
-            classes.set(classIndex, ((LazyClassNode) classes.get(classIndex)).getFullNode());
+        if (classes.get(classIndex) instanceof LazyClassMapNode) {
+            classes.set(classIndex, ((LazyClassMapNode) classes.get(classIndex)).getFullNode());
         }
 
         Node parentNode = targetPath.resolve(classes);

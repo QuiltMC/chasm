@@ -20,7 +20,7 @@ public class SliceTarget implements Target {
     /**
      * Create a {@link SliceTarget} of the passed {@link ListNode}.
      *
-     * @param listNode The {@link ListNode} to slice.
+     * @param target The {@link ListNode} to slice.
      *
      * @param start The first index of the {@link ListNode} included in the
      *            {@link SliceTarget}.

@@ -22,7 +22,7 @@ import org.quiltmc.chasm.internal.util.NodeConstants;
 public class AddField implements Transformer {
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<Transformation> apply(ListNode<? extends Node> classes) {
+    public Collection<Transformation> apply(FrozenListNode<? extends FrozenNode> classes) {
         MapNode<Node> newFieldNode = new LinkedHashMapNode();
         newFieldNode.put(NodeConstants.ACCESS, new ValueNode<>(Opcodes.ACC_PUBLIC));
         newFieldNode.put(NodeConstants.NAME, new ValueNode<>("field1"));

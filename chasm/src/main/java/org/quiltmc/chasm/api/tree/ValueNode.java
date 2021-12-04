@@ -43,8 +43,9 @@ public class ValueNode<T> implements Node {
     }
 
     @Override
-    public MetadataProvider getMetadata() {
-        return metadataProvider;
+    @SuppressWarnings("unchecked")
+    public MetadataProvider<Metadata> getMetadata() {
+        return (MetadataProvider<Metadata>) metadataProvider;
     }
 
     @Override

@@ -20,7 +20,6 @@ import org.quiltmc.chasm.internal.TransformerSorter;
 import org.quiltmc.chasm.internal.asm.ChasmClassWriter;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.tree.reader.ClassNodeReader;
-import org.quiltmc.chasm.internal.util.PathInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +79,7 @@ public class ChasmProcessor {
         LOGGER.info("Processing {} classes...", classes.size());
 
         LOGGER.info("Initializing paths...");
-        PathInitializer.initialize(classes, new PathMetadata());
+        classes.updatePath(new PathMetadata());
 
         LOGGER.info("Sorting {} transformers...", transformers.size());
         List<List<Transformer>> rounds = TransformerSorter.sort(transformers);

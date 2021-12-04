@@ -44,7 +44,7 @@ public class FrozenLinkedHashMapNode implements FrozenMapNode {
     }
 
     @Override
-    public FrozenMetadataProvider getMetadata() {
+    public FrozenMetadataProvider getFrozenMetadata() {
         return metadata;
     }
 
@@ -199,11 +199,11 @@ public class FrozenLinkedHashMapNode implements FrozenMapNode {
         }
 
         @Override
-        public Iterator<Entry<String, FrozenNode>> iterator() {
+        public Iterator<Map.Entry<String, FrozenNode>> iterator() {
             if (frozenEntries == null) {
                 frozenEntries = new FrozenEntry[iterationOrder.length];
             }
-            return new Iterator<>() {
+            return new Iterator<Map.Entry<String, FrozenNode>>() {
                 private int nextIndex;
                 {
                     nextIndex = 0;
@@ -250,7 +250,7 @@ public class FrozenLinkedHashMapNode implements FrozenMapNode {
         @Override
         public <T> T[] toArray(T[] a) {
             if (a.length < frozenEntries.length) {
-                a = (T[]) Array.newInstance(a.getClass().componentType(), frozenEntries.length);
+                a = (T[]) Array.newInstance(a.getClass().getComponentType(), frozenEntries.length);
             }
             for (int i = 0; i < frozenEntries.length; ++i) {
                 a[i] = (T) getFrozenEntryAt(i);
@@ -301,7 +301,7 @@ public class FrozenLinkedHashMapNode implements FrozenMapNode {
         @SuppressWarnings("unchecked")
         public <T> T[] toArray(T[] a) {
             if (a.length < iterationOrder.length) {
-                a = (T[]) Array.newInstance(a.getClass().componentType(), iterationOrder.length);
+                a = (T[]) Array.newInstance(a.getClass().getComponentType(), iterationOrder.length);
             }
             System.arraycopy(iterationOrder, 0, a, 0, iterationOrder.length);
             return a;
@@ -336,7 +336,7 @@ public class FrozenLinkedHashMapNode implements FrozenMapNode {
 
         @Override
         public Iterator<FrozenNode> iterator() {
-            return new Iterator<>() {
+            return new Iterator<FrozenNode>() {
                 private int nextIndex;
 
                 @Override
@@ -369,7 +369,7 @@ public class FrozenLinkedHashMapNode implements FrozenMapNode {
         @SuppressWarnings("unchecked")
         public <T> T[] toArray(T[] a) {
             if (a.length < iterationOrder.length) {
-                a = (T[]) Array.newInstance(a.getClass().componentType(), iterationOrder.length);
+                a = (T[]) Array.newInstance(a.getClass().getComponentType(), iterationOrder.length);
             }
             for (int i = 0; i < iterationOrder.length; ++i) {
                 a[i] = (T) map.get(iterationOrder[i]);

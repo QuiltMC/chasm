@@ -52,8 +52,7 @@ public class ImmutableArrayList<T> extends AbstractImmutableCollection<T>
     @SuppressWarnings("unchecked")
     public <E> E[] toArray(E[] a) {
         if (a.length < elements.length) {
-            Class<? extends Object> aClass = a.getClass();
-            a = (E[]) Array.newInstance(aClass.componentType(), elements.length);
+            a = (E[]) Array.newInstance(a.getClass().getComponentType(), elements.length);
         }
         System.arraycopy(elements, 0, a, 0, elements.length);
         return a;

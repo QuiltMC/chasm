@@ -83,15 +83,13 @@ public class TransformationSorter {
 
         // Add explicit dependencies
         for (TransformationInfo transformation : transformations) {
-            Iterable<String> mustRunAfterIDs = transformation.get().getParent().mustRunAfter(byTransformerId.keySet());
-            for (String id : mustRunAfterIDs) {
+            for (String id : transformation.get().getParent().mustRunAfter(byTransformerId.keySet())) {
                 for (TransformationInfo other : byTransformerId.get(id)) {
                     transformation.addDependency(other);
                 }
             }
-            Iterable<String> mustRunBeforeIDs = transformation.get().getParent()
-                    .mustRunBefore(byTransformerId.keySet());
-            for (String id : mustRunBeforeIDs) {
+            for (String id : transformation.get().getParent()
+                    .mustRunBefore(byTransformerId.keySet())) {
                 for (TransformationInfo other : byTransformerId.get(id)) {
                     other.addDependency(transformation);
                 }

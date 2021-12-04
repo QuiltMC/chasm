@@ -3,6 +3,7 @@ package org.quiltmc.chasm.api.tree;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.internal.metadata.Metadata;
 import org.quiltmc.chasm.internal.metadata.MetadataProvider;
+import org.quiltmc.chasm.internal.metadata.PathMetadata;
 
 /**
  * Mark a compliant {@link Node} of a CHASM tree with this interface.
@@ -34,5 +35,13 @@ public interface Node {
      * @return The {@link MetadataProvider} of this node.
      */
     @ApiStatus.Internal
-    MetadataProvider getMetadata();
+    MetadataProvider<Metadata> getMetadata();
+
+    @ApiStatus.Internal
+    default Node updatePath(PathMetadata newPath) {
+        MetadataProvider<Metadata> metadataProvider = getMetadata();
+        metadataProvider.put(newPath);
+
+        return this;
+    }
 }

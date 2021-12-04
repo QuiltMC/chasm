@@ -6,7 +6,7 @@ import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
-import org.quiltmc.chasm.internal.LazyClassNode;
+import org.quiltmc.chasm.internal.LazyClassMapNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
 @SuppressWarnings("unchecked")
@@ -19,8 +19,8 @@ public class ClassNodeReader {
 
     public void accept(ClassVisitor visitor) {
         // Unmodified class
-        if (classNode instanceof LazyClassNode) {
-            ((LazyClassNode) classNode).getClassReader().accept(visitor, 0);
+        if (classNode instanceof LazyClassMapNode) {
+            ((LazyClassMapNode) classNode).getClassReader().accept(visitor, 0);
             return;
         }
 
