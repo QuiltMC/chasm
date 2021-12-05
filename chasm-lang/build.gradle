@@ -35,6 +35,8 @@ repositories {
 
 dependencies {
     implementation project(':chasm')
+    implementation 'org.ow2.asm:asm:9.2'
+
 
     antlr 'org.antlr:antlr4:4.9.3'
 

@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Transform a list of classes, according to a {@link List} of {@link Transformer}s.
+ * Transforms the added classes using the added {@link Transformer}s.
  */
 public class ChasmProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChasmProcessor.class);
@@ -34,10 +34,10 @@ public class ChasmProcessor {
     private final List<Transformer> transformers = new ArrayList<>();
 
     /**
-     * Create a new {@link ChasmProcessor} using the given {@link SuperClassProvider}.
+     * Creates a new {@link ChasmProcessor} that uses the given {@link SuperClassProvider}.
      *
-     * @param superClassProvider A {@link SuperClassProvider} to supply parents of classes that are not being
-     *                               transformed.
+     * @param superClassProvider A {@code SuperClassProvider} to supply parents of classes that are not being
+     *            transformed.
      */
     public ChasmProcessor(SuperClassProvider superClassProvider) {
         this.superClassProvider = superClassProvider;
@@ -45,21 +45,21 @@ public class ChasmProcessor {
     }
 
     /**
-     * Add the passed {@link Transformer} to this {@link ChasmProcessor}'s
-     *           list of {@link Transformer}s.
+     * Adds the passed {@link Transformer} to this {@link ChasmProcessor}'s
+     * list of {@code Transformer}s.
      *
-     * @param transformer A {@link Transformer} to add to this {@link ChasmProcessor}'s
-     *           list of {@link Transformer}s to transform classes with.
+     * @param transformer A {@code Transformer} to add to this {@code ChasmProcessor}'s
+     *            list of {@code Transformer}s to transform classes with.
      */
     public void addTransformer(Transformer transformer) {
         transformers.add(transformer);
     }
 
     /**
-     * Add the passed class {@code byte[]} to this {@link ChasmProcessor}'s
-     *          list of classes to transform.
+     * Adds the passed class {@code byte[]} to this {@link ChasmProcessor}'s
+     * list of classes to transform.
      *
-     * @param classBytes A class {@code byte[]} to transform.
+     * @param classBytes A transformable class as a {@code byte[]}.
      */
     public void addClass(byte[] classBytes) {
         ClassReader classReader = new ClassReader(classBytes);
@@ -68,10 +68,10 @@ public class ChasmProcessor {
     }
 
     /**
-     * Transform this {@link ChasmProcessor}'s list of classes according
-     *          to this {@link ChasmProcessor}'s list of {@link Transformer}s.
+     * Transforms this {@link ChasmProcessor}'s list of classes according
+     * to this {@code ChasmProcessor}'s list of {@link Transformer}s.
      *
-     * @return The list of transformed classes, as a {@link List} of {@code byte[]}s.
+     * @return The resulting list of classes as {@code byte[]}s.
      */
     public List<byte[]> process() {
         LOGGER.info("Processing {} classes...", classes.size());
@@ -98,7 +98,7 @@ public class ChasmProcessor {
         LOGGER.info("Writing {} classes...", classes.size());
         List<byte[]> classBytes = new ArrayList<>();
         for (Node node : classes) {
-            MapNode classNode = (MapNode) node;
+            MapNode classNode = Node.asMap(node);
 
             ClassNodeReader chasmWriter = new ClassNodeReader(classNode);
             ClassWriter classWriter = new ChasmClassWriter(
@@ -111,7 +111,7 @@ public class ChasmProcessor {
         return classBytes;
     }
 
-    private static List<Transformation> applyTransformers(List<Transformer> transformers, ListNode classes) {
+    private List<Transformation> applyTransformers(List<Transformer> transformers, ListNode classes) {
         List<Transformation> transformations = new ArrayList<>();
 
         for (Transformer transformer : transformers) {

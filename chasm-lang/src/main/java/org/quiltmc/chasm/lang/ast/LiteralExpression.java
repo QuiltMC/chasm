@@ -3,8 +3,9 @@ package org.quiltmc.chasm.lang.ast;
 import java.util.Objects;
 
 import org.quiltmc.chasm.lang.ReductionContext;
+import org.quiltmc.chasm.lang.op.Equatable;
 
-public abstract class LiteralExpression<T> implements Expression {
+public abstract class LiteralExpression<T> implements Expression, Equatable {
     protected final T value;
 
     protected LiteralExpression(T value) {
@@ -39,5 +40,15 @@ public abstract class LiteralExpression<T> implements Expression {
     @Override
     public int hashCode() {
         return Objects.hash(value);
+    }
+
+    @Override
+    public boolean canEquate(Expression expression) {
+        return expression instanceof LiteralExpression;
+    }
+
+    @Override
+    public Expression equate(Expression expression) {
+        return new BooleanExpression(Objects.equals(value, ((LiteralExpression<?>) expression).value));
     }
 }

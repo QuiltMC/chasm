@@ -11,8 +11,8 @@ file
 expression
     : IDENTIFIER # ReferenceExpression
     | expression '.' IDENTIFIER # MemberExpression
-    | expression '[' expression ']' # IndexExpression
-    | expression '<' expression '>' # FilterExpression
+    | expression '.' '[' expression ']' # IndexExpression
+    | expression '.' '<' expression '>' # FilterExpression
     | expression '(' expression ')' # CallExpression
     | map # MapExpression
     | list # ListExpression
@@ -27,6 +27,7 @@ expression
 
 literal
     : STRING # StringExpression
+    | TYPE # TypeExpression
     | INTEGER # IntegerExpression
     | BOOLEAN # BooleanExpression
     | NONE # NoneExpression
@@ -51,6 +52,7 @@ OPERATOR: '+' | '-' | '*' | '/';
 BOOLEAN: 'true' | 'false';
 NONE: 'none';
 
+TYPE: 'T"' .*? '"';
 STRING: '"' .*? '"';
 INTEGER: [+-]? [0-9]+;
 IDENTIFIER: [_$a-zA-Z] [_a-zA-Z0-9]*;

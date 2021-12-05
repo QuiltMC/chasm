@@ -36,7 +36,7 @@ public abstract class ConversionHelper {
         }
 
         if (expression instanceof LiteralExpression<?>) {
-            return new ValueNode<>(((LiteralExpression<?>) expression).getValue());
+            return new ValueNode(((LiteralExpression<?>) expression).getValue());
         }
 
         throw new RuntimeException("Can't convert Expression to Node.");
@@ -44,24 +44,21 @@ public abstract class ConversionHelper {
 
     public static Expression convert(Node node) {
         if (node instanceof MapNode) {
-            return new ChasmMapNodeExpression((MapNode) node);
+            return new ChasmMapNodeExpression(Node.asMap(node));
         }
         if (node instanceof ListNode) {
-            return new ChasmListNodeExpression((ListNode) node);
+            return new ChasmListNodeExpression(Node.asList(node));
         }
-        if (node instanceof ValueNode<?>) {
-            Object value = ((ValueNode<?>) node).getValue();
+        if (node instanceof ValueNode) {
+            Object value = Node.asValue(node).getValue();
             if (value instanceof String) {
-                //noinspection unchecked
-                return new ChasmStringNodeExpression((ValueNode<String>) node);
+                return new ChasmStringNodeExpression(Node.asValue(node));
             }
             if (value instanceof Integer) {
-                //noinspection unchecked
-                return new ChasmIntegerNodeExpression((ValueNode<Integer>) node);
+                return new ChasmIntegerNodeExpression(Node.asValue(node));
             }
             if (value instanceof BooleanExpression) {
-                //noinspection unchecked
-                return new ChasmBooleanNodeExpression((ValueNode<Boolean>) node);
+                return new ChasmBooleanNodeExpression(Node.asValue(node));
             }
         }
 

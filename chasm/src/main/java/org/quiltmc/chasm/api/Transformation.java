@@ -6,7 +6,9 @@ import org.quiltmc.chasm.api.target.Target;
 import org.quiltmc.chasm.api.tree.Node;
 
 /**
- * Transform a {@link Target} {@link Node} using the {@link Node}'s sources, and a {@link Function}.
+ * Transforms a {@link Target} {@link Node} using requested {@code Node} sources.
+ *
+ * @see Function
  */
 public final class Transformation {
     private final Transformer parent;
@@ -15,16 +17,16 @@ public final class Transformation {
     private final Function applyFunction;
 
     /**
-     * Make a new {@link Transformation} with the given
-     *  {@link Transformer} parent, {@link Target}, {@link Target} sources, and {@link Function}.
+     * Makes a new {@link Transformation} with the given
+     * {@link Transformer} parent, {@link Target}, input sources, and {@link Function}.
      *
-     * @param parent The {@link Transformer} parent of the new {@link Transformation}.
+     * @param parent The {@code Transformer} parent of the new {@code Transformation}.
      *
-     * @param target The {@link Target} of the new {@link Transformation}.
+     * @param target The {@code Target} of the new {@code Transformation}.
      *
-     * @param sources The named {@link Target} sources of the new {@link Transformation}.
+     * @param sources The named {@code Target} input {@link Node} sources the new {@code Transformation} requires.
      *
-     * @param applyFunction The {@link Node}-transforming {@link Function} of the new {@link Transformation}.  
+     * @param applyFunction The {@code Node}-transforming {@code Function} of the new {@code Transformation}.
      */
     public Transformation(Transformer parent, Target target, Map<String, Target> sources, Function applyFunction) {
         this.parent = parent;
@@ -34,60 +36,62 @@ public final class Transformation {
     }
 
     /**
-     * Get this {@link Transformation}'s parent {@link Transformer}.
+     * Gets this {@link Transformation}'s parent {@link Transformer}.
      *
-     * @return The parent {@link Transformer} of this {@link Transformation}.
+     * @return The parent {@code Transformer} of this {@code Transformation}.
      */
     public Transformer getParent() {
         return parent;
     }
 
     /**
-     * Get this {@link Transformation}'s {@link Target}.
+     * Gets this {@link Transformation}'s {@link Target}.
      *
-     * @return The {@link Target} of this {@link Transformation}.
+     * @return The {@code Target} of this {@code Transformation}.
      */
     public Target getTarget() {
         return target;
     }
 
     /**
-     * Get this {@link Transformation}'s map of named source {@link Target}s.
+     * Gets this {@link Transformation}'s map of named source {@link Target}s.
      *
-     * @return This {@link Transformation}'s sources as a {@link Map} from name {@link String} to {@link Target} source.
+     * <p>Sources are the {@link Node}s that this {@code Transformation} requests as input.
+     *
+     * @return This {@code Transformation}'s input sources as a map of string-named {@code Target}s.
      */
     public Map<String, Target> getSources() {
         return sources;
     }
 
     /**
-     * Apply this {@link Transformation} to the given {@link Node},
-     *                 possibly using its {@link Node} sources.
+     * Applies this {@link Transformation} to the given {@link Node},
+     * possibly using its {@code Node} sources.
      *
-     * @param targetNode A {@link Node} to apply this {@link Transformation} to.
+     * @param targetNode A {@code Node} to apply this {@code Transformation} to.
      *
-     * @param nodeSources The sources of the target {@link Node}.
+     * @param nodeSources The sources of the target {@code Node}.
      *
-     * @return The {@link Node} resulting from applying this {@link Transformation}.
+     * @return The {@code Node} resulting from applying this {@code Transformation}.
      */
     public Node apply(Node targetNode, Map<String, Node> nodeSources) {
         return applyFunction.apply(targetNode, nodeSources);
     }
 
     /**
-     * Transform the passed {@link Node}, possibly using its sources.
+     * Transforms the passed {@link Node}, using the given input {@code Node} sources.
      */
     @FunctionalInterface
     public interface Function {
         /**
-         * Apply this {@link Function} to the given {@link Node},
-         *              possibly using its {@link Node} sources.
+         * Applies this {@link Function} to the passed {@link Node},
+         * using the given named input {@code Node} sources.
          *
-         * @param targetNode A {@link Node} to transform.
+         * @param targetNode The {@code Node} to transform.
          *
-         * @param nodeSources The sources of the target {@link Node}.
+         * @param nodeSources The input {@code Node} sources requested by the containing {@link Transformation}.
          *
-         * @return The {@link Node} resulting from transforming the given {@link Node}.
+         * @return The {@code Node} to replace the {@link Target} {@code Node}.
          */
         Node apply(Node targetNode, Map<String, Node> nodeSources);
     }

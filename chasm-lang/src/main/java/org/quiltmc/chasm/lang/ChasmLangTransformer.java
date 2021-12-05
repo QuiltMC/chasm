@@ -140,7 +140,7 @@ public class ChasmLangTransformer implements Transformer {
             IntegerExpression start = (IntegerExpression) rawStart;
             IntegerExpression end = (IntegerExpression) rawEnd;
 
-            return new SliceTarget((ListNode) target.getNode(), start.getValue(), end.getValue());
+            return new SliceTarget(Node.asList(target.getNode()), start.getValue(), end.getValue());
         }
 
         throw new RuntimeException("Target mst be node or map.");

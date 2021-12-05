@@ -3,7 +3,9 @@ package org.quiltmc.chasm.api.tree;
 import java.util.List;
 
 /**
- * Store a {@link List} of child {@link Node}s in a CHASM tree {@link Node}.
+ * Accesses child {@link Node}s by index.
+ *
+ * <p>Stores a {@code List} of child {@code Node}s.
  */
 public interface ListNode extends Node, List<Node> {
     @Override

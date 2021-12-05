@@ -21,11 +21,11 @@ public class AddField implements Transformer {
     @Override
     public Collection<Transformation> apply(ListNode classes) {
         MapNode newFieldNode = new LinkedHashMapNode();
-        newFieldNode.put(NodeConstants.ACCESS, new ValueNode<>(Opcodes.ACC_PUBLIC));
-        newFieldNode.put(NodeConstants.NAME, new ValueNode<>("field1"));
-        newFieldNode.put(NodeConstants.DESCRIPTOR, new ValueNode<>("I"));
-        newFieldNode.put(NodeConstants.SIGNATURE, new ValueNode<>(null));
-        newFieldNode.put(NodeConstants.VALUE, new ValueNode<>(null));
+        newFieldNode.put(NodeConstants.ACCESS, new ValueNode(Opcodes.ACC_PUBLIC));
+        newFieldNode.put(NodeConstants.NAME, new ValueNode("field1"));
+        newFieldNode.put(NodeConstants.DESCRIPTOR, new ValueNode("I"));
+        newFieldNode.put(NodeConstants.SIGNATURE, new ValueNode(null));
+        newFieldNode.put(NodeConstants.VALUE, new ValueNode(null));
         newFieldNode.put(NodeConstants.ANNOTATIONS, new ArrayListNode());
         newFieldNode.put(NodeConstants.ATTRIBUTES, new ArrayListNode());
 
@@ -34,8 +34,8 @@ public class AddField implements Transformer {
 
         List<Transformation> transformations = new ArrayList<>();
         for (Node node : classes) {
-            MapNode classNode = (MapNode) node;
-            ListNode fieldsNode = (ListNode) classNode.get(NodeConstants.FIELDS);
+            MapNode classNode = Node.asMap(node);
+            ListNode fieldsNode = Node.asList(classNode.get(NodeConstants.FIELDS));
             SliceTarget sliceTarget = new SliceTarget(fieldsNode, 0, 0);
             transformations.add(new Transformation(this, sliceTarget, Map.of(), (target, sources) -> newFields));
         }

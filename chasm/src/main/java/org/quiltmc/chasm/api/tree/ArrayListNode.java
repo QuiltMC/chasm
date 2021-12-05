@@ -6,7 +6,7 @@ import org.quiltmc.chasm.internal.metadata.MetadataProvider;
 
 
 /**
- * Use a {@link ArrayList} to implement a {@link ListNode}.
+ * Uses an {@code ArrayList} to implement a {@link ListNode}.
  */
 public class ArrayListNode extends ArrayList<Node> implements ListNode {
     private MetadataProvider metadataProvider = new MetadataProvider();

@@ -9,7 +9,6 @@ import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
-@SuppressWarnings("unchecked")
 public class FieldNodeReader {
     private final MapNode fieldNode;
 
@@ -18,17 +17,17 @@ public class FieldNodeReader {
     }
 
     private void visitAttributes(FieldVisitor fieldVisitor) {
-        ListNode attributesListNode = (ListNode) fieldNode.get(NodeConstants.ATTRIBUTES);
+        ListNode attributesListNode = Node.asList(fieldNode.get(NodeConstants.ATTRIBUTES));
         if (attributesListNode == null) {
             return;
         }
         for (Node n : attributesListNode) {
-            fieldVisitor.visitAttribute(((ValueNode<Attribute>) n).getValue());
+            fieldVisitor.visitAttribute(Node.asValue(n).getValueAs(Attribute.class));
         }
     }
 
     private void visitAnnotations(FieldVisitor fieldVisitor) {
-        ListNode annotationsListNode = (ListNode) fieldNode.get(NodeConstants.ANNOTATIONS);
+        ListNode annotationsListNode = Node.asList(fieldNode.get(NodeConstants.ANNOTATIONS));
         if (annotationsListNode == null) {
             return;
         }
@@ -39,14 +38,14 @@ public class FieldNodeReader {
     }
 
     public void visitField(ClassVisitor visitor) {
-        int access = ((ValueNode<Integer>) fieldNode.get(NodeConstants.ACCESS)).getValue();
-        String name = ((ValueNode<String>) fieldNode.get(NodeConstants.NAME)).getValue();
-        String descriptor = ((ValueNode<String>) fieldNode.get(NodeConstants.DESCRIPTOR)).getValue();
+        int access = Node.asValue(fieldNode.get(NodeConstants.ACCESS)).getValueAsInt();
+        String name = Node.asValue(fieldNode.get(NodeConstants.NAME)).getValueAsString();
+        String descriptor = Node.asValue(fieldNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
 
-        ValueNode<String> signatureNode = (ValueNode<String>) fieldNode.get(NodeConstants.SIGNATURE);
-        String signature = signatureNode == null ? null : signatureNode.getValue();
+        ValueNode signatureNode = Node.asValue(fieldNode.get(NodeConstants.SIGNATURE));
+        String signature = signatureNode == null ? null : signatureNode.getValueAsString();
 
-        ValueNode<Object> valueNode = (ValueNode<Object>) fieldNode.get(NodeConstants.VALUE);
+        ValueNode valueNode = Node.asValue(fieldNode.get(NodeConstants.VALUE));
         Object value = valueNode == null ? null : valueNode.getValue();
 
         FieldVisitor fieldVisitor = visitor.visitField(access, name, descriptor, signature, value);

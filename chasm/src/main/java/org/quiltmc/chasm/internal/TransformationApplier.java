@@ -79,7 +79,7 @@ public class TransformationApplier {
         if (target instanceof NodeTarget) {
             replaceNode((NodeTarget) target, replacement);
         } else if (target instanceof SliceTarget && replacement instanceof ListNode) {
-            replaceSlice((SliceTarget) target, (ListNode) replacement);
+            replaceSlice((SliceTarget) target, Node.asList(replacement));
         } else {
             throw new RuntimeException("Invalid replacement for target");
         }
@@ -98,13 +98,13 @@ public class TransformationApplier {
         PathMetadata.Entry entry = targetPath.get(targetPath.size() - 1);
 
         if (parentNode instanceof ListNode && entry.isInteger()) {
-            ListNode parentList = (ListNode) parentNode;
+            ListNode parentList = Node.asList(parentNode);
             parentList.set(entry.asInteger(), replacement);
             return;
         }
 
         if (parentNode instanceof MapNode && entry.isString()) {
-            MapNode parentList = (MapNode) parentNode;
+            MapNode parentList = Node.asMap(parentNode);
             parentList.put(entry.asString(), replacement);
             return;
         }
@@ -126,7 +126,7 @@ public class TransformationApplier {
             throw new UnsupportedOperationException("Replacement for slice target must be a list node.");
         }
 
-        ListNode parentList = (ListNode) parentNode;
+        ListNode parentList = Node.asList(parentNode);
 
         int change = parentList.size() - replacement.size();
         int start = sliceTarget.getStartIndex() / 2;
@@ -184,9 +184,9 @@ public class TransformationApplier {
 
         for (PathMetadata.Entry entry : path) {
             if (currentNode instanceof ListNode && entry.isInteger()) {
-                currentNode = ((ListNode) currentNode).get(entry.asInteger());
+                currentNode = Node.asList(currentNode).get(entry.asInteger());
             } else if (currentNode instanceof MapNode && entry.isString()) {
-                currentNode = ((MapNode) currentNode).get(entry.asString());
+                currentNode = Node.asMap(currentNode).get(entry.asString());
             } else {
                 throw new RuntimeException("Can't resolve path " + path);
             }

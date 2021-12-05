@@ -28,8 +28,8 @@ public class NodeConstants {
     public static final String IS_INTERFACE = "isInterface";
     public static final String KEY = "key";
     public static final String LABEL = "label";
-    public static final String LABELS = "labels";
     public static final String LINE = "line";
+    public static final String LINE_NUMBERS = "lineNumbers";
     public static final String LOCALS = "locals";
     public static final String MAIN = "main";
     public static final String METHODS = "methods";
@@ -48,14 +48,13 @@ public class NodeConstants {
     public static final String OWNER_METHOD = "ownerMethod";
     public static final String PACKAGE = "package";
     public static final String PACKAGES = "packages";
-    public static final String PARAMETER = "parameter";
     public static final String PARAMETERS = "parameters";
-    public static final String PARAMETER_ANNOTATIONS = "parameterAnnotations";
     public static final String PERMITTED_SUBCLASSES = "permittedSubclasses";
     public static final String PROVIDERS = "providers";
     public static final String PROVIDES = "provides";
     public static final String RECORD_COMPONENTS = "recordComponents";
     public static final String REQUIRES = "requires";
+    public static final String RETURN_TYPE = "returnType";
     public static final String SERVICE = "service";
     public static final String SIGNATURE = "signature";
     public static final String SOURCE = "source";

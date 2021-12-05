@@ -1,8 +1,8 @@
 package org.quiltmc.chasm.lang.ast;
 
-import org.quiltmc.chasm.lang.op.Equatable;
+import org.quiltmc.chasm.lang.op.Indexable;
 
-public class StringExpression extends LiteralExpression<String> implements Equatable {
+public class StringExpression extends LiteralExpression<String> implements Indexable {
     public StringExpression(String value) {
         super(value);
     }
@@ -13,12 +13,17 @@ public class StringExpression extends LiteralExpression<String> implements Equat
     }
 
     @Override
-    public boolean canEquate(Expression expression) {
-        return expression instanceof StringExpression;
+    public boolean canIndex(Expression expression) {
+        return expression instanceof IntegerExpression;
     }
 
     @Override
-    public Expression equate(Expression expression) {
-        return new BooleanExpression(value.equals(((StringExpression) expression).getValue()));
+    public Expression index(Expression expression) {
+        int index = ((IntegerExpression) expression).getValue();
+        if (index >= value.length()) {
+            return Expression.none();
+        }
+
+        return new StringExpression(String.valueOf(value.charAt(index)));
     }
 }

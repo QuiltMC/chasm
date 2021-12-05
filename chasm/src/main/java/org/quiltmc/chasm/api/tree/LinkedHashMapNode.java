@@ -6,7 +6,7 @@ import java.util.Map;
 import org.quiltmc.chasm.internal.metadata.MetadataProvider;
 
 /**
- * Use a {@link LinkedHashMap} to implement a {@link MapNode}.
+ * Uses a {@linkplain LinkedHashMap} to implement a {@link MapNode}.
  */
 public class LinkedHashMapNode extends LinkedHashMap<String, Node> implements MapNode {
     private MetadataProvider metadataProvider = new MetadataProvider();

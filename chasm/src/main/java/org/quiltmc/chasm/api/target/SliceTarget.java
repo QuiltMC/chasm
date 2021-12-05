@@ -6,27 +6,28 @@ import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.Node;
 
 /**
- * Slice a {@link ListNode}, as a {@link Target}.
+ * Slices a {@link ListNode}, as a {@link Target}.
  *
  * <p>A slice of a list is a contiguous subset of the list, like
  * {@link List#subList}.
  */
 public class SliceTarget implements Target {
-    private final Node target;
+    private final ListNode target;
     // NOTE! "Virtual Index". Divide by two for actual list index
     private int startIndex;
     private int endIndex;
 
     /**
-     * Create a {@link SliceTarget} of the passed {@link ListNode}.
+     * Creates a {@link SliceTarget} of the passed {@link ListNode}.
      *
-     * @param listNode The {@link ListNode} to slice.
+     * @param target The {@code ListNode} to slice.
      *
-     * @param start The first index of the {@link ListNode} included in the
-     *            {@link SliceTarget}.
+     * @param start The first index of the {@code ListNode} included in the
+     *            {@code SliceTarget}.
      *
      * @param end The first index after the {@code start} of the {@link ListNode}
-     *            not included in the {@link SliceTarget}.
+     *            not included in the {@code SliceTarget}.
+     *
      */
     public SliceTarget(ListNode target, int start, int end) {
         this.target = target;
@@ -40,27 +41,34 @@ public class SliceTarget implements Target {
     }
 
     /**
-     * Get this {@link SliceTarget}'s slice start index.
+     * Gets this {@link SliceTarget}'s slice start index.
      *
-     * @return The start index of this {@link SliceTarget}' slice.
+     * <p>The slice start index is the first index of the {@link ListNode} included in this {@code SliceTarget}.
+     *
+     * @return The start index of this {@code SliceTarget}' slice.
      */
     public int getStartIndex() {
         return startIndex;
     }
 
     /**
-     * Set this {@link SliceTarget}'s slice start index.
+     * Sets this {@link SliceTarget}'s slice start index.
      *
-     * @param startIndex The new start index for this {@link SliceTarget}'s slice.
+     * <p>The slice start index is the first index of the {@link ListNode} included in this {@code SliceTarget}.
+     *
+     * @param startIndex The new start index for this {@code SliceTarget}'s slice.
      */
     public void setStartIndex(int startIndex) {
         this.startIndex = startIndex;
     }
 
     /**
-     * Get this {@link SliceTarget}'s slice end index.
+     * Gets this {@link SliceTarget}'s slice end index.
      *
-     * @return The end index of this {@link SliceTarget}'s slice.
+     * <p> The slice end index is the first index after the {@code start} of the {@link ListNode}
+     * not included in this {@code SliceTarget}.
+     *
+     * @return The end index of this {@code SliceTarget}'s slice.
      */
     public int getEndIndex() {
         return endIndex;
@@ -68,6 +76,9 @@ public class SliceTarget implements Target {
 
     /**
      * Set this {@link SliceTarget}'s slice end index.
+     *
+     * <p> The slice end index is the first index after the {@code start} of the {@link ListNode}
+     * not included in this {@code SliceTarget}.
      *
      * @param endIndex The new end index for this {@link SliceTarget}'s slice.
      */
