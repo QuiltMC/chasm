@@ -4,6 +4,10 @@ import java.util.ArrayList;
 
 import org.quiltmc.chasm.internal.metadata.MetadataProvider;
 
+
+/**
+ * Uses an {@code ArrayList} to implement a {@link ListNode}.
+ */
 public class ArrayListNode extends ArrayList<Node> implements ListNode {
     private MetadataProvider metadataProvider = new MetadataProvider();
 
