@@ -3,6 +3,7 @@ package org.quiltmc.chasm.internal.metadata;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import org.quiltmc.chasm.api.metadata.Metadata;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;

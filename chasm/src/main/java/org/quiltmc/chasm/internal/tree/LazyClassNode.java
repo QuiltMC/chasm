@@ -1,10 +1,11 @@
-package org.quiltmc.chasm.internal;
+package org.quiltmc.chasm.internal.tree;
 
 import java.lang.ref.SoftReference;
 import java.util.AbstractMap;
 import java.util.Set;
 
 import org.objectweb.asm.ClassReader;
+import org.quiltmc.chasm.api.metadata.MetadataProvider;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
@@ -12,7 +13,6 @@ import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.internal.asm.visitor.ChasmClassVisitor;
-import org.quiltmc.chasm.internal.metadata.MetadataProvider;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.internal.util.PathInitializer;

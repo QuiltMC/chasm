@@ -3,7 +3,7 @@ package org.quiltmc.chasm.api.tree;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.quiltmc.chasm.internal.metadata.MetadataProvider;
+import org.quiltmc.chasm.api.metadata.MetadataProvider;
 
 /**
  * Uses a {@linkplain LinkedHashMap} to implement a {@link MapNode}.

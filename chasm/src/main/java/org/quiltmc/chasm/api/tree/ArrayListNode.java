@@ -2,7 +2,7 @@ package org.quiltmc.chasm.api.tree;
 
 import java.util.ArrayList;
 
-import org.quiltmc.chasm.internal.metadata.MetadataProvider;
+import org.quiltmc.chasm.api.metadata.MetadataProvider;
 
 
 /**

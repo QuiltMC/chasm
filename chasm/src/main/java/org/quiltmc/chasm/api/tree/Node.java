@@ -1,7 +1,6 @@
 package org.quiltmc.chasm.api.tree;
 
-import org.jetbrains.annotations.ApiStatus;
-import org.quiltmc.chasm.internal.metadata.MetadataProvider;
+import org.quiltmc.chasm.api.metadata.MetadataProvider;
 import org.quiltmc.chasm.internal.util.NodeUtils;
 
 /**
@@ -23,7 +22,6 @@ public interface Node {
      *
      * @return The {@code MetadataProvider} of this node.
      */
-    @ApiStatus.Internal
     MetadataProvider getMetadata();
 
     /**

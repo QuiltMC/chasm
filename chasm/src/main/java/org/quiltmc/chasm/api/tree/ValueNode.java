@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.api.tree;
 
-import org.quiltmc.chasm.internal.metadata.MetadataProvider;
+import org.quiltmc.chasm.api.metadata.MetadataProvider;
 
 /**
  * Wraps a value as a {@link Node} for use in a CHASM tree.

@@ -15,6 +15,7 @@ import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.internal.metadata.OriginMetadata;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
+import org.quiltmc.chasm.internal.tree.LazyClassNode;
 
 public class TransformationApplier {
     private final ListNode classes;

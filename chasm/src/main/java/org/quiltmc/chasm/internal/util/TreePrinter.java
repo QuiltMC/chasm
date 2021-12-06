@@ -7,7 +7,7 @@ import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
-import org.quiltmc.chasm.internal.LazyClassNode;
+import org.quiltmc.chasm.internal.tree.LazyClassNode;
 
 public class TreePrinter {
     private static final String INDENT_STRING = "  ";

@@ -5,8 +5,8 @@ import java.util.Map;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
-import org.quiltmc.chasm.internal.LazyClassNode;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
+import org.quiltmc.chasm.internal.tree.LazyClassNode;
 
 public abstract class PathInitializer {
     private PathInitializer() {
