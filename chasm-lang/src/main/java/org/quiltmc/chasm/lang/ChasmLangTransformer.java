@@ -84,37 +84,62 @@ public class ChasmLangTransformer implements Transformer {
         if (!(rawTransformationExpression instanceof MapExpression)) {
             throw new RuntimeException("Transformation must be a map.");
         }
+
+        // Extract target
         MapExpression transformationExpression = (MapExpression) rawTransformationExpression;
         Expression targetExpression = transformationExpression.get("target");
         Target target = parseTarget(targetExpression);
 
-        Map<String, Target> sources = Collections.emptyMap();
+        // Extract sources
+        Map<String, Target> sources = new HashMap<>();
         Expression rawSourcesExpression = transformationExpression.get("sources");
         if (rawSourcesExpression != Expression.none()) {
             if (!(rawSourcesExpression instanceof MapExpression)) {
                 throw new RuntimeException("Sources must be a map.");
             }
             MapExpression sourcesExpression = (MapExpression) rawSourcesExpression;
-            sources = new HashMap<>();
             for (Map.Entry<String, Expression> entry : sourcesExpression.getEntries().entrySet()) {
                 sources.put(entry.getKey(), parseTarget(entry.getValue()));
             }
         }
 
+        // Extract apply function
         Expression rawApplyExpression = transformationExpression.get("apply");
         if (!(rawApplyExpression instanceof Callable)) {
             throw new RuntimeException("Apply must be callable.");
         }
         Callable applyExpression = (Callable) rawApplyExpression;
 
-        return new Transformation(this, target, sources, (resolvedTarget, resolvedSources) -> {
-            Map<String, Expression> argEntries = new HashMap<>();
-            argEntries.put("target", ConversionHelper.convert(resolvedTarget));
-            argEntries.put("sources", ConversionHelper.convert((Node) resolvedSources));
-            MapExpression argExpression = new MapExpression(argEntries);
-            Expression result = applyExpression.call(argExpression);
-            return ConversionHelper.convert(result);
-        });
+        // Create Transformation
+        return new Transformation() {
+            @Override
+            public Transformer getParent() {
+                return ChasmLangTransformer.this;
+            }
+
+            @Override
+            public Target getTarget() {
+                return target;
+            }
+
+            @Override
+            public Map<String, Target> getSources() {
+                return sources;
+            }
+
+            @Override
+            public Node apply(Node resolvedTarget, Map<String, Node> resolvedSources) {
+                // Construct arguments
+                Map<String, Expression> argEntries = new HashMap<>();
+                argEntries.put("target", ConversionHelper.convert(resolvedTarget));
+                argEntries.put("sources", ConversionHelper.convert((Node) resolvedSources));
+                MapExpression argExpression = new MapExpression(argEntries);
+
+                // Invoke function and return replacement
+                Expression result = applyExpression.call(argExpression);
+                return ConversionHelper.convert(result);
+            }
+        };
     }
 
     private Target parseTarget(Expression rawTargetExpression) {

@@ -9,6 +9,7 @@ import org.objectweb.asm.Opcodes;
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.Transformer;
 import org.quiltmc.chasm.api.target.SliceTarget;
+import org.quiltmc.chasm.api.target.Target;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
@@ -37,7 +38,7 @@ public class AddField implements Transformer {
             MapNode classNode = Node.asMap(node);
             ListNode fieldsNode = Node.asList(classNode.get(NodeConstants.FIELDS));
             SliceTarget sliceTarget = new SliceTarget(fieldsNode, 0, 0);
-            transformations.add(new Transformation(this, sliceTarget, Map.of(), (target, sources) -> newFields));
+            transformations.add(new StaticTransformation(sliceTarget, newFields));
         }
 
         return transformations;
@@ -46,5 +47,30 @@ public class AddField implements Transformer {
     @Override
     public String getId() {
         return AddField.class.getCanonicalName();
+    }
+
+    private class StaticTransformation implements Transformation {
+        private final Target target;
+        private final Node replacement;
+
+        public StaticTransformation(Target target, Node replacement) {
+            this.target = target;
+            this.replacement = replacement;
+        }
+
+        @Override
+        public Transformer getParent() {
+            return AddField.this;
+        }
+
+        @Override
+        public Target getTarget() {
+            return target;
+        }
+
+        @Override
+        public Node apply(Node targetNode, Map<String, Node> nodeSources) {
+            return replacement;
+        }
     }
 }
