@@ -80,7 +80,7 @@ public class SliceTarget implements Target {
      * <p>The slice end index is the first index after the {@code start} of the {@link ListNode}
      * not included in this {@code SliceTarget}.
      *
-     * @param endIndex The new end index for this {@link SliceTarget}'s slice.
+     * @param endIndex The new end index for this {@code SliceTarget}'s slice.
      */
     public void setEndIndex(int endIndex) {
         this.endIndex = endIndex;
