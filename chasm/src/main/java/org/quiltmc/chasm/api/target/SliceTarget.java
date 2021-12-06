@@ -65,7 +65,7 @@ public class SliceTarget implements Target {
     /**
      * Gets this {@link SliceTarget}'s slice end index.
      *
-     * <p> The slice end index is the first index after the {@code start} of the {@link ListNode}
+     * <p>The slice end index is the first index after the {@code start} of the {@link ListNode}
      * not included in this {@code SliceTarget}.
      *
      * @return The end index of this {@code SliceTarget}'s slice.
@@ -77,7 +77,7 @@ public class SliceTarget implements Target {
     /**
      * Set this {@link SliceTarget}'s slice end index.
      *
-     * <p> The slice end index is the first index after the {@code start} of the {@link ListNode}
+     * <p>The slice end index is the first index after the {@code start} of the {@link ListNode}
      * not included in this {@code SliceTarget}.
      *
      * @param endIndex The new end index for this {@link SliceTarget}'s slice.
