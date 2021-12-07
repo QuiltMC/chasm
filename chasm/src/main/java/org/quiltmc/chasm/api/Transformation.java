@@ -7,9 +7,7 @@ import org.quiltmc.chasm.api.target.Target;
 import org.quiltmc.chasm.api.tree.Node;
 
 /**
- * Transforms a {@link Target} {@link Node} using requested {@code Node} sources.
- *
- * @see Function
+ * A Transformation of a {@link #getTarget() target} using specified {@link #getSources() sources}.
  */
 public interface Transformation {
     /**

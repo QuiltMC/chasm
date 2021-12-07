@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.quiltmc.chasm.api.Lock;
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.target.Target;
@@ -251,13 +252,27 @@ public class TransformationSorter {
         }
 
         public void addDependency(TargetInfo other) {
-            // A source always depends on a target softly
-            if (this.type == TargetType.SOURCE && other.type == TargetType.TARGET) {
-                parent.addSoftDependency(other.parent);
+            Lock lock = this.target.getLock();
+            Lock otherLock = other.target.getLock();
+
+            if (lock == Lock.BEFORE || otherLock == Lock.AFTER) {
+                // Any containing targets must be applied after
+                other.parent.addDependency(this.parent);
             }
-            // A target always has hard dependencies
+
+            if (lock == Lock.AFTER || otherLock == Lock.BEFORE) {
+                // Any containing targets must be applied before
+                this.parent.addDependency(other.parent);
+            }
+
+            // Targets must be applied before contained targets or sources
             if (this.type == TargetType.TARGET) {
                 parent.addDependency(other.parent);
+            }
+
+            // Sources are preferably applied before contained targets
+            if (this.type == TargetType.SOURCE && other.type == TargetType.TARGET) {
+                parent.addSoftDependency(other.parent);
             }
         }
     }
