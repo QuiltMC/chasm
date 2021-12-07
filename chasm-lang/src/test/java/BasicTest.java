@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.api.ChasmProcessor;
-import org.quiltmc.chasm.api.util.ClassLoaderSuperClassProvider;
+import org.quiltmc.chasm.api.util.ClassLoaderClassInfoProvider;
 import org.quiltmc.chasm.lang.ChasmLang;
 import org.quiltmc.chasm.lang.ChasmLangTransformer;
 import org.quiltmc.chasm.lang.ReductionContext;
@@ -49,7 +49,7 @@ public class BasicTest {
     @Test
     public void testTransform() throws IOException {
         ChasmProcessor processor =
-                new ChasmProcessor(new ClassLoaderSuperClassProvider(null, getClass().getClassLoader()));
+                new ChasmProcessor(new ClassLoaderClassInfoProvider(null, getClass().getClassLoader()));
 
         byte[] classBytes = getClass().getResourceAsStream("TestClass.class").readAllBytes();
         processor.addClass(classBytes);
@@ -76,12 +76,18 @@ public class BasicTest {
                                         instructions: [
                                             {
                                                 opcode: 25,
-                                                var: 0
+                                                var: "P0"
                                             },
                                             {
                                                 opcode: 176,
                                             },
                                         ],
+                                        locals: {
+                                            P0: {
+                                                index: 0,
+                                                type: T"LTestClass;"
+                                            }
+                                        }
                                     },
                                 }
                             ]

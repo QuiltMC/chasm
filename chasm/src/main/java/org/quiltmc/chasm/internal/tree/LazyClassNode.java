@@ -12,6 +12,7 @@ import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
+import org.quiltmc.chasm.api.util.ClassInfoProvider;
 import org.quiltmc.chasm.internal.asm.visitor.ChasmClassVisitor;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.util.NodeConstants;
@@ -19,12 +20,14 @@ import org.quiltmc.chasm.internal.util.PathInitializer;
 
 public class LazyClassNode extends AbstractMap<String, Node> implements MapNode {
     private final ClassReader classReader;
+    private final ClassInfoProvider classInfoProvider;
     private final MapNode nonLazyChildren;
     private MetadataProvider metadataProvider = new MetadataProvider();
     private SoftReference<MapNode> fullNode = new SoftReference<>(null);
 
-    public LazyClassNode(ClassReader reader) {
+    public LazyClassNode(ClassReader reader, ClassInfoProvider classInfoProvider) {
         this.classReader = reader;
+        this.classInfoProvider = classInfoProvider;
 
         // NOTE: Ensure parity with names in ChasmClassVisitor
         this.nonLazyChildren = new LinkedHashMapNode();
@@ -41,7 +44,7 @@ public class LazyClassNode extends AbstractMap<String, Node> implements MapNode 
 
     @Override
     public MapNode copy() {
-        LazyClassNode copy = new LazyClassNode(classReader);
+        LazyClassNode copy = new LazyClassNode(classReader, classInfoProvider);
         copy.metadataProvider = metadataProvider.copy();
 
         for (Entry<String, Node> entry : nonLazyChildren.entrySet()) {
@@ -63,7 +66,7 @@ public class LazyClassNode extends AbstractMap<String, Node> implements MapNode 
     public MapNode getFullNode() {
         MapNode fullNode = this.fullNode.get();
         if (fullNode == null) {
-            ChasmClassVisitor classVisitor = new ChasmClassVisitor();
+            ChasmClassVisitor classVisitor = new ChasmClassVisitor(classInfoProvider);
             classReader.accept(classVisitor, 0);
             fullNode = classVisitor.getClassNode();
 

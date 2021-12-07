@@ -60,7 +60,14 @@ public class MethodNodeReader {
         return labelMap.computeIfAbsent(labelName, unusedLabelName -> new Label());
     }
 
-    private static void visitInstructions(MethodVisitor methodVisitor, MapNode codeNode, Map<String, Label> labelMap) {
+    private static void visitInstructions(boolean isStatic, String descriptor, MethodVisitor methodVisitor, MapNode codeNode, Map<String, Label> labelMap) {
+        MapNode locals = Node.asMap(codeNode.get(NodeConstants.LOCALS));
+        int argumentSize = Type.getArgumentsAndReturnSizes(descriptor) >> 2;
+        if (isStatic) {
+            argumentSize--;
+        }
+        Map<String, Integer> remappedLocalIndexes = new HashMap<>();
+
         for (Node rawInstruction : Node.asList(codeNode.get(NodeConstants.INSTRUCTIONS))) {
             MapNode instruction = Node.asMap(rawInstruction);
 
@@ -207,8 +214,9 @@ public class MethodNodeReader {
                 case Opcodes.ASTORE:
                 case Opcodes.RET: {
                     // visitVarInsn
-                    int varIndex = Node.asValue(instruction.get(NodeConstants.VAR)).getValueAsInt();
-                    methodVisitor.visitVarInsn(opcode, varIndex);
+                    String varName = Node.asValue(instruction.get(NodeConstants.VAR)).getValueAsString();
+                    int localIndex = getLocalIndex(locals, argumentSize, remappedLocalIndexes, varName);
+                    methodVisitor.visitVarInsn(opcode, localIndex);
                     break;
                 }
                 case Opcodes.NEW:
@@ -288,7 +296,8 @@ public class MethodNodeReader {
                 }
                 case Opcodes.IINC: {
                     // visitIincInsn
-                    int varIndex = Node.asValue(instruction.get(NodeConstants.VAR)).getValueAsInt();
+                    String varName = Node.asValue(instruction.get(NodeConstants.VAR)).getValueAsString();
+                    int varIndex = getLocalIndex(locals, argumentSize, remappedLocalIndexes, varName);
                     int increment = Node.asValue(instruction.get(NodeConstants.INCREMENT)).getValueAsInt();
                     methodVisitor.visitIincInsn(varIndex, increment);
                     break;
@@ -353,6 +362,17 @@ public class MethodNodeReader {
         }
     }
 
+    private static int getLocalIndex(MapNode locals, int argumentSize, Map<String, Integer> remappedLocalIndexes, String varName) {
+        MapNode localNode = Node.asMap(locals.get(varName));
+        ValueNode indexNode = Node.asValue(localNode.get(NodeConstants.INDEX));
+        if (indexNode != null && indexNode.getValueAsInt() < argumentSize) {
+            return indexNode.getValueAsInt();
+        } else {
+            // TODO: smart merging of local variable indexes
+            return remappedLocalIndexes.computeIfAbsent(varName, k -> remappedLocalIndexes.size() + argumentSize);
+        }
+    }
+
     private static void visitTryCatchBlocks(MethodVisitor methodVisitor, MapNode codeNode,
                                             Map<String, Label> labelMap) {
         ListNode tryCatchBlocksListNode = Node.asList(codeNode.get(NodeConstants.TRY_CATCH_BLOCKS));
@@ -382,7 +402,7 @@ public class MethodNodeReader {
     }
 
     private void visitLocalVariables(MethodVisitor methodVisitor, MapNode codeNode, Map<String, Label> labelMap) {
-        ListNode codeLocalsNode = Node.asList(codeNode.get(NodeConstants.LOCALS));
+        ListNode codeLocalsNode = Node.asList(codeNode.get(NodeConstants.SOURCE_LOCALS));
         if (codeLocalsNode == null) {
             return;
         }
@@ -537,7 +557,7 @@ public class MethodNodeReader {
             // Don't care
 
             // Instructions
-            visitInstructions(methodVisitor, codeNode, labelMap);
+            visitInstructions((access & Opcodes.ACC_STATIC) != 0, descriptor, methodVisitor, codeNode, labelMap);
 
             // visitTryCatchBlock
             visitTryCatchBlocks(methodVisitor, codeNode, labelMap);

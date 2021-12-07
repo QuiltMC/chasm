@@ -8,15 +8,22 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.ModuleVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.RecordComponentVisitor;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
+import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
+import org.quiltmc.chasm.api.util.ClassInfoProvider;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
+import java.util.stream.Collectors;
+
 public class ChasmClassVisitor extends ClassVisitor {
+    private final ClassInfoProvider classInfoProvider;
+
     private final MapNode classNode = new LinkedHashMapNode();
     private final ListNode fields = new ArrayListNode();
     private final ListNode methods = new ArrayListNode();
@@ -29,8 +36,9 @@ public class ChasmClassVisitor extends ClassVisitor {
     private final ListNode annotations = new ArrayListNode();
     private final ListNode attributes = new ArrayListNode();
 
-    public ChasmClassVisitor() {
+    public ChasmClassVisitor(ClassInfoProvider classInfoProvider) {
         super(Opcodes.ASM9);
+        this.classInfoProvider = classInfoProvider;
     }
 
     public MapNode getClassNode() {
@@ -180,7 +188,15 @@ public class ChasmClassVisitor extends ClassVisitor {
         MapNode methodNode = new LinkedHashMapNode();
         methods.add(methodNode);
 
-        return new ChasmMethodVisitor(api, methodNode, access, name, descriptor, signature, exceptions);
+        ValueNode superNode = Node.asValue(classNode.get(NodeConstants.SUPER));
+        return new ChasmMethodVisitor(
+                api,
+                classInfoProvider,
+                Type.getObjectType(Node.asValue(classNode.get(NodeConstants.NAME)).getValueAsString()),
+                superNode == null ? null : Type.getObjectType(superNode.getValueAsString()),
+                Node.asList(classNode.get(NodeConstants.INTERFACES)).stream().map(n -> Type.getObjectType(Node.asValue(n).getValueAsString())).collect(Collectors.toList()),
+                (Node.asValue(classNode.get(NodeConstants.ACCESS)).getValueAsInt() & Opcodes.ACC_INTERFACE) != 0,
+                methodNode, access, name, descriptor, signature, exceptions);
     }
 
     @Override

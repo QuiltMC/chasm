@@ -12,7 +12,11 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
     private final ListNode values;
 
     public ChasmAnnotationVisitor(int api, ListNode values) {
-        super(api);
+        this(api, values, null);
+    }
+
+    public ChasmAnnotationVisitor(int api, ListNode values, AnnotationVisitor av) {
+        super(api, av);
 
         this.values = values;
     }
@@ -33,6 +37,8 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
             valueNode.put(NodeConstants.VALUE, new ValueNode(value));
             this.values.add(valueNode);
         }
+
+        super.visit(name, value);
     }
 
     @Override
@@ -49,6 +55,8 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
         } else {
             this.values.add(enumValueNode);
         }
+
+        super.visitEnum(name, descriptor, value);
     }
 
     @Override
@@ -67,7 +75,7 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
             this.values.add(annotationValueNode);
         }
 
-        return new ChasmAnnotationVisitor(api, values);
+        return new ChasmAnnotationVisitor(api, values, super.visitAnnotation(name, descriptor));
     }
 
     @Override
@@ -83,11 +91,12 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
             this.values.add(values);
         }
 
-        return new ChasmAnnotationVisitor(api, values);
+        return new ChasmAnnotationVisitor(api, values, super.visitArray(name));
     }
 
     @Override
     public void visitEnd() {
         // Nothing to do
+        super.visitEnd();
     }
 }

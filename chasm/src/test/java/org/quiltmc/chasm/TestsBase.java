@@ -22,7 +22,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.api.ChasmProcessor;
 import org.quiltmc.chasm.api.Transformer;
-import org.quiltmc.chasm.api.util.ClassLoaderSuperClassProvider;
+import org.quiltmc.chasm.api.util.ClassLoaderClassInfoProvider;
 
 public abstract class TestsBase {
     private static final Path TEST_CLASSES_DIR = Paths.get("build/classes/java/testData");
@@ -88,7 +88,7 @@ public abstract class TestsBase {
     @BeforeEach
     public void setUp() {
         // Instantiate the processor
-        processor = new ChasmProcessor(new ClassLoaderSuperClassProvider(null, getClass().getClassLoader()));
+        processor = new ChasmProcessor(new ClassLoaderClassInfoProvider(null, getClass().getClassLoader()));
     }
 
     @AfterEach
