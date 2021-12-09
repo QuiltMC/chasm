@@ -11,6 +11,8 @@ import org.quiltmc.chasm.api.Transformer;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.target.Target;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
+import org.quiltmc.chasm.api.tree.FrozenListNode;
+import org.quiltmc.chasm.api.tree.FrozenNode;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
@@ -20,7 +22,7 @@ import org.quiltmc.chasm.internal.util.NodeConstants;
 
 public class AddField implements Transformer {
     @Override
-    public Collection<Transformation> apply(ListNode classes) {
+    public Collection<Transformation> apply(FrozenListNode classes) {
         MapNode newFieldNode = new LinkedHashMapNode();
         newFieldNode.put(NodeConstants.ACCESS, new ValueNode(Opcodes.ACC_PUBLIC));
         newFieldNode.put(NodeConstants.NAME, new ValueNode("field1"));
@@ -32,13 +34,14 @@ public class AddField implements Transformer {
 
         ListNode newFields = new ArrayListNode();
         newFields.add(newFieldNode);
+        FrozenListNode frozenNewFields = newFields.asImmutable();
 
         List<Transformation> transformations = new ArrayList<>();
         for (Node node : classes) {
             MapNode classNode = Node.asMap(node);
             ListNode fieldsNode = Node.asList(classNode.get(NodeConstants.FIELDS));
             SliceTarget sliceTarget = new SliceTarget(fieldsNode, 0, 0);
-            transformations.add(new StaticTransformation(sliceTarget, newFields));
+            transformations.add(new StaticTransformation(sliceTarget, frozenNewFields));
         }
 
         return transformations;
@@ -51,9 +54,9 @@ public class AddField implements Transformer {
 
     private class StaticTransformation implements Transformation {
         private final Target target;
-        private final Node replacement;
+        private final FrozenNode replacement;
 
-        public StaticTransformation(Target target, Node replacement) {
+        StaticTransformation(Target target, FrozenNode replacement) {
             this.target = target;
             this.replacement = replacement;
         }
@@ -69,7 +72,7 @@ public class AddField implements Transformer {
         }
 
         @Override
-        public Node apply(Node targetNode, Map<String, Node> nodeSources) {
+        public FrozenNode apply(FrozenNode targetNode, Map<String, ? extends Node> nodeSources) {
             return replacement;
         }
     }

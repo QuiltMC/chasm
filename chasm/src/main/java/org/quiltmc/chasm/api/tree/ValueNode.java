@@ -20,6 +20,11 @@ public class ValueNode implements Node {
         this.value = value;
     }
 
+    protected ValueNode(Object value, MetadataProvider metadata) {
+        this.value = value;
+        metadataProvider = metadata.copy();
+    }
+
     /**
      * Gets the wrapped {@code Object} value.
      *
@@ -93,7 +98,6 @@ public class ValueNode implements Node {
         return boxed;
     }
 
-    @Override
     public ValueNode copy() {
         ValueNode copy = new ValueNode(value);
         copy.metadataProvider = metadataProvider.copy();
@@ -101,7 +105,17 @@ public class ValueNode implements Node {
     }
 
     @Override
+    public FrozenValueNode asImmutable() {
+        return new FrozenValueNode(this);
+    }
+
+    @Override
     public MetadataProvider getMetadata() {
         return metadataProvider;
+    }
+
+    @Override
+    public ValueNode asMutable() {
+        return this;
     }
 }

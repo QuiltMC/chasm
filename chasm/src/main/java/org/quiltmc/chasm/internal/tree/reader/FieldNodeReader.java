@@ -17,7 +17,9 @@ public class FieldNodeReader {
     }
 
     private void visitAttributes(FieldVisitor fieldVisitor) {
+
         ListNode attributesListNode = Node.asList(fieldNode.get(NodeConstants.ATTRIBUTES));
+
         if (attributesListNode == null) {
             return;
         }
@@ -27,7 +29,9 @@ public class FieldNodeReader {
     }
 
     private void visitAnnotations(FieldVisitor fieldVisitor) {
+
         ListNode annotationsListNode = Node.asList(fieldNode.get(NodeConstants.ANNOTATIONS));
+
         if (annotationsListNode == null) {
             return;
         }

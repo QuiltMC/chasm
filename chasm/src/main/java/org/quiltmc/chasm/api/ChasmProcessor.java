@@ -6,6 +6,8 @@ import java.util.List;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
+import org.quiltmc.chasm.api.tree.FrozenListNode;
+import org.quiltmc.chasm.api.tree.FrozenNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
@@ -18,7 +20,6 @@ import org.quiltmc.chasm.internal.asm.ChasmClassWriter;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.tree.LazyClassNode;
 import org.quiltmc.chasm.internal.tree.reader.ClassNodeReader;
-import org.quiltmc.chasm.internal.util.PathInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,11 +74,12 @@ public class ChasmProcessor {
      *
      * @return The resulting list of classes as {@code byte[]}s.
      */
+    @SuppressWarnings("unchecked")
     public List<byte[]> process() {
         LOGGER.info("Processing {} classes...", classes.size());
 
         LOGGER.info("Initializing paths...");
-        PathInitializer.initialize(classes, new PathMetadata());
+        classes.updatePath(new PathMetadata());
 
         LOGGER.info("Sorting {} transformers...", transformers.size());
         List<List<Transformer>> rounds = TransformerSorter.sort(transformers);
@@ -114,9 +116,9 @@ public class ChasmProcessor {
     private List<Transformation> applyTransformers(List<Transformer> transformers, ListNode classes) {
         List<Transformation> transformations = new ArrayList<>();
 
+        FrozenListNode frozenClasses = classes.asImmutable();
         for (Transformer transformer : transformers) {
-            // TODO: Replace copy with immutability
-            transformations.addAll(transformer.apply(classes.copy()));
+            transformations.addAll(transformer.apply(frozenClasses));
         }
 
         return transformations;

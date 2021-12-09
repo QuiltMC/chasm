@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.quiltmc.chasm.api.target.Target;
+import org.quiltmc.chasm.api.tree.FrozenNode;
 import org.quiltmc.chasm.api.tree.Node;
 
 /**
@@ -46,5 +47,5 @@ public interface Transformation {
      *
      * @return The {@code Node} resulting from applying this {@code Transformation}.
      */
-    Node apply(Node targetNode, Map<String, Node> nodeSources);
+    FrozenNode apply(FrozenNode targetNode, Map<String, ? extends Node> nodeSources);
 }

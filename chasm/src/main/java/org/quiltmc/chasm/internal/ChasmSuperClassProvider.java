@@ -25,6 +25,7 @@ public class ChasmSuperClassProvider implements SuperClassProvider {
             ValueNode superName = Node.asValue(classNode.get(NodeConstants.SUPER));
             classNameToSuperClass.put(className.getValueAsString(),
                     superName == null ? OBJECT : superName.getValueAsString());
+
         }
     }
 

@@ -14,12 +14,12 @@ public class MapExpression implements Expression, Indexable {
     }
 
     public Map<String, Expression> getEntries() {
-        return entries;
+        return this.entries;
     }
 
     @Override
     public void resolve(String identifier, Expression value) {
-        for (Expression entry : entries.values()) {
+        for (Expression entry : this.entries.values()) {
             entry.resolve(identifier, value);
         }
     }
@@ -27,7 +27,7 @@ public class MapExpression implements Expression, Indexable {
     @Override
     public MapExpression reduce(ReductionContext context) {
         Map<String, Expression> reduced = new LinkedHashMap<>();
-        for (Map.Entry<String, Expression> entry : entries.entrySet()) {
+        for (Map.Entry<String, Expression> entry : this.entries.entrySet()) {
             reduced.put(entry.getKey(), context.reduce(entry.getValue()));
         }
         return new MapExpression(reduced);
@@ -37,7 +37,7 @@ public class MapExpression implements Expression, Indexable {
     public MapExpression copy() {
         Map<String, Expression> copies = new LinkedHashMap<>();
 
-        for (Map.Entry<String, Expression> entry : entries.entrySet()) {
+        for (Map.Entry<String, Expression> entry : this.entries.entrySet()) {
             copies.put(entry.getKey(), entry.getValue().copy());
         }
 
@@ -45,7 +45,7 @@ public class MapExpression implements Expression, Indexable {
     }
 
     public Expression get(String key) {
-        return entries.getOrDefault(key, Expression.none());
+        return this.entries.getOrDefault(key, Expression.none());
     }
 
     @Override
@@ -55,6 +55,6 @@ public class MapExpression implements Expression, Indexable {
 
     @Override
     public Expression index(Expression expression) {
-        return get(((StringExpression) expression).getValue());
+        return this.get(((StringExpression) expression).getValue());
     }
 }

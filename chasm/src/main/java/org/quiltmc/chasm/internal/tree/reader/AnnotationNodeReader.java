@@ -22,6 +22,7 @@ public class AnnotationNodeReader {
             values = Node.asList(Node.asMap(annotationNode).get(NodeConstants.VALUES));
         } else {
             values = Node.asList(annotationNode);
+
         }
         if (values == null) {
             visitor.visitEnd();
@@ -32,6 +33,7 @@ public class AnnotationNodeReader {
             String name = null;
             if (value instanceof MapNode && (Node.asMap(value)).containsKey(NodeConstants.NAME)) {
                 MapNode mapNode = Node.asMap(value);
+
                 // Name-value pairs
                 name = Node.asValue(mapNode.get(NodeConstants.NAME)).getValueAsString();
                 value = mapNode.get(NodeConstants.VALUE);
@@ -45,6 +47,7 @@ public class AnnotationNodeReader {
                 new AnnotationNodeReader(value).visitAnnotation(arrayVisitor);
             } else {
                 MapNode mapNode = Node.asMap(value);
+
                 if (mapNode.containsKey(NodeConstants.VALUE)) {
                     String descriptor = Node.asValue(mapNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
                     String enumValue = Node.asValue(mapNode.get(NodeConstants.VALUE)).getValueAsString();
@@ -53,6 +56,7 @@ public class AnnotationNodeReader {
                 } else {
                     String descriptor = Node.asValue(mapNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
                     ListNode annotationValues = Node.asList(mapNode.get(NodeConstants.VALUES));
+
 
                     AnnotationVisitor annotationVisitor = visitor.visitAnnotation(name, descriptor);
                     new AnnotationNodeReader(annotationValues).visitAnnotation(annotationVisitor);
@@ -68,6 +72,7 @@ public class AnnotationNodeReader {
         ValueNode visible = Node.asValue(Node.asMap(annotationNode).get(NodeConstants.VISIBLE));
         ValueNode typeRef = Node.asValue(Node.asMap(annotationNode).get(NodeConstants.TYPE_REF));
         ValueNode typePath = Node.asValue(Node.asMap(annotationNode).get(NodeConstants.TYPE_PATH));
+
         AnnotationVisitor annotationVisitor;
         if (typeRef == null) {
             annotationVisitor = visitAnnotation.visitAnnotation(annotationDesc.getValueAsString(),

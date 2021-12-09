@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,8 @@ import org.quiltmc.chasm.api.Transformer;
 import org.quiltmc.chasm.api.target.NodeTarget;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.target.Target;
+import org.quiltmc.chasm.api.tree.FrozenListNode;
+import org.quiltmc.chasm.api.tree.FrozenNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.lang.antlr.ChasmLexer;
@@ -41,13 +42,13 @@ public class ChasmLangTransformer implements Transformer {
     }
 
     public static ChasmLangTransformer parse(CharStream charStream) {
-        ChasmLexer chasmLexer = new ChasmLexer(charStream);
+        var chasmLexer = new ChasmLexer(charStream);
         TokenStream tokenStream = new CommonTokenStream(chasmLexer);
-        ChasmParser chasmParser = new ChasmParser(tokenStream);
+        var chasmParser = new ChasmParser(tokenStream);
 
-        ChasmParser.FileContext fileContext = chasmParser.file();
-        ChasmExpressionVisitor mapVisitor = new ChasmExpressionVisitor();
-        MapExpression mapExpression = mapVisitor.visitMap(fileContext.map());
+        var fileContext = chasmParser.file();
+        var mapVisitor = new ChasmExpressionVisitor();
+        var mapExpression = mapVisitor.visitMap(fileContext.map());
         mapExpression.resolve("$", mapExpression);
         return new ChasmLangTransformer(mapExpression);
     }
@@ -61,20 +62,20 @@ public class ChasmLangTransformer implements Transformer {
     }
 
     @Override
-    public Collection<Transformation> apply(ListNode classes) {
-        mapExpression.resolve("classes", new ChasmListNodeExpression(classes));
+    public Collection<Transformation> apply(FrozenListNode classes) {
+        this.mapExpression.resolve("classes", new ChasmListNodeExpression(classes));
 
-        MapExpression reduced = (MapExpression) new ReductionContext().reduce(mapExpression);
+        var reduced = (MapExpression) new ReductionContext().reduce(this.mapExpression);
 
-        Expression rawTransformationsExpression = reduced.get("transformations");
+        var rawTransformationsExpression = reduced.get("transformations");
         if (!(rawTransformationsExpression instanceof ListExpression)) {
             throw new RuntimeException("Transformer must provide a list \"transformations\".");
         }
 
-        ListExpression transformationsExpression = (ListExpression) rawTransformationsExpression;
+        var transformationsExpression = (ListExpression) rawTransformationsExpression;
         List<Transformation> transformations = new ArrayList<>(transformationsExpression.getEntries().size());
         for (Expression rawTransformationExpression : transformationsExpression.getEntries()) {
-            transformations.add(parseTransformation(rawTransformationExpression));
+            transformations.add(this.parseTransformation(rawTransformationExpression));
         }
 
         return transformations;
@@ -86,29 +87,29 @@ public class ChasmLangTransformer implements Transformer {
         }
 
         // Extract target
-        MapExpression transformationExpression = (MapExpression) rawTransformationExpression;
-        Expression targetExpression = transformationExpression.get("target");
-        Target target = parseTarget(targetExpression);
+        var transformationExpression = (MapExpression) rawTransformationExpression;
+        var targetExpression = transformationExpression.get("target");
+        var target = this.parseTarget(targetExpression);
 
         // Extract sources
         Map<String, Target> sources = new HashMap<>();
-        Expression rawSourcesExpression = transformationExpression.get("sources");
+        var rawSourcesExpression = transformationExpression.get("sources");
         if (rawSourcesExpression != Expression.none()) {
             if (!(rawSourcesExpression instanceof MapExpression)) {
                 throw new RuntimeException("Sources must be a map.");
             }
-            MapExpression sourcesExpression = (MapExpression) rawSourcesExpression;
+            var sourcesExpression = (MapExpression) rawSourcesExpression;
             for (Map.Entry<String, Expression> entry : sourcesExpression.getEntries().entrySet()) {
-                sources.put(entry.getKey(), parseTarget(entry.getValue()));
+                sources.put(entry.getKey(), this.parseTarget(entry.getValue()));
             }
         }
 
         // Extract apply function
-        Expression rawApplyExpression = transformationExpression.get("apply");
+        var rawApplyExpression = transformationExpression.get("apply");
         if (!(rawApplyExpression instanceof Callable)) {
             throw new RuntimeException("Apply must be callable.");
         }
-        Callable applyExpression = (Callable) rawApplyExpression;
+        var applyExpression = (Callable) rawApplyExpression;
 
         // Create Transformation
         return new Transformation() {
@@ -128,30 +129,30 @@ public class ChasmLangTransformer implements Transformer {
             }
 
             @Override
-            public Node apply(Node resolvedTarget, Map<String, Node> resolvedSources) {
+            public FrozenNode apply(FrozenNode resolvedTarget, Map<String, ? extends Node> resolvedSources) {
                 // Construct arguments
                 Map<String, Expression> argEntries = new HashMap<>();
                 argEntries.put("target", ConversionHelper.convert(resolvedTarget));
                 argEntries.put("sources", ConversionHelper.convert((Node) resolvedSources));
-                MapExpression argExpression = new MapExpression(argEntries);
+                var argExpression = new MapExpression(argEntries);
 
                 // Invoke function and return replacement
-                Expression result = applyExpression.call(argExpression);
-                return ConversionHelper.convert(result);
+                var result = applyExpression.call(argExpression);
+                return ConversionHelper.convert(result).asImmutable();
             }
         };
     }
 
     private Target parseTarget(Expression rawTargetExpression) {
         if (rawTargetExpression instanceof ChasmNodeExpression) {
-            ChasmNodeExpression targetNode = (ChasmNodeExpression) rawTargetExpression;
+            var targetNode = (ChasmNodeExpression) rawTargetExpression;
             return new NodeTarget(targetNode.getNode());
         } else if (rawTargetExpression instanceof MapExpression) {
-            MapExpression targetExpression = (MapExpression) rawTargetExpression;
+            var targetExpression = (MapExpression) rawTargetExpression;
 
-            Expression rawTarget = targetExpression.get("node");
-            Expression rawStart = targetExpression.get("start");
-            Expression rawEnd = targetExpression.get("end");
+            var rawTarget = targetExpression.get("node");
+            var rawStart = targetExpression.get("start");
+            var rawEnd = targetExpression.get("end");
 
             if (!(rawTarget instanceof ChasmNodeExpression
                     && ((ChasmNodeExpression) rawTarget).getNode() instanceof ListNode)) {
@@ -161,9 +162,9 @@ public class ChasmLangTransformer implements Transformer {
                 throw new RuntimeException("Slice target must contain start and end as integers.");
             }
 
-            ChasmNodeExpression target = (ChasmNodeExpression) rawTarget;
-            IntegerExpression start = (IntegerExpression) rawStart;
-            IntegerExpression end = (IntegerExpression) rawEnd;
+            var target = (ChasmNodeExpression) rawTarget;
+            var start = (IntegerExpression) rawStart;
+            var end = (IntegerExpression) rawEnd;
 
             return new SliceTarget(Node.asList(target.getNode()), start.getValue(), end.getValue());
         }
@@ -173,7 +174,7 @@ public class ChasmLangTransformer implements Transformer {
 
     @Override
     public String getId() {
-        Expression expression = mapExpression.get("id");
+        var expression = this.mapExpression.get("id");
         if (expression instanceof StringExpression) {
             return ((StringExpression) expression).getValue();
         }

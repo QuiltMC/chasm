@@ -13,8 +13,10 @@ import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
+import org.quiltmc.chasm.internal.metadata.PathEntry;
 import org.quiltmc.chasm.internal.metadata.OriginMetadata;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
+import org.quiltmc.chasm.internal.tree.LazyClassMapNode;
 import org.quiltmc.chasm.internal.tree.LazyClassNode;
 
 public class TransformationApplier {
@@ -27,13 +29,19 @@ public class TransformationApplier {
         this.classes = classes;
         this.transformations = transformations;
 
-        this.affectedTargets = new HashMap<>();
+        affectedTargets = new HashMap<>();
     }
 
+    @SuppressWarnings("serial")
+    private static final class MissingPathException extends RuntimeException {
+        public MissingPathException() {
+            super("Node in specified target is missing path information.");
+        }
+    }
     private static PathMetadata getPath(Target target) {
         PathMetadata path = target.getTarget().getMetadata().get(PathMetadata.class);
         if (path == null) {
-            throw new RuntimeException("Node in specified target is missing path information.");
+            throw new MissingPathException();
         }
         return path;
     }
@@ -69,18 +77,19 @@ public class TransformationApplier {
         Node target = resolveTarget(transformation.getTarget());
         MapNode sources = resolveSources(transformation);
 
-        // TODO: Replace copies with immutability
-        Node replacement = transformation.apply(target.copy(), sources.copy()).copy();
+        Node replacement = transformation.apply(target.asImmutable(), sources.asImmutable()).asMutable();
         replacement.getMetadata().put(OriginMetadata.class, new OriginMetadata(transformation));
 
         replaceTarget(transformation.getTarget(), replacement);
     }
 
+    @SuppressWarnings("unchecked")
     private void replaceTarget(Target target, Node replacement) {
         if (target instanceof NodeTarget) {
             replaceNode((NodeTarget) target, replacement);
         } else if (target instanceof SliceTarget && replacement instanceof ListNode) {
             replaceSlice((SliceTarget) target, Node.asList(replacement));
+
         } else {
             throw new RuntimeException("Invalid replacement for target");
         }
@@ -91,12 +100,12 @@ public class TransformationApplier {
         PathMetadata targetPath = getPath(nodeTarget);
 
         int classIndex = targetPath.get(0).asInteger();
-        if (classes.get(classIndex) instanceof LazyClassNode) {
-            classes.set(classIndex, ((LazyClassNode) classes.get(classIndex)).getFullNode());
+        if (classes.get(classIndex) instanceof LazyClassMapNode) {
+            classes.set(classIndex, ((LazyClassMapNode) classes.get(classIndex)).getFullNode());
         }
 
         Node parentNode = targetPath.parent().resolve(classes);
-        PathMetadata.Entry entry = targetPath.get(targetPath.size() - 1);
+        PathEntry entry = targetPath.get(targetPath.size() - 1);
 
         if (parentNode instanceof ListNode && entry.isInteger()) {
             ListNode parentList = Node.asList(parentNode);
@@ -106,7 +115,8 @@ public class TransformationApplier {
 
         if (parentNode instanceof MapNode && entry.isString()) {
             MapNode parentList = Node.asMap(parentNode);
-            parentList.put(entry.asString(), replacement);
+            parentList.put(entry.toString(), replacement);
+
             return;
         }
 
@@ -117,8 +127,8 @@ public class TransformationApplier {
         PathMetadata targetPath = getPath(sliceTarget);
 
         int classIndex = targetPath.get(0).asInteger();
-        if (classes.get(classIndex) instanceof LazyClassNode) {
-            classes.set(classIndex, ((LazyClassNode) classes.get(classIndex)).getFullNode());
+        if (classes.get(classIndex) instanceof LazyClassMapNode) {
+            classes.set(classIndex, ((LazyClassMapNode) classes.get(classIndex)).getFullNode());
         }
 
         Node parentNode = targetPath.resolve(classes);
@@ -128,6 +138,7 @@ public class TransformationApplier {
         }
 
         ListNode parentList = Node.asList(parentNode);
+
 
         int change = parentList.size() - replacement.size();
         int start = sliceTarget.getStartIndex() / 2;
@@ -165,7 +176,7 @@ public class TransformationApplier {
     private void movePathIndex(PathMetadata path, int pathIndex, int endIndex, int amount) {
         int originalIndex = path.get(pathIndex).asInteger();
         if (originalIndex >= endIndex) {
-            path.set(pathIndex, new PathMetadata.Entry(originalIndex + amount));
+            path.set(pathIndex, new PathEntry(originalIndex + amount));
         }
     }
 
@@ -179,15 +190,17 @@ public class TransformationApplier {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Node resolveTarget(Target target) {
         Node currentNode = classes;
         PathMetadata path = getPath(target);
 
-        for (PathMetadata.Entry entry : path) {
+        for (PathEntry entry : path) {
             if (currentNode instanceof ListNode && entry.isInteger()) {
                 currentNode = Node.asList(currentNode).get(entry.asInteger());
             } else if (currentNode instanceof MapNode && entry.isString()) {
-                currentNode = Node.asMap(currentNode).get(entry.asString());
+                currentNode = Node.asMap(currentNode).get(entry.toString());
+
             } else {
                 throw new RuntimeException("Can't resolve path " + path);
             }

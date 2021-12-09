@@ -1,6 +1,7 @@
 package org.quiltmc.chasm.api.tree;
 
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
+import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.util.NodeUtils;
 
 /**
@@ -8,14 +9,24 @@ import org.quiltmc.chasm.internal.util.NodeUtils;
  */
 public interface Node {
     /**
-     * Creates a deep copy of this {@link Node}.
+     * Gets an immutable version of this {@link Node}.
      *
-     * <p>This means that any contained nodes should also be copied,
-     * as well as the metadata of all Nodes copied by this method.
+     * <p>This means that all children and {@link Metadata} of the returned
+     * {@link Node} must also be immutable.
+     * Only immutable children are allowed in order to avoid callers mutating using saved references.
      *
-     * @return A recursive copy of this {@code Node}.
+     * @return An immutable version of this {@link Node}.
      */
-    Node copy();
+    FrozenNode asImmutable();
+
+    /**
+     * Get a mutable version of this {@link Node}.
+     *
+     * @return A mutable version of the current {@link Node}.
+     */
+    default Node asMutable() {
+        return this;
+    }
 
     /**
      * Returns the {@link MetadataProvider} of this node.
@@ -88,5 +99,12 @@ public interface Node {
             return (ValueNode) node;
         }
         throw NodeUtils.createWrongTypeException(node, "ValueNode");
+    }
+
+    default Node updatePath(PathMetadata newPath) {
+        MetadataProvider metadataProvider = getMetadata();
+        metadataProvider.put(PathMetadata.class, newPath);
+
+        return this;
     }
 }

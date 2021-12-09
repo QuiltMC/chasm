@@ -1,19 +1,35 @@
 package org.quiltmc.chasm.api.metadata;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import org.quiltmc.chasm.internal.metadata.FrozenMetadataProvider;
 
 /**
  * Provides {@link Metadata} attached to a {@link org.quiltmc.chasm.api.tree.Node}.
  */
-public class MetadataProvider {
+public class MetadataProvider implements Iterable<Class<? extends Metadata>> {
     private final Map<Class<? extends Metadata>, Metadata> metadata;
 
     /**
      * Create a new, empty {@link MetadataProvider}.
      */
     public MetadataProvider() {
-        this.metadata = new HashMap<>();
+        metadata = new HashMap<>();
+    }
+
+    public MetadataProvider(int size) {
+        metadata = new HashMap<>(size);
+    }
+
+    public MetadataProvider(MetadataProvider other) {
+        this(other.size());
+        Iterator<Class<? extends Metadata>> metaIter = iterator();
+        for (Class<? extends Metadata> clazz = metaIter.next(); metaIter.hasNext(); clazz = metaIter.next()) {
+            Metadata data = MetadataProvider.this.get(clazz).thaw();
+            MetadataProvider.this.putRaw(data.getClass(), data);
+        }
     }
 
     /**
@@ -23,7 +39,12 @@ public class MetadataProvider {
      * @param data The instance of the specified type to attach.
      * @param <T> The type of the metadata.
      */
-    public <T extends Metadata> void put(Class<T> dataClass, T data) {
+    @SuppressWarnings("unchecked")
+    public <T extends Metadata> void put(Class<? super T> dataClass, T data) {
+        metadata.put((Class<? extends Metadata>) dataClass, data);
+    }
+
+    protected void putRaw(Class<? extends Metadata> dataClass, Metadata data) {
         metadata.put(dataClass, data);
     }
 
@@ -47,12 +68,29 @@ public class MetadataProvider {
      * @return A deep copy of this instance.
      */
     public MetadataProvider copy() {
-        MetadataProvider copy = new MetadataProvider();
+        MetadataProvider copy = new MetadataProvider(size());
 
         for (Map.Entry<Class<? extends Metadata>, Metadata> entry : metadata.entrySet()) {
             copy.metadata.put(entry.getKey(), entry.getValue().copy());
         }
 
         return copy;
+    }
+
+    @Override
+    public Iterator<Class<? extends Metadata>> iterator() {
+        return metadata.keySet().iterator();
+    }
+
+    public int size() {
+        return metadata.size();
+    }
+
+    public FrozenMetadataProvider freeze() {
+        return new FrozenMetadataProvider(this);
+    }
+
+    public MetadataProvider thaw() {
+        return this;
     }
 }

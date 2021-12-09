@@ -9,18 +9,24 @@ import org.quiltmc.chasm.api.metadata.MetadataProvider;
  * Uses an {@code ArrayList} to implement a {@link ListNode}.
  */
 public class ArrayListNode extends ArrayList<Node> implements ListNode {
-    private MetadataProvider metadataProvider = new MetadataProvider();
+    private MetadataProvider metadataProvider;
+
+    public ArrayListNode() {
+        super();
+        metadataProvider = new MetadataProvider();
+    }
+
+    public ArrayListNode(ListNode listNode) {
+        super(listNode.size());
+        metadataProvider = listNode.getMetadata().thaw();
+        for (Node node : listNode) {
+            ArrayListNode.this.add(node.asMutable());
+        }
+    }
 
     @Override
-    public ArrayListNode copy() {
-        ArrayListNode copy = new ArrayListNode();
-        copy.metadataProvider = metadataProvider.copy();
-
-        for (Node entry : this) {
-            copy.add(entry.copy());
-        }
-
-        return copy;
+    public FrozenArrayListNode asImmutable() {
+        return new FrozenArrayListNode(this);
     }
 
     @Override

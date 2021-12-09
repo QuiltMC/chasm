@@ -17,7 +17,9 @@ public class RecordComponentNodeReader {
     }
 
     private void visitAttributes(RecordComponentVisitor componentVisitor) {
+
         ListNode attributesListNode = Node.asList(componentNode.get(NodeConstants.ATTRIBUTES));
+
         if (attributesListNode == null) {
             return;
         }
@@ -27,7 +29,9 @@ public class RecordComponentNodeReader {
     }
 
     private void visitAnnotations(RecordComponentVisitor componentVisitor) {
+
         ListNode annotationsListNode = Node.asList(componentNode.get(NodeConstants.ANNOTATIONS));
+
         if (annotationsListNode == null) {
             return;
         }

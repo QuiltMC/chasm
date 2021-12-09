@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.quiltmc.chasm.api.Lock;
 import org.quiltmc.chasm.api.tree.ListNode;
-import org.quiltmc.chasm.api.tree.Node;
 
 /**
  * Slices a {@link ListNode}, as a {@link Target}.

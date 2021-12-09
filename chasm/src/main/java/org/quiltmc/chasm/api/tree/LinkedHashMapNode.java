@@ -11,16 +11,24 @@ import org.quiltmc.chasm.api.metadata.MetadataProvider;
 public class LinkedHashMapNode extends LinkedHashMap<String, Node> implements MapNode {
     private MetadataProvider metadataProvider = new MetadataProvider();
 
-    @Override
-    public LinkedHashMapNode copy() {
-        LinkedHashMapNode copy = new LinkedHashMapNode();
-        copy.metadataProvider = metadataProvider.copy();
+    public LinkedHashMapNode() {
+        super();
+    }
 
-        for (Map.Entry<String, Node> entry : entrySet()) {
-            copy.put(entry.getKey(), entry.getValue().copy());
+    public LinkedHashMapNode(FrozenLinkedHashMapNode f) {
+        super(f.size());
+        Iterable<Map.Entry<String, Node>> frozenEntries = f.entrySet();
+        for (Map.Entry<String, Node> frozenEntry : frozenEntries) {
+            String key = frozenEntry.getKey();
+            Node thawedValue = frozenEntry.getValue().asMutable();
+            LinkedHashMapNode.this.put(key, thawedValue);
         }
+        metadataProvider = f.getMetadata().thaw();
+    }
 
-        return copy;
+    @Override
+    public FrozenLinkedHashMapNode asImmutable() {
+        return new FrozenLinkedHashMapNode(this);
     }
 
     @Override

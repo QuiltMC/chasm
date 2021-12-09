@@ -6,7 +6,7 @@ import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
-import org.quiltmc.chasm.internal.tree.LazyClassNode;
+import org.quiltmc.chasm.internal.tree.LazyClassMapNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
 public class ClassNodeReader {
@@ -18,8 +18,8 @@ public class ClassNodeReader {
 
     public void accept(ClassVisitor visitor) {
         // Unmodified class
-        if (classNode instanceof LazyClassNode) {
-            ((LazyClassNode) classNode).getClassReader().accept(visitor, 0);
+        if (classNode instanceof LazyClassMapNode) {
+            ((LazyClassMapNode) classNode).getClassReader().accept(visitor, 0);
             return;
         }
 
@@ -47,6 +47,7 @@ public class ClassNodeReader {
         // visitModule
         if (classNode.containsKey(NodeConstants.MODULE)) {
             ModuleNodeReader moduleWriter = new ModuleNodeReader(Node.asMap(classNode.get(NodeConstants.MODULE)));
+
             moduleWriter.visitModule(visitor);
         }
         // visitNestHost
@@ -113,6 +114,7 @@ public class ClassNodeReader {
             ValueNode innerNameNode = Node.asValue(innerClass.get(NodeConstants.INNER_NAME));
             ValueNode accessNode = Node.asValue(innerClass.get(NodeConstants.ACCESS));
 
+
             String name = nameNode.getValueAsString();
             String outerName = outerNameNode == null ? null : outerNameNode.getValueAsString();
             String innerName = innerNameNode == null ? null : innerNameNode.getValueAsString();
@@ -124,6 +126,7 @@ public class ClassNodeReader {
 
     private void visitPermittedSubclasses(ClassVisitor visitor) {
         ListNode permittedSubclassesListNode = Node.asList(classNode.get(NodeConstants.PERMITTED_SUBCLASSES));
+
         if (permittedSubclassesListNode == null) {
             return;
         }
@@ -134,6 +137,7 @@ public class ClassNodeReader {
 
     private void visitNestMembers(ClassVisitor visitor) {
         ListNode nestMembersListNode = Node.asList(classNode.get(NodeConstants.NEST_MEMBERS));
+
         if (nestMembersListNode == null) {
             return;
         }
@@ -144,6 +148,7 @@ public class ClassNodeReader {
 
     private void visitAttributes(ClassVisitor visitor) {
         ListNode attributesListNode = Node.asList(classNode.get(NodeConstants.ATTRIBUTES));
+
         if (attributesListNode == null) {
             return;
         }
@@ -154,6 +159,7 @@ public class ClassNodeReader {
 
     private void visitAnnotations(ClassVisitor visitor) {
         ListNode annotationsListNode = Node.asList(classNode.get(NodeConstants.ANNOTATIONS));
+
         if (annotationsListNode == null) {
             return;
         }

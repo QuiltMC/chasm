@@ -1,7 +1,9 @@
 package org.quiltmc.chasm.api.metadata;
 
+import org.quiltmc.chasm.api.tree.Node;
+
 /**
- * {@link org.quiltmc.chasm.api.tree.Node} metadata, capable of being attached to a {@link MetadataProvider}.
+ * {@link Node} metadata, capable of being attached to a {@link MetadataProvider}.
  */
 public interface Metadata {
     /**
@@ -10,4 +12,10 @@ public interface Metadata {
      * @return A deep copy of this instance.
      */
     Metadata copy();
+
+    FrozenMetadata freeze();
+
+    default Metadata thaw() {
+        return this;
+    }
 }

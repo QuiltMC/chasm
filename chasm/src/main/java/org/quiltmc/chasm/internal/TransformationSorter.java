@@ -17,6 +17,7 @@ import org.quiltmc.chasm.api.Lock;
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.target.Target;
+import org.quiltmc.chasm.internal.metadata.PathEntry;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 
 public class TransformationSorter {
@@ -88,7 +89,8 @@ public class TransformationSorter {
                     transformation.addDependency(other);
                 }
             }
-            for (String id : transformation.get().getParent().mustRunBefore(byTransformerId.keySet())) {
+            for (String id : transformation.get().getParent()
+                    .mustRunBefore(byTransformerId.keySet())) {
                 for (TransformationInfo other : byTransformerId.get(id)) {
                     other.addDependency(transformation);
                 }
@@ -111,11 +113,11 @@ public class TransformationSorter {
 
     private static void recurseTargets(List<TargetInfo> targets, int depth, Set<TargetInfo> enclosingTargets) {
         // Group by path
-        Map<PathMetadata.Entry, List<TargetInfo>> childrenByKey = new LinkedHashMap<>();
+        Map<PathEntry, List<TargetInfo>> childrenByKey = new LinkedHashMap<>();
         for (TargetInfo target : targets) {
             PathMetadata path = target.getPath();
-            PathMetadata.Entry entry = path.size() > depth ? path.get(depth) : null;
-            childrenByKey.computeIfAbsent(entry, e -> new ArrayList<>());
+            PathEntry pathEntry = path.size() > depth ? path.get(depth) : null;
+            childrenByKey.computeIfAbsent(pathEntry, e -> new ArrayList<>());
         }
 
         // All Targets targeting the current node
@@ -205,8 +207,8 @@ public class TransformationSorter {
 
                 if (index % 2 != 0) {
                     // Convert slice index to node index
-                    PathMetadata.Entry entry = new PathMetadata.Entry(index / 2);
-                    List<TargetInfo> children = childrenByKey.getOrDefault(entry, Collections.emptyList());
+                    PathEntry pathEntry = new PathEntry(index / 2);
+                    List<TargetInfo> children = childrenByKey.getOrDefault(pathEntry, Collections.emptyList());
                     recurseTargets(children, depth + 1, enclosingTargets);
                 }
 
@@ -236,7 +238,7 @@ public class TransformationSorter {
             this.target = target;
             this.type = type;
 
-            this.path = target.getTarget().getMetadata().get(PathMetadata.class);
+            path = target.getTarget().getMetadata().get(PathMetadata.class);
         }
 
         public PathMetadata getPath() {
@@ -252,26 +254,27 @@ public class TransformationSorter {
         }
 
         public void addDependency(TargetInfo other) {
-            Lock lock = this.target.getLock();
+            Lock lock = target.getLock();
             Lock otherLock = other.target.getLock();
 
             if (lock == Lock.BEFORE || otherLock == Lock.AFTER) {
                 // Any containing targets must be applied after
-                other.parent.addDependency(this.parent);
+                other.parent.addDependency(parent);
             }
 
             if (lock == Lock.AFTER || otherLock == Lock.BEFORE) {
                 // Any containing targets must be applied before
-                this.parent.addDependency(other.parent);
+                parent.addDependency(other.parent);
             }
 
             // Targets must be applied before contained targets or sources
-            if (this.type == TargetType.TARGET) {
+            if (type == TargetType.TARGET) {
+
                 parent.addDependency(other.parent);
             }
 
             // Sources are preferably applied before contained targets
-            if (this.type == TargetType.SOURCE && other.type == TargetType.TARGET) {
+            if (type == TargetType.SOURCE && other.type == TargetType.TARGET) {
                 parent.addSoftDependency(other.parent);
             }
         }
@@ -295,12 +298,12 @@ public class TransformationSorter {
         }
 
         public void addDependency(TransformationInfo other) {
-            this.dependencies.add(other);
+            dependencies.add(other);
             other.dependents.add(this);
         }
 
         public void addSoftDependency(TransformationInfo other) {
-            this.softDependencies.add(other);
+            softDependencies.add(other);
             other.softDependents.add(this);
         }
 

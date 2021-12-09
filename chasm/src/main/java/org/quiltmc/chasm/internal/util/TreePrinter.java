@@ -7,7 +7,7 @@ import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
-import org.quiltmc.chasm.internal.tree.LazyClassNode;
+import org.quiltmc.chasm.internal.tree.LazyClassMapNode;
 
 public class TreePrinter {
     private static final String INDENT_STRING = "  ";
@@ -28,6 +28,7 @@ public class TreePrinter {
         print(node, 0);
     }
 
+    @SuppressWarnings("unchecked")
     private void print(Node node, int indent) {
         if (node instanceof ValueNode) {
             ValueNode valueNode = (ValueNode) node;
@@ -39,6 +40,7 @@ public class TreePrinter {
         } else if (node instanceof ListNode) {
             printStream.println("[");
             for (Node entry : Node.asList(node)) {
+
                 printIndent(indent + 1);
                 print(entry, indent + 1);
                 printStream.println(",");
@@ -46,11 +48,12 @@ public class TreePrinter {
             printIndent(indent);
             printStream.print("]");
         } else if (node instanceof MapNode) {
-            if (node instanceof LazyClassNode && !expandClasses) {
-                printStream.print("LazyClassNode<" + ((LazyClassNode) node).getClassReader().getClassName() + ">");
+            if (node instanceof LazyClassMapNode && !expandClasses) {
+                printStream.print("LazyClassNode<" + ((LazyClassMapNode) node).getClassReader().getClassName() + ">");
             } else {
                 printStream.println("{");
                 for (Map.Entry<String, Node> entry : (Node.asMap(node)).entrySet()) {
+
                     printIndent(indent + 1);
                     printStream.print("\"" + entry.getKey() + "\"" + ": ");
                     print(entry.getValue(), indent + 1);

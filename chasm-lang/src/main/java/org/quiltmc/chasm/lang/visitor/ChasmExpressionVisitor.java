@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.objectweb.asm.Type;
 import org.quiltmc.chasm.lang.antlr.ChasmBaseVisitor;
 import org.quiltmc.chasm.lang.antlr.ChasmParser;
 import org.quiltmc.chasm.lang.ast.BinaryExpression;
@@ -22,7 +21,6 @@ import org.quiltmc.chasm.lang.ast.NoneExpression;
 import org.quiltmc.chasm.lang.ast.ReferenceExpression;
 import org.quiltmc.chasm.lang.ast.StringExpression;
 import org.quiltmc.chasm.lang.ast.TernaryExpression;
-import org.quiltmc.chasm.lang.ast.TypeExpression;
 
 public class ChasmExpressionVisitor extends ChasmBaseVisitor<Expression> {
     @Override
@@ -74,29 +72,22 @@ public class ChasmExpressionVisitor extends ChasmBaseVisitor<Expression> {
 
     @Override
     public StringExpression visitStringExpression(ChasmParser.StringExpressionContext ctx) {
-        String rawValue = ctx.STRING().getText();
-        String value = rawValue.substring(1, rawValue.length() - 1);
+        var rawValue = ctx.STRING().getText();
+        var value = rawValue.substring(1, rawValue.length() - 1);
         return new StringExpression(value);
     }
 
     @Override
-    public Expression visitTypeExpression(ChasmParser.TypeExpressionContext ctx) {
-        String rawValue = ctx.TYPE().getText();
-        Type value = Type.getType(rawValue.substring(2, rawValue.length() - 1));
-        return new TypeExpression(value);
-    }
-
-    @Override
     public IntegerExpression visitIntegerExpression(ChasmParser.IntegerExpressionContext ctx) {
-        String rawValue = ctx.INTEGER().getText();
-        int value = Integer.parseInt(rawValue);
+        var rawValue = ctx.INTEGER().getText();
+        var value = Integer.parseInt(rawValue);
         return new IntegerExpression(value);
     }
 
     @Override
     public BooleanExpression visitBooleanExpression(ChasmParser.BooleanExpressionContext ctx) {
-        String rawValue = ctx.BOOLEAN().getText();
-        boolean value = Boolean.parseBoolean(rawValue);
+        var rawValue = ctx.BOOLEAN().getText();
+        var value = Boolean.parseBoolean(rawValue);
         return new BooleanExpression(value);
     }
 
