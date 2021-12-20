@@ -9,5 +9,9 @@ import java.util.List;
  */
 public interface ListNode extends Node, List<Node> {
     @Override
-    ListNode copy();
+    ListNode deepCopy();
+
+    @Override
+    <P extends Node, W extends CowWrapperNode<P, W>> CowWrapperListNode asWrapper(CowWrapperNode<P, W> parent,
+            Object key, boolean owned);
 }

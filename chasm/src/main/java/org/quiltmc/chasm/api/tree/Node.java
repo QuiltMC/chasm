@@ -1,12 +1,13 @@
 package org.quiltmc.chasm.api.tree;
 
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
+import org.quiltmc.chasm.internal.util.Copyable;
 import org.quiltmc.chasm.internal.util.NodeUtils;
 
 /**
  * Marks a compliant {@link Node} of a CHASM tree.
  */
-public interface Node {
+public interface Node extends Copyable {
     /**
      * Creates a deep copy of this {@link Node}.
      *
@@ -15,7 +16,11 @@ public interface Node {
      *
      * @return A recursive copy of this {@code Node}.
      */
-    Node copy();
+    @Override
+    Node deepCopy();
+
+    @Override
+    Node shallowCopy();
 
     /**
      * Returns the {@link MetadataProvider} of this node.
@@ -89,4 +94,8 @@ public interface Node {
         }
         throw NodeUtils.createWrongTypeException(node, "ValueNode");
     }
+
+    <P extends Node, W extends CowWrapperNode<P, W>> Node asWrapper(CowWrapperNode<P, W> parent, Object key,
+            boolean owned);
+
 }

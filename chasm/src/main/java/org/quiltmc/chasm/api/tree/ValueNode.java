@@ -1,6 +1,7 @@
 package org.quiltmc.chasm.api.tree;
 
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
+import org.quiltmc.chasm.api.metadata.MapMetadataProvider;
 
 /**
  * Wraps a value as a {@link Node} for use in a CHASM tree.
@@ -9,7 +10,7 @@ import org.quiltmc.chasm.api.metadata.MetadataProvider;
  */
 public class ValueNode implements Node {
     private final Object value;
-    private MetadataProvider metadataProvider = new MetadataProvider();
+    private MetadataProvider metadataProvider = new MapMetadataProvider();
 
     /**
      * Wraps the given {@code Object} value in a new {@link ValueNode}.
@@ -94,14 +95,27 @@ public class ValueNode implements Node {
     }
 
     @Override
-    public ValueNode copy() {
+    public ValueNode deepCopy() {
         ValueNode copy = new ValueNode(value);
-        copy.metadataProvider = metadataProvider.copy();
+        copy.metadataProvider = metadataProvider.deepCopy();
+        return copy;
+    }
+
+    @Override
+    public ValueNode shallowCopy() {
+        ValueNode copy = new ValueNode(value);
+        copy.metadataProvider = metadataProvider.shallowCopy();
         return copy;
     }
 
     @Override
     public MetadataProvider getMetadata() {
         return metadataProvider;
+    }
+
+    @Override
+    public <P extends Node, W extends CowWrapperNode<P, W>> Node asWrapper(CowWrapperNode<P, W> parent, Object key,
+            boolean owned) {
+        return new CowWrapperListNode(parent, key, this, owned);
     }
 }

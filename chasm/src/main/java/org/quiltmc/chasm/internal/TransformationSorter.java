@@ -17,7 +17,7 @@ import org.quiltmc.chasm.api.Lock;
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.target.Target;
-import org.quiltmc.chasm.internal.metadata.PathMetadata;
+import org.quiltmc.chasm.internal.metadata.ListPathMetadata;
 
 public class TransformationSorter {
     public static List<Transformation> sort(Collection<Transformation> transformations) {
@@ -111,10 +111,10 @@ public class TransformationSorter {
 
     private static void recurseTargets(List<TargetInfo> targets, int depth, Set<TargetInfo> enclosingTargets) {
         // Group by path
-        Map<PathMetadata.Entry, List<TargetInfo>> childrenByKey = new LinkedHashMap<>();
+        Map<ListPathMetadata.Entry, List<TargetInfo>> childrenByKey = new LinkedHashMap<>();
         for (TargetInfo target : targets) {
-            PathMetadata path = target.getPath();
-            PathMetadata.Entry entry = path.size() > depth ? path.get(depth) : null;
+            ListPathMetadata path = target.getPath();
+            ListPathMetadata.Entry entry = path.size() > depth ? path.get(depth) : null;
             childrenByKey.computeIfAbsent(entry, e -> new ArrayList<>());
         }
 
@@ -205,7 +205,7 @@ public class TransformationSorter {
 
                 if (index % 2 != 0) {
                     // Convert slice index to node index
-                    PathMetadata.Entry entry = new PathMetadata.Entry(index / 2);
+                    ListPathMetadata.Entry entry = new ListPathMetadata.Entry(index / 2);
                     List<TargetInfo> children = childrenByKey.getOrDefault(entry, Collections.emptyList());
                     recurseTargets(children, depth + 1, enclosingTargets);
                 }
@@ -229,17 +229,17 @@ public class TransformationSorter {
         private final Target target;
         private final TargetType type;
 
-        private final PathMetadata path;
+        private final ListPathMetadata path;
 
         public TargetInfo(TransformationInfo parent, Target target, TargetType type) {
             this.parent = parent;
             this.target = target;
             this.type = type;
 
-            this.path = target.getTarget().getMetadata().get(PathMetadata.class);
+            this.path = target.getTarget().getMetadata().get(ListPathMetadata.class);
         }
 
-        public PathMetadata getPath() {
+        public ListPathMetadata getPath() {
             return path;
         }
 

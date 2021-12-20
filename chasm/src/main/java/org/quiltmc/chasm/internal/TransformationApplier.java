@@ -14,6 +14,7 @@ import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.internal.metadata.OriginMetadata;
+import org.quiltmc.chasm.internal.metadata.ListPathMetadata;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.tree.LazyClassNode;
 
@@ -21,7 +22,7 @@ public class TransformationApplier {
     private final ListNode classes;
     private final List<Transformation> transformations;
 
-    private final Map<PathMetadata, List<Target>> affectedTargets;
+    private final Map<ListPathMetadata, List<Target>> affectedTargets;
 
     public TransformationApplier(ListNode classes, List<Transformation> transformations) {
         this.classes = classes;
@@ -30,15 +31,15 @@ public class TransformationApplier {
         this.affectedTargets = new HashMap<>();
     }
 
-    private static PathMetadata getPath(Target target) {
-        PathMetadata path = target.getTarget().getMetadata().get(PathMetadata.class);
+    private static ListPathMetadata getPath(Target target) {
+        ListPathMetadata path = target.getTarget().getMetadata().get(ListPathMetadata.class);
         if (path == null) {
             throw new RuntimeException("Node in specified target is missing path information.");
         }
         return path;
     }
 
-    private List<Target> getAffectedTargets(PathMetadata path) {
+    private List<Target> getAffectedTargets(ListPathMetadata path) {
         List<Target> affectedTargets = new ArrayList<>();
 
         for (Transformation transformation : transformations) {
@@ -70,7 +71,7 @@ public class TransformationApplier {
         MapNode sources = resolveSources(transformation);
 
         // TODO: Replace copies with immutability
-        Node replacement = transformation.apply(target.copy(), sources.copy()).copy();
+        Node replacement = transformation.apply(target.deepCopy(), sources.deepCopy()).deepCopy();
         replacement.getMetadata().put(OriginMetadata.class, new OriginMetadata(transformation));
 
         replaceTarget(transformation.getTarget(), replacement);
@@ -88,7 +89,7 @@ public class TransformationApplier {
     }
 
     private void replaceNode(NodeTarget nodeTarget, Node replacement) {
-        PathMetadata targetPath = getPath(nodeTarget);
+        ListPathMetadata targetPath = getPath(nodeTarget);
 
         int classIndex = targetPath.get(0).asInteger();
         if (classes.get(classIndex) instanceof LazyClassNode) {
@@ -96,7 +97,7 @@ public class TransformationApplier {
         }
 
         Node parentNode = targetPath.parent().resolve(classes);
-        PathMetadata.Entry entry = targetPath.get(targetPath.size() - 1);
+        ListPathMetadata.Entry entry = targetPath.get(targetPath.size() - 1);
 
         if (parentNode instanceof ListNode && entry.isInteger()) {
             ListNode parentList = Node.asList(parentNode);
@@ -114,7 +115,7 @@ public class TransformationApplier {
     }
 
     private void replaceSlice(SliceTarget sliceTarget, ListNode replacement) {
-        PathMetadata targetPath = getPath(sliceTarget);
+        ListPathMetadata targetPath = getPath(sliceTarget);
 
         int classIndex = targetPath.get(0).asInteger();
         if (classes.get(classIndex) instanceof LazyClassNode) {
@@ -162,10 +163,10 @@ public class TransformationApplier {
         }
     }
 
-    private void movePathIndex(PathMetadata path, int pathIndex, int endIndex, int amount) {
+    private void movePathIndex(ListPathMetadata path, int pathIndex, int endIndex, int amount) {
         int originalIndex = path.get(pathIndex).asInteger();
         if (originalIndex >= endIndex) {
-            path.set(pathIndex, new PathMetadata.Entry(originalIndex + amount));
+            path.set(pathIndex, new ListPathMetadata.Entry(originalIndex + amount));
         }
     }
 
@@ -183,7 +184,7 @@ public class TransformationApplier {
         Node currentNode = classes;
         PathMetadata path = getPath(target);
 
-        for (PathMetadata.Entry entry : path) {
+        for (ListPathMetadata.Entry entry : path) {
             if (currentNode instanceof ListNode && entry.isInteger()) {
                 currentNode = Node.asList(currentNode).get(entry.asInteger());
             } else if (currentNode instanceof MapNode && entry.isString()) {

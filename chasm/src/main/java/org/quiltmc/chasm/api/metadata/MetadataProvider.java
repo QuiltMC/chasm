@@ -1,20 +1,14 @@
+/**
+ *
+ */
 package org.quiltmc.chasm.api.metadata;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.quiltmc.chasm.internal.util.Copyable;
 
 /**
- * Provides {@link Metadata} attached to a {@link org.quiltmc.chasm.api.tree.Node}.
+ *
  */
-public class MetadataProvider {
-    private final Map<Class<? extends Metadata>, Metadata> metadata;
-
-    /**
-     * Create a new, empty {@link MetadataProvider}.
-     */
-    public MetadataProvider() {
-        this.metadata = new HashMap<>();
-    }
+public interface MetadataProvider extends Copyable {
 
     /**
      * Attach {@link Metadata} of a given type.
@@ -23,9 +17,7 @@ public class MetadataProvider {
      * @param data The instance of the specified type to attach.
      * @param <T> The type of the metadata.
      */
-    public <T extends Metadata> void put(Class<T> dataClass, T data) {
-        metadata.put(dataClass, data);
-    }
+    <T extends Metadata> void put(Class<T> dataClass, T data);
 
     /**
      * Retrieves {@link Metadata} of a given type.
@@ -34,10 +26,7 @@ public class MetadataProvider {
      * @param <T> The type of the metadata.
      * @return The attached metadata of the specified type, or {@code null} if it doesn't exist.
      */
-    @SuppressWarnings("unchecked")
-    public <T extends Metadata> T get(Class<T> dataClass) {
-        return (T) metadata.get(dataClass);
-    }
+    <T extends Metadata> T get(Class<T> dataClass);
 
     /**
      * Creates a deep copy of this {@link MetadataProvider}.
@@ -46,13 +35,9 @@ public class MetadataProvider {
      *
      * @return A deep copy of this instance.
      */
-    public MetadataProvider copy() {
-        MetadataProvider copy = new MetadataProvider();
+    @Override
+    MetadataProvider deepCopy();
 
-        for (Map.Entry<Class<? extends Metadata>, Metadata> entry : metadata.entrySet()) {
-            copy.metadata.put(entry.getKey(), entry.getValue().copy());
-        }
-
-        return copy;
-    }
+    @Override
+    MetadataProvider shallowCopy();
 }

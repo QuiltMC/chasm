@@ -15,7 +15,7 @@ import org.quiltmc.chasm.internal.TransformationApplier;
 import org.quiltmc.chasm.internal.TransformationSorter;
 import org.quiltmc.chasm.internal.TransformerSorter;
 import org.quiltmc.chasm.internal.asm.ChasmClassWriter;
-import org.quiltmc.chasm.internal.metadata.PathMetadata;
+import org.quiltmc.chasm.internal.metadata.ListPathMetadata;
 import org.quiltmc.chasm.internal.tree.LazyClassNode;
 import org.quiltmc.chasm.internal.tree.reader.ClassNodeReader;
 import org.quiltmc.chasm.internal.util.PathInitializer;
@@ -77,7 +77,7 @@ public class ChasmProcessor {
         LOGGER.info("Processing {} classes...", classes.size());
 
         LOGGER.info("Initializing paths...");
-        PathInitializer.initialize(classes, new PathMetadata());
+        PathInitializer.initialize(classes, new ListPathMetadata());
 
         LOGGER.info("Sorting {} transformers...", transformers.size());
         List<List<Transformer>> rounds = TransformerSorter.sort(transformers);
@@ -115,8 +115,7 @@ public class ChasmProcessor {
         List<Transformation> transformations = new ArrayList<>();
 
         for (Transformer transformer : transformers) {
-            // TODO: Replace copy with immutability
-            transformations.addAll(transformer.apply(classes.copy()));
+            transformations.addAll(transformer.apply(classes.asWrapper(null, null, false)));
         }
 
         return transformations;
