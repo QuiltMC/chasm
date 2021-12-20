@@ -82,7 +82,7 @@ public class COWWrapperMetadataProvider extends
     @Override
     protected <C> void updateThisWrapper(Object objKey, CowWrapper cow, C contents) {
         if (!(cow instanceof Metadata)) {
-            throw new ClassCastException("Invalid metadata provider child wrapper: " + cow);
+            throw new ClassCastException("Invalid metadata provider child list: " + cow);
         }
         Class<?> classKey = (Class<?>) objKey;
         Class<? extends Metadata> key = classKey.asSubclass(Metadata.class);

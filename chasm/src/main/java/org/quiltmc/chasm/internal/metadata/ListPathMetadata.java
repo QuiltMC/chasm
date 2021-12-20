@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import org.quiltmc.chasm.api.metadata.COWWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.CowWrapperMetadata;
+import org.quiltmc.chasm.api.metadata.Metadata;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
@@ -74,7 +75,7 @@ public class ListPathMetadata extends ArrayList<ListPathMetadata.Entry> implemen
             } else if (entry.isString() && current instanceof MapNode) {
                 current = Node.asMap(current).get(entry.asString());
             } else {
-                throw new UnsupportedOperationException("Can't apply path to given node.");
+                throw new UnsupportedOperationException("Can't apply list to given node.");
             }
         }
 
@@ -132,9 +133,9 @@ public class ListPathMetadata extends ArrayList<ListPathMetadata.Entry> implemen
     }
 
     @Override
-    public CowWrapperMetadata<PathMetadata> asWrapper(COWWrapperMetadataProvider parent, boolean owned) {
+    public <T extends Metadata> T asWrapper(COWWrapperMetadataProvider parent, Class<T> key, boolean owned) {
         CowWrapperMetadata<PathMetadata> wrapper = new CowWrapperPathMetadata(parent, this, owned);
         wrapper.toOwned(owned);
-        return wrapper;
+        return key.cast(wrapper);
     }
 }

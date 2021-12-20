@@ -40,9 +40,8 @@ public class ArrayListNode extends ArrayList<Node> implements ListNode {
 
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <P extends Node, W extends CowWrapperNode<P, W>> CowWrapperListNode asWrapper(
-            CowWrapperNode<P, W> parent, boolean owned) {
-        return new CowWrapperListNode(parent, this);
+    public <P extends Node, W extends CowWrapperNode<P, W>> CowWrapperListNode asWrapper(CowWrapperNode<P, W> parent,
+            Object key, boolean owned) {
+        return new CowWrapperListNode(parent, key, this, owned);
     }
 }

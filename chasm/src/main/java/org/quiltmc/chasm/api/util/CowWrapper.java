@@ -12,44 +12,44 @@ import org.quiltmc.chasm.internal.util.Copyable;
  */
 public interface CowWrapper extends Copyable {
     /**
-     * Returns whether this wrapper is owned.
+     * Returns whether this list is owned.
      *
-     * @return Whether this wrapper is in owned (read-write) mode.
+     * @return Whether this list is in owned (read-write) mode.
      */
     boolean isOwned();
 
     /**
-     * Switches this wrapper to shared (read-only) mode.
+     * Switches this list to shared (read-only) mode.
      *
-     * @return Whether this wrapper's ownership state changed.
+     * @return Whether this list's ownership state changed.
      */
     boolean toShared();
 
     /**
-     * Switches this wrapper to owned (read-write) mode.
+     * Switches this list to owned (read-write) mode.
      * Will shallow copy the contained object if it's currently shared.
      *
-     * @return Whether this wrapper's ownership state changed.
+     * @return Whether this list's ownership state changed.
      */
     boolean toOwned();
 
     /**
-     * Switches this wrapper to the passed state.
+     * Switches this list to the passed state.
      *
-     * @param owned The new ownership mode of this wrapper.
+     * @param owned The new ownership mode of this list.
      *
-     * @return Whether this wrapper's ownership state changed.
+     * @return Whether this list's ownership state changed.
      */
     boolean toOwned(boolean owned);
 
     /**
-     * Checks if this wrapper wraps the passed object.
+     * Checks if this list wraps the passed object.
      *
      * @implNote Currently uses reference equality.
      *
-     * @param o The object to check this wrapper for.
+     * @param o The object to check this list for.
      *
-     * @return Whether this wrapper wraps the passed object.
+     * @return Whether this list wraps the passed object.
      */
     boolean wrapsObject(Object o);
 

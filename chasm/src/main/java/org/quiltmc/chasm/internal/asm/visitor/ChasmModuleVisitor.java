@@ -5,7 +5,7 @@ import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
-import org.quiltmc.chasm.api.tree.ValueNode;
+import org.quiltmc.chasm.api.tree.WrapperValueNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
 public class ChasmModuleVisitor extends ModuleVisitor {
@@ -32,32 +32,32 @@ public class ChasmModuleVisitor extends ModuleVisitor {
 
     @Override
     public void visitMainClass(String mainClass) {
-        moduleNode.put(NodeConstants.MAIN, new ValueNode(mainClass));
+        moduleNode.put(NodeConstants.MAIN, new WrapperValueNode(mainClass));
     }
 
     @Override
     public void visitPackage(String packaze) {
-        packages.add(new ValueNode(packaze));
+        packages.add(new WrapperValueNode(packaze));
     }
 
     @Override
     public void visitRequire(String module, int access, String version) {
         MapNode requireNode = new LinkedHashMapNode();
-        requireNode.put(NodeConstants.MODULE, new ValueNode(module));
-        requireNode.put(NodeConstants.ACCESS, new ValueNode(access));
-        requireNode.put(NodeConstants.VERSION, new ValueNode(version));
+        requireNode.put(NodeConstants.MODULE, new WrapperValueNode(module));
+        requireNode.put(NodeConstants.ACCESS, new WrapperValueNode(access));
+        requireNode.put(NodeConstants.VERSION, new WrapperValueNode(version));
         requires.add(requireNode);
     }
 
     @Override
     public void visitExport(String packaze, int access, String... modules) {
         MapNode exportNode = new LinkedHashMapNode();
-        exportNode.put(NodeConstants.PACKAGE, new ValueNode(packaze));
-        exportNode.put(NodeConstants.ACCESS, new ValueNode(access));
+        exportNode.put(NodeConstants.PACKAGE, new WrapperValueNode(packaze));
+        exportNode.put(NodeConstants.ACCESS, new WrapperValueNode(access));
         if (modules != null) {
             ListNode modulesNode = new ArrayListNode();
             for (String m : modules) {
-                modulesNode.add(new ValueNode(m));
+                modulesNode.add(new WrapperValueNode(m));
             }
             exportNode.put(NodeConstants.MODULES, modulesNode);
         }
@@ -67,12 +67,12 @@ public class ChasmModuleVisitor extends ModuleVisitor {
     @Override
     public void visitOpen(String packaze, int access, String... modules) {
         MapNode openNode = new LinkedHashMapNode();
-        openNode.put(NodeConstants.PACKAGE, new ValueNode(packaze));
-        openNode.put(NodeConstants.ACCESS, new ValueNode(access));
+        openNode.put(NodeConstants.PACKAGE, new WrapperValueNode(packaze));
+        openNode.put(NodeConstants.ACCESS, new WrapperValueNode(access));
         if (modules != null) {
             ListNode modulesNode = new ArrayListNode();
             for (String m : modules) {
-                modulesNode.add(new ValueNode(m));
+                modulesNode.add(new WrapperValueNode(m));
             }
             openNode.put(NodeConstants.MODULES, modulesNode);
         }
@@ -81,16 +81,16 @@ public class ChasmModuleVisitor extends ModuleVisitor {
 
     @Override
     public void visitUse(String service) {
-        uses.add(new ValueNode(service));
+        uses.add(new WrapperValueNode(service));
     }
 
     @Override
     public void visitProvide(String service, String... providers) {
         MapNode provideNode = new LinkedHashMapNode();
-        provideNode.put(NodeConstants.SERVICE, new ValueNode(service));
+        provideNode.put(NodeConstants.SERVICE, new WrapperValueNode(service));
         ListNode providersNode = new ArrayListNode();
         for (String provider : providers) {
-            providersNode.add(new ValueNode(provider));
+            providersNode.add(new WrapperValueNode(provider));
         }
         provideNode.put(NodeConstants.PROVIDERS, providersNode);
         provides.add(provideNode);

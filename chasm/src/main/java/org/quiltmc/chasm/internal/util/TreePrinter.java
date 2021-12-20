@@ -30,11 +30,11 @@ public class TreePrinter {
 
     private void print(Node node, int indent) {
         if (node instanceof ValueNode) {
-            ValueNode valueNode = (ValueNode) node;
-            if (valueNode.getValue() instanceof String) {
-                printStream.print("\"" + valueNode.getValue() + "\"");
+            ValueNode wrapperValueNode = (ValueNode) node;
+            if (wrapperValueNode.getValue() instanceof String) {
+                printStream.print("\"" + wrapperValueNode.getValue() + "\"");
             } else {
-                printStream.print(valueNode.getValue());
+                printStream.print(wrapperValueNode.getValue());
             }
         } else if (node instanceof ListNode) {
             printStream.println("[");
@@ -47,7 +47,7 @@ public class TreePrinter {
             printStream.print("]");
         } else if (node instanceof MapNode) {
             if (node instanceof LazyClassNode && !expandClasses) {
-                printStream.print("LazyClassNode<" + ((LazyClassNode) node).getClassReader().getClassName() + ">");
+                printStream.print("LazyClassMapNode<" + ((LazyClassNode) node).getClassReader().getClassName() + ">");
             } else {
                 printStream.println("{");
                 for (Map.Entry<String, Node> entry : (Node.asMap(node)).entrySet()) {

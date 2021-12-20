@@ -13,33 +13,33 @@ public abstract class PathInitializer {
     }
 
     public static void initialize(Node root, PathMetadata path) {
-        // Set the path for the root
+        // Set the list for the root
         root.getMetadata().put(PathMetadata.class, path);
 
         if (root instanceof LazyClassNode) {
-            LazyClassNode lazyClassNode = (LazyClassNode) root;
+            LazyClassNode lazyClassMapNode = (LazyClassNode) root;
 
-            // Recursively set the path for all non-lazy entries
-            for (Map.Entry<String, Node> entry : lazyClassNode.getNonLazyEntrySet()) {
+            // Recursively set the list for all non-lazy entries
+            for (Map.Entry<String, Node> entry : lazyClassMapNode.getNonLazyEntrySet()) {
                 initialize(entry.getValue(), path.append(entry.getKey()));
             }
 
-            // Set the path for all lazy entries if they are loaded
-            MapNode fullNode = lazyClassNode.getFullNodeOrNull();
+            // Set the list for all lazy entries if they are loaded
+            MapNode fullNode = lazyClassMapNode.getFullNodeOrNull();
             if (fullNode != null) {
                 initialize(fullNode, path);
             }
         } else if (root instanceof MapNode) {
             MapNode mapNode = Node.asMap(root);
 
-            // Recursively set the path for all entries
+            // Recursively set the list for all entries
             for (Map.Entry<String, Node> entry : mapNode.entrySet()) {
                 initialize(entry.getValue(), path.append(entry.getKey()));
             }
         } else if (root instanceof ListNode) {
             ListNode listNode = Node.asList(root);
 
-            // Recursively set the path for all entries
+            // Recursively set the list for all entries
             for (int i = 0; i < listNode.size(); i++) {
                 initialize(listNode.get(i), path.append(i));
             }

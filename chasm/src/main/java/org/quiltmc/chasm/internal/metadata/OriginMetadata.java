@@ -28,7 +28,7 @@ public class OriginMetadata implements Metadata {
     }
 
     @Override
-    public CowWrapperOriginMetadata asWrapper(COWWrapperMetadataProvider parent, boolean owned) {
-        return new CowWrapperOriginMetadata(parent, this, owned);
+    public <T extends Metadata> T asWrapper(COWWrapperMetadataProvider parent, Class<T> key, boolean owned) {
+        return key.cast(this);
     }
 }

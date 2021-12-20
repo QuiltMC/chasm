@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
+import org.quiltmc.chasm.internal.tree.CowWrapperMapNode;
 import org.quiltmc.chasm.api.metadata.MapMetadataProvider;
 
 /**
@@ -38,5 +39,11 @@ public class LinkedHashMapNode extends LinkedHashMap<String, Node> implements Ma
 
     @Override
     public MetadataProvider getMetadata() { return metadataProvider;
+    }
+
+    @Override
+    public <P extends org.quiltmc.chasm.api.tree.Node, W extends CowWrapperNode<P, W>> org.quiltmc.chasm.api.tree.Node asWrapper(
+            CowWrapperNode<P, W> parent, Object key, boolean owned) {
+        return new CowWrapperMapNode(parent, key, this, owned);
     }
 }

@@ -34,7 +34,7 @@ public class TransformationApplier {
     private static ListPathMetadata getPath(Target target) {
         ListPathMetadata path = target.getTarget().getMetadata().get(ListPathMetadata.class);
         if (path == null) {
-            throw new RuntimeException("Node in specified target is missing path information.");
+            throw new RuntimeException("Node in specified target is missing list information.");
         }
         return path;
     }
@@ -190,7 +190,7 @@ public class TransformationApplier {
             } else if (currentNode instanceof MapNode && entry.isString()) {
                 currentNode = Node.asMap(currentNode).get(entry.asString());
             } else {
-                throw new RuntimeException("Can't resolve path " + path);
+                throw new RuntimeException("Can't resolve list " + path);
             }
         }
 

@@ -45,8 +45,8 @@ public class FieldNodeReader {
         ValueNode signatureNode = Node.asValue(fieldNode.get(NodeConstants.SIGNATURE));
         String signature = signatureNode == null ? null : signatureNode.getValueAsString();
 
-        ValueNode valueNode = Node.asValue(fieldNode.get(NodeConstants.VALUE));
-        Object value = valueNode == null ? null : valueNode.getValue();
+        ValueNode wrapperValueNode = Node.asValue(fieldNode.get(NodeConstants.VALUE));
+        Object value = wrapperValueNode == null ? null : wrapperValueNode.getValue();
 
         FieldVisitor fieldVisitor = visitor.visitField(access, name, descriptor, signature, value);
 

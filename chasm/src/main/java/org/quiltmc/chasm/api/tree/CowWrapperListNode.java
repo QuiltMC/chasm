@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.quiltmc.chasm.api.util.CowWrapper;
-import org.quiltmc.chasm.internal.util.UpdatableCowWrapper;
+import org.quiltmc.chasm.internal.util.ListWrapperListIterator;
+import org.quiltmc.chasm.internal.util.ListWrapperSubList;
+import org.quiltmc.chasm.internal.util.ReadOnlyListWrapperIterator;
 
 /**
  *
@@ -21,7 +23,8 @@ public class CowWrapperListNode extends CowWrapperNode<ListNode, CowWrapperListN
      * @param owned
      * @param parent
      */
-    public <K extends Object> CowWrapperListNode(UpdatableCowWrapper parent, K key, ListNode object, boolean owned) {
+    public <P extends Node, W extends CowWrapperNode<P, W>, K extends Object> CowWrapperListNode(
+            CowWrapperNode<P, W> parent, K key, ListNode object, boolean owned) {
         super(parent, key, object, owned);
     }
 
@@ -65,121 +68,112 @@ public class CowWrapperListNode extends CowWrapperNode<ListNode, CowWrapperListN
 
     @Override
     public Iterator<Node> iterator() {
-
+        return new ReadOnlyListWrapperIterator<>(this);
     }
 
     @Override
     public Object[] toArray() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.object.toArray();
     }
 
     @Override
     public <T> T[] toArray(T[] a) {
-        // TODO Auto-generated method stub
-        return null;
+        return this.object.toArray(a);
     }
 
     @Override
     public boolean add(Node e) {
-        // TODO Auto-generated method stub
-        return false;
+        this.toOwned();
+        return this.object.add(e);
     }
 
     @Override
     public boolean remove(Object o) {
-        // TODO Auto-generated method stub
-        return false;
+        this.toOwned();
+        return this.object.remove(o);
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        // TODO Auto-generated method stub
-        return false;
+        return this.object.containsAll(c);
     }
 
     @Override
     public boolean addAll(Collection<? extends Node> c) {
-        // TODO Auto-generated method stub
-        return false;
+        this.toOwned();
+        return this.object.addAll(c);
     }
 
     @Override
     public boolean addAll(int index, Collection<? extends Node> c) {
-        // TODO Auto-generated method stub
-        return false;
+        this.toOwned();
+        return this.object.addAll(index, c);
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        // TODO Auto-generated method stub
-        return false;
+        this.toOwned();
+        return this.object.removeAll(c);
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        // TODO Auto-generated method stub
-        return false;
+        this.toOwned();
+        return this.object.retainAll(c);
     }
 
     @Override
     public void clear() {
-        // TODO Auto-generated method stub
-
+        this.toOwned();
+        this.object.clear();
     }
 
     @Override
     public Node get(int index) {
-        // TODO Auto-generated method stub
-        return null;
+        return this.object.get(index);
     }
 
     @Override
     public Node set(int index, Node element) {
-        // TODO Auto-generated method stub
-        return null;
+        this.toOwned();
+        return this.object.get(index);
     }
 
     @Override
     public void add(int index, Node element) {
-        // TODO Auto-generated method stub
-
+        this.toOwned();
+        this.object.add(index, element);
     }
 
     @Override
     public Node remove(int index) {
-        // TODO Auto-generated method stub
-        return null;
+        this.toOwned();
+        return this.object.remove(index);
     }
 
     @Override
     public int indexOf(Object o) {
-        // TODO Auto-generated method stub
-        return 0;
+        return this.object.indexOf(o);
     }
 
     @Override
     public int lastIndexOf(Object o) {
-        // TODO Auto-generated method stub
-        return 0;
+        return this.object.lastIndexOf(o);
     }
 
     @Override
     public ListIterator<Node> listIterator() {
-        // TODO Auto-generated method stub
-        return null;
+        return new ListWrapperListIterator<>(this);
     }
 
     @Override
     public ListIterator<Node> listIterator(int index) {
-        // TODO Auto-generated method stub
-        return null;
+        return new ListWrapperListIterator<>(this, index);
     }
 
     @Override
     public List<Node> subList(int fromIndex, int toIndex) {
-        // TODO Auto-generated method stub
-        return null;
+        return new ListWrapperSubList<>(this, fromIndex, toIndex);
     }
 
     @Override

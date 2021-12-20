@@ -16,7 +16,7 @@ import org.quiltmc.chasm.internal.TransformationSorter;
 import org.quiltmc.chasm.internal.TransformerSorter;
 import org.quiltmc.chasm.internal.asm.ChasmClassWriter;
 import org.quiltmc.chasm.internal.metadata.ListPathMetadata;
-import org.quiltmc.chasm.internal.tree.LazyClassNode;
+import org.quiltmc.chasm.internal.tree.LazyClassMapNode;
 import org.quiltmc.chasm.internal.tree.reader.ClassNodeReader;
 import org.quiltmc.chasm.internal.util.PathInitializer;
 import org.slf4j.Logger;
@@ -63,7 +63,7 @@ public class ChasmProcessor {
      */
     public void addClass(byte[] classBytes) {
         ClassReader classReader = new ClassReader(classBytes);
-        LazyClassNode classNode = new LazyClassNode(classReader);
+        LazyClassMapNode classNode = new LazyClassMapNode(classReader);
         classes.add(classNode);
     }
 

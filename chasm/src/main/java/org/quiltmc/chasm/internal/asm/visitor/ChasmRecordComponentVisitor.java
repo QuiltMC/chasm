@@ -8,7 +8,7 @@ import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
-import org.quiltmc.chasm.api.tree.ValueNode;
+import org.quiltmc.chasm.api.tree.WrapperValueNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
 public class ChasmRecordComponentVisitor extends RecordComponentVisitor {
@@ -26,8 +26,8 @@ public class ChasmRecordComponentVisitor extends RecordComponentVisitor {
     public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
         MapNode annotation = new LinkedHashMapNode();
         ListNode values = new ArrayListNode();
-        annotation.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
-        annotation.put(NodeConstants.VISIBLE, new ValueNode(visible));
+        annotation.put(NodeConstants.DESCRIPTOR, new WrapperValueNode(descriptor));
+        annotation.put(NodeConstants.VISIBLE, new WrapperValueNode(visible));
         annotation.put(NodeConstants.VALUES, values);
         annotations.add(annotation);
 
@@ -38,11 +38,11 @@ public class ChasmRecordComponentVisitor extends RecordComponentVisitor {
     public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
         MapNode annotation = new LinkedHashMapNode();
         ListNode values = new ArrayListNode();
-        annotation.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
-        annotation.put(NodeConstants.VISIBLE, new ValueNode(visible));
+        annotation.put(NodeConstants.DESCRIPTOR, new WrapperValueNode(descriptor));
+        annotation.put(NodeConstants.VISIBLE, new WrapperValueNode(visible));
         annotation.put(NodeConstants.VALUES, values);
-        annotation.put(NodeConstants.TYPE_REF, new ValueNode(typeRef));
-        annotation.put(NodeConstants.TYPE_PATH, new ValueNode(typePath.toString()));
+        annotation.put(NodeConstants.TYPE_REF, new WrapperValueNode(typeRef));
+        annotation.put(NodeConstants.TYPE_PATH, new WrapperValueNode(typePath.toString()));
         annotations.add(annotation);
 
         return new ChasmAnnotationVisitor(api, values);
@@ -50,7 +50,7 @@ public class ChasmRecordComponentVisitor extends RecordComponentVisitor {
 
     @Override
     public void visitAttribute(Attribute attribute) {
-        attributes.add(new ValueNode(attribute));
+        attributes.add(new WrapperValueNode(attribute));
     }
 
     @Override

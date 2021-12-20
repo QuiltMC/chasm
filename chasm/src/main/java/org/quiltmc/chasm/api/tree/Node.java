@@ -74,25 +74,25 @@ public interface Node extends Copyable {
     }
 
     /**
-     * Casts the passed {@link Node} as a {@link ValueNode}.
+     * Casts the passed {@link Node} as a {@link WrapperValueNode}.
      *
-     * @param node The {@code Node} to cast to a {@code ValueNode}.
+     * @param node The {@code Node} to cast to a {@code WrapperValueNode}.
      *
-     * @return The passed {@code Node} as a {@code ValueNode}.
+     * @return The passed {@code Node} as a {@code WrapperValueNode}.
      *
-     * @throws IllegalStateException If the passed {@code Node} is not a {@code ValueNode}.
+     * @throws IllegalStateException If the passed {@code Node} is not a {@code WrapperValueNode}.
      *
      * @see Node#asList(Node)
      * @see Node#asMap(Node)
      */
-    static ValueNode asValue(Node node) {
+    static WrapperValueNode asValue(Node node) {
         if (node == null) {
             return null;
         }
         if (node instanceof ValueNode) {
-            return (ValueNode) node;
+            return (WrapperValueNode) node;
         }
-        throw NodeUtils.createWrongTypeException(node, "ValueNode");
+        throw NodeUtils.createWrongTypeException(node, "WrapperValueNode");
     }
 
     <P extends Node, W extends CowWrapperNode<P, W>> Node asWrapper(CowWrapperNode<P, W> parent, Object key,

@@ -6,15 +6,14 @@ package org.quiltmc.chasm.internal.metadata;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.NoSuchElementException;
-
 import org.quiltmc.chasm.api.metadata.COWWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.CowWrapperMetadata;
 import org.quiltmc.chasm.api.metadata.Metadata;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.util.CowWrapper;
 import org.quiltmc.chasm.internal.metadata.ListPathMetadata.Entry;
+import org.quiltmc.chasm.internal.util.ListWrapperListIterator;
+import org.quiltmc.chasm.internal.util.ReadOnlyListWrapperIterator;
 
 /**
  *
@@ -53,7 +52,7 @@ public class CowWrapperPathMetadata extends CowWrapperMetadata<PathMetadata>
 
     @Override
     public Iterator<Entry> iterator() {
-        return new PathMetadataIterator<>(this.object);
+        return new ReadOnlyListWrapperIterator<>(this.object);
     }
 
     @Override
@@ -146,66 +145,14 @@ public class CowWrapperPathMetadata extends CowWrapperMetadata<PathMetadata>
         return this.object.lastIndexOf(o);
     }
 
-    private static class PathMetadataListIterator extends PathMetadataIterator<CowWrapperPathMetadata>
-            implements ListIterator<ListPathMetadata.Entry> {
-
-
-        public PathMetadataListIterator(CowWrapperPathMetadata wrapper) {
-            super(wrapper);
-        }
-
-        public PathMetadataListIterator(CowWrapperPathMetadata wrapper, int nextIndex) {
-            super(wrapper, nextIndex);
-        }
-
-        @Override
-        public boolean hasPrevious() {
-            return this.nextIndex > 0;
-        }
-
-        @Override
-        public Entry previous() {
-            if (this.nextIndex <= 0) {
-                throw new NoSuchElementException();
-            }
-            --this.nextIndex;
-            return this.path.get(nextIndex);
-        }
-
-        @Override
-        public int nextIndex() {
-            return this.nextIndex;
-        }
-
-        @Override
-        public int previousIndex() {
-            return this.nextIndex - 1;
-        }
-
-        @Override
-        public void remove() {
-            this.path.remove(this.previousIndex());
-        }
-
-        @Override
-        public void set(Entry e) {
-            this.path.set(this.previousIndex(), e);
-        }
-
-        @Override
-        public void add(Entry e) {
-            this.path.add(this.nextIndex, e);
-        }
-
-    }
     @Override
-    public ListIterator<Entry> listIterator() {
-        return new PathMetadataListIterator(this);
+    public ListWrapperListIterator<Entry, CowWrapperPathMetadata> listIterator() {
+        return new ListWrapperListIterator<>(this);
     }
 
     @Override
-    public ListIterator<Entry> listIterator(int index) {
-        return new PathMetadataListIterator(this, index);
+    public ListWrapperListIterator<Entry, CowWrapperPathMetadata> listIterator(int index) {
+        return new ListWrapperListIterator<>(this, index);
     }
 
     @Override

@@ -110,7 +110,7 @@ public class TransformationSorter {
     }
 
     private static void recurseTargets(List<TargetInfo> targets, int depth, Set<TargetInfo> enclosingTargets) {
-        // Group by path
+        // Group by list
         Map<ListPathMetadata.Entry, List<TargetInfo>> childrenByKey = new LinkedHashMap<>();
         for (TargetInfo target : targets) {
             ListPathMetadata path = target.getPath();
