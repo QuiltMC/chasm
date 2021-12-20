@@ -1,5 +1,8 @@
 package org.quiltmc.chasm.internal.asm.visitor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -11,20 +14,32 @@ import org.objectweb.asm.tree.analysis.Interpreter;
 import org.objectweb.asm.tree.analysis.SimpleVerifier;
 import org.quiltmc.chasm.api.util.ClassInfoProvider;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class LocalInterpreter extends Interpreter<LocalValue> {
     private final MethodNode method;
     private final SimpleVerifier simpleVerifier;
 
-    protected LocalInterpreter(MethodNode method, ClassInfoProvider classInfoProvider, Type currentClass, @Nullable Type currentSuperClass, List<Type> currentClassInterfaces, boolean isInterface) {
+    protected LocalInterpreter(
+            MethodNode method,
+            ClassInfoProvider classInfoProvider,
+            Type currentClass,
+            @Nullable Type currentSuperClass,
+            List<Type> currentClassInterfaces,
+            boolean isInterface
+    ) {
         super(Opcodes.ASM9);
         this.method = method;
-        this.simpleVerifier = new SimpleVerifier(Opcodes.ASM9, currentClass, currentSuperClass, currentClassInterfaces, isInterface) {
+        this.simpleVerifier = new SimpleVerifier(
+                Opcodes.ASM9,
+                currentClass,
+                currentSuperClass,
+                currentClassInterfaces,
+                isInterface
+        ) {
             @Override
             protected Class<?> getClass(Type type) {
-                throw new UnsupportedOperationException("This method shouldn't have been called, as the methods that call it have been overridden");
+                throw new UnsupportedOperationException(
+                        "This method shouldn't have been called, as the methods that call it have been overridden"
+                );
             }
 
             @Override
@@ -122,14 +137,23 @@ public class LocalInterpreter extends Interpreter<LocalValue> {
     @Override
     public LocalValue binaryOperation(AbstractInsnNode insn, LocalValue value1, LocalValue value2)
             throws AnalyzerException {
-        BasicValue basicValue = simpleVerifier.binaryOperation(insn, new BasicValue(value1.getType()), new BasicValue(value2.getType()));
+        BasicValue basicValue = simpleVerifier.binaryOperation(
+                insn,
+                new BasicValue(value1.getType()),
+                new BasicValue(value2.getType())
+        );
         return basicValue == null ? null : new LocalValue(basicValue.getType());
     }
 
     @Override
     public LocalValue ternaryOperation(AbstractInsnNode insn, LocalValue value1, LocalValue value2, LocalValue value3)
             throws AnalyzerException {
-        BasicValue basicValue = simpleVerifier.ternaryOperation(insn, new BasicValue(value1.getType()), new BasicValue(value2.getType()), new BasicValue(value3.getType()));
+        BasicValue basicValue = simpleVerifier.ternaryOperation(
+                insn,
+                new BasicValue(value1.getType()),
+                new BasicValue(value2.getType()),
+                new BasicValue(value3.getType())
+        );
         return basicValue == null ? null : new LocalValue(basicValue.getType());
     }
 
@@ -153,7 +177,14 @@ public class LocalInterpreter extends Interpreter<LocalValue> {
 
     @Override
     public LocalValue merge(LocalValue value1, LocalValue value2) {
-        BasicValue basicValue = simpleVerifier.merge(new BasicValue(value1.getType()), new BasicValue(value2.getType()));
-        return basicValue == null ? null : new LocalValue(basicValue.getType(), LocalValue.mergeSourceStores(value1.getSourceStores(), value2.getSourceStores()));
+        BasicValue basicValue = simpleVerifier.merge(
+                new BasicValue(value1.getType()),
+                new BasicValue(value2.getType())
+        );
+        return basicValue == null ? null
+                : new LocalValue(
+                        basicValue.getType(),
+                        LocalValue.mergeSourceStores(value1.getSourceStores(), value2.getSourceStores())
+                );
     }
 }

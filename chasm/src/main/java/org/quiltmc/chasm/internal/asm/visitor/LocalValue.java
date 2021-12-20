@@ -1,13 +1,13 @@
 package org.quiltmc.chasm.internal.asm.visitor;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.analysis.Value;
-
-import java.util.Arrays;
-import java.util.Objects;
 
 public final class LocalValue implements Value {
     private final @Nullable Type type;
@@ -49,8 +49,12 @@ public final class LocalValue implements Value {
 
     @Override
     public boolean equals(Object other) {
-        if (other == this) return true;
-        if (!(other instanceof LocalValue)) return false;
+        if (other == this) {
+            return true;
+        }
+        if (!(other instanceof LocalValue)) {
+            return false;
+        }
         LocalValue that = (LocalValue) other;
         return Arrays.equals(this.sourceStores, that.sourceStores) && Objects.equals(this.type, that.type);
     }
@@ -67,18 +71,18 @@ public final class LocalValue implements Value {
             return a;
         } else {
             int[] ret = new int[a.length + b.length];
-            int aIndex = 0;
-            int bIndex = 0;
+            int indexA = 0;
+            int indexB = 0;
             int retIndex = 0;
-            while (aIndex < a.length || bIndex < b.length) {
-                if (aIndex < a.length && (bIndex >= b.length || a[aIndex] <= b[bIndex])) {
-                    if (bIndex < b.length && a[aIndex] == b[bIndex]) {
+            while (indexA < a.length || indexB < b.length) {
+                if (indexA < a.length && (indexB >= b.length || a[indexA] <= b[indexB])) {
+                    if (indexB < b.length && a[indexA] == b[indexB]) {
                         // prevent duplicates
-                        bIndex++;
+                        indexB++;
                     }
-                    ret[retIndex++] = a[aIndex++];
+                    ret[retIndex++] = a[indexA++];
                 } else {
-                    ret[retIndex++] = b[bIndex++];
+                    ret[retIndex++] = b[indexB++];
                 }
             }
             if (retIndex < ret.length) {

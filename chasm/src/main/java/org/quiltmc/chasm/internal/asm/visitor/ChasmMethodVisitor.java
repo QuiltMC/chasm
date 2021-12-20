@@ -1,5 +1,9 @@
 package org.quiltmc.chasm.internal.asm.visitor;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
@@ -26,10 +30,6 @@ import org.quiltmc.chasm.api.util.ClassInfoProvider;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ChasmMethodVisitor extends MethodVisitor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChasmMethodVisitor.class);
@@ -174,7 +174,11 @@ public class ChasmMethodVisitor extends MethodVisitor {
         annotation.put(NodeConstants.VALUES, new ValueNode(values));
         annotations.add(annotation);
 
-        return new ChasmAnnotationVisitor(api, values, super.visitTypeAnnotation(typeRef, typePath, descriptor, visible));
+        return new ChasmAnnotationVisitor(
+                api,
+                values,
+                super.visitTypeAnnotation(typeRef, typePath, descriptor, visible)
+        );
     }
 
     @Override
@@ -402,7 +406,11 @@ public class ChasmMethodVisitor extends MethodVisitor {
                 .computeIfAbsent(NodeConstants.ANNOTATIONS, s -> new ArrayListNode()));
         annotations.add(annotation);
 
-        return new ChasmAnnotationVisitor(api, values, super.visitInsnAnnotation(typeRef, typePath, descriptor, visible));
+        return new ChasmAnnotationVisitor(
+                api,
+                values,
+                super.visitInsnAnnotation(typeRef, typePath, descriptor, visible)
+        );
     }
 
     @Override
@@ -434,11 +442,22 @@ public class ChasmMethodVisitor extends MethodVisitor {
         ListNode annotations = Node.asList(tryCatchBlock.get(NodeConstants.ANNOTATIONS));
         annotations.add(annotation);
 
-        return new ChasmAnnotationVisitor(api, values, super.visitTryCatchAnnotation(typeRef, typePath, descriptor, visible));
+        return new ChasmAnnotationVisitor(
+                api,
+                values,
+                super.visitTryCatchAnnotation(typeRef, typePath, descriptor, visible)
+        );
     }
 
     @Override
-    public void visitLocalVariable(String name, String descriptor, String signature, Label start, Label end, int index) {
+    public void visitLocalVariable(
+            String name,
+            String descriptor,
+            String signature,
+            Label start,
+            Label end,
+            int index
+    ) {
         MapNode localNode = new LinkedHashMapNode();
         localNode.put(NodeConstants.NAME, new ValueNode(name));
         localNode.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
@@ -486,7 +505,15 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     private void computeLocalVariables() {
         MethodNode method = (MethodNode) this.mv;
-        Analyzer<LocalValue> analyzer = new Analyzer<>(new LocalInterpreter(method, classInfoProvider, currentClass, currentSuperClass, currentInterfaces, currentClassIsInterface));
+        LocalInterpreter interpreter = new LocalInterpreter(
+                method,
+                classInfoProvider,
+                currentClass,
+                currentSuperClass,
+                currentInterfaces,
+                currentClassIsInterface
+        );
+        Analyzer<LocalValue> analyzer = new Analyzer<>(interpreter);
         Frame<LocalValue>[] frames;
         try {
             frames = analyzer.analyzeAndComputeMaxs(currentClass.getInternalName(), method);
@@ -547,7 +574,8 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     private int[] computeEquivalentStores(MethodNode method, Frame<LocalValue>[] frames) {
         // This is initialized to zero. Zero means there is no other equivalent store.
-        // We rely on the fact that the first instruction cannot be a store, since it would pop a non-existent value off the stack.
+        // We rely on the fact that the first instruction cannot be a store, since it would pop a non-existent value off
+        // the stack.
         int[] equivalentStores = new int[frames.length];
 
         for (AbstractInsnNode insn : method.instructions) {

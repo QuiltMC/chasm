@@ -374,7 +374,12 @@ public class MethodNodeReader {
         }
     }
 
-    private static int getLocalIndex(int[] nextLocalIndex, Map<String, Integer> remappedLocalIndexes, String varName, int size) {
+    private static int getLocalIndex(
+            int[] nextLocalIndex,
+            Map<String, Integer> remappedLocalIndexes,
+            String varName,
+            int size
+    ) {
         // TODO: smart merging of local variable indexes
         return remappedLocalIndexes.computeIfAbsent(varName, k -> {
             int index = nextLocalIndex[0];

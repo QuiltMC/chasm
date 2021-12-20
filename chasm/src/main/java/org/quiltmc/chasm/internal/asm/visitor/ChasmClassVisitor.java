@@ -1,5 +1,8 @@
 package org.quiltmc.chasm.internal.asm.visitor;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -18,8 +21,6 @@ import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.api.util.ClassInfoProvider;
 import org.quiltmc.chasm.internal.util.NodeConstants;
-
-import java.util.stream.Collectors;
 
 public class ChasmClassVisitor extends ClassVisitor {
     private final ClassInfoProvider classInfoProvider;
@@ -189,12 +190,14 @@ public class ChasmClassVisitor extends ClassVisitor {
         methods.add(methodNode);
 
         ValueNode superNode = Node.asValue(classNode.get(NodeConstants.SUPER));
+        List<Type> interfaces = Node.asList(classNode.get(NodeConstants.INTERFACES)).stream()
+                .map(n -> Type.getObjectType(Node.asValue(n).getValueAsString())).collect(Collectors.toList());
         return new ChasmMethodVisitor(
                 api,
                 classInfoProvider,
                 Type.getObjectType(Node.asValue(classNode.get(NodeConstants.NAME)).getValueAsString()),
                 superNode == null ? null : Type.getObjectType(superNode.getValueAsString()),
-                Node.asList(classNode.get(NodeConstants.INTERFACES)).stream().map(n -> Type.getObjectType(Node.asValue(n).getValueAsString())).collect(Collectors.toList()),
+                interfaces,
                 (Node.asValue(classNode.get(NodeConstants.ACCESS)).getValueAsInt() & Opcodes.ACC_INTERFACE) != 0,
                 methodNode, access, name, descriptor, signature, exceptions);
     }
