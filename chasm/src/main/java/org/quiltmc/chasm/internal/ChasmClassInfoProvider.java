@@ -30,12 +30,14 @@ public class ChasmClassInfoProvider implements ClassInfoProvider {
             ValueNode className = Node.asValue(classNode.get(NodeConstants.NAME));
             ValueNode superName = Node.asValue(classNode.get(NodeConstants.SUPER));
             ValueNode access = Node.asValue(classNode.get(NodeConstants.ACCESS));
-            ListNode interfaces = Node.asList(classNode.get(NodeConstants.INTERFACES));
+            ListNode interfacesList = Node.asList(classNode.get(NodeConstants.INTERFACES));
+            List<String> interfaces = interfacesList == null ? Collections.emptyList()
+                    : interfacesList.stream().map(n -> Node.asValue(n).getValueAsString()).collect(Collectors.toList());
             classNameToInfo.put(className.getValueAsString(),
                     new ClassInfo(
                             superName == null ? OBJECT : superName.getValueAsString(),
                             (access.getValueAsInt() & Opcodes.ACC_INTERFACE) != 0,
-                            interfaces == null ? Collections.emptyList() : interfaces.stream().map(n -> Node.asValue(n).getValueAsString()).collect(Collectors.toList())));
+                            interfaces));
         }
     }
 
@@ -69,18 +71,18 @@ public class ChasmClassInfoProvider implements ClassInfoProvider {
             return true;
         }
         Set<String> interfacesToCheck = new HashSet<>(0);
-        String rClass = rightClass;
+        String tmpRightClass = rightClass;
         while (true) {
-            ClassInfo rightInfo = classNameToInfo.get(rClass);
+            ClassInfo rightInfo = classNameToInfo.get(tmpRightClass);
             if (rightInfo == null) {
                 return parent.isAssignable(leftClass, rightClass);
             }
-            rClass = rightInfo.superClass;
-            if (rClass == null) {
+            tmpRightClass = rightInfo.superClass;
+            if (tmpRightClass == null) {
                 break;
             }
 
-            if (rClass.equals(leftClass)) {
+            if (tmpRightClass.equals(leftClass)) {
                 return true;
             }
 
