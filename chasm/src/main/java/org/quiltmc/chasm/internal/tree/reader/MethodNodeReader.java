@@ -60,7 +60,13 @@ public class MethodNodeReader {
         return labelMap.computeIfAbsent(labelName, unusedLabelName -> new Label());
     }
 
-    private static void visitInstructions(boolean isStatic, ListNode params, MethodVisitor methodVisitor, MapNode codeNode, Map<String, Label> labelMap) {
+    private static void visitInstructions(
+            boolean isStatic,
+            ListNode params,
+            MethodVisitor methodVisitor,
+            MapNode codeNode,
+            Map<String, Label> labelMap
+    ) {
         Map<String, Integer> remappedLocalIndexes = new HashMap<>();
         int[] nextLocalIndex = new int[] {0};
         if (!isStatic) {
@@ -217,7 +223,10 @@ public class MethodNodeReader {
                 case Opcodes.RET: {
                     // visitVarInsn
                     String varName = Node.asValue(instruction.get(NodeConstants.VAR)).getValueAsString();
-                    int size = opcode == Opcodes.LLOAD || opcode == Opcodes.DLOAD || opcode == Opcodes.LSTORE || opcode == Opcodes.DSTORE ? 2 : 1;
+                    int size = opcode == Opcodes.LLOAD
+                            || opcode == Opcodes.DLOAD
+                            || opcode == Opcodes.LSTORE
+                            || opcode == Opcodes.DSTORE ? 2 : 1;
                     int localIndex = getLocalIndex(nextLocalIndex, remappedLocalIndexes, varName, size);
                     methodVisitor.visitVarInsn(opcode, localIndex);
                     break;
