@@ -113,7 +113,8 @@ public class BasicTest {
         // TODO: remove len when there is a builtin length function
         String transformerString = """
                 {
-                    len_helper: map -> map.list.[map.index] = none ? map.index : $.len_helper({list: map.list, index: map.index + 1}),
+                    len_helper: map -> map.list.[map.index] = none ? map.index
+                        : $.len_helper({list: map.list, index: map.index + 1}),
                     len: list -> $.len_helper({list: list, index: 0}),
                     tail: info -> {
                         node: $.target_class.methods.<m -> m.name = info.target_method>.[0].code.instructions,
@@ -154,7 +155,10 @@ public class BasicTest {
                             target: $.tail({target_method: "mergeVariable", index: 2}),
                             sources: {
                                 var1: $.transformations.[2].target.node.<i -> i.opcode = 54>.[0].var,
-                                var2: $.transformations.[2].target.node.<i -> i.opcode = 54 ? i.var = $.transformations.[2].sources.var1 ? false : true : false>.[0].var
+                                var2: $.transformations.[2].target.node
+                                    .<i -> i.opcode = 54 ? i.var = $.transformations.[2].sources.var1
+                                        ? false : true : false>
+                                    .[0].var
                             },
                             apply: args -> [
                                 {
