@@ -76,18 +76,12 @@ public class BasicTest {
                                         instructions: [
                                             {
                                                 opcode: 25,
-                                                var: "P0"
+                                                var: "this"
                                             },
                                             {
                                                 opcode: 176,
                                             },
-                                        ],
-                                        locals: {
-                                            P0: {
-                                                index: 0,
-                                                type: T"LTestClass;"
-                                            }
-                                        }
+                                        ]
                                     },
                                 }
                             ]

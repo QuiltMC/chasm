@@ -25,7 +25,7 @@ public class MethodNodeReader {
         this.methodNode = methodNode;
     }
 
-    public static Object[] getArguments(ListNode argumentNode) {
+    private static Object[] getArguments(ListNode argumentNode) {
         Object[] arguments = new Object[argumentNode.size()];
         for (int i = 0; i < arguments.length; i++) {
             Node argNode = argumentNode.get(i);
@@ -60,13 +60,18 @@ public class MethodNodeReader {
         return labelMap.computeIfAbsent(labelName, unusedLabelName -> new Label());
     }
 
-    private static void visitInstructions(boolean isStatic, String descriptor, MethodVisitor methodVisitor, MapNode codeNode, Map<String, Label> labelMap) {
-        MapNode locals = Node.asMap(codeNode.get(NodeConstants.LOCALS));
-        int argumentSize = Type.getArgumentsAndReturnSizes(descriptor) >> 2;
-        if (isStatic) {
-            argumentSize--;
-        }
+    private static void visitInstructions(boolean isStatic, ListNode params, MethodVisitor methodVisitor, MapNode codeNode, Map<String, Label> labelMap) {
         Map<String, Integer> remappedLocalIndexes = new HashMap<>();
+        int[] nextLocalIndex = new int[] {0};
+        if (!isStatic) {
+            remappedLocalIndexes.put("this", nextLocalIndex[0]++);
+        }
+        for (Node paramNode : params) {
+            MapNode param = Node.asMap(paramNode);
+            remappedLocalIndexes.put(Node.asValue(param.get(NodeConstants.NAME)).getValueAsString(), nextLocalIndex[0]);
+            Type type = Node.asValue(param.get(NodeConstants.TYPE)).getValueAs(Type.class);
+            nextLocalIndex[0] += type.getSize();
+        }
 
         for (Node rawInstruction : Node.asList(codeNode.get(NodeConstants.INSTRUCTIONS))) {
             MapNode instruction = Node.asMap(rawInstruction);
@@ -215,7 +220,8 @@ public class MethodNodeReader {
                 case Opcodes.RET: {
                     // visitVarInsn
                     String varName = Node.asValue(instruction.get(NodeConstants.VAR)).getValueAsString();
-                    int localIndex = getLocalIndex(locals, argumentSize, remappedLocalIndexes, varName);
+                    int size = opcode == Opcodes.LLOAD || opcode == Opcodes.DLOAD || opcode == Opcodes.LSTORE || opcode == Opcodes.DSTORE ? 2 : 1;
+                    int localIndex = getLocalIndex(nextLocalIndex, remappedLocalIndexes, varName, size);
                     methodVisitor.visitVarInsn(opcode, localIndex);
                     break;
                 }
@@ -297,7 +303,7 @@ public class MethodNodeReader {
                 case Opcodes.IINC: {
                     // visitIincInsn
                     String varName = Node.asValue(instruction.get(NodeConstants.VAR)).getValueAsString();
-                    int varIndex = getLocalIndex(locals, argumentSize, remappedLocalIndexes, varName);
+                    int varIndex = getLocalIndex(nextLocalIndex, remappedLocalIndexes, varName, 1);
                     int increment = Node.asValue(instruction.get(NodeConstants.INCREMENT)).getValueAsInt();
                     methodVisitor.visitIincInsn(varIndex, increment);
                     break;
@@ -362,15 +368,13 @@ public class MethodNodeReader {
         }
     }
 
-    private static int getLocalIndex(MapNode locals, int argumentSize, Map<String, Integer> remappedLocalIndexes, String varName) {
-        MapNode localNode = Node.asMap(locals.get(varName));
-        ValueNode indexNode = Node.asValue(localNode.get(NodeConstants.INDEX));
-        if (indexNode != null && indexNode.getValueAsInt() < argumentSize) {
-            return indexNode.getValueAsInt();
-        } else {
-            // TODO: smart merging of local variable indexes
-            return remappedLocalIndexes.computeIfAbsent(varName, k -> remappedLocalIndexes.size() + argumentSize);
-        }
+    private static int getLocalIndex(int[] nextLocalIndex, Map<String, Integer> remappedLocalIndexes, String varName, int size) {
+        // TODO: smart merging of local variable indexes
+        return remappedLocalIndexes.computeIfAbsent(varName, k -> {
+            int index = nextLocalIndex[0];
+            nextLocalIndex[0] += size;
+            return index;
+        });
     }
 
     private static void visitTryCatchBlocks(MethodVisitor methodVisitor, MapNode codeNode,
@@ -557,7 +561,7 @@ public class MethodNodeReader {
             // Don't care
 
             // Instructions
-            visitInstructions((access & Opcodes.ACC_STATIC) != 0, descriptor, methodVisitor, codeNode, labelMap);
+            visitInstructions((access & Opcodes.ACC_STATIC) != 0, parameters, methodVisitor, codeNode, labelMap);
 
             // visitTryCatchBlock
             visitTryCatchBlocks(methodVisitor, codeNode, labelMap);

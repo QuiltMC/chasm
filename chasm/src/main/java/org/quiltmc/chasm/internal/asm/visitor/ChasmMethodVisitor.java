@@ -51,7 +51,6 @@ public class ChasmMethodVisitor extends MethodVisitor {
     private final ListNode instructions = new ArrayListNode();
     private final ListNode sourceLocals = new ArrayListNode();
     private final ListNode tryCatchBlocks = new ArrayListNode();
-    private final MapNode locals = new LinkedHashMapNode();
 
     private final ListNode lineNumbers = new ArrayListNode();
 
@@ -82,7 +81,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
         for (int i = 0; i < argumentTypes.length; i++) {
             MapNode parameterNode = new LinkedHashMapNode();
             parameterNode.put(NodeConstants.TYPE, new ValueNode(argumentTypes[i]));
-            parameterNode.put(NodeConstants.NAME, new ValueNode("arg" + i));
+            parameterNode.put(NodeConstants.NAME, new ValueNode("P" + i));
             this.parameters.add(parameterNode);
         }
 
@@ -191,7 +190,6 @@ public class ChasmMethodVisitor extends MethodVisitor {
         code.put(NodeConstants.SOURCE_LOCALS, sourceLocals);
         code.put(NodeConstants.TRY_CATCH_BLOCKS, tryCatchBlocks);
         code.put(NodeConstants.LINE_NUMBERS, lineNumbers);
-        code.put(NodeConstants.LOCALS, locals);
         super.visitCode();
     }
 
@@ -505,17 +503,11 @@ public class ChasmMethodVisitor extends MethodVisitor {
         if ((method.access & Opcodes.ACC_STATIC) != 0) {
             argumentSize--;
         }
-        final int argumentSize_f = argumentSize;
-
-        int index = 0;
-        if ((method.access & Opcodes.ACC_STATIC) == 0) {
-            MapNode local = makeLocal(index, currentClass);
-            locals.put("P0", local);
-            index++;
-        }
+        int[] paramIndexes = new int[argumentSize];
+        int index = (method.access & Opcodes.ACC_STATIC) != 0 ? 0 : 1;
+        int argIndex = 0;
         for (Type argType : Type.getArgumentTypes(method.desc)) {
-            MapNode local = makeLocal(index, argType);
-            locals.put("P" + index, local);
+            paramIndexes[index] = argIndex++;
             index += argType.getSize();
         }
 
@@ -523,8 +515,12 @@ public class ChasmMethodVisitor extends MethodVisitor {
             int opcode = asmInsn.getOpcode();
             int varIndex = opcode == Opcodes.IINC ? ((IincInsnNode) asmInsn).var : ((VarInsnNode) asmInsn).var;
             @Nullable String localLabel;
-            if (varIndex < argumentSize_f) {
-                localLabel = "P" + varIndex;
+            if (varIndex < paramIndexes.length) {
+                if (varIndex == 0 && (method.access & Opcodes.ACC_STATIC) == 0) {
+                    localLabel = "this";
+                } else {
+                    localLabel = "P" + paramIndexes[varIndex];
+                }
             } else {
                 localLabel = null;
                 int frameIndex = method.instructions.indexOf(asmInsn);
@@ -542,8 +538,6 @@ public class ChasmMethodVisitor extends MethodVisitor {
                                 sourceStore = equivalentStores[sourceStore];
                             }
                             localLabel = "V" + sourceStore;
-                            MapNode local = makeLocal(varIndex, value.getType());
-                            locals.put(localLabel, local);
                         }
                     }
                 }
