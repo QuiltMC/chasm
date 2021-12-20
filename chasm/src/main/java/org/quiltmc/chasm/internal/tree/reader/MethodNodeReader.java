@@ -86,9 +86,6 @@ public class MethodNodeReader {
             // visit<...>Insn
             int opcode = Node.asValue(instruction.get(NodeConstants.OPCODE)).getValueAsInt();
             switch (opcode) {
-                case Opcodes.NOP:
-                    // TODO Hack to strip the trailing NOP
-                    break;
                 case Opcodes.ACONST_NULL:
                 case Opcodes.ICONST_M1:
                 case Opcodes.ICONST_0:

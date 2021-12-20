@@ -476,10 +476,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitEnd() {
-        // TODO: Attach final labels to a NOP
-        visitInsn(Opcodes.NOP);
         super.visitEnd();
-
         computeLocalVariables();
     }
 

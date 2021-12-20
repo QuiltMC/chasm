@@ -42,7 +42,11 @@ public class ChasmListNodeExpression implements ChasmNodeExpression, Indexable, 
 
     @Override
     public Expression index(Expression expression) {
-        return ConversionHelper.convert(node.get(((IntegerExpression) expression).getValue()));
+        int value = ((IntegerExpression) expression).getValue();
+        if (value < 0 || value >= node.size()) {
+            return Expression.none();
+        }
+        return ConversionHelper.convert(node.get(value));
     }
 
     @Override

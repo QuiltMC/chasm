@@ -137,7 +137,7 @@ public class ChasmLangTransformer implements Transformer {
 
                 // Invoke function and return replacement
                 Expression result = applyExpression.call(argExpression);
-                return ConversionHelper.convert(result);
+                return ConversionHelper.convert(new ReductionContext().reduce(result));
             }
         };
     }
