@@ -7,17 +7,18 @@ import org.quiltmc.chasm.api.util.CowWrapper;
 import org.quiltmc.chasm.internal.util.AbstractChildCowWrapper;
 
 /**
+ * @param <T>
  *
  */
 public abstract class CowWrapperMetadata<T extends Metadata>
-        extends AbstractChildCowWrapper<T, CowWrapperMetadata<T>, COWWrapperMetadataProvider>
+        extends AbstractChildCowWrapper<T, CowWrapperMetadata<T>, CowWrapperMetadataProvider>
         implements Metadata {
 
     /**
      * @param object
      * @param owned
      */
-    protected <M extends Metadata> CowWrapperMetadata(COWWrapperMetadataProvider parent, Class<M> key, T object,
+    protected <M extends Metadata> CowWrapperMetadata(CowWrapperMetadataProvider parent, Class<M> key, T object,
             boolean owned) {
         super(parent, key, object, owned);
     }
@@ -43,6 +44,6 @@ public abstract class CowWrapperMetadata<T extends Metadata>
     }
 
     @Override
-    public abstract <T extends Metadata> T asWrapper(COWWrapperMetadataProvider parent, Class<T> key, boolean owned);
+    public abstract <T extends Metadata> T asWrapper(CowWrapperMetadataProvider parent, Class<T> key, boolean owned);
 
 }

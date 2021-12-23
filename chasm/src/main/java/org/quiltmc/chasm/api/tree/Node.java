@@ -1,6 +1,7 @@
 package org.quiltmc.chasm.api.tree;
 
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
+import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
 import org.quiltmc.chasm.internal.util.Copyable;
 import org.quiltmc.chasm.internal.util.NodeUtils;
 
@@ -95,7 +96,7 @@ public interface Node extends Copyable {
         throw NodeUtils.createWrongTypeException(node, "WrapperValueNode");
     }
 
-    <P extends Node, W extends CowWrapperNode<P, W>> Node asWrapper(CowWrapperNode<P, W> parent, Object key,
+    <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(AbstractCowWrapperNode<P, W> parent, Object key,
             boolean owned);
 
 }

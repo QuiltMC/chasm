@@ -3,12 +3,16 @@
  */
 package org.quiltmc.chasm.api.tree;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.RandomAccess;
 
 import org.quiltmc.chasm.api.util.CowWrapper;
+import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
+import org.quiltmc.chasm.internal.util.AbstractChildCowWrapper;
 import org.quiltmc.chasm.internal.util.ListWrapperListIterator;
 import org.quiltmc.chasm.internal.util.ListWrapperSubList;
 import org.quiltmc.chasm.internal.util.ReadOnlyListWrapperIterator;
@@ -16,15 +20,17 @@ import org.quiltmc.chasm.internal.util.ReadOnlyListWrapperIterator;
 /**
  *
  */
-public class CowWrapperListNode extends CowWrapperNode<ListNode, CowWrapperListNode> implements ListNode {
+public class CowWrapperListNode extends AbstractCowWrapperNode<ArrayListNode, CowWrapperListNode>
+        implements ListNode, RandomAccess {
+    private List<AbstractCowWrapperNode<Node, ? extends CowWrapper>> wrapperCache;
 
     /**
      * @param object
      * @param owned
      * @param parent
      */
-    public <P extends Node, W extends CowWrapperNode<P, W>, K extends Object> CowWrapperListNode(
-            CowWrapperNode<P, W> parent, K key, ListNode object, boolean owned) {
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>, K extends Object> CowWrapperListNode(
+            AbstractCowWrapperNode<P, W> parent, K key, ArrayListNode object, boolean owned) {
         super(parent, key, object, owned);
     }
 
@@ -33,12 +39,13 @@ public class CowWrapperListNode extends CowWrapperNode<ListNode, CowWrapperListN
     }
 
     @Override
-    public Node shallowCopy() {
+    public CowWrapperListNode shallowCopy() {
         return new CowWrapperListNode(this);
     }
 
     @Override
-    public <P extends Node, W extends CowWrapperNode<P, W>> CowWrapperListNode asWrapper(CowWrapperNode<P, W> parent,
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperListNode asWrapper(
+            AbstractCowWrapperNode<P, W> parent,
             Object key, boolean owned) {
         if (this.checkParentLink(parent)) {
             if (this.isOwned() == owned) {
@@ -68,7 +75,7 @@ public class CowWrapperListNode extends CowWrapperNode<ListNode, CowWrapperListN
 
     @Override
     public Iterator<Node> iterator() {
-        return new ReadOnlyListWrapperIterator<>(this);
+        return new ReadOnlyListWrapperIterator<>(this.object);
     }
 
     @Override
@@ -178,19 +185,58 @@ public class CowWrapperListNode extends CowWrapperNode<ListNode, CowWrapperListN
 
     @Override
     protected CowWrapperListNode castThis() {
-        // TODO Auto-generated method stub
-        return null;
+        return this;
     }
 
     @Override
     public CowWrapperListNode deepCopy() {
-        // TODO Auto-generated method stub
-        return null;
+        CowWrapperListNode copy = new CowWrapperListNode(this);
+        copy.toShared();
+        copy.toOwned();
+        if (copy.object == this.object) {
+            copy.object = this.object.deepCopy();
+        } else {
+            for (int i = 0; i < this.object.size(); ++i) {
+                if (copy.object.get(i) == this.object.get(i)) {
+                    copy.object.set(i, this.object.get(i).deepCopy());
+                }
+            }
+        }
+        return copy;
     }
 
     @Override
-    protected <C> void updateThisWrapper(Object key, CowWrapper child, C contents) {
-        // TODO Auto-generated method stub
+    protected <C> void updateThisWrapper(Object key, CowWrapper childWrapper, C contents) {
+        if (key == AbstractChildCowWrapper.SentinelKeys.METADATA) {
+            super.updateThisWrapper(key, childWrapper, contents);
+            return;
+        }
+        final int i = (Integer) key;
+        final Node contained = this.object.get(i);
+        if (!(childWrapper instanceof AbstractCowWrapperNode<?, ?>)) {
+            throw new IllegalArgumentException();
+        }
+        AbstractCowWrapperNode<Node, ? extends CowWrapper> child = (AbstractCowWrapperNode<Node, ? extends CowWrapper>) childWrapper;
+
+        if (this.wrapperCache == null) {
+            final ArrayList<AbstractCowWrapperNode<Node, ? extends CowWrapper>> cache;
+            this.wrapperCache = cache = new ArrayList<>();
+            cache.ensureCapacity(i + 1);
+        }
+        if (this.wrapperCache.size() <= i) {
+            do {
+                this.wrapperCache.add(null);
+            } while (this.wrapperCache.size() <= i);
+        } else {
+            final Node wrapper = this.wrapperCache.get(i);
+            if (wrapper == child && ((CowWrapper) wrapper).wrapsObject(contents)) {
+                return;
+            }
+        }
+
+        this.wrapperCache.set(i, child);
+        CowWrapper wrapper = this.wrapperCache == null || this.wrapperCache.size() < i ? null
+                : this.wrapperCache.get(i);
 
     }
 

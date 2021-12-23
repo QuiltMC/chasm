@@ -4,8 +4,9 @@
 package org.quiltmc.chasm.api.tree;
 
 import org.quiltmc.chasm.api.util.CowWrapper;
+import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
 
-public class CowWrapperValueNode extends CowWrapperNode<ValueNode, CowWrapperValueNode> implements ValueNode {
+public class CowWrapperValueNode extends AbstractCowWrapperNode<ValueNode, CowWrapperValueNode> implements ValueNode {
 
     /**
      * @param parent
@@ -13,67 +14,66 @@ public class CowWrapperValueNode extends CowWrapperNode<ValueNode, CowWrapperVal
      * @param object
      * @param owned
      */
-    protected <P extends Node, W extends CowWrapperNode<P, W>, K> CowWrapperValueNode(CowWrapperNode<P, W> parent,
+    protected <P extends Node, W extends AbstractCowWrapperNode<P, W>, K> CowWrapperValueNode(AbstractCowWrapperNode<P, W> parent,
             K key, ValueNode object, boolean owned) {
         super(parent, key, object, owned);
-        // TODO Auto-generated constructor stub
+    }
+
+    public CowWrapperValueNode(CowWrapperValueNode other) {
+        super(other);
     }
 
     @Override
-    public Node shallowCopy() {
-        // TODO Auto-generated method stub
-        return null;
+    public CowWrapperValueNode shallowCopy() {
+        return new CowWrapperValueNode(this);
     }
 
     @Override
-    public <P extends Node, W extends CowWrapperNode<P, W>> Node asWrapper(CowWrapperNode<P, W> parent, Object key,
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(AbstractCowWrapperNode<P, W> parent, Object key,
             boolean owned) {
-        // TODO Auto-generated method stub
-        return null;
+        CowWrapperValueNode copy = new CowWrapperValueNode(parent, key, object, owned);
+        copy.toShared();
+        copy.toOwned(owned);
+        return copy;
     }
 
     @Override
-    public Object getValue() { // TODO Auto-generated method stub
-        return null;
+    public Object getValue() { return this.object.getValue();
     }
 
     @Override
     public <T> T getValueAs(Class<T> type) {
-        // TODO Auto-generated method stub
-        return null;
+        return this.object.getValueAs(type);
     }
 
     @Override
-    public String getValueAsString() { // TODO Auto-generated method stub
-        return null;
+    public String getValueAsString() { return this.object.getValueAsString();
     }
 
     @Override
-    public int getValueAsInt() { // TODO Auto-generated method stub
-        return 0;
+    public int getValueAsInt() { return this.object.getValueAsInt();
     }
 
     @Override
-    public boolean getValueAsBoolean() { // TODO Auto-generated method stub
-        return false;
+    public boolean getValueAsBoolean() { return this.object.getValueAsBoolean();
     }
 
     @Override
     protected CowWrapperValueNode castThis() {
-        // TODO Auto-generated method stub
-        return null;
+        return this;
     }
 
     @Override
     public CowWrapperValueNode deepCopy() {
-        // TODO Auto-generated method stub
-        return null;
+        CowWrapperValueNode copy = new CowWrapperValueNode(this);
+        copy.toShared();
+        copy.toOwned(this.isOwned());
+        return copy;
     }
 
     @Override
     protected <C> void updateThisWrapper(Object key, CowWrapper child, C contents) {
-        // TODO Auto-generated method stub
-
+        super.updateThisWrapper(key, child, contents);
     }
 
 

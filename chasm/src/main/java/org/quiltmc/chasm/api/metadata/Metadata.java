@@ -22,5 +22,5 @@ public interface Metadata extends Copyable {
      *
      * @return
      */
-    <T extends Metadata> T asWrapper(COWWrapperMetadataProvider parent, Class<T> key, boolean owned);
+    <T extends Metadata> T asWrapper(CowWrapperMetadataProvider parent, Class<T> key, boolean owned);
 }

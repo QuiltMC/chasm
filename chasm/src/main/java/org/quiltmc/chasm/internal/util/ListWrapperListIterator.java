@@ -6,8 +6,9 @@ package org.quiltmc.chasm.internal.util;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
+import java.util.RandomAccess;
 
-public class ListWrapperListIterator<E, L extends List<E>> extends ReadOnlyListWrapperIterator<E, L>
+public class ListWrapperListIterator<E, L extends List<E> & RandomAccess> extends ReadOnlyListWrapperIterator<E, L>
         implements ListIterator<E> {
 
 

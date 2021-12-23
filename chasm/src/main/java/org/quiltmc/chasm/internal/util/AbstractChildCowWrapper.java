@@ -28,10 +28,10 @@ public abstract class AbstractChildCowWrapper<T extends Copyable, W extends Abst
     }
 
     @Override
-    protected void copyToOwn() {
+    protected final void copyToOwn() {
         super.copyToOwn();
         if (this.parent != null) {
-            this.parent.updateParentWrapper(key, parent, this.object);
+            this.parent.updateParentWrapper(key, this, this.object);
         }
     }
 

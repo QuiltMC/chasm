@@ -3,7 +3,7 @@ package org.quiltmc.chasm.internal.metadata;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import org.quiltmc.chasm.api.metadata.COWWrapperMetadataProvider;
+import org.quiltmc.chasm.api.metadata.CowWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.CowWrapperMetadata;
 import org.quiltmc.chasm.api.metadata.Metadata;
 import org.quiltmc.chasm.api.tree.ListNode;
@@ -14,12 +14,13 @@ public class ListPathMetadata extends ArrayList<ListPathMetadata.Entry> implemen
     public ListPathMetadata() {
     }
 
-    private ListPathMetadata(PathMetadata entries) {
+    public ListPathMetadata(PathMetadata entries) {
         super(entries);
     }
 
     @Override
     public PathMetadata deepCopy() {
+        // No need to copy entries because they're immutable
         return new ListPathMetadata(this);
     }
 
@@ -133,8 +134,8 @@ public class ListPathMetadata extends ArrayList<ListPathMetadata.Entry> implemen
     }
 
     @Override
-    public <T extends Metadata> T asWrapper(COWWrapperMetadataProvider parent, Class<T> key, boolean owned) {
-        CowWrapperMetadata<PathMetadata> wrapper = new CowWrapperPathMetadata(parent, this, owned);
+    public <T extends Metadata> T asWrapper(CowWrapperMetadataProvider parent, Class<T> key, boolean owned) {
+        CowWrapperMetadata<ListPathMetadata> wrapper = new CowWrapperPathMetadata(parent, this, owned);
         wrapper.toOwned(owned);
         return key.cast(wrapper);
     }

@@ -9,12 +9,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
+import java.util.RandomAccess;
 import java.util.Set;
 
 /**
  *
  */
-public class ListWrapperSubList<E, L extends List<E>> implements List<E> {
+public class ListWrapperSubList<E, L extends List<E> & RandomAccess> implements List<E>, RandomAccess {
 
     protected final L list;
     protected int min;
@@ -56,7 +57,7 @@ public class ListWrapperSubList<E, L extends List<E>> implements List<E> {
         return false;
     }
 
-    protected static class ListWrapperSubListWrapperIterator<E, L extends List<E>, W extends ListWrapperSubList<E, L>>
+    protected static class ListWrapperSubListWrapperIterator<E, L extends List<E> & RandomAccess, W extends ListWrapperSubList<E, L>>
             implements Iterator<E> {
         protected final L list;
             protected int nextIndex;
@@ -277,7 +278,7 @@ public class ListWrapperSubList<E, L extends List<E>> implements List<E> {
         return -1;
     }
 
-    protected static class ListWrapperSubListWrapperListIterator<E, S extends List<E>, L extends ListWrapperSubList<E, S>>
+    protected static class ListWrapperSubListWrapperListIterator<E, S extends List<E> & RandomAccess, L extends ListWrapperSubList<E, S>>
             extends ListWrapperSubListWrapperIterator<E, S, L>
             implements ListIterator<E> {
             private final int min;

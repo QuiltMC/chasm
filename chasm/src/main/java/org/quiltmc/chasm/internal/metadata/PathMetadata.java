@@ -5,7 +5,7 @@ package org.quiltmc.chasm.internal.metadata;
 
 import java.util.List;
 
-import org.quiltmc.chasm.api.metadata.COWWrapperMetadataProvider;
+import org.quiltmc.chasm.api.metadata.CowWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.Metadata;
 import org.quiltmc.chasm.api.tree.Node;
 
@@ -28,7 +28,7 @@ public interface PathMetadata extends Metadata, List<ListPathMetadata.Entry> {
     Node resolve(Node root);
 
     @Override
-    <T extends Metadata> T asWrapper(COWWrapperMetadataProvider parent, Class<T> key,
+    <T extends Metadata> T asWrapper(CowWrapperMetadataProvider parent, Class<T> key,
             boolean owned);
 
 }

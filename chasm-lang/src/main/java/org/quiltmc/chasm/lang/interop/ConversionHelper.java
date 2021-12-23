@@ -8,6 +8,7 @@ import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
+import org.quiltmc.chasm.api.tree.WrapperValueNode;
 import org.quiltmc.chasm.lang.ast.BooleanExpression;
 import org.quiltmc.chasm.lang.ast.Expression;
 import org.quiltmc.chasm.lang.ast.ListExpression;
@@ -36,7 +37,7 @@ public abstract class ConversionHelper {
         }
 
         if (expression instanceof LiteralExpression<?>) {
-            return new ValueNode(((LiteralExpression<?>) expression).getValue());
+            return new WrapperValueNode(((LiteralExpression<?>) expression).getValue());
         }
 
         throw new RuntimeException("Can't convert Expression to Node.");

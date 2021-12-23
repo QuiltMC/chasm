@@ -5,17 +5,17 @@ package org.quiltmc.chasm.api.metadata;
 
 import java.util.Map;
 
-import org.quiltmc.chasm.api.tree.CowWrapperNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.util.CowWrapper;
+import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
 import org.quiltmc.chasm.internal.util.AbstractChildCowWrapper;
 import org.quiltmc.chasm.internal.util.UpdatableCowWrapper;
 
 /**
  *
  */
-public class COWWrapperMetadataProvider extends
-        AbstractChildCowWrapper<MetadataProvider, COWWrapperMetadataProvider, UpdatableCowWrapper>
+public class CowWrapperMetadataProvider extends
+        AbstractChildCowWrapper<MetadataProvider, CowWrapperMetadataProvider, UpdatableCowWrapper>
         implements MetadataProvider {
     private Map<Class<? extends Metadata>, CowWrapperMetadata<? extends Metadata>> metadataWrapperCache;
 
@@ -23,7 +23,7 @@ public class COWWrapperMetadataProvider extends
      * @param metadata
      * @param owned
      */
-    public <N extends Node, U extends CowWrapperNode<N, U>> COWWrapperMetadataProvider(CowWrapperNode<N, U> parent,
+    public <N extends Node, U extends AbstractCowWrapperNode<N, U>> CowWrapperMetadataProvider(AbstractCowWrapperNode<N, U> parent,
             MetadataProvider metadata, boolean owned) {
         super(parent, AbstractChildCowWrapper.SentinelKeys.METADATA, metadata, owned);
     }
@@ -31,7 +31,7 @@ public class COWWrapperMetadataProvider extends
     /**
      * @param cowWrapperMetadataProvider
      */
-    protected COWWrapperMetadataProvider(COWWrapperMetadataProvider cowWrapperMetadataProvider) {
+    protected CowWrapperMetadataProvider(CowWrapperMetadataProvider cowWrapperMetadataProvider) {
         super(cowWrapperMetadataProvider);
     }
 
@@ -58,20 +58,20 @@ public class COWWrapperMetadataProvider extends
     }
 
     @Override
-    protected COWWrapperMetadataProvider castThis() {
+    protected CowWrapperMetadataProvider castThis() {
         return this;
     }
 
     @Override
-    public COWWrapperMetadataProvider deepCopy() {
-        COWWrapperMetadataProvider copy = new COWWrapperMetadataProvider(this);
+    public CowWrapperMetadataProvider deepCopy() {
+        CowWrapperMetadataProvider copy = new CowWrapperMetadataProvider(this);
         copy.toShared();
         return copy;
     }
 
     @Override
-    public COWWrapperMetadataProvider shallowCopy() {
-        return new COWWrapperMetadataProvider(this);
+    public CowWrapperMetadataProvider shallowCopy() {
+        return new CowWrapperMetadataProvider(this);
     }
 
     @SuppressWarnings("unchecked")

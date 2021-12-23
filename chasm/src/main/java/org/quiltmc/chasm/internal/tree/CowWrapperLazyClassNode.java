@@ -4,7 +4,6 @@
 package org.quiltmc.chasm.internal.tree;
 
 import org.quiltmc.chasm.api.tree.CowWrapperListNode;
-import org.quiltmc.chasm.api.tree.CowWrapperNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.internal.util.UpdatableCowWrapper;
@@ -22,7 +21,7 @@ public class CowWrapperLazyClassNode extends CowWrapperMapNode {
      * @param lazyClassMapNode
      * @param owned
      */
-    public <K, P extends Node, W extends CowWrapperNode<P, W>> CowWrapperLazyClassNode(CowWrapperNode<P, W> parent,
+    public <K, P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperLazyClassNode(AbstractCowWrapperNode<P, W> parent,
             K key, LazyClassMapNode lazyClassMapNode,
             boolean owned) {
         super(parent, key, lazyClassMapNode, owned);

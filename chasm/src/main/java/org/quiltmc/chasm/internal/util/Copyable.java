@@ -1,10 +1,7 @@
-/**
- *
- */
 package org.quiltmc.chasm.internal.util;
 
 /**
- *
+ * Represents a deeply and shallowly copyable object.
  */
 public interface Copyable {
     /**

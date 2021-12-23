@@ -4,29 +4,37 @@
 package org.quiltmc.chasm.internal.tree;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.quiltmc.chasm.api.tree.CowWrapperNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.util.CowWrapper;
+import org.quiltmc.chasm.internal.util.AbstractChildCowWrapper;
+import org.quiltmc.chasm.internal.util.ReadOnlyIteratorWrapper;
 import org.quiltmc.chasm.internal.util.UpdatableCowWrapper;
 
 /**
  *
  */
-public class CowWrapperMapNode extends CowWrapperNode<MapNode, CowWrapperMapNode> implements MapNode {
-
+public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrapperMapNode> implements MapNode {
+    private Map<String, Node> wrapperCache;
     /**
      * @param parent
      * @param key
      * @param object
      * @param owned
      */
-    public <K> CowWrapperMapNode(UpdatableCowWrapper parent, K key, MapNode object, boolean owned) {
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>, K> CowWrapperMapNode(AbstractCowWrapperNode<P, W> parent, K key,
+            MapNode object, boolean owned) {
         super(parent, key, object, owned);
-        // TODO Auto-generated constructor stub
+        if (owned || !this.object.isEmpty()) {
+            this.wrapperCache = new HashMap<>();
+        } else {
+            this.wrapperCache = null;
+        }
     }
 
     /**
@@ -37,81 +45,379 @@ public class CowWrapperMapNode extends CowWrapperNode<MapNode, CowWrapperMapNode
     }
 
     @Override
-    public Node shallowCopy() {
-        // TODO Auto-generated method stub
-        return null;
+    public CowWrapperMapNode shallowCopy() {
+        CowWrapperMapNode copy = new CowWrapperMapNode(this);
+        if (this.isOwned()) {
+            copy.toShared();
+            copy.toOwned();
+        }
+        return copy;
     }
 
     @Override
-    public <P extends Node, W extends CowWrapperNode<P, W>> Node asWrapper(CowWrapperNode<P, W> parent, Object key,
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperMapNode asWrapper(AbstractCowWrapperNode<P, W> parent,
+            Object key,
             boolean owned) {
-        // TODO Auto-generated method stub
-        return null;
+        return new CowWrapperMapNode(parent, key, object, owned);
     }
 
     @Override
     public int size() {
-        // TODO Auto-generated method stub
-        return 0;
+        return this.object.size();
     }
 
     @Override
-    public boolean isEmpty() { // TODO Auto-generated method stub
-        return false;
-    }
+    public boolean isEmpty() { return this.object.isEmpty(); }
 
     @Override
     public boolean containsKey(Object key) {
-        // TODO Auto-generated method stub
-        return false;
+        return this.object.containsKey(key);
     }
 
     @Override
     public boolean containsValue(Object value) {
-        // TODO Auto-generated method stub
-        return false;
+        return this.object.containsValue(value);
     }
 
     @Override
     public Node get(Object key) {
-        // TODO Auto-generated method stub
-        return null;
+        if (this.wrapperCache == null) {
+            this.wrapperCache = new HashMap<>();
+        }
+        Node cached = this.wrapperCache.get(key);
+        if (cached == null) {
+            Node child = this.object.get(key);
+            if (child == null) {
+                return null;
+            }
+            cached = child.asWrapper(this, key, this.isOwned());
+        }
+        return cached;
     }
 
     @Override
     public Node put(String key, Node value) {
-        // TODO Auto-generated method stub
-        return null;
+        this.toOwned();
+        final Node cached = getRestrictedWrapper(key);
+        this.object.put(key, value);
+        return cached;
+    }
+
+    private Node getRestrictedWrapper(String key) {
+        if (this.wrapperCache != null) {
+            final Node cached = this.get(key);
+            restrictWrapper(key, cached);
+            return cached;
+        } else {
+            return null;
+        }
+    }
+
+    private Node getCachedRestrictedWrapper(String key) {
+        if (this.wrapperCache != null) {
+            final Node cached = this.wrapperCache.get(key);
+            restrictWrapper(key, cached);
+            return cached;
+        } else {
+            return null;
+        }
+    }
+
+    private void restrictWrapper(String key, final Node cached) {
+        if (cached != null) {
+            if (cached instanceof UpdatableCowWrapper) {
+                ((UpdatableCowWrapper) cached).unlinkParentWrapper();
+            }
+            this.wrapperCache.remove(key);
+        }
     }
 
     @Override
     public Node remove(Object key) {
-        // TODO Auto-generated method stub
-        return null;
+        this.toOwned();
+        if (key instanceof String) {
+            final Node cached = getRestrictedWrapper((String) key);
+            this.object.remove(key);
+            return cached;
+        } else {
+            return null;
+        }
     }
 
     @Override
     public void putAll(Map<? extends String, ? extends Node> m) {
-        // TODO Auto-generated method stub
-
+        this.toOwned();
+        for (Entry<? extends String, ? extends Node> e : m.entrySet()) {
+            String key = e.getKey();
+            this.getCachedRestrictedWrapper(key);
+            this.object.put(key, e.getValue());
+        }
     }
 
     @Override
     public void clear() {
-        // TODO Auto-generated method stub
+        this.toOwned();
+        if (this.wrapperCache != null) {
+            for (String key : this.wrapperCache.keySet()) {
+                this.getCachedRestrictedWrapper(key);
+                this.wrapperCache.remove(key);
+            }
+        }
+        this.object.clear();
+    }
+
+    private static final class CowWrapperMapNodeKeySet implements Set<String> {
+        private final CowWrapperMapNode self;
+
+        public CowWrapperMapNodeKeySet(CowWrapperMapNode self) {
+            this.self = self;
+        }
+
+        @Override
+        public int size() {
+            return this.self.object.size();
+        }
+
+        @Override
+        public boolean isEmpty() { return this.self.object.isEmpty(); }
+
+        @Override
+        public boolean contains(Object o) {
+            return this.self.object.containsKey(o);
+        }
+
+        @Override
+        public Iterator<String> iterator() {
+            return new ReadOnlyIteratorWrapper<>(this.self.object.keySet().iterator());
+        }
+
+        @Override
+        public Object[] toArray() {
+            return this.self.object.keySet().toArray();
+        }
+
+        @Override
+        public <T> T[] toArray(T[] a) {
+            return this.self.object.keySet().toArray(a);
+        }
+
+        @Override
+        public boolean add(String e) {
+            this.self.toOwned();
+            return this.self.object.keySet().add(e);
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            this.self.toOwned();
+            if (o instanceof String) {
+                this.self.getCachedRestrictedWrapper((String) o);
+                if (this.self.object.containsKey(o)) {
+                    this.self.object.remove(o);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean containsAll(Collection<?> c) {
+            return this.self.object.keySet().containsAll(c);
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends String> c) {
+            this.self.toOwned();
+            return this.self.object.keySet().addAll(c);
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            this.self.toOwned();
+            boolean modified = false;
+            Iterator<String> keyIter = this.self.object.keySet().iterator();
+            for (String key = keyIter.next(); keyIter.hasNext(); key = keyIter.next()) {
+                if (!c.contains(key)) {
+                    this.self.getCachedRestrictedWrapper(key);
+                    this.self.wrapperCache.remove(key);
+                    keyIter.remove();
+                    modified = true;
+                }
+            }
+            return modified;
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            this.self.toOwned();
+            boolean modified = false;
+            Iterator<String> keyIter = this.self.object.keySet().iterator();
+            for (String key = keyIter.next(); keyIter.hasNext(); key = keyIter.next()) {
+                if (c.contains(key)) {
+                    this.self.getCachedRestrictedWrapper(key);
+                    this.self.wrapperCache.remove(key);
+                    keyIter.remove();
+                    modified = true;
+                }
+            }
+            return modified;
+        }
+
+        @Override
+        public void clear() {
+            this.self.clear();
+        }
 
     }
 
     @Override
     public Set<String> keySet() {
-        // TODO Auto-generated method stub
-        return null;
+        return new CowWrapperMapNodeKeySet(this);
+    }
+
+    private static final class CowWrapperMapNodeValueCollection implements Collection<Node> {
+        private CowWrapperMapNode self;
+
+        public CowWrapperMapNodeValueCollection(CowWrapperMapNode self) {
+            this.self = self;
+        }
+
+        @Override
+        public int size() {
+            return this.self.object.size();
+        }
+
+        @Override
+        public boolean isEmpty() { return this.self.object.isEmpty();
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            return this.self.object.containsValue(o);
+        }
+
+        private static class CowWrapperMapNodeValueCollectionIterator implements Iterator<Node> {
+            private CowWrapperMapNode self;
+            private Iterator<String> keys;
+
+            public CowWrapperMapNodeValueCollectionIterator(CowWrapperMapNode self) {
+                this.self = self;
+                this.keys = self.object.keySet().iterator();
+            }
+
+            @Override
+            public boolean hasNext() {
+                return this.keys.hasNext();
+            }
+
+            @Override
+            public Node next() {
+                return this.self.get(this.keys.next());
+            }
+
+        }
+
+        @Override
+        public Iterator<Node> iterator() {
+            return new CowWrapperMapNodeValueCollectionIterator(this.self);
+        }
+
+        private void requireFullyGeneratedCache() {
+            if (this.self.wrapperCache == null || this.self.wrapperCache.size() < this.self.object.size()) {
+                for (String str : this.self.object.keySet()) {
+                    if (this.self.get(str) == null) {
+                        throw new RuntimeException();
+                    }
+                }
+            }
+        }
+
+        @Override
+        public Object[] toArray() {
+            this.requireFullyGeneratedCache();
+            return this.self.wrapperCache.values().toArray();
+        }
+
+        @Override
+        public <T> T[] toArray(T[] a) {
+            this.requireFullyGeneratedCache();
+            return this.self.wrapperCache.values().toArray(a);
+        }
+
+        @Override
+        public boolean add(Node e) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            for (String key : this.self.object.keySet()) {
+                if (this.self.object.get(key).equals(o)) {
+                    this.self.remove(key);
+                    return true;
+                }
+            }
+//            // This loop will allocate wrappers for every value, in case its equals is different
+//            for (String key : this.self.object.keySet()) {
+//                if (this.self.get(key).equals(o)) {
+//                    this.self.remove(key);
+//                    return true;
+//                }
+//            }
+            return false;
+        }
+
+        @Override
+        public boolean containsAll(Collection<?> c) {
+            return this.self.object.values().containsAll(c);
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends Node> c) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            this.self.toOwned();
+            boolean modified = false;
+            Iterator<String> keys = this.self.object.keySet().iterator();
+            for (String key = keys.next(); keys.hasNext(); key = keys.next()) {
+                if (c.contains(this.self.get(key))) {
+                    keys.remove();
+                    this.self.getCachedRestrictedWrapper(key);
+                    this.self.wrapperCache.remove(key);
+                    modified = true;
+                }
+            }
+            return modified;
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            this.self.toOwned();
+            boolean modified = false;
+            Iterator<String> keys = this.self.object.keySet().iterator();
+            for (String key = keys.next(); keys.hasNext(); key = keys.next()) {
+                if (!c.contains(this.self.get(key))) {
+                    keys.remove();
+                    this.self.getCachedRestrictedWrapper(key);
+                    this.self.wrapperCache.remove(key);
+                    modified = true;
+                }
+            }
+            return modified;
+        }
+
+        @Override
+        public void clear() {
+            this.self.clear();
+        }
     }
 
     @Override
     public Collection<Node> values() {
-        // TODO Auto-generated method stub
-        return null;
+        return new CowWrapperMapNodeValueCollection(this);
     }
 
     @Override
@@ -122,20 +428,22 @@ public class CowWrapperMapNode extends CowWrapperNode<MapNode, CowWrapperMapNode
 
     @Override
     protected CowWrapperMapNode castThis() {
-        // TODO Auto-generated method stub
-        return null;
+        return this;
     }
 
     @Override
     public CowWrapperMapNode deepCopy() {
-        // TODO Auto-generated method stub
-        return null;
+        CowWrapperMapNode copy = new CowWrapperMapNode(this);
+        copy.wrapperCache = null;
+        copy.object = this.object.deepCopy();
+        return copy;
     }
 
     @Override
     protected <C> void updateThisWrapper(Object key, CowWrapper child, C contents) {
-        // TODO Auto-generated method stub
-
+        if (key == AbstractChildCowWrapper.SentinelKeys.METADATA) {
+            super.updateParentWrapper(key, child, contents);
+        }
     }
 
 

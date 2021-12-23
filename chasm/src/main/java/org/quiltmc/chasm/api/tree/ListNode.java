@@ -2,6 +2,8 @@ package org.quiltmc.chasm.api.tree;
 
 import java.util.List;
 
+import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
+
 /**
  * Accesses child {@link Node}s by index.
  *
@@ -12,6 +14,6 @@ public interface ListNode extends Node, List<Node> {
     ListNode deepCopy();
 
     @Override
-    <P extends Node, W extends CowWrapperNode<P, W>> CowWrapperListNode asWrapper(CowWrapperNode<P, W> parent,
+    <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperListNode asWrapper(AbstractCowWrapperNode<P, W> parent,
             Object key, boolean owned);
 }

@@ -6,7 +6,9 @@ package org.quiltmc.chasm.internal.metadata;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import org.quiltmc.chasm.api.metadata.COWWrapperMetadataProvider;
+import java.util.RandomAccess;
+
+import org.quiltmc.chasm.api.metadata.CowWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.CowWrapperMetadata;
 import org.quiltmc.chasm.api.metadata.Metadata;
 import org.quiltmc.chasm.api.tree.Node;
@@ -18,22 +20,22 @@ import org.quiltmc.chasm.internal.util.ReadOnlyListWrapperIterator;
 /**
  *
  */
-public class CowWrapperPathMetadata extends CowWrapperMetadata<PathMetadata>
-        implements PathMetadata {
+public class CowWrapperPathMetadata extends CowWrapperMetadata<ListPathMetadata>
+        implements PathMetadata, RandomAccess {
 
     /**
      * @param parent
      * @param object
      * @param owned
      */
-    public CowWrapperPathMetadata(COWWrapperMetadataProvider parent, PathMetadata object, boolean owned) {
-        super(parent, ListPathMetadata.class, object, owned);
+    public CowWrapperPathMetadata(CowWrapperMetadataProvider parent, ListPathMetadata object, boolean owned) {
+        super(parent, PathMetadata.class, object, owned);
     }
 
     /**
      * @param other
      */
-    public CowWrapperPathMetadata(CowWrapperMetadata<PathMetadata> other) {
+    public CowWrapperPathMetadata(CowWrapperMetadata<ListPathMetadata> other) {
         super(other);
     }
 
@@ -221,7 +223,7 @@ public class CowWrapperPathMetadata extends CowWrapperMetadata<PathMetadata>
     }
 
     @Override
-    public <T extends Metadata> T asWrapper(COWWrapperMetadataProvider parent, Class<T> key, boolean owned) {
+    public <T extends Metadata> T asWrapper(CowWrapperMetadataProvider parent, Class<T> key, boolean owned) {
         if (key != PathMetadata.class) {
             throw new IllegalArgumentException("Illegal agument" + key);
         }

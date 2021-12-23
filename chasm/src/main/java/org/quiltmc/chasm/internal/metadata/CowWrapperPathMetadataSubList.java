@@ -3,7 +3,7 @@
  */
 package org.quiltmc.chasm.internal.metadata;
 
-import org.quiltmc.chasm.api.metadata.COWWrapperMetadataProvider;
+import org.quiltmc.chasm.api.metadata.CowWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.Metadata;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
@@ -98,9 +98,9 @@ class CowWrapperPathMetadataSubList extends ListWrapperSubList<Entry, CowWrapper
     }
 
     @Override
-    public <T extends Metadata> T asWrapper(COWWrapperMetadataProvider parent, Class<T> key, boolean owned) {
+    public <T extends Metadata> T asWrapper(CowWrapperMetadataProvider parent, Class<T> key, boolean owned) {
         // Why would you do this though?
-        return key.cast(new CowWrapperPathMetadata(parent, this, owned));
+        return key.cast(new CowWrapperPathMetadata(parent, new ListPathMetadata(this), owned));
     }
 
 }

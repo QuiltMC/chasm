@@ -3,6 +3,7 @@ package org.quiltmc.chasm.api.tree;
 import java.util.ArrayList;
 
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
+import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
 import org.quiltmc.chasm.api.metadata.MapMetadataProvider;
 
 
@@ -40,7 +41,7 @@ public class ArrayListNode extends ArrayList<Node> implements ListNode {
 
 
     @Override
-    public <P extends Node, W extends CowWrapperNode<P, W>> CowWrapperListNode asWrapper(CowWrapperNode<P, W> parent,
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperListNode asWrapper(AbstractCowWrapperNode<P, W> parent,
             Object key, boolean owned) {
         return new CowWrapperListNode(parent, key, this, owned);
     }

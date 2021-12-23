@@ -8,7 +8,6 @@ import org.objectweb.asm.ClassReader;
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
 import org.quiltmc.chasm.api.metadata.MapMetadataProvider;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
-import org.quiltmc.chasm.api.tree.CowWrapperNode;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
@@ -128,7 +127,7 @@ public class LazyClassMapNode extends AbstractMap<String, Node> implements MapNo
     }
 
     @Override
-    public <P extends Node, W extends CowWrapperNode<P, W>> Node asWrapper(CowWrapperNode<P, W> parent, Object key,
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(AbstractCowWrapperNode<P, W> parent, Object key,
             boolean owned) {
         return new CowWrapperLazyClassNode(parent, key, this, owned);
     }

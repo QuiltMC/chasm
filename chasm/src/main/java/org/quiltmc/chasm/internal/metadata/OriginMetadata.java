@@ -1,7 +1,7 @@
 package org.quiltmc.chasm.internal.metadata;
 
 import org.quiltmc.chasm.api.Transformation;
-import org.quiltmc.chasm.api.metadata.COWWrapperMetadataProvider;
+import org.quiltmc.chasm.api.metadata.CowWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.Metadata;
 
 public class OriginMetadata implements Metadata {
@@ -28,7 +28,7 @@ public class OriginMetadata implements Metadata {
     }
 
     @Override
-    public <T extends Metadata> T asWrapper(COWWrapperMetadataProvider parent, Class<T> key, boolean owned) {
+    public <T extends Metadata> T asWrapper(CowWrapperMetadataProvider parent, Class<T> key, boolean owned) {
         return key.cast(this);
     }
 }
