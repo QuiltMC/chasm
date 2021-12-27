@@ -59,6 +59,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
     private int visibleParameterAnnotationOffset = 0;
     private final Map<Label, String> labelIds = new HashMap<>();
     private final Map<AbstractInsnNode, MapNode> localVariableSensitiveInstructions = new HashMap<>();
+    private boolean hasCode = false;
 
     public ChasmMethodVisitor(int api, ClassInfoProvider classInfoProvider, Type currentClass,
                               Type currentSuperClass, List<Type> currentInterfaces,
@@ -189,6 +190,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitCode() {
+        hasCode = true;
         methodNode.put(NodeConstants.CODE, code);
         code.put(NodeConstants.INSTRUCTIONS, instructions);
         code.put(NodeConstants.SOURCE_LOCALS, sourceLocals);
@@ -496,7 +498,9 @@ public class ChasmMethodVisitor extends MethodVisitor {
     @Override
     public void visitEnd() {
         super.visitEnd();
-        computeLocalVariables();
+        if (hasCode) {
+            computeLocalVariables();
+        }
     }
 
     private String getLabelId(Label label) {
