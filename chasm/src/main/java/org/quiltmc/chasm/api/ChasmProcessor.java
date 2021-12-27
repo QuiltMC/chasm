@@ -9,8 +9,8 @@ import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
-import org.quiltmc.chasm.api.util.SuperClassProvider;
-import org.quiltmc.chasm.internal.ChasmSuperClassProvider;
+import org.quiltmc.chasm.api.util.ClassInfoProvider;
+import org.quiltmc.chasm.internal.ChasmClassInfoProvider;
 import org.quiltmc.chasm.internal.TransformationApplier;
 import org.quiltmc.chasm.internal.TransformationSorter;
 import org.quiltmc.chasm.internal.TransformerSorter;
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 public class ChasmProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChasmProcessor.class);
 
-    private final SuperClassProvider superClassProvider;
+    private final ClassInfoProvider classInfoProvider;
 
     private final ListNode classes;
     private final List<Transformer> transformers = new ArrayList<>();
@@ -39,9 +39,9 @@ public class ChasmProcessor {
      * @param superClassProvider A {@code SuperClassProvider} to supply parents of classes that are not being
      *            transformed.
      */
-    public ChasmProcessor(SuperClassProvider superClassProvider) {
-        this.superClassProvider = superClassProvider;
+    public ChasmProcessor(ClassInfoProvider classInfoProvider) {
         classes = new ArrayListNode();
+        this.classInfoProvider = new ChasmClassInfoProvider(classInfoProvider, classes);
     }
 
     /**
@@ -63,7 +63,7 @@ public class ChasmProcessor {
      */
     public void addClass(byte[] classBytes) {
         ClassReader classReader = new ClassReader(classBytes);
-        LazyClassNode classNode = new LazyClassNode(classReader);
+        LazyClassNode classNode = new LazyClassNode(classReader, classInfoProvider);
         classes.add(classNode);
     }
 
@@ -102,7 +102,7 @@ public class ChasmProcessor {
 
             ClassNodeReader chasmWriter = new ClassNodeReader(classNode);
             ClassWriter classWriter = new ChasmClassWriter(
-                    new ChasmSuperClassProvider(superClassProvider, classes));
+                    classInfoProvider);
             chasmWriter.accept(classWriter);
             classBytes.add(classWriter.toByteArray());
         }

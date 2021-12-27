@@ -43,6 +43,10 @@ public abstract class ConversionHelper {
     }
 
     public static Expression convert(Node node) {
+        if (node == null) {
+            return Expression.none();
+        }
+
         if (node instanceof MapNode) {
             return new ChasmMapNodeExpression(Node.asMap(node));
         }

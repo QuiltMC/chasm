@@ -104,4 +104,9 @@ public class ValueNode implements Node {
     public MetadataProvider getMetadata() {
         return metadataProvider;
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
 }

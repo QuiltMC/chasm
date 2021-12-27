@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.api.ChasmProcessor;
-import org.quiltmc.chasm.api.util.ClassLoaderSuperClassProvider;
+import org.quiltmc.chasm.api.util.ClassLoaderClassInfoProvider;
 import org.quiltmc.chasm.lang.ChasmLang;
 import org.quiltmc.chasm.lang.ChasmLangTransformer;
 import org.quiltmc.chasm.lang.ReductionContext;
@@ -49,7 +49,7 @@ public class BasicTest {
     @Test
     public void testTransform() throws IOException {
         ChasmProcessor processor =
-                new ChasmProcessor(new ClassLoaderSuperClassProvider(null, getClass().getClassLoader()));
+                new ChasmProcessor(new ClassLoaderClassInfoProvider(null, getClass().getClassLoader()));
 
         byte[] classBytes = getClass().getResourceAsStream("TestClass.class").readAllBytes();
         processor.addClass(classBytes);
@@ -76,17 +76,105 @@ public class BasicTest {
                                         instructions: [
                                             {
                                                 opcode: 25,
-                                                var: 0
+                                                var: "this"
                                             },
                                             {
                                                 opcode: 176,
                                             },
-                                        ],
+                                        ]
                                     },
                                 }
                             ]
                         },
                     ],
+                }
+                """;
+        ChasmLangTransformer transformer = ChasmLangTransformer.parse(transformerString);
+        processor.addTransformer(transformer);
+
+        List<byte[]> classes = processor.process();
+
+        ClassReader reader = new ClassReader(classes.get(0));
+        StringWriter resultString = new StringWriter();
+        TraceClassVisitor resultVisitor = new TraceClassVisitor(new PrintWriter(resultString));
+        reader.accept(resultVisitor, 0);
+
+        System.out.println(resultString);
+    }
+
+    @Test
+    public void testLocalIndexes() throws IOException {
+        ChasmProcessor processor =
+                new ChasmProcessor(new ClassLoaderClassInfoProvider(null, getClass().getClassLoader()));
+
+        byte[] classBytes = getClass().getResourceAsStream("TestLocalVariables.class").readAllBytes();
+        processor.addClass(classBytes);
+
+        // TODO: remove len when there is a builtin length function
+        String transformerString = """
+                {
+                    len_helper: map -> map.list.[map.index] = none ? map.index
+                        : $.len_helper({list: map.list, index: map.index + 1}),
+                    len: list -> $.len_helper({list: list, index: 0}),
+                    tail: info -> {
+                        node: $.target_class.methods.<m -> m.name = info.target_method>.[0].code.instructions,
+                        start: $.len($.transformations.[info.index].target.node) * 2 - 3,
+                        end: $.transformations.[info.index].target.start
+                    },
+                    id: "exampleTransformer",
+                    target_name: "TestLocalVariables",
+                    target_class: classes.<c -> c.name = $.target_name>.[0],
+                    transformations: [
+                        {
+                            target: $.tail({target_method: "staticMethod", index: 0}),
+                            sources: {
+                                var_name: $.transformations.[0].target.node.<i -> i.opcode = 54>.[0].var
+                            },
+                            apply: args -> [
+                                {
+                                    opcode: 132,
+                                    var: args.sources.var_name,
+                                    increment: 1
+                                },
+                            ],
+                        },
+                        {
+                            target: $.tail({target_method: "instanceMethod", index: 1}),
+                            sources: {
+                                var_name: $.transformations.[1].target.node.<i -> i.opcode = 54>.[0].var
+                            },
+                            apply: args -> [
+                                {
+                                    opcode: 132,
+                                    var: args.sources.var_name,
+                                    increment: 1
+                                },
+                            ],
+                        },
+                        {
+                            target: $.tail({target_method: "mergeVariable", index: 2}),
+                            sources: {
+                                var1: $.transformations.[2].target.node.<i -> i.opcode = 54>.[0].var,
+                                var2: $.transformations.[2].target.node
+                                    .<i -> i.opcode = 54 ? i.var = $.transformations.[2].sources.var1
+                                        ? false : true : false>
+                                    .[0].var
+                            },
+                            apply: args -> [
+                                {
+                                    opcode: 132,
+                                    var: args.sources.var1,
+                                    increment: 1
+                                },
+                                {
+                                    opcode: 132,
+                                    var: args.sources.var2,
+                                    increment: 1
+                                },
+                            ],
+                        },
+                    ],
+                    
                 }
                 """;
         ChasmLangTransformer transformer = ChasmLangTransformer.parse(transformerString);

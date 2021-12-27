@@ -13,11 +13,7 @@ public class ReferenceExpression implements Expression {
     @Override
     public void resolve(String identifier, Expression value) {
         if (this.identifier.equals(identifier)) {
-            if (this.value == null) {
-                this.value = value;
-            } else {
-                throw new RuntimeException("Reference \"" + identifier + "\" already resolved.");
-            }
+            this.value = value;
         }
     }
 

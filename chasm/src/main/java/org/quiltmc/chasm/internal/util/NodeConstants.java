@@ -58,6 +58,7 @@ public class NodeConstants {
     public static final String SERVICE = "service";
     public static final String SIGNATURE = "signature";
     public static final String SOURCE = "source";
+    public static final String SOURCE_LOCALS = "sourceLocals";
     public static final String START = "start";
     public static final String SUPER = "super";
     public static final String TAG = "tag";

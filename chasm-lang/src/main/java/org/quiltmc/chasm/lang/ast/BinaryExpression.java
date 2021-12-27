@@ -6,6 +6,7 @@ import java.util.Map;
 import org.quiltmc.chasm.lang.ReductionContext;
 import org.quiltmc.chasm.lang.op.Addable;
 import org.quiltmc.chasm.lang.op.Equatable;
+import org.quiltmc.chasm.lang.op.Multiplicable;
 import org.quiltmc.chasm.lang.op.Subtractable;
 
 public class BinaryExpression implements Expression {
@@ -43,8 +44,17 @@ public class BinaryExpression implements Expression {
                     result = ((Subtractable) left).subtract(right);
                 }
                 break;
+            case MULTIPLY:
+                if (left instanceof Multiplicable && ((Multiplicable) left).canMultiply(right)) {
+                    result = ((Multiplicable) left).multiply(right);
+                }
+                break;
             case EQUAL:
-                if (left instanceof Equatable && ((Equatable) left).canEquate(right)) {
+                if (left instanceof NoneExpression) {
+                    result = new BooleanExpression(right instanceof NoneExpression);
+                } else if (right instanceof NoneExpression) {
+                    result = new BooleanExpression(false);
+                } else if (left instanceof Equatable && ((Equatable) left).canEquate(right)) {
                     result = ((Equatable) left).equate(right);
                 }
                 break;
