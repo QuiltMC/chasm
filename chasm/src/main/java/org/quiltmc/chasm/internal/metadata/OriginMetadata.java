@@ -3,8 +3,9 @@ package org.quiltmc.chasm.internal.metadata;
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.metadata.CowWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.Metadata;
+import org.quiltmc.chasm.internal.cow.ImmutableCowWrapper;
 
-public class OriginMetadata implements Metadata {
+public class OriginMetadata implements Metadata, ImmutableCowWrapper {
     private final String transformerId;
 
     public OriginMetadata(Transformation origin) {
