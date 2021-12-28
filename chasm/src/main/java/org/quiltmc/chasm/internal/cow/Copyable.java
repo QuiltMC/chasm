@@ -1,4 +1,4 @@
-package org.quiltmc.chasm.internal.util;
+package org.quiltmc.chasm.internal.cow;
 
 /**
  * Represents a deeply and shallowly copyable object.

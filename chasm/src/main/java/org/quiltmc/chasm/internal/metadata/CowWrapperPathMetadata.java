@@ -5,23 +5,20 @@ package org.quiltmc.chasm.internal.metadata;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.RandomAccess;
-
 import org.quiltmc.chasm.api.metadata.CowWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.CowWrapperMetadata;
 import org.quiltmc.chasm.api.metadata.Metadata;
 import org.quiltmc.chasm.api.tree.Node;
-import org.quiltmc.chasm.api.util.CowWrapper;
+import org.quiltmc.chasm.internal.collection.MixinRandomAccessListImpl;
+import org.quiltmc.chasm.internal.collection.ReadOnlyListWrapperIterator;
+import org.quiltmc.chasm.internal.cow.UpdatableCowWrapper;
 import org.quiltmc.chasm.internal.metadata.ListPathMetadata.Entry;
-import org.quiltmc.chasm.internal.util.ListWrapperListIterator;
-import org.quiltmc.chasm.internal.util.ReadOnlyListWrapperIterator;
 
 /**
  *
  */
 public class CowWrapperPathMetadata extends CowWrapperMetadata<ListPathMetadata>
-        implements PathMetadata, RandomAccess {
+        implements PathMetadata, MixinRandomAccessListImpl<Entry> {
 
     /**
      * @param parent
@@ -148,21 +145,6 @@ public class CowWrapperPathMetadata extends CowWrapperMetadata<ListPathMetadata>
     }
 
     @Override
-    public ListWrapperListIterator<Entry, CowWrapperPathMetadata> listIterator() {
-        return new ListWrapperListIterator<>(this);
-    }
-
-    @Override
-    public ListWrapperListIterator<Entry, CowWrapperPathMetadata> listIterator(int index) {
-        return new ListWrapperListIterator<>(this, index);
-    }
-
-    @Override
-    public List<Entry> subList(int fromIndex, int toIndex) {
-        return new CowWrapperPathMetadataSubList(this, fromIndex, toIndex);
-    }
-
-    @Override
     public CowWrapperPathMetadata deepCopy() {
         return new CowWrapperPathMetadata(this);
     }
@@ -212,7 +194,7 @@ public class CowWrapperPathMetadata extends CowWrapperMetadata<ListPathMetadata>
     }
 
     @Override
-    protected <C> void updateThisWrapper(Object objKey, CowWrapper child, C objContents) {
+    protected void updateThisWrapper(Object objKey, UpdatableCowWrapper child, Object objContents) {
         int key = (Integer) objKey;
         Entry current = this.get(key);
         Entry contents = (Entry) objContents;

@@ -1,9 +1,7 @@
 /**
  *
  */
-package org.quiltmc.chasm.internal.util;
-
-import org.quiltmc.chasm.api.util.CowWrapper;
+package org.quiltmc.chasm.internal.cow;
 
 /**
  * Wraps an object in a lockable COW wrapper that only copies to unlock.
@@ -144,18 +142,19 @@ public abstract class AbstractCowWrapper<T extends Copyable, W extends AbstractC
     }
 
     @Override
-    public final <C extends Object> boolean updateParentWrapper(Object key, CowWrapper child, C contents) {
-        final boolean updatedState = this.toOwned(child.isOwned());
-        if (!child.wrapsObject(contents)) {
+    public final boolean updateParentWrapper(Object key, UpdatableCowWrapper child, Object contents) {
+        final boolean oldState = this.isOwned();
+        if (!child.wrapsObject(contents) || !child.checkParentLink(this) || !child.checkKey(key)) {
             throw new IllegalArgumentException("Wrong child object");
         }
         this.updateThisWrapper(key, child, contents);
-        return updatedState;
+        return this.isOwned() != oldState;
     }
 
     /**
      * @param key
      * @param child
+     * @param contents
      */
-    protected abstract <C extends Object> void updateThisWrapper(Object key, CowWrapper child, C contents);
+    protected abstract void updateThisWrapper(Object key, UpdatableCowWrapper child, Object contents);
 }

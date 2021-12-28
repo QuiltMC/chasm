@@ -3,7 +3,6 @@
  */
 package org.quiltmc.chasm.api.tree;
 
-import org.quiltmc.chasm.api.util.CowWrapper;
 import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
 
 public class CowWrapperValueNode extends AbstractCowWrapperNode<ValueNode, CowWrapperValueNode> implements ValueNode {
@@ -72,8 +71,8 @@ public class CowWrapperValueNode extends AbstractCowWrapperNode<ValueNode, CowWr
     }
 
     @Override
-    protected <C> void updateThisWrapper(Object key, CowWrapper child, C contents) {
-        super.updateThisWrapper(key, child, contents);
+    protected void updateThisNode(Object key, CowWrapperNode child, Node contents) {
+        throw new UnsupportedOperationException("CowWrapperValueNodes have no children.");
     }
 
 

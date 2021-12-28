@@ -9,12 +9,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.quiltmc.chasm.api.tree.CowWrapperNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
-import org.quiltmc.chasm.api.util.CowWrapper;
-import org.quiltmc.chasm.internal.util.AbstractChildCowWrapper;
-import org.quiltmc.chasm.internal.util.ReadOnlyIteratorWrapper;
-import org.quiltmc.chasm.internal.util.UpdatableCowWrapper;
+import org.quiltmc.chasm.internal.collection.ReadOnlyIteratorWrapper;
+import org.quiltmc.chasm.internal.cow.UpdatableCowWrapper;
 
 /**
  *
@@ -30,11 +29,7 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
     public <P extends Node, W extends AbstractCowWrapperNode<P, W>, K> CowWrapperMapNode(AbstractCowWrapperNode<P, W> parent, K key,
             MapNode object, boolean owned) {
         super(parent, key, object, owned);
-        if (owned || !this.object.isEmpty()) {
-            this.wrapperCache = new HashMap<>();
-        } else {
-            this.wrapperCache = null;
-        }
+        this.wrapperCache = null;
     }
 
     /**
@@ -58,7 +53,10 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
     public <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperMapNode asWrapper(AbstractCowWrapperNode<P, W> parent,
             Object key,
             boolean owned) {
-        return new CowWrapperMapNode(parent, key, object, owned);
+        CowWrapperMapNode copy = new CowWrapperMapNode(parent, key, object, owned);
+        copy.toOwned(this.isOwned());
+        copy.toOwned(owned);
+        return copy;
     }
 
     @Override
@@ -98,32 +96,32 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
     @Override
     public Node put(String key, Node value) {
         this.toOwned();
-        final Node cached = getRestrictedWrapper(key);
+        final Node cached = takeWrapper(key);
         this.object.put(key, value);
         return cached;
     }
 
-    private Node getRestrictedWrapper(String key) {
+    private Node takeWrapper(String key) {
         if (this.wrapperCache != null) {
             final Node cached = this.get(key);
-            restrictWrapper(key, cached);
+            removeWrapper(key, cached);
             return cached;
         } else {
             return null;
         }
     }
 
-    private Node getCachedRestrictedWrapper(String key) {
+    private Node removeCachedWrapper(String key) {
         if (this.wrapperCache != null) {
             final Node cached = this.wrapperCache.get(key);
-            restrictWrapper(key, cached);
+            removeWrapper(key, cached);
             return cached;
         } else {
             return null;
         }
     }
 
-    private void restrictWrapper(String key, final Node cached) {
+    private void removeWrapper(String key, final Node cached) {
         if (cached != null) {
             if (cached instanceof UpdatableCowWrapper) {
                 ((UpdatableCowWrapper) cached).unlinkParentWrapper();
@@ -136,7 +134,7 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
     public Node remove(Object key) {
         this.toOwned();
         if (key instanceof String) {
-            final Node cached = getRestrictedWrapper((String) key);
+            final Node cached = takeWrapper((String) key);
             this.object.remove(key);
             return cached;
         } else {
@@ -149,7 +147,7 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
         this.toOwned();
         for (Entry<? extends String, ? extends Node> e : m.entrySet()) {
             String key = e.getKey();
-            this.getCachedRestrictedWrapper(key);
+            this.removeCachedWrapper(key);
             this.object.put(key, e.getValue());
         }
     }
@@ -159,7 +157,7 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
         this.toOwned();
         if (this.wrapperCache != null) {
             for (String key : this.wrapperCache.keySet()) {
-                this.getCachedRestrictedWrapper(key);
+                this.removeCachedWrapper(key);
                 this.wrapperCache.remove(key);
             }
         }
@@ -204,6 +202,7 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
         @Override
         public boolean add(String e) {
             this.self.toOwned();
+            this.self.removeCachedWrapper(e);
             return this.self.object.keySet().add(e);
         }
 
@@ -211,7 +210,7 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
         public boolean remove(Object o) {
             this.self.toOwned();
             if (o instanceof String) {
-                this.self.getCachedRestrictedWrapper((String) o);
+                this.self.removeCachedWrapper((String) o);
                 if (this.self.object.containsKey(o)) {
                     this.self.object.remove(o);
                     return true;
@@ -238,7 +237,7 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
             Iterator<String> keyIter = this.self.object.keySet().iterator();
             for (String key = keyIter.next(); keyIter.hasNext(); key = keyIter.next()) {
                 if (!c.contains(key)) {
-                    this.self.getCachedRestrictedWrapper(key);
+                    this.self.removeCachedWrapper(key);
                     this.self.wrapperCache.remove(key);
                     keyIter.remove();
                     modified = true;
@@ -254,7 +253,7 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
             Iterator<String> keyIter = this.self.object.keySet().iterator();
             for (String key = keyIter.next(); keyIter.hasNext(); key = keyIter.next()) {
                 if (c.contains(key)) {
-                    this.self.getCachedRestrictedWrapper(key);
+                    this.self.removeCachedWrapper(key);
                     this.self.wrapperCache.remove(key);
                     keyIter.remove();
                     modified = true;
@@ -385,7 +384,7 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
             for (String key = keys.next(); keys.hasNext(); key = keys.next()) {
                 if (c.contains(this.self.get(key))) {
                     keys.remove();
-                    this.self.getCachedRestrictedWrapper(key);
+                    this.self.removeCachedWrapper(key);
                     this.self.wrapperCache.remove(key);
                     modified = true;
                 }
@@ -401,7 +400,7 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
             for (String key = keys.next(); keys.hasNext(); key = keys.next()) {
                 if (!c.contains(this.self.get(key))) {
                     keys.remove();
-                    this.self.getCachedRestrictedWrapper(key);
+                    this.self.removeCachedWrapper(key);
                     this.self.wrapperCache.remove(key);
                     modified = true;
                 }
@@ -440,10 +439,9 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
     }
 
     @Override
-    protected <C> void updateThisWrapper(Object key, CowWrapper child, C contents) {
-        if (key == AbstractChildCowWrapper.SentinelKeys.METADATA) {
-            super.updateParentWrapper(key, child, contents);
-        }
+    protected void updateThisNode(Object objKey, CowWrapperNode cowChild, Node contents) {
+        // TODO Auto-generated method stub
+
     }
 
 

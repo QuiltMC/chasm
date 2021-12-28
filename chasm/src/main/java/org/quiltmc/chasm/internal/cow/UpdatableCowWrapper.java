@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.quiltmc.chasm.internal.util;
+package org.quiltmc.chasm.internal.cow;
 
 import org.quiltmc.chasm.api.util.CowWrapper;
 
@@ -22,10 +22,12 @@ public interface UpdatableCowWrapper extends CowWrapper {
      *
      * @return
      */
-    <C> boolean updateParentWrapper(Object key, CowWrapper child, C contents);
+    boolean updateParentWrapper(Object key, UpdatableCowWrapper child, Object contents);
 
     boolean unlinkParentWrapper();
 
     boolean checkParentLink(Object o);
+
+    boolean checkKey(Object key);
 
 }

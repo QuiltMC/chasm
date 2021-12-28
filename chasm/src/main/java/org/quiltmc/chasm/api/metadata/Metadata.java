@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.api.metadata;
 
-import org.quiltmc.chasm.internal.util.Copyable;
+import org.quiltmc.chasm.internal.cow.Copyable;
 
 /**
  * {@link org.quiltmc.chasm.api.tree.Node} metadata, capable of being attached to a {@link MapMetadataProvider}.

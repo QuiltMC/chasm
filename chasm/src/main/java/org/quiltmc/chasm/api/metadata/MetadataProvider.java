@@ -3,7 +3,7 @@
  */
 package org.quiltmc.chasm.api.metadata;
 
-import org.quiltmc.chasm.internal.util.Copyable;
+import org.quiltmc.chasm.internal.cow.Copyable;
 
 /**
  *

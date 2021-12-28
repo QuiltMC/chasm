@@ -1,8 +1,8 @@
 package org.quiltmc.chasm.api.tree;
 
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
+import org.quiltmc.chasm.internal.cow.Copyable;
 import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
-import org.quiltmc.chasm.internal.util.Copyable;
 import org.quiltmc.chasm.internal.util.NodeUtils;
 
 /**

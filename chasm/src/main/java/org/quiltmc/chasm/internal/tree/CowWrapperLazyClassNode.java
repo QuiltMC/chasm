@@ -6,7 +6,7 @@ package org.quiltmc.chasm.internal.tree;
 import org.quiltmc.chasm.api.tree.CowWrapperListNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.Node;
-import org.quiltmc.chasm.internal.util.UpdatableCowWrapper;
+import org.quiltmc.chasm.internal.cow.UpdatableCowWrapper;
 
 /**
  *

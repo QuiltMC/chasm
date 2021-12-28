@@ -6,10 +6,9 @@ package org.quiltmc.chasm.api.metadata;
 import java.util.Map;
 
 import org.quiltmc.chasm.api.tree.Node;
-import org.quiltmc.chasm.api.util.CowWrapper;
+import org.quiltmc.chasm.internal.cow.AbstractChildCowWrapper;
+import org.quiltmc.chasm.internal.cow.UpdatableCowWrapper;
 import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
-import org.quiltmc.chasm.internal.util.AbstractChildCowWrapper;
-import org.quiltmc.chasm.internal.util.UpdatableCowWrapper;
 
 /**
  *
@@ -17,7 +16,7 @@ import org.quiltmc.chasm.internal.util.UpdatableCowWrapper;
 public class CowWrapperMetadataProvider extends
         AbstractChildCowWrapper<MetadataProvider, CowWrapperMetadataProvider, UpdatableCowWrapper>
         implements MetadataProvider {
-    private Map<Class<? extends Metadata>, CowWrapperMetadata<? extends Metadata>> metadataWrapperCache;
+    private Map<Class<? extends Metadata>, Metadata> metadataCache;
 
     /**
      * @param metadata
@@ -26,6 +25,7 @@ public class CowWrapperMetadataProvider extends
     public <N extends Node, U extends AbstractCowWrapperNode<N, U>> CowWrapperMetadataProvider(AbstractCowWrapperNode<N, U> parent,
             MetadataProvider metadata, boolean owned) {
         super(parent, AbstractChildCowWrapper.SentinelKeys.METADATA, metadata, owned);
+        metadataCache = null;
     }
 
     /**
@@ -33,26 +33,42 @@ public class CowWrapperMetadataProvider extends
      */
     protected CowWrapperMetadataProvider(CowWrapperMetadataProvider cowWrapperMetadataProvider) {
         super(cowWrapperMetadataProvider);
+        metadataCache = null;
+    }
+
+    public <T extends Metadata> T getCachedWrapper(Class<T> dataClass) {
+        if (this.metadataCache == null) {
+            return null;
+        }
+        return dataClass.cast(this.metadataCache.get(dataClass));
+    }
+
+    public <T extends Metadata> T removeCachedWrapper(Class<T> dataClass) {
+        if (this.metadataCache == null) {
+            return null;
+        }
+        T cached = dataClass.cast(this.metadataCache.remove(dataClass));
+        if (cached instanceof CowWrapperMetadata<?>) {
+            CowWrapperMetadata<?> wrapper = (CowWrapperMetadata<?>) cached;
+            wrapper.unlinkParentWrapper();
+        }
+        return cached;
     }
 
     @Override
     public <T extends Metadata> void put(Class<T> dataClass, T data) {
         this.toOwned();
+        this.removeCachedWrapper(dataClass);
         this.object.put(dataClass, data);
-        this.metadataWrapperCache.put(dataClass, null);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T extends Metadata> T get(Class<T> dataClass) {
-        T metadata = this.object.get(dataClass);
-        if (metadata == null) {
-            return null;
-        }
-        CowWrapperMetadata<? extends Metadata> wrapper = this.metadataWrapperCache.get(dataClass);
-        if (wrapper == null || !wrapper.wrapsObject(metadata) || wrapper.isOwned() == this.isOwned()) {
-            wrapper = (CowWrapperMetadata<? extends Metadata>) metadata.asWrapper(this, dataClass, isOwned());
-            this.metadataWrapperCache.put(dataClass, wrapper);
+        T wrapper = this.getCachedWrapper(dataClass);
+        if (wrapper == null) {
+            T metadata = this.object.get(dataClass);
+            wrapper = metadata.asWrapper(this, dataClass, isOwned());
+            this.metadataCache.put(dataClass, wrapper);
         }
         return dataClass.cast(wrapper);
     }
@@ -66,6 +82,7 @@ public class CowWrapperMetadataProvider extends
     public CowWrapperMetadataProvider deepCopy() {
         CowWrapperMetadataProvider copy = new CowWrapperMetadataProvider(this);
         copy.toShared();
+        copy.toOwned(this.isOwned());
         return copy;
     }
 
@@ -80,7 +97,7 @@ public class CowWrapperMetadataProvider extends
     }
 
     @Override
-    protected <C> void updateThisWrapper(Object objKey, CowWrapper cow, C contents) {
+    protected void updateThisWrapper(Object objKey, UpdatableCowWrapper cow, Object contents) {
         if (!(cow instanceof Metadata)) {
             throw new ClassCastException("Invalid metadata provider child list: " + cow);
         }

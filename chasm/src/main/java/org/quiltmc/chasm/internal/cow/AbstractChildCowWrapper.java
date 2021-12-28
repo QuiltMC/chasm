@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.quiltmc.chasm.internal.util;
+package org.quiltmc.chasm.internal.cow;
 
 public abstract class AbstractChildCowWrapper<T extends Copyable, W extends AbstractChildCowWrapper<T, W, P>, P extends UpdatableCowWrapper>
         extends AbstractCowWrapper<T, W> {
@@ -48,5 +48,10 @@ public abstract class AbstractChildCowWrapper<T extends Copyable, W extends Abst
     @Override
     public boolean checkParentLink(Object o) {
         return this.parent == o;
+    }
+
+    @Override
+    public boolean checkKey(Object objKey) {
+        return this.key == objKey;
     }
 }

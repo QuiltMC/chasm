@@ -3,8 +3,8 @@
  */
 package org.quiltmc.chasm.api.metadata;
 
-import org.quiltmc.chasm.api.util.CowWrapper;
-import org.quiltmc.chasm.internal.util.AbstractChildCowWrapper;
+import org.quiltmc.chasm.internal.cow.AbstractChildCowWrapper;
+import org.quiltmc.chasm.internal.cow.UpdatableCowWrapper;
 
 /**
  * @param <T>
@@ -39,7 +39,7 @@ public abstract class CowWrapperMetadata<T extends Metadata>
     public abstract CowWrapperMetadata<T> deepCopy();
 
     @Override
-    protected <C> void updateThisWrapper(Object key, CowWrapper child, C contents) {
+    protected void updateThisWrapper(Object key, UpdatableCowWrapper child, Object contents) {
         throw new UnsupportedOperationException("Metadata has no children.");
     }
 

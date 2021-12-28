@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.quiltmc.chasm.internal.util;
+package org.quiltmc.chasm.internal.collection;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -15,7 +15,7 @@ import java.util.Set;
 /**
  *
  */
-public class ListWrapperSubList<E, L extends List<E> & RandomAccess> implements List<E>, RandomAccess {
+public class ListWrapperSubList<E, L extends List<E> & RandomAccess> implements List<E>, MixinRandomAccessListImpl<E> {
 
     protected final L list;
     protected int min;
@@ -279,69 +279,68 @@ public class ListWrapperSubList<E, L extends List<E> & RandomAccess> implements 
     }
 
     protected static class ListWrapperSubListWrapperListIterator<E, S extends List<E> & RandomAccess, L extends ListWrapperSubList<E, S>>
-            extends ListWrapperSubListWrapperIterator<E, S, L>
-            implements ListIterator<E> {
-            private final int min;
+            extends ListWrapperSubListWrapperIterator<E, S, L> implements ListIterator<E> {
+        private final int min;
 
-            public ListWrapperSubListWrapperListIterator(L subPath) {
-                super(subPath);
-                this.min = subPath.min;
-            }
-
-            public ListWrapperSubListWrapperListIterator(L subPath, int i) {
-                super(subPath, i);
-                this.min = subPath.min;
-            }
-
-            @Override
-            public boolean hasPrevious() {
-                return this.nextIndex > 0;
-            }
-
-            @Override
-            public E previous() {
-                if (this.nextIndex <= this.min) {
-                    throw new NoSuchElementException();
-                }
-                --this.nextIndex;
-                return this.list.get(this.nextIndex);
-            }
-
-            @Override
-            public int nextIndex() {
-                return this.nextIndex - this.min;
-            }
-
-            @Override
-            public int previousIndex() {
-                return this.nextIndex - this.min - 1;
-            }
-
-            @Override
-            public void remove() {
-                int index = this.previousIndex();
-                if (index < this.min) {
-                    throw new IndexOutOfBoundsException();
-                }
-                this.list.remove(index);
-            }
-
-            @Override
-            public void set(E e) {
-                int index = this.previousIndex();
-                if (index < this.min) {
-                    throw new IndexOutOfBoundsException();
-                }
-                this.list.set(index, e);
-            }
-
-            @Override
-            public void add(E e) {
-                int index = this.nextIndex();
-                this.list.add(index, e);
-            }
-
+        public ListWrapperSubListWrapperListIterator(L subPath) {
+            super(subPath);
+            this.min = subPath.min;
         }
+
+        public ListWrapperSubListWrapperListIterator(L subPath, int i) {
+            super(subPath, i);
+            this.min = subPath.min;
+        }
+
+        @Override
+        public boolean hasPrevious() {
+            return this.nextIndex > 0;
+        }
+
+        @Override
+        public E previous() {
+            if (this.nextIndex <= this.min) {
+                throw new NoSuchElementException();
+            }
+            --this.nextIndex;
+            return this.list.get(this.nextIndex);
+        }
+
+        @Override
+        public int nextIndex() {
+            return this.nextIndex - this.min;
+        }
+
+        @Override
+        public int previousIndex() {
+            return this.nextIndex - this.min - 1;
+        }
+
+        @Override
+        public void remove() {
+            int index = this.previousIndex();
+            if (index < this.min) {
+                throw new IndexOutOfBoundsException();
+            }
+            this.list.remove(index);
+        }
+
+        @Override
+        public void set(E e) {
+            int index = this.previousIndex();
+            if (index < this.min) {
+                throw new IndexOutOfBoundsException();
+            }
+            this.list.set(index, e);
+        }
+
+        @Override
+        public void add(E e) {
+            int index = this.nextIndex();
+            this.list.add(index, e);
+        }
+
+    }
 
     @Override
     public ListIterator<E> listIterator() {
@@ -365,4 +364,13 @@ public class ListWrapperSubList<E, L extends List<E> & RandomAccess> implements 
         return new ListWrapperSubList<>(this, fromIndex, toIndex);
     }
 
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof List<?> && this.listEqualsHelper((List<?>) other);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.listHashcodeHelper();
+    }
 }

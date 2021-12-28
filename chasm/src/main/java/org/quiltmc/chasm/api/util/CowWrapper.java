@@ -3,8 +3,8 @@
  */
 package org.quiltmc.chasm.api.util;
 
-import org.quiltmc.chasm.internal.util.AbstractChildCowWrapper;
-import org.quiltmc.chasm.internal.util.Copyable;
+import org.quiltmc.chasm.internal.cow.AbstractChildCowWrapper;
+import org.quiltmc.chasm.internal.cow.Copyable;
 
 /**
  * A non-generic interface for general Cow methods.

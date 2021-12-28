@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.quiltmc.chasm.internal.util;
+package org.quiltmc.chasm.internal.collection;
 
 import java.util.Iterator;
 import java.util.List;
