@@ -13,7 +13,8 @@ public class CowWrapperValueNode extends AbstractCowWrapperNode<ValueNode, CowWr
      * @param object
      * @param owned
      */
-    protected <P extends Node, W extends AbstractCowWrapperNode<P, W>, K> CowWrapperValueNode(AbstractCowWrapperNode<P, W> parent,
+    protected <P extends Node, W extends AbstractCowWrapperNode<P, W>, K> CowWrapperValueNode(
+            AbstractCowWrapperNode<P, W> parent,
             K key, ValueNode object, boolean owned) {
         super(parent, key, object, owned);
     }
@@ -28,7 +29,8 @@ public class CowWrapperValueNode extends AbstractCowWrapperNode<ValueNode, CowWr
     }
 
     @Override
-    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(AbstractCowWrapperNode<P, W> parent, Object key,
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(AbstractCowWrapperNode<P, W> parent,
+            Object key,
             boolean owned) {
         CowWrapperValueNode copy = new CowWrapperValueNode(parent, key, object, owned);
         copy.toShared();

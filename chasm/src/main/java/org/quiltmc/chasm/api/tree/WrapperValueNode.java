@@ -2,6 +2,7 @@ package org.quiltmc.chasm.api.tree;
 
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
 import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
+import org.quiltmc.chasm.api.metadata.CowWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.MapMetadataProvider;
 
 /**
@@ -120,9 +121,20 @@ public class WrapperValueNode implements ValueNode {
     }
 
     @Override
-    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(AbstractCowWrapperNode<P, W> parent, Object key,
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(AbstractCowWrapperNode<P, W> parent,
+            Object key,
             boolean owned) {
         // Only because of the metadata
         return new CowWrapperValueNode(parent, key, this, owned);
+    }
+
+    @Override
+    public MetadataProvider setMetadata(MetadataProvider other, CowWrapperMetadataProvider container) {
+        if (!container.wrapsObject(this)) {
+            throw new IllegalArgumentException();
+        }
+        MetadataProvider old = this.metadataProvider;
+        this.metadataProvider = other;
+        return old;
     }
 }

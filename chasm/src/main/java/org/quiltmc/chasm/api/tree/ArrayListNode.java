@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
 import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
+import org.quiltmc.chasm.api.metadata.CowWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.MapMetadataProvider;
 
 
@@ -12,7 +13,6 @@ import org.quiltmc.chasm.api.metadata.MapMetadataProvider;
  */
 public class ArrayListNode extends ArrayList<Node> implements ListNode {
     private MetadataProvider metadataProvider = new MapMetadataProvider();
-
 
     @Override
     public ArrayListNode deepCopy() {
@@ -41,8 +41,19 @@ public class ArrayListNode extends ArrayList<Node> implements ListNode {
 
 
     @Override
-    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperListNode asWrapper(AbstractCowWrapperNode<P, W> parent,
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperListNode asWrapper(
+            AbstractCowWrapperNode<P, W> parent,
             Object key, boolean owned) {
         return new CowWrapperListNode(parent, key, this, owned);
+    }
+
+    @Override
+    public MetadataProvider setMetadata(MetadataProvider other, CowWrapperMetadataProvider container) {
+        if (!container.wrapsObject(other)) {
+            throw new IllegalArgumentException();
+        }
+        MetadataProvider old = this.metadataProvider;
+        this.metadataProvider = other;
+        return old;
     }
 }

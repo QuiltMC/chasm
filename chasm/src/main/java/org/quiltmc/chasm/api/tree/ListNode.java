@@ -14,6 +14,7 @@ public interface ListNode extends Node, List<Node> {
     ListNode deepCopy();
 
     @Override
-    <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperListNode asWrapper(AbstractCowWrapperNode<P, W> parent,
+    <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperListNode asWrapper(
+            AbstractCowWrapperNode<P, W> parent,
             Object key, boolean owned);
 }

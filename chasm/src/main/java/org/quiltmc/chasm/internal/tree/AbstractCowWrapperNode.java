@@ -48,27 +48,46 @@ public abstract class AbstractCowWrapperNode<N extends Node, W extends AbstractC
         return this.metadataProviderWrapperCache;
     }
 
+    @Override
+    public MetadataProvider setMetadata(MetadataProvider other, CowWrapperMetadataProvider container) {
+        if (!container.wrapsObject(this)) {
+            throw new IllegalArgumentException();
+        }
+        this.toOwned();
+        MetadataProvider old = this.getMetadata();
+        if (other instanceof CowWrapperMetadataProvider) {
+            throw new IllegalArgumentException(
+                    "Will not put the wrapped metadata provider in this wrapper's base node; Call #updateThisParent() instead.");
+        }
+        this.object.setMetadata(other, container);
+        return old;
+    }
+
     protected abstract void updateThisNode(Object objKey, CowWrapperNode cowChild, Node contents);
 
     @Override
     protected void updateThisWrapper(Object objKey, UpdatableCowWrapper cowChild, Object objectContents) {
         if (objKey == AbstractChildCowWrapper.SentinelKeys.METADATA) {
-            if (!(cowChild instanceof CowWrapperMetadataProvider) || !(objectContents instanceof MetadataProvider)) {
-                throw new IllegalArgumentException("Wrong metadata update typing.");
-            }
-            CowWrapperMetadataProvider child = (CowWrapperMetadataProvider) cowChild;
-            MetadataProvider childContents = (MetadataProvider) objectContents;
-            MetadataProvider sourced = this.object.getMetadata();
-            if (this.metadataProviderWrapperCache == null) {
-                this.metadataProviderWrapperCache = child;
-                if (childContents != sourced) {
-                    this.toOwned();
-                    this.object.getMetadata();
-                }
-            }
-            return;
+            updateMetadata(cowChild, objectContents);
         }
         this.updateThisNode(objKey, (CowWrapperNode) cowChild, (Node) objectContents);
+    }
+
+    private void updateMetadata(UpdatableCowWrapper cowChild, Object objectContents) {
+        if (!(cowChild instanceof CowWrapperMetadataProvider) || !(objectContents instanceof MetadataProvider)) {
+            throw new IllegalArgumentException("Wrong metadata update typing.");
+        }
+        CowWrapperMetadataProvider child = (CowWrapperMetadataProvider) cowChild;
+        MetadataProvider childContents = (MetadataProvider) objectContents;
+        MetadataProvider sourced = this.object.getMetadata();
+        if (this.metadataProviderWrapperCache == null) {
+            this.metadataProviderWrapperCache = child;
+            if (childContents != sourced) {
+                this.toOwned();
+                sourced = this.object.getMetadata();
+                this.object.setMetadata(childContents, child);
+            }
+        }
     }
 
 }

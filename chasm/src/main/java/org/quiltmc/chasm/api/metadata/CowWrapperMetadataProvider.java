@@ -22,7 +22,8 @@ public class CowWrapperMetadataProvider extends
      * @param metadata
      * @param owned
      */
-    public <N extends Node, U extends AbstractCowWrapperNode<N, U>> CowWrapperMetadataProvider(AbstractCowWrapperNode<N, U> parent,
+    public <N extends Node, U extends AbstractCowWrapperNode<N, U>> CowWrapperMetadataProvider(
+            AbstractCowWrapperNode<N, U> parent,
             MetadataProvider metadata, boolean owned) {
         super(parent, AbstractChildCowWrapper.SentinelKeys.METADATA, metadata, owned);
         metadataCache = null;

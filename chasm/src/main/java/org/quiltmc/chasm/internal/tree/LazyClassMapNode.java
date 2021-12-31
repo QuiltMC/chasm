@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.objectweb.asm.ClassReader;
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
+import org.quiltmc.chasm.api.metadata.CowWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.MapMetadataProvider;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
@@ -62,6 +63,16 @@ public class LazyClassMapNode extends AbstractMap<String, Node> implements MapNo
     @Override
     public MetadataProvider getMetadata() {
         return metadataProvider;
+    }
+
+    @Override
+    public MetadataProvider setMetadata(MetadataProvider other, CowWrapperMetadataProvider container) {
+        if (!container.wrapsObject(other)) {
+            throw new IllegalArgumentException();
+        }
+        MetadataProvider old = this.metadataProvider;
+        this.metadataProvider = other;
+        return old;
     }
 
     @Override
@@ -127,7 +138,8 @@ public class LazyClassMapNode extends AbstractMap<String, Node> implements MapNo
     }
 
     @Override
-    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(AbstractCowWrapperNode<P, W> parent, Object key,
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(AbstractCowWrapperNode<P, W> parent,
+            Object key,
             boolean owned) {
         return new CowWrapperLazyClassNode(parent, key, this, owned);
     }

@@ -26,7 +26,8 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
      * @param object
      * @param owned
      */
-    public <P extends Node, W extends AbstractCowWrapperNode<P, W>, K> CowWrapperMapNode(AbstractCowWrapperNode<P, W> parent, K key,
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>, K> CowWrapperMapNode(
+            AbstractCowWrapperNode<P, W> parent, K key,
             MapNode object, boolean owned) {
         super(parent, key, object, owned);
         this.wrapperCache = null;
@@ -50,7 +51,8 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
     }
 
     @Override
-    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperMapNode asWrapper(AbstractCowWrapperNode<P, W> parent,
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperMapNode asWrapper(
+            AbstractCowWrapperNode<P, W> parent,
             Object key,
             boolean owned) {
         CowWrapperMapNode copy = new CowWrapperMapNode(parent, key, object, owned);

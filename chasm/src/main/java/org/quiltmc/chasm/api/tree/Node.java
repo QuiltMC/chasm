@@ -1,5 +1,7 @@
 package org.quiltmc.chasm.api.tree;
 
+import org.jetbrains.annotations.ApiStatus;
+import org.quiltmc.chasm.api.metadata.CowWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
 import org.quiltmc.chasm.internal.cow.Copyable;
 import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
@@ -29,6 +31,18 @@ public interface Node extends Copyable {
      * @return The {@code MetadataProvider} of this node.
      */
     MetadataProvider getMetadata();
+
+    /**
+     * Sets the {@link MetadataProvider} of this node.
+     *
+     * @param other The new {@code MetadataProvider}
+     * @param wrapper The {@link CowWrapperMetadataProvider} that wraps the given metadata provider, to discourage
+     *            unauthorized calls.
+     *
+     * @return The old {@code MetadataProvider}
+     */
+    @ApiStatus.Internal
+    MetadataProvider setMetadata(MetadataProvider other, CowWrapperMetadataProvider wrapper);
 
     /**
      * Casts the passed {@link Node} as a {@link MapNode}.

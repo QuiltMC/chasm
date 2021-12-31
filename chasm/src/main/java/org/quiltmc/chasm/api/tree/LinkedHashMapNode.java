@@ -6,6 +6,7 @@ import java.util.Map;
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
 import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
 import org.quiltmc.chasm.internal.tree.CowWrapperMapNode;
+import org.quiltmc.chasm.api.metadata.CowWrapperMetadataProvider;
 import org.quiltmc.chasm.api.metadata.MapMetadataProvider;
 
 /**
@@ -39,11 +40,20 @@ public class LinkedHashMapNode extends LinkedHashMap<String, Node> implements Ma
     }
 
     @Override
-    public MetadataProvider getMetadata() { return metadataProvider;
+    public MetadataProvider getMetadata() { return metadataProvider; }
+
+    @Override
+    public MetadataProvider setMetadata(MetadataProvider other, CowWrapperMetadataProvider container) {
+        if (!container.wrapsObject(other)) {
+            throw new IllegalArgumentException();
+        }
+        MetadataProvider old = this.metadataProvider;
+        this.metadataProvider = other;
+        return old;
     }
 
     @Override
-    public <P extends org.quiltmc.chasm.api.tree.Node, W extends AbstractCowWrapperNode<P, W>> org.quiltmc.chasm.api.tree.Node asWrapper(
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(
             AbstractCowWrapperNode<P, W> parent, Object key, boolean owned) {
         return new CowWrapperMapNode(parent, key, this, owned);
     }
