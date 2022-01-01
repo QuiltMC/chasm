@@ -3,6 +3,8 @@
  */
 package org.quiltmc.chasm.internal.cow;
 
+import org.quiltmc.chasm.api.util.CowWrapper;
+
 /**
  * Wraps an object in a lockable COW wrapper that only copies to unlock.
  *
@@ -141,20 +143,104 @@ public abstract class AbstractCowWrapper<T extends Copyable, W extends AbstractC
         return this.object == o;
     }
 
-    @Override
-    public final boolean updateParentWrapper(Object key, UpdatableCowWrapper child, Object contents) {
-        final boolean oldState = this.isOwned();
-        if (!child.wrapsObject(contents) || !child.checkParentLink(this) || !child.checkKey(key)) {
-            throw new IllegalArgumentException("Wrong child object");
-        }
-        this.updateThisWrapper(key, child, contents);
-        return this.isOwned() != oldState;
-    }
+    /**
+     * Retrieves the cached {@link CowWrapper} corresponding to the passed key, or {@code null}.
+     *
+     * @param key The key of the cached child wrapper to fetch.
+     *
+     * @return The cached cow wrapper with the given key.
+     *
+     * @exception ClassCastException If the given key is not of the required type.
+     */
+    protected abstract CowWrapper getCachedCowWrapper(Object key);
 
     /**
+     * Sets the cached {@link CowWrapper} corresponding to the passed key.
+     *
+     * @param key The key to insert the cached child wrapper under.
+     * @param wrapper The old cached cow wrapper, or {@code null} if no wrapper was cached.
+     *
+     * @return The old cached {@code CowWrapper} with the given key.
+     *
+     * @exception ClassCastException If the given key is not the correct type, or the wrapper is not the correct type.
+     */
+    protected abstract CowWrapper setCachedCowWrapper(Object key, CowWrapper wrapper);
+
+    /**
+     * Gets the contained Object's child corresponding to the passed key.
+     *
+     * @param key The key to retrieve the contained Object's child.
+     *
+     * @return The child of the contained Object with the given key.
+     *
+     * @exception ClassCastException If the given key is not of the expected type.
+     */
+    protected abstract Object getChildObject(Object key);
+
+    /**
+     * Sets the contained Object's child corresponding to the passed key.
+     *
+     * @param key The key specifies which child to set.
+     * @param value The old contained Object's child with the given key.
+     *
+     * @return The old child of the contained Object with the passed key.
+     */
+    protected abstract Object setChildObject(Object key, Object value);
+
+    /**
+     * Updates this wrapper as the parent of the passed wrapper.
+     *
+     * <p>If the passed wrapper does not match the current child wrapper of {@code this}, clears the passed child
+     * wrapper's parent link to this wrapper and does not change the state of this wrapper.
+     *
+     * <p>If the passed wrapper is in the same {@code CowState} as this wrapper but has a different contained object,
+     * updates this wrapper's contained object's child to match the passed child's contained object.
+     * If the passed wrapper is in the same {@code CowState} and contains the same object as this wrapper's contained
+     * object's child object with the given key, does not change the state of this wrapper.
+     *
+     * <p>If the passed child object is in a different {@code CowState} from this wrapper, sets the ownership state of
+     * this wrapper to match the child wrapper's.
+     *
      * @param key
      * @param child
      * @param contents
+     *
+     * @return Whether the state of this {@link CowWrapper} changed after this call.
+     *
+     * @exception IllegalArgumentException if the passed child does not contain the passed contents or the passed
+     *                child's parent wrapper is not {@code this}.
+     * @exception ClassCastException if the passed key, child, or contents are not the type expected by the implementing
+     *                subclass.
      */
-    protected abstract void updateThisWrapper(Object key, UpdatableCowWrapper child, Object contents);
+    @Override
+    public final boolean updateWrapper(Object key, UpdatableCowWrapper child, Object contents) {
+        if (!child.wrapsObject(contents) || !child.checkParentLink(this) || !child.checkKey(key)) {
+            throw new IllegalArgumentException("Invalid child object");
+        }
+        CowWrapper childWrapper = getCachedCowWrapper(key);
+        if (childWrapper != child) {
+            // Leftover parent link, so sever it
+            child.unlinkParentWrapper();
+            return false;
+        }
+        Object childObject = getChildObject(key);
+        if (this.isOwned() == child.isOwned()) {
+            if (contents != childObject) {
+                this.setChildObject(key, contents);
+                return true;
+            } else {
+                // The child wrapper matches this cached wrapper perfectly
+                return false;
+            }
+        } else { // this.isOwned != child.isOwned()
+            if (child.isOwned()) {
+                this.toOwned();
+                this.setChildObject(key, contents);
+                this.setCachedCowWrapper(key, child);
+            } else {
+                this.toShared();
+            }
+            return true;
+        }
+    }
 }

@@ -1,14 +1,14 @@
-/**
- *
- */
+
 package org.quiltmc.chasm.api.metadata;
 
+import org.quiltmc.chasm.api.util.CowWrapper;
 import org.quiltmc.chasm.internal.cow.AbstractChildCowWrapper;
 import org.quiltmc.chasm.internal.cow.UpdatableCowWrapper;
 
 /**
- * @param <T>
+ * A read-write locking lazy {@link CowWrapper} for {@link Metadata}.
  *
+ * @param <T> The type of metadata wrapped by this metadata wrapper.
  */
 public abstract class CowWrapperMetadata<T extends Metadata>
         extends AbstractChildCowWrapper<T, CowWrapperMetadata<T>, CowWrapperMetadataProvider>
