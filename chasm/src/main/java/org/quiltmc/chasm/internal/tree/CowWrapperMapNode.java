@@ -19,7 +19,7 @@ import org.quiltmc.chasm.internal.cow.UpdatableCowWrapper;
  *
  */
 public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrapperMapNode> implements MapNode {
-    private Map<String, Node> wrapperCache;
+    private Map<String, CowWrapperNode> wrapperCache;
     /**
      * @param parent
      * @param key
@@ -441,10 +441,38 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
     }
 
     @Override
-    protected void updateThisNode(Object objKey, CowWrapperNode cowChild, Node contents) {
-        // TODO Auto-generated method stub
-
+    protected CowWrapperNode getCachedCowWrapperNode(Object key) {
+        if (this.wrapperCache == null) {
+            return null;
+        }
+        return this.wrapperCache.get(key);
     }
 
+    @Override
+    protected CowWrapperNode setCachedCowWrapperNode(Object key, CowWrapperNode wrapper) {
+        if (this.wrapperCache == null) {
+            this.wrapperCache = new HashMap<>();
+        }
+        return this.wrapperCache.put((String) key, wrapper);
+    }
+
+    @Override
+    protected boolean clearCachedCowWrapperNodes() {
+        if (this.wrapperCache == null || this.wrapperCache.isEmpty()) {
+            return false;
+        }
+        this.wrapperCache.clear();
+        return true;
+    }
+
+    @Override
+    protected Node getChildNode(Object key) {
+        return this.object.get(key);
+    }
+
+    @Override
+    protected Node setChildNode(Object key, Node value) {
+        return this.object.put((String) key, value);
+    }
 
 }

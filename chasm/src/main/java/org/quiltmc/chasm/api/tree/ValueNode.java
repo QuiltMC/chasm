@@ -4,6 +4,7 @@
 package org.quiltmc.chasm.api.tree;
 
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
+import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
 
 /**
  *
@@ -63,5 +64,9 @@ public interface ValueNode extends Node {
 
     @Override
     MetadataProvider getMetadata();
+
+    @Override
+    <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperValueNode asWrapper(
+            AbstractCowWrapperNode<P, W> parent, Object key, boolean owned);
 
 }

@@ -167,6 +167,28 @@ public abstract class AbstractCowWrapper<T extends Copyable, W extends AbstractC
     protected abstract CowWrapper setCachedCowWrapper(Object key, CowWrapper wrapper);
 
     /**
+     * Removes all cached {@link CowWrapper}s of this wrapper.
+     *
+     * @return Whether any {@code CowWrapper}s were removed by this call.
+     */
+    protected abstract boolean clearCachedCowWrappers();
+
+    /**
+     * Clears any parent of the passed {@link CowWrapper}.
+     *
+     * @param cached The {@code CowWrapper} to clear the parent of.
+     *
+     * @return Whether the passed {@code CowWrapper} had a parent and was unlinked.
+     */
+    protected static final boolean clearCowWrapperParent(CowWrapper cached) {
+        if (!(cached instanceof ChildCowWrapper)) {
+            return false;
+        }
+        ChildCowWrapper cachedWrapper = (ChildCowWrapper) cached;
+        return cachedWrapper.unlinkParentWrapper();
+    }
+
+    /**
      * Gets the contained Object's child corresponding to the passed key.
      *
      * @param key The key to retrieve the contained Object's child.

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.quiltmc.chasm.internal.collection.MixinRandomAccessListImpl;
+import org.quiltmc.chasm.internal.cow.AbstractCowWrapper;
 import org.quiltmc.chasm.internal.cow.UpdatableCowWrapper;
 import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
 
@@ -15,7 +16,7 @@ import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
  */
 public class CowWrapperListNode extends AbstractCowWrapperNode<ArrayListNode, CowWrapperListNode>
         implements ListNode, MixinRandomAccessListImpl<Node> {
-    private List<Node> listCache = null;
+    private List<CowWrapperNode> listCache = null;
     private int hashCode = System.identityHashCode(this);
 
     /**
@@ -32,26 +33,26 @@ public class CowWrapperListNode extends AbstractCowWrapperNode<ArrayListNode, Co
         super(cowWrapperListNode);
     }
 
-    private void setCache(int i, Node toCache) {
+    private CowWrapperNode setCache(int i, CowWrapperNode toCache) {
         if (this.listCache == null) {
             this.listCache = new ArrayList<>();
         }
         if (this.listCache.size() <= i) {
             expandCache(i + 1);
         }
-        this.set(i, toCache);
+        return this.listCache.set(i, toCache);
     }
 
     private void expandCache(int size) {
         if (this.listCache instanceof ArrayList<?>) {
-            ((ArrayList<Node>) this.listCache).ensureCapacity(size);
+            ((ArrayList<CowWrapperNode>) this.listCache).ensureCapacity(size);
         }
         for (int j = size - this.listCache.size(); j > 0; --j) {
             this.listCache.add(null);
         }
     }
 
-    private Node getCachedWrapper(int i) {
+    private CowWrapperNode getCachedWrapper(int i) {
         if (this.listCache == null || this.listCache.size() <= i) {
             return null;
         }
@@ -85,20 +86,15 @@ public class CowWrapperListNode extends AbstractCowWrapperNode<ArrayListNode, Co
         return cached;
     }
 
-    private void clearCachedWrappers() {
+    private boolean clearCachedWrappers() {
         if (this.listCache == null || this.listCache.isEmpty()) {
-            return;
+            return false;
         }
         for (int i = this.listCache.size() - 1; i >= 0; --i) {
-            unsafeRemoveCachedWrapper(i);
+            AbstractCowWrapper.clearCowWrapperParent(this.listCache.get(i));
         }
-    }
-
-    private void unsafeRemoveCachedWrapper(int i) {
-        Node cached = this.listCache.remove(i);
-        if (cached instanceof UpdatableCowWrapper) {
-            ((UpdatableCowWrapper) cached).unlinkParentWrapper();
-        }
+        this.listCache.clear();
+        return true;
     }
 
     @Override
@@ -181,7 +177,7 @@ public class CowWrapperListNode extends AbstractCowWrapperNode<ArrayListNode, Co
     }
 
     public Node get(Integer i) {
-        Node node = this.getCachedWrapper(i);
+        CowWrapperNode node = this.getCachedWrapper(i);
         if (node == null) {
             node = this.object.get(i).asWrapper(this, i, this.isOwned());
             this.setCache(i, node);
@@ -191,7 +187,7 @@ public class CowWrapperListNode extends AbstractCowWrapperNode<ArrayListNode, Co
 
     @Override
     public Node get(int i) {
-        Node node = this.getCachedWrapper(i);
+        CowWrapperNode node = this.getCachedWrapper(i);
         if (node == null) {
             node = this.object.get(i).asWrapper(this, i, this.isOwned());
             this.setCache(i, node);
@@ -273,26 +269,6 @@ public class CowWrapperListNode extends AbstractCowWrapperNode<ArrayListNode, Co
     }
 
     @Override
-    protected void updateThisNode(Object key, CowWrapperNode child, Node contents) {
-        final Integer i = (Integer) key;
-        boolean wasOwned = this.isOwned();
-        this.toOwned();
-        final Node cached = this.getCachedWrapper(i);
-        if (cached == null) {
-            throw new IndexOutOfBoundsException("No cached child wrapper at index " + i);
-        }
-
-        final Node wrapper = this.listCache.get(i);
-        if (wrapper == child) {
-            return;
-        }
-        this.setCache(i, child);
-        this.object.set(i, contents);
-        this.hashCode = System.identityHashCode(this);
-        this.toOwned(wasOwned);
-    }
-
-    @Override
     public boolean equals(Object other) {
         return other instanceof List<?> && this.listEqualsHelper((List<?>) other);
     }
@@ -307,6 +283,34 @@ public class CowWrapperListNode extends AbstractCowWrapperNode<ArrayListNode, Co
             this.hashCode = code;
         }
         return this.hashCode;
+    }
+
+    @Override
+    protected CowWrapperNode getCachedCowWrapperNode(Object key) {
+        if (this.listCache == null) {
+            return null;
+        }
+        return getCachedWrapper((Integer) key);
+    }
+
+    @Override
+    protected CowWrapperNode setCachedCowWrapperNode(Object key, CowWrapperNode wrapper) {
+        return this.setCache((Integer) key, wrapper);
+    }
+
+    @Override
+    protected boolean clearCachedCowWrapperNodes() {
+        return this.clearCachedWrappers();
+    }
+
+    @Override
+    protected Node getChildNode(Object key) {
+        return this.object.get((Integer) key);
+    }
+
+    @Override
+    protected Node setChildNode(Object key, Node value) {
+        return this.object.set((Integer) key, value);
     }
 
 }

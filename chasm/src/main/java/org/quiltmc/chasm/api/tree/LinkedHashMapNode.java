@@ -53,7 +53,7 @@ public class LinkedHashMapNode extends LinkedHashMap<String, Node> implements Ma
     }
 
     @Override
-    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperMapNode asWrapper(
             AbstractCowWrapperNode<P, W> parent, Object key, boolean owned) {
         return new CowWrapperMapNode(parent, key, this, owned);
     }

@@ -3,6 +3,7 @@
  */
 package org.quiltmc.chasm.api.tree;
 
+import org.quiltmc.chasm.api.util.CowWrapper;
 import org.quiltmc.chasm.internal.tree.AbstractCowWrapperNode;
 
 public class CowWrapperValueNode extends AbstractCowWrapperNode<ValueNode, CowWrapperValueNode> implements ValueNode {
@@ -29,9 +30,8 @@ public class CowWrapperValueNode extends AbstractCowWrapperNode<ValueNode, CowWr
     }
 
     @Override
-    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(AbstractCowWrapperNode<P, W> parent,
-            Object key,
-            boolean owned) {
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperValueNode asWrapper(
+            AbstractCowWrapperNode<P, W> parent, Object key, boolean owned) {
         CowWrapperValueNode copy = new CowWrapperValueNode(parent, key, object, owned);
         copy.toShared();
         copy.toOwned(owned);
@@ -39,8 +39,7 @@ public class CowWrapperValueNode extends AbstractCowWrapperNode<ValueNode, CowWr
     }
 
     @Override
-    public Object getValue() { return this.object.getValue();
-    }
+    public Object getValue() { return this.object.getValue(); }
 
     @Override
     public <T> T getValueAs(Class<T> type) {
@@ -72,9 +71,33 @@ public class CowWrapperValueNode extends AbstractCowWrapperNode<ValueNode, CowWr
         return copy;
     }
 
+    private static final <T> T throwUnsupportedOperation() {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
-    protected void updateThisNode(Object key, CowWrapperNode child, Node contents) {
-        throw new UnsupportedOperationException("CowWrapperValueNodes have no children.");
+    protected CowWrapperNode getCachedCowWrapperNode(Object key) {
+        return null;
+    }
+
+    @Override
+    protected CowWrapper setCachedCowWrapperNode(Object key, CowWrapperNode wrapper) {
+        return throwUnsupportedOperation();
+    }
+
+    @Override
+    protected boolean clearCachedCowWrapperNodes() {
+        return throwUnsupportedOperation();
+    }
+
+    @Override
+    protected Node getChildNode(Object key) {
+        return throwUnsupportedOperation();
+    }
+
+    @Override
+    protected Node setChildNode(Object key, Node value) {
+        return throwUnsupportedOperation();
     }
 
 

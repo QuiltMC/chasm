@@ -11,7 +11,6 @@ import org.quiltmc.chasm.api.metadata.Metadata;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.internal.collection.MixinRandomAccessListImpl;
 import org.quiltmc.chasm.internal.collection.ReadOnlyListWrapperIterator;
-import org.quiltmc.chasm.internal.cow.UpdatableCowWrapper;
 import org.quiltmc.chasm.internal.metadata.ListPathMetadata.Entry;
 
 /**
@@ -191,17 +190,6 @@ public class CowWrapperPathMetadata extends CowWrapperMetadata<ListPathMetadata>
     @Override
     public Node resolve(Node root) {
         return this.object.resolve(root);
-    }
-
-    @Override
-    protected void updateThisWrapper(Object objKey, UpdatableCowWrapper child, Object objContents) {
-        int key = (Integer) objKey;
-        Entry current = this.get(key);
-        Entry contents = (Entry) objContents;
-        if (contents != current || child.isOwned() != this.isOwned()) {
-            this.set(key, contents);
-            this.toOwned(child.isOwned());
-        }
     }
 
     @Override

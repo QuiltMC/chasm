@@ -110,7 +110,7 @@ public interface Node extends Copyable {
         throw NodeUtils.createWrongTypeException(node, "WrapperValueNode");
     }
 
-    <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(AbstractCowWrapperNode<P, W> parent, Object key,
-            boolean owned);
+    <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperNode asWrapper(
+            AbstractCowWrapperNode<P, W> parent, Object key, boolean owned);
 
 }

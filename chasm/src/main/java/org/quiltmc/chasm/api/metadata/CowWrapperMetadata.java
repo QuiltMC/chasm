@@ -3,7 +3,6 @@ package org.quiltmc.chasm.api.metadata;
 
 import org.quiltmc.chasm.api.util.CowWrapper;
 import org.quiltmc.chasm.internal.cow.AbstractChildCowWrapper;
-import org.quiltmc.chasm.internal.cow.UpdatableCowWrapper;
 
 /**
  * A read-write locking lazy {@link CowWrapper} for {@link Metadata}.
@@ -39,11 +38,34 @@ public abstract class CowWrapperMetadata<T extends Metadata>
     public abstract CowWrapperMetadata<T> deepCopy();
 
     @Override
-    protected void updateThisWrapper(Object key, UpdatableCowWrapper child, Object contents) {
-        throw new UnsupportedOperationException("Metadata has no children.");
+    public abstract <M extends Metadata> M asWrapper(CowWrapperMetadataProvider parent, Class<M> key, boolean owned);
+
+    @Override
+    protected final CowWrapper getCachedCowWrapper(Object key) {
+        return null;
     }
 
     @Override
-    public abstract <T extends Metadata> T asWrapper(CowWrapperMetadataProvider parent, Class<T> key, boolean owned);
+    protected final CowWrapper setCachedCowWrapper(Object key, CowWrapper wrapper) {
+        return throwUnsupportedOperation();
+    }
 
+    @Override
+    protected final boolean clearCachedCowWrappers() {
+        return false;
+    }
+
+    @Override
+    protected final Object getChildObject(Object key) {
+        return throwUnsupportedOperation();
+    }
+
+    @Override
+    protected final Object setChildObject(Object key, Object value) {
+        return throwUnsupportedOperation();
+    }
+
+    private static final <T> T throwUnsupportedOperation() {
+        throw new UnsupportedOperationException();
+    }
 }

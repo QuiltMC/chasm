@@ -121,9 +121,8 @@ public class WrapperValueNode implements ValueNode {
     }
 
     @Override
-    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(AbstractCowWrapperNode<P, W> parent,
-            Object key,
-            boolean owned) {
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperValueNode asWrapper(
+            AbstractCowWrapperNode<P, W> parent, Object key, boolean owned) {
         // Only because of the metadata
         return new CowWrapperValueNode(parent, key, this, owned);
     }

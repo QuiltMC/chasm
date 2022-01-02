@@ -27,4 +27,7 @@ public interface LazyClassNode extends MapNode {
     @Override
     LazyClassNode shallowCopy();
 
+    @Override
+    <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperLazyClassNode asWrapper(
+            AbstractCowWrapperNode<P, W> parent, Object key, boolean owned);
 }

@@ -19,7 +19,7 @@ import org.quiltmc.chasm.internal.metadata.ListPathMetadata;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.internal.util.PathInitializer;
 
-public class LazyClassMapNode extends AbstractMap<String, Node> implements MapNode, LazyClassNode {
+public class LazyClassMapNode extends AbstractMap<String, Node> implements LazyClassNode {
     private final ClassReader classReader;
     private final MapNode nonLazyChildren;
     private MetadataProvider metadataProvider = new MapMetadataProvider();
@@ -138,9 +138,8 @@ public class LazyClassMapNode extends AbstractMap<String, Node> implements MapNo
     }
 
     @Override
-    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> Node asWrapper(AbstractCowWrapperNode<P, W> parent,
-            Object key,
-            boolean owned) {
+    public <P extends Node, W extends AbstractCowWrapperNode<P, W>> CowWrapperLazyClassNode asWrapper(
+            AbstractCowWrapperNode<P, W> parent, Object key, boolean owned) {
         return new CowWrapperLazyClassNode(parent, key, this, owned);
     }
 }

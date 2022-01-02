@@ -10,6 +10,7 @@ import org.quiltmc.chasm.internal.tree.LazyClassNode;
 
 public abstract class PathInitializer {
     private PathInitializer() {
+        throw new UnsupportedOperationException();
     }
 
     public static void initialize(Node root, PathMetadata path) {
