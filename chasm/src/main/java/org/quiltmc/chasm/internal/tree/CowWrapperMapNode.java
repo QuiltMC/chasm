@@ -19,7 +19,11 @@ import org.quiltmc.chasm.internal.cow.UpdatableCowWrapper;
  *
  */
 public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrapperMapNode> implements MapNode {
+
     private Map<String, CowWrapperNode> wrapperCache;
+    private CowWrapperMapNodeKeySet keySet = null;
+    private CowWrapperMapNodeValueCollection valueCollection = null;
+    private CowWrapperMapNodeEntrySet entrySet = null;
     /**
      * @param parent
      * @param key
@@ -34,7 +38,9 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
     }
 
     /**
-     * @param cowWrapperMapNode
+     * Constructs a shallow copy of the passed map node wrapper.
+     *
+     * @param cowWrapperMapNode The map node wrapper to copy.
      */
     public CowWrapperMapNode(CowWrapperMapNode cowWrapperMapNode) {
         super(cowWrapperMapNode);
@@ -55,8 +61,10 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
             AbstractCowWrapperNode<P, W> parent,
             Object key,
             boolean owned) {
-        CowWrapperMapNode copy = new CowWrapperMapNode(parent, key, object, owned);
-        copy.toOwned(this.isOwned());
+        if (this.checkParentLink(parent) && this.checkKey(key) && this.isOwned() == owned) {
+            return this;
+        }
+        CowWrapperMapNode copy = new CowWrapperMapNode(parent, key, object, this.isOwned());
         copy.toOwned(owned);
         return copy;
     }
@@ -132,6 +140,16 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
         }
     }
 
+    private void requireFullyGeneratedCache() {
+        if (this.wrapperCache == null || this.wrapperCache.size() < this.object.size()) {
+            for (String str : this.object.keySet()) {
+                if (this.get(str) == null) {
+                    throw new IllegalArgumentException(str);
+                }
+            }
+        }
+    }
+
     @Override
     public Node remove(Object key) {
         this.toOwned();
@@ -168,6 +186,7 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
 
     private static final class CowWrapperMapNodeKeySet implements Set<String> {
         private final CowWrapperMapNode self;
+        private ReadOnlyIteratorWrapper<String> iterator = null;
 
         public CowWrapperMapNodeKeySet(CowWrapperMapNode self) {
             this.self = self;
@@ -188,7 +207,10 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
 
         @Override
         public Iterator<String> iterator() {
-            return new ReadOnlyIteratorWrapper<>(this.self.object.keySet().iterator());
+            if (this.iterator == null) {
+                this.iterator = new ReadOnlyIteratorWrapper<>(this.self.object.keySet().iterator());
+            }
+            return this.iterator;
         }
 
         @Override
@@ -273,11 +295,15 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
 
     @Override
     public Set<String> keySet() {
-        return new CowWrapperMapNodeKeySet(this);
+        if (this.keySet == null) {
+            this.keySet = new CowWrapperMapNodeKeySet(this);
+        }
+        return this.keySet;
     }
 
     private static final class CowWrapperMapNodeValueCollection implements Collection<Node> {
         private CowWrapperMapNode self;
+        private CowWrapperMapNodeValueCollectionIterator iterator = null;
 
         public CowWrapperMapNodeValueCollection(CowWrapperMapNode self) {
             this.self = self;
@@ -289,8 +315,7 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
         }
 
         @Override
-        public boolean isEmpty() { return this.self.object.isEmpty();
-        }
+        public boolean isEmpty() { return this.self.object.isEmpty(); }
 
         @Override
         public boolean contains(Object o) {
@@ -320,33 +345,28 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
 
         @Override
         public Iterator<Node> iterator() {
-            return new CowWrapperMapNodeValueCollectionIterator(this.self);
+            if (this.iterator == null) {
+                this.iterator = new CowWrapperMapNodeValueCollectionIterator(this.self);
+            }
+            return this.iterator;
         }
 
-        private void requireFullyGeneratedCache() {
-            if (this.self.wrapperCache == null || this.self.wrapperCache.size() < this.self.object.size()) {
-                for (String str : this.self.object.keySet()) {
-                    if (this.self.get(str) == null) {
-                        throw new RuntimeException();
-                    }
-                }
-            }
-        }
 
         @Override
         public Object[] toArray() {
-            this.requireFullyGeneratedCache();
+            this.self.requireFullyGeneratedCache();
             return this.self.wrapperCache.values().toArray();
         }
 
         @Override
         public <T> T[] toArray(T[] a) {
-            this.requireFullyGeneratedCache();
+            this.self.requireFullyGeneratedCache();
             return this.self.wrapperCache.values().toArray(a);
         }
 
         @Override
         public boolean add(Node e) {
+            // What would the key even be?
             throw new UnsupportedOperationException();
         }
 
@@ -358,13 +378,6 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
                     return true;
                 }
             }
-//            // This loop will allocate wrappers for every value, in case its equals is different
-//            for (String key : this.self.object.keySet()) {
-//                if (this.self.get(key).equals(o)) {
-//                    this.self.remove(key);
-//                    return true;
-//                }
-//            }
             return false;
         }
 
@@ -375,6 +388,7 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
 
         @Override
         public boolean addAll(Collection<? extends Node> c) {
+            // what would the DIFFERENT keys be?
             throw new UnsupportedOperationException();
         }
 
@@ -418,13 +432,236 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
 
     @Override
     public Collection<Node> values() {
-        return new CowWrapperMapNodeValueCollection(this);
+        if (this.valueCollection == null) {
+            this.valueCollection = new CowWrapperMapNodeValueCollection(this);
+        }
+        return this.valueCollection;
+    }
+
+    private static final class CowWrapperMapNodeEntry implements Entry<String, Node> {
+        private CowWrapperMapNode parent;
+        private String key;
+
+        CowWrapperMapNodeEntry(CowWrapperMapNode parent, String key) {
+            this.parent = parent;
+            this.key = key;
+        }
+
+        @Override
+        public String getKey() { return key; }
+
+        @Override
+        public Node getValue() { return this.parent.get(key); }
+
+        @Override
+        public Node setValue(Node value) {
+            this.parent.toOwned();
+            return this.parent.put(key, value);
+        }
+
+    }
+
+    /**
+     *
+     */
+    private static final class CowWrapperMapNodeEntrySet implements Set<Entry<String, Node>> {
+        private final CowWrapperMapNode self;
+
+        private Map<String, CowWrapperMapNodeEntry> entryCache = null;
+
+        CowWrapperMapNodeEntrySet(CowWrapperMapNode self) {
+            this.self = self;
+        }
+
+        private CowWrapperMapNodeEntry getEntry(String key) {
+            if (this.entryCache == null) {
+                this.entryCache = new HashMap<>();
+            }
+            CowWrapperMapNodeEntry cached = this.entryCache.get(key);
+            if (cached == null) {
+                cached = new CowWrapperMapNodeEntry(this.self, key);
+                this.entryCache.put(key, cached);
+            }
+            return cached;
+        }
+
+        private void ensureFullyGeneratedCache() {
+            if (this.entryCache == null || this.entryCache.size() < this.size()) {
+                for (String key : this.self.object.keySet()) {
+                    this.getEntry(key);
+                }
+            }
+        }
+
+        @Override
+        public int size() {
+            return this.self.size();
+        }
+
+        @Override
+        public boolean isEmpty() { return this.self.isEmpty(); }
+
+        private String getEntryKeyString(Object o) {
+            if (!(o instanceof Entry<?, ?>)) {
+                return null;
+            }
+            Entry<?, ?> vagueEntry = (Entry<?, ?>) o;
+            Object objKey = vagueEntry.getKey();
+            if (!(objKey instanceof String)) {
+                return null;
+            }
+            return (String) objKey;
+        }
+
+        private Node getEntryValueNode(Object o) {
+            if (!(o instanceof Entry<?, ?>)) {
+                return null;
+            }
+            Entry<?, ?> vagueEntry = (Entry<?, ?>) o;
+            Object objValue = vagueEntry.getValue();
+            if (!(objValue instanceof Node)) {
+                return null;
+            }
+            return (Node) objValue;
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            String key = getEntryKeyString(o);
+            if (key == null) {
+                return false;
+            }
+            Node value = getEntryValueNode(o);
+            Node realValue = this.self.object.get(key);
+            return realValue != null && realValue.equals(value);
+        }
+
+        private static class CowWrapperMapNodeEntrySetIterator implements Iterator<Entry<String, Node>> {
+            private final CowWrapperMapNodeEntrySet entrySet;
+            private final CowWrapperMapNode map;
+
+            private final Iterator<String> keyIterator;
+
+            CowWrapperMapNodeEntrySetIterator(CowWrapperMapNodeEntrySet entrySet) {
+                this.entrySet = entrySet;
+                this.map = entrySet.self;
+                this.keyIterator = this.map.object.keySet().iterator();
+            }
+
+            @Override
+            public boolean hasNext() {
+                return this.keyIterator.hasNext();
+            }
+
+            @Override
+            public Entry<String, Node> next() {
+                return this.entrySet.getEntry(this.keyIterator.next());
+            }
+        }
+
+        @Override
+        public Iterator<Entry<String, Node>> iterator() {
+            return new CowWrapperMapNodeEntrySetIterator(this);
+        }
+
+        @Override
+        public Object[] toArray() {
+            this.ensureFullyGeneratedCache();
+            return this.entryCache.values().toArray();
+        }
+
+        @Override
+        public <T> T[] toArray(T[] a) {
+            this.ensureFullyGeneratedCache();
+            return this.entryCache.values().toArray(a);
+        }
+
+        @Override
+        public boolean add(Entry<String, Node> e) {
+            String key = e.getKey();
+            Node value = e.getValue();
+            Node currentValue = this.self.object.get(key);
+            if (currentValue != null && currentValue.equals(value)) {
+                return false;
+            }
+            this.self.put(e.getKey(), e.getValue());
+            return true;
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            String key = getEntryKeyString(o);
+            if (key == null) {
+                return false;
+            }
+            Node value = getEntryValueNode(o);
+            if (value == null) {
+                return false;
+            }
+            return this.self.remove(key, value);
+        }
+
+        @Override
+        public boolean containsAll(Collection<?> c) {
+            for (Object o : c) {
+                if (!(this.contains(o))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends Entry<String, Node>> c) {
+            boolean changed = false;
+            for (Entry<String, Node> entry : c) {
+                changed |= this.add(entry);
+            }
+            return changed;
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            boolean changed = false;
+            for (String key : this.self.object.keySet()) {
+                Entry<String, Node> entry = this.getEntry(key);
+                if (!c.contains(entry)) {
+                    this.entryCache.remove(key);
+                    this.self.remove(key);
+                    changed = true;
+                }
+            }
+            return changed;
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            boolean changed = false;
+            for (String key : this.self.object.keySet()) {
+                Entry<String, Node> entry = this.getEntry(key);
+                if (c.contains(entry)) {
+                    this.self.remove(key);
+                    this.entryCache.remove(key);
+                    changed = true;
+                }
+            }
+            return changed;
+        }
+
+        @Override
+        public void clear() {
+            this.self.clear();
+            this.entryCache.clear();
+        }
+
     }
 
     @Override
     public Set<Entry<String, Node>> entrySet() {
-        // TODO Auto-generated method stub
-        return null;
+        if (this.entrySet == null) {
+            this.entrySet = new CowWrapperMapNodeEntrySet(this);
+        }
+        return this.entrySet;
     }
 
     @Override
@@ -436,7 +673,8 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
     public CowWrapperMapNode deepCopy() {
         CowWrapperMapNode copy = new CowWrapperMapNode(this);
         copy.wrapperCache = null;
-        copy.object = this.object.deepCopy();
+        copy.toShared();
+        copy.toOwned(this.isOwned());
         return copy;
     }
 

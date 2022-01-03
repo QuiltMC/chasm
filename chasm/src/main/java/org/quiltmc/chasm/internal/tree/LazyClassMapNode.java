@@ -20,6 +20,13 @@ import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.internal.util.PathInitializer;
 
 public class LazyClassMapNode extends AbstractMap<String, Node> implements LazyClassNode {
+    // These enums and fields are for constructor overloading
+    private enum ShallowCopy {}
+    private enum DeepCopy {}
+
+    private static final ShallowCopy SHALLOW_COPY = null;
+    private static final DeepCopy DEEP_COPY = null;
+
     private final ClassReader classReader;
     private final MapNode nonLazyChildren;
     private MetadataProvider metadataProvider = new MapMetadataProvider();
@@ -41,23 +48,28 @@ public class LazyClassMapNode extends AbstractMap<String, Node> implements LazyC
         this.nonLazyChildren.put(NodeConstants.INTERFACES, interfaces);
     }
 
-    private LazyClassMapNode(LazyClassMapNode lazyClassMapNode) {
+    private LazyClassMapNode(LazyClassMapNode lazyClassMapNode, ShallowCopy tag) {
         this.classReader = lazyClassMapNode.classReader;
         this.nonLazyChildren = lazyClassMapNode.nonLazyChildren;
         this.metadataProvider = lazyClassMapNode.metadataProvider;
         this.fullNode = lazyClassMapNode.fullNode;
     }
 
+    private LazyClassMapNode(LazyClassMapNode original, DeepCopy tag) {
+        this.classReader = original.classReader; // seems to only be read-mutable, which should be equivalent
+        this.nonLazyChildren = original.nonLazyChildren.deepCopy();
+        this.metadataProvider = original.metadataProvider.deepCopy();
+        MapNode full = original.fullNode == null ? null : original.fullNode.get();
+        if (full == null) {
+            this.fullNode = null;
+        } else {
+            this.fullNode = new SoftReference<>(full.deepCopy());
+        }
+    }
+
     @Override
     public LazyClassMapNode deepCopy() {
-        LazyClassMapNode copy = new LazyClassMapNode(classReader);
-        copy.metadataProvider = metadataProvider.deepCopy();
-
-        for (Entry<String, Node> entry : nonLazyChildren.entrySet()) {
-            copy.nonLazyChildren.put(entry.getKey(), entry.getValue().deepCopy());
-        }
-
-        return copy;
+        return new LazyClassMapNode(this, LazyClassMapNode.DEEP_COPY);
     }
 
     @Override
@@ -133,8 +145,7 @@ public class LazyClassMapNode extends AbstractMap<String, Node> implements LazyC
 
     @Override
     public LazyClassNode shallowCopy() {
-        // TODO: is this correct?
-        return new LazyClassMapNode(this);
+        return new LazyClassMapNode(this, LazyClassMapNode.SHALLOW_COPY);
     }
 
     @Override
