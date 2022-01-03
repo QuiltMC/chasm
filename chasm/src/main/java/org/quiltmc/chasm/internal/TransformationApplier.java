@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.target.NodeTarget;
@@ -70,8 +71,16 @@ public class TransformationApplier {
         Node target = resolveTarget(transformation.getTarget());
         MapNode sources = resolveSources(transformation);
 
-        // TODO: Replace copies with immutability
-        Node replacement = transformation.apply(target.deepCopy(), sources.deepCopy()).deepCopy();
+        /*
+         * I shouldn't pass the mutable target directly because then the transformer could mutate it.
+         *
+         * I shouldn't pass the target as an owned cow wrapper because that requires a deep copy anyway, or else the wrapper will assume the target's child nodes are owned as well.
+         *
+         * I shouldn't pass the target as a shared cow wrapper because that wouldn't allow me to unwrap it.
+         * Maybe that's OK for now though.
+         */
+        Node replacement = transformation.apply(target.asWrapper(null, null, false),
+                sources.asWrapper(null, null, false));
         replacement.getMetadata().put(OriginMetadata.class, new OriginMetadata(transformation));
 
         replaceTarget(transformation.getTarget(), replacement);
@@ -83,9 +92,8 @@ public class TransformationApplier {
         } else if (target instanceof SliceTarget && replacement instanceof ListNode) {
             replaceSlice((SliceTarget) target, Node.asList(replacement));
         } else {
-            throw new RuntimeException("Invalid replacement for target");
+            throw new IllegalArgumentException("Invalid replacement for target");
         }
-
     }
 
     private void replaceNode(NodeTarget nodeTarget, Node replacement) {
@@ -111,7 +119,7 @@ public class TransformationApplier {
             return;
         }
 
-        throw new RuntimeException("Invalid index into node.");
+        throw new IndexOutOfBoundsException("Invalid index into node.");
     }
 
     private void replaceSlice(SliceTarget sliceTarget, ListNode replacement) {
@@ -190,7 +198,7 @@ public class TransformationApplier {
             } else if (currentNode instanceof MapNode && entry.isString()) {
                 currentNode = Node.asMap(currentNode).get(entry.asString());
             } else {
-                throw new RuntimeException("Can't resolve list " + path);
+                throw new NoSuchElementException("Can't resolve list " + path);
             }
         }
 
