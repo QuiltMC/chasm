@@ -15,7 +15,7 @@ import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.WrapperValueNode;
 import org.quiltmc.chasm.internal.asm.visitor.ChasmClassVisitor;
-import org.quiltmc.chasm.internal.metadata.ListPathMetadata;
+import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.internal.util.PathInitializer;
 
@@ -100,8 +100,8 @@ public class LazyClassMapNode extends AbstractMap<String, Node> implements LazyC
             classReader.accept(classVisitor, 0);
             fullNode = classVisitor.getClassNode();
 
-            if (getMetadata().get(ListPathMetadata.class) != null) {
-                PathInitializer.initialize(fullNode, getMetadata().get(ListPathMetadata.class));
+            if (getMetadata().get(PathMetadata.class) != null) {
+                PathInitializer.initialize(fullNode, getMetadata().get(PathMetadata.class));
             }
 
             this.fullNode = new SoftReference<>(fullNode);

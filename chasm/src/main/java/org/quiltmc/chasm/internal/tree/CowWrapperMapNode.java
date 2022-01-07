@@ -144,7 +144,7 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
         if (this.wrapperCache == null || this.wrapperCache.size() < this.object.size()) {
             for (String str : this.object.keySet()) {
                 if (this.get(str) == null) {
-                    throw new IllegalArgumentException(str);
+                    throw new AssertionError(str);
                 }
             }
         }
@@ -439,8 +439,8 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
     }
 
     private static final class CowWrapperMapNodeEntry implements Entry<String, Node> {
-        private CowWrapperMapNode parent;
-        private String key;
+        private final CowWrapperMapNode parent;
+        private final String key;
 
         CowWrapperMapNodeEntry(CowWrapperMapNode parent, String key) {
             this.parent = parent;
@@ -466,7 +466,6 @@ public class CowWrapperMapNode extends AbstractCowWrapperNode<MapNode, CowWrappe
      */
     private static final class CowWrapperMapNodeEntrySet implements Set<Entry<String, Node>> {
         private final CowWrapperMapNode self;
-
         private Map<String, CowWrapperMapNodeEntry> entryCache = null;
 
         CowWrapperMapNodeEntrySet(CowWrapperMapNode self) {
