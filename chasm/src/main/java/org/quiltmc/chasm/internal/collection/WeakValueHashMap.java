@@ -188,7 +188,7 @@ public class WeakValueHashMap<K, V> implements Map<K, V> {
 
         @Override
         public Iterator<V> iterator() {
-            return new WeakIterator<V>(this.parent.map.values().iterator());
+            return new WeakIterator<>(this.parent.map.values().iterator());
         }
 
         @Override

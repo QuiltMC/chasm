@@ -17,6 +17,7 @@ import org.quiltmc.chasm.api.tree.CowWrapperNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.internal.collection.ReadOnlyIteratorWrapper;
+import org.quiltmc.chasm.internal.collection.WeakValueHashMap;
 
 /**
  *
@@ -128,6 +129,7 @@ public class CowWrapperLazyClassNode extends CowWrapperMapNode implements LazyCl
     private static final class CowWrapperLazyClassNodeNonLazyEntrySet implements Set<Entry<String, Node>> {
         private final CowWrapperLazyClassNode self;
         private final Set<Entry<String, Node>> wrappedSet;
+        private final Map<String, Entry<String, Node>> map;
         private final Map<String, CowWrapperNode> wrapperCache = null;
 
         private Map<String, CowWrapperLazyClassNodeNonLazyEntry> entryCache = null;
@@ -136,6 +138,19 @@ public class CowWrapperLazyClassNode extends CowWrapperMapNode implements LazyCl
         CowWrapperLazyClassNodeNonLazyEntrySet(CowWrapperLazyClassNode self, Set<Entry<String, Node>> set) {
             this.self = self;
             this.wrappedSet = set;
+            this.map = CowWrapperLazyClassNodeNonLazyEntrySet.initializeMap(wrappedSet);
+        }
+
+        /**
+         * @param wrappedSet2
+         *
+         * @return
+         */
+        private static Map<String, Entry<String, Node>> initializeMap(Set<Entry<String, Node>> wrappedSet) {
+            Map<String, Entry<String, Node>> map = new WeakValueHashMap<String, Node>(wrappedSet.size()) {
+
+            };
+            return map;
         }
 
         @Override
@@ -156,6 +171,7 @@ public class CowWrapperLazyClassNode extends CowWrapperMapNode implements LazyCl
             return new ReadOnlyIteratorWrapper<>(this.wrappedSet.iterator());
         }
 
+        @Override
         private CowWrapperLazyClassNodeNonLazyEntry getCachedEntry(String key) {
             if (this.entryCache == null) {
                 return null;
@@ -269,6 +285,7 @@ public class CowWrapperLazyClassNode extends CowWrapperMapNode implements LazyCl
         }
 
     }
+
 
     @Override
     public Set<Entry<String, Node>> getNonLazyEntrySet() {
