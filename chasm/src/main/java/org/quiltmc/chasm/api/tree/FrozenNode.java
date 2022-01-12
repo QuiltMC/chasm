@@ -1,6 +1,5 @@
 package org.quiltmc.chasm.api.tree;
 
-import org.quiltmc.chasm.api.metadata.MetadataProvider;
 import org.quiltmc.chasm.internal.metadata.FrozenMetadataProvider;
 
 /**
@@ -10,7 +9,15 @@ import org.quiltmc.chasm.internal.metadata.FrozenMetadataProvider;
  */
 public interface FrozenNode extends Node {
     @Override
-    Node asMutable();
+    default boolean isMutable() { return false; }
+
+    @Override
+    default boolean isImmutable() { return true; }
+
+    @Override
+    default Node asMutable() {
+        return asMutableCopy();
+    }
 
     @Override
     default FrozenNode asImmutable() {
@@ -18,7 +25,8 @@ public interface FrozenNode extends Node {
     }
 
     @Override
-    default MetadataProvider getMetadata() { return getFrozenMetadata(); }
+    Node asMutableCopy();
 
-    FrozenMetadataProvider getFrozenMetadata();
+    @Override
+    FrozenMetadataProvider getMetadata();
 }

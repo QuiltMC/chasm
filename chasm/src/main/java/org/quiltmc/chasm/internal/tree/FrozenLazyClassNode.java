@@ -10,7 +10,6 @@ import org.objectweb.asm.ClassReader;
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
 import org.quiltmc.chasm.api.tree.FrozenLinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.FrozenMapNode;
-import org.quiltmc.chasm.api.tree.FrozenNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 
@@ -18,18 +17,20 @@ import org.quiltmc.chasm.api.tree.Node;
  *
  */
 public class FrozenLazyClassNode extends FrozenLinkedHashMapNode implements LazyClassMapNode {
-
+    private final ClassReader classReader;
+    private final Set<Entry<String, Node>> eagerEntrySet;
 
     private SoftReference<FrozenMapNode> fullNodeRef;
+
 
     /**
      * @param fullNodeRef
      */
-    public FrozenLazyClassNode(LazyClassNode lazyClass, SoftReference<MapNode> fullNode) {
+    public FrozenLazyClassNode(LazyClassNode lazyClass) {
         super(lazyClass);
-        MapNode optionalMap = fullNode.get();
+        MapNode optionalMap = lazyClass.getFullNode();
         FrozenMapNode optionalFrozenMap = optionalMap == null ? null : optionalMap.asImmutable();
-        fullNodeRef = new SoftReference<>(optionalFrozenMap);
+        fullNodeRef = optionalFrozenMap == null ? null : new SoftReference<>(optionalFrozenMap);
     }
 
     @Override
@@ -39,7 +40,7 @@ public class FrozenLazyClassNode extends FrozenLinkedHashMapNode implements Lazy
 
     @Override
     public MapNode pollFullNode() {
-        return fullNodeRef.get();
+        return fullNodeRef == null ? null : fullNodeRef.get();
     }
 
     @Override
@@ -56,14 +57,12 @@ public class FrozenLazyClassNode extends FrozenLinkedHashMapNode implements Lazy
 
     @Override
     public ClassReader getClassReader() {
-        // TODO Auto-generated method stub
-        return null;
+        return classReader;
     }
 
     @Override
     public Set<Entry<String, Node>> getNonLazyEntrySet() {
-        // TODO Auto-generated method stub
-        return null;
+        return eagerEntrySet;
     }
 
 }

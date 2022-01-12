@@ -204,7 +204,7 @@ public class FrozenLinkedHashMapNode implements FrozenMapNode {
             if (frozenEntries == null) {
                 frozenEntries = new FrozenEntry[iterationOrder.length];
             }
-            return new Iterator<Map.Entry<String, FrozenNode>>() {
+            return new Iterator<>() {
                 private int nextIndex;
                 {
                     nextIndex = 0;
@@ -337,7 +337,7 @@ public class FrozenLinkedHashMapNode implements FrozenMapNode {
 
         @Override
         public Iterator<FrozenNode> iterator() {
-            return new Iterator<FrozenNode>() {
+            return new Iterator<>() {
                 private int nextIndex;
 
                 @Override

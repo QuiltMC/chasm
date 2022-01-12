@@ -118,4 +118,9 @@ public class ValueNode implements Node {
     public ValueNode asMutable() {
         return this;
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
 }

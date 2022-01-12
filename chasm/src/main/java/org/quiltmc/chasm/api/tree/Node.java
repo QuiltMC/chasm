@@ -1,13 +1,21 @@
 package org.quiltmc.chasm.api.tree;
 
+import org.quiltmc.chasm.api.metadata.Metadata;
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
+import org.quiltmc.chasm.internal.util.MaybeMutable;
 import org.quiltmc.chasm.internal.util.NodeUtils;
 
 /**
  * Marks a compliant {@link Node} of a CHASM tree.
  */
-public interface Node {
+public interface Node extends MaybeMutable {
+    @Override
+    default boolean isMutable() { return true; }
+
+    @Override
+    default boolean isImmutable() { return false; }
+
     /**
      * Gets an immutable version of this {@link Node}.
      *
@@ -17,6 +25,7 @@ public interface Node {
      *
      * @return An immutable version of this {@link Node}.
      */
+    @Override
     FrozenNode asImmutable();
 
     /**
@@ -24,9 +33,13 @@ public interface Node {
      *
      * @return A mutable version of the current {@link Node}.
      */
+    @Override
     default Node asMutable() {
         return this;
     }
+
+    @Override
+    Node asMutableCopy();
 
     /**
      * Returns the {@link MetadataProvider} of this node.

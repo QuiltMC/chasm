@@ -14,18 +14,21 @@ import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
+import org.quiltmc.chasm.api.util.ClassInfoProvider;
 import org.quiltmc.chasm.internal.asm.visitor.ChasmClassVisitor;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 
 public class LazyClassNode extends AbstractMap<String, Node> implements LazyClassMapNode {
     private final ClassReader classReader;
+    private final ClassInfoProvider classInfoProvider;
     private final MapNode nonLazyChildren;
     private MetadataProvider metadataProvider = new MetadataProvider();
     private SoftReference<MapNode> fullNodeRef = new SoftReference<>(null);
 
-    public LazyClassNode(ClassReader reader) {
+    public LazyClassNode(ClassReader reader, ClassInfoProvider classInfoProvider) {
         classReader = reader;
+        this.classInfoProvider = classInfoProvider;
 
         // NOTE: Ensure parity with names in ChasmClassVisitor
         nonLazyChildren = new LinkedHashMapNode();
@@ -41,8 +44,14 @@ public class LazyClassNode extends AbstractMap<String, Node> implements LazyClas
     }
 
     @Override
+<<<<<<< HEAD
     public FrozenMapNode asImmutable() {
         FrozenLazyClassNode frozen = new FrozenLazyClassNode(this, fullNodeRef);
+=======
+    public MapNode copy() {
+        LazyClassNode copy = new LazyClassNode(classReader, classInfoProvider);
+        copy.metadataProvider = metadataProvider.copy();
+>>>>>>> 86b5cc9222a6062260f06bd9dd9539433d141017
 
         return frozen;
     }
@@ -61,9 +70,15 @@ public class LazyClassNode extends AbstractMap<String, Node> implements LazyClas
     public MapNode getFullNode() {
         MapNode fullNode = fullNodeRef.get();
         if (fullNode == null) {
+<<<<<<< HEAD
             fullNode = makeFullNode(classReader, metadataProvider);
             fullNodeRef = new SoftReference<>(fullNode);
         }
+=======
+            ChasmClassVisitor classVisitor = new ChasmClassVisitor(classInfoProvider);
+            classReader.accept(classVisitor, 0);
+            fullNode = classVisitor.getClassNode();
+>>>>>>> 86b5cc9222a6062260f06bd9dd9539433d141017
 
         return fullNode;
     }

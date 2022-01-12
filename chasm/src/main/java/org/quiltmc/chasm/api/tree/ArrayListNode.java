@@ -1,6 +1,7 @@
 package org.quiltmc.chasm.api.tree;
 
 import java.util.ArrayList;
+import java.util.WeakHashMap;
 
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
 
@@ -10,6 +11,9 @@ import org.quiltmc.chasm.api.metadata.MetadataProvider;
  */
 public class ArrayListNode extends ArrayList<Node> implements ListNode {
     private MetadataProvider metadataProvider;
+
+    private WeakHashMap<Node, Void> parents;
+
 
     public ArrayListNode() {
         super();
@@ -32,5 +36,30 @@ public class ArrayListNode extends ArrayList<Node> implements ListNode {
     @Override
     public MetadataProvider getMetadata() {
         return metadataProvider;
+    }
+
+    @Override
+    public Node asMutableCopy() {
+        return new ArrayListNode(this);
+    }
+
+    @Override
+    public void notifyMutated() {
+        if (parents != null) {
+            for (Node obj : parents.keySet()) {
+                obj.notifyMutated();
+            }
+        }
+    }
+
+    public void registerParent(Node parent) {
+        if (parents == null) {
+            parents = new WeakHashMap<>(4);
+        }
+        parents.put(parent, null);
+    }
+
+    public void unregisterParent(Node parent) {
+        parents.remove(parent);
     }
 }

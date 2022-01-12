@@ -1,17 +1,17 @@
 package org.quiltmc.chasm.internal.asm;
 
 import org.objectweb.asm.ClassWriter;
-import org.quiltmc.chasm.api.util.SuperClassProvider;
+import org.quiltmc.chasm.api.util.ClassInfoProvider;
 
 public class ChasmClassWriter extends ClassWriter {
     private static final String OBJECT = "java/lang/Object";
 
-    private final SuperClassProvider superClassProvider;
+    private final ClassInfoProvider classInfoProvider;
 
-    public ChasmClassWriter(SuperClassProvider superClassProvider) {
+    public ChasmClassWriter(ClassInfoProvider classInfoProvider) {
         super(COMPUTE_FRAMES);
 
-        this.superClassProvider = superClassProvider;
+        this.classInfoProvider = classInfoProvider;
     }
 
     @Override
@@ -23,9 +23,9 @@ public class ChasmClassWriter extends ClassWriter {
                 if (current1.equals(current2)) {
                     return current1;
                 }
-                current2 = superClassProvider.getSuperClass(current2);
+                current2 = classInfoProvider.getSuperClass(current2);
             }
-            current1 = superClassProvider.getSuperClass(current1);
+            current1 = classInfoProvider.getSuperClass(current1);
         }
 
         return OBJECT;
