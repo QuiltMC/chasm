@@ -2,3 +2,4 @@ rootProject.name = 'chasm'
 
 include 'chasm'
 include 'chasm-lang'
+include 'chasm-gradle-plugin'

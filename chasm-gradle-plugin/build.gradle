@@ -1,0 +1,32 @@
+plugins {
+    id 'java-gradle-plugin'
+    id 'checkstyle'
+}
+
+group 'org.quiltmc.chasm'
+version '1.0-SNAPSHOT'
+
+gradlePlugin {
+    plugins {
+        minecarftMaven {
+            id = 'org.quiltmc.chasm'
+            implementationClass = 'org.quiltmc.chasm.gradle.ChasmPlugin'
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+checkstyle {
+    toolVersion "9.1"
+    ignoreFailures(false)
+}
+
+dependencies {
+    implementation project(":chasm")
+    implementation project(":chasm-lang")
+
+    implementation 'org.ow2.asm:asm:9.2'
+}
