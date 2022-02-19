@@ -21,7 +21,9 @@ import org.junit.jupiter.api.TestFactory;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.api.ChasmProcessor;
+import org.quiltmc.chasm.api.ClassData;
 import org.quiltmc.chasm.api.Transformer;
+import org.quiltmc.chasm.api.metadata.Metadata;
 import org.quiltmc.chasm.api.util.ClassLoaderClassInfoProvider;
 
 public abstract class TestsBase {
@@ -127,13 +129,13 @@ public abstract class TestsBase {
         // Load the test class
         Path classFile = testDefinition.getClassFile();
         Assertions.assertTrue(Files.isRegularFile(classFile), classFile + " does not exist");
-        processor.addClass(Files.readAllBytes(classFile));
+        processor.addClass(new ClassData(Files.readAllBytes(classFile)));
 
         // Load any additional classes
         for (String additionalClass : testDefinition.additionalClasses) {
             Path additionalClassFile = TEST_CLASSES_DIR.resolve(additionalClass + ".class");
             Assertions.assertTrue(Files.isRegularFile(additionalClassFile), additionalClassFile + " does not exist");
-            processor.addClass(Files.readAllBytes(additionalClassFile));
+            processor.addClass(new ClassData(Files.readAllBytes(additionalClassFile)));
         }
 
         // Add transformers
@@ -142,13 +144,13 @@ public abstract class TestsBase {
         }
 
         // Process the data
-        List<byte[]> processedClasses = processor.process();
+        List<ClassData> processedClasses = processor.process();
 
         // Find the result class by name
         ClassReader resultClass = null;
-        for (byte[] clazz : processedClasses) {
+        for (ClassData classData : processedClasses) {
             // Read basic class info
-            resultClass = new ClassReader(clazz);
+            resultClass = new ClassReader(classData.getClassBytes());
 
             // Convert the JVM binary name (e.g. org/example/Class$Inner) into
             // the JLS binary name (e.g. org.example.Class$Inner)

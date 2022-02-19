@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.quiltmc.chasm.api.metadata.MetadataProvider;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
@@ -34,9 +35,9 @@ public class ChasmProcessor {
     private final List<Transformer> transformers = new ArrayList<>();
 
     /**
-     * Creates a new {@link ChasmProcessor} that uses the given {@link SuperClassProvider}.
+     * Creates a new {@link ChasmProcessor} that uses the given {@link ClassInfoProvider}.
      *
-     * @param superClassProvider A {@code SuperClassProvider} to supply parents of classes that are not being
+     * @param classInfoProvider A {@code ClassInfoProvider} to supply parents of classes that are not being
      *            transformed.
      */
     public ChasmProcessor(ClassInfoProvider classInfoProvider) {
@@ -56,24 +57,37 @@ public class ChasmProcessor {
     }
 
     /**
-     * Adds the passed class {@code byte[]} to this {@link ChasmProcessor}'s
+     * Adds the passed class data to this {@link ChasmProcessor}'s
      * list of classes to transform.
      *
-     * @param classBytes A transformable class as a {@code byte[]}.
+     * @param classData The data of the transformable class.
      */
-    public void addClass(byte[] classBytes) {
-        ClassReader classReader = new ClassReader(classBytes);
-        LazyClassNode classNode = new LazyClassNode(classReader, classInfoProvider);
+    public void addClass(ClassData classData) {
+        ClassReader classReader = new ClassReader(classData.getClassBytes());
+        LazyClassNode classNode = new LazyClassNode(classReader, classInfoProvider, classData.getMetadataProvider());
         classes.add(classNode);
+    }
+
+
+    /**
+     * Transforms this {@link ChasmProcessor}'s list of classes according
+     * to this {@code ChasmProcessor}'s list of {@link Transformer}s.
+     * If you only want the classes returned, see {@link #process(boolean)}.
+     *
+     * @return The resulting list of class data including unchanged classes.
+     */
+    public List<ClassData> process() {
+        return process(false);
     }
 
     /**
      * Transforms this {@link ChasmProcessor}'s list of classes according
      * to this {@code ChasmProcessor}'s list of {@link Transformer}s.
      *
-     * @return The resulting list of classes as {@code byte[]}s.
+     * @param onlyChangedClasses If this method should only return classes that changed during transformation.
+     * @return The resulting list of class data.
      */
-    public List<byte[]> process() {
+    public List<ClassData> process(boolean onlyChangedClasses) {
         LOGGER.info("Processing {} classes...", classes.size());
 
         LOGGER.info("Initializing paths...");
@@ -96,19 +110,24 @@ public class ChasmProcessor {
         }
 
         LOGGER.info("Writing {} classes...", classes.size());
-        List<byte[]> classBytes = new ArrayList<>();
+        List<ClassData> classData = new ArrayList<>();
         for (Node node : classes) {
+            // Skip unchanged (still lazy) class nodes if requested
+            if (onlyChangedClasses && node instanceof LazyClassNode) {
+                continue;
+            }
+
             MapNode classNode = Node.asMap(node);
 
             ClassNodeReader chasmWriter = new ClassNodeReader(classNode);
             ClassWriter classWriter = new ChasmClassWriter(
                     classInfoProvider);
             chasmWriter.accept(classWriter);
-            classBytes.add(classWriter.toByteArray());
+            classData.add(new ClassData(classWriter.toByteArray(), classNode.getMetadata()));
         }
 
         LOGGER.info("Processing done!");
-        return classBytes;
+        return classData;
     }
 
     private List<Transformation> applyTransformers(List<Transformer> transformers, ListNode classes) {

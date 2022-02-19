@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.api.ChasmProcessor;
+import org.quiltmc.chasm.api.ClassData;
 import org.quiltmc.chasm.api.util.ClassLoaderClassInfoProvider;
 import org.quiltmc.chasm.lang.ChasmLang;
 import org.quiltmc.chasm.lang.ChasmLangTransformer;
@@ -52,7 +53,7 @@ public class BasicTest {
                 new ChasmProcessor(new ClassLoaderClassInfoProvider(null, getClass().getClassLoader()));
 
         byte[] classBytes = getClass().getResourceAsStream("TestClass.class").readAllBytes();
-        processor.addClass(classBytes);
+        processor.addClass(new ClassData(classBytes));
 
         String transformerString = """
                 {
@@ -92,9 +93,9 @@ public class BasicTest {
         ChasmLangTransformer transformer = ChasmLangTransformer.parse(transformerString);
         processor.addTransformer(transformer);
 
-        List<byte[]> classes = processor.process();
+        List<ClassData> classes = processor.process();
 
-        ClassReader reader = new ClassReader(classes.get(0));
+        ClassReader reader = new ClassReader(classes.get(0).getClassBytes());
         StringWriter resultString = new StringWriter();
         TraceClassVisitor resultVisitor = new TraceClassVisitor(new PrintWriter(resultString));
         reader.accept(resultVisitor, 0);
@@ -108,7 +109,7 @@ public class BasicTest {
                 new ChasmProcessor(new ClassLoaderClassInfoProvider(null, getClass().getClassLoader()));
 
         byte[] classBytes = getClass().getResourceAsStream("TestLocalVariables.class").readAllBytes();
-        processor.addClass(classBytes);
+        processor.addClass(new ClassData(classBytes));
 
         // TODO: remove len when there is a builtin length function
         String transformerString = """
@@ -180,9 +181,9 @@ public class BasicTest {
         ChasmLangTransformer transformer = ChasmLangTransformer.parse(transformerString);
         processor.addTransformer(transformer);
 
-        List<byte[]> classes = processor.process();
+        List<ClassData> classes = processor.process();
 
-        ClassReader reader = new ClassReader(classes.get(0));
+        ClassReader reader = new ClassReader(classes.get(0).getClassBytes());
         StringWriter resultString = new StringWriter();
         TraceClassVisitor resultVisitor = new TraceClassVisitor(new PrintWriter(resultString));
         reader.accept(resultVisitor, 0);

@@ -40,6 +40,17 @@ public class MetadataProvider {
     }
 
     /**
+     * Copies all {@link Metadata} from the specified {@link MetadataProvider} and adds it to this one.
+     *
+     * @param metadataProvider The instance to copy from.
+     */
+    public void copyFrom(MetadataProvider metadataProvider) {
+        for (Map.Entry<Class<? extends Metadata>, Metadata> entry : metadataProvider.metadata.entrySet()) {
+            this.metadata.put(entry.getKey(), entry.getValue().copy());
+        }
+    }
+
+    /**
      * Creates a deep copy of this {@link MetadataProvider}.
      *
      * <p>This means that all the contained {@link Metadata} will also be copied.
@@ -49,9 +60,7 @@ public class MetadataProvider {
     public MetadataProvider copy() {
         MetadataProvider copy = new MetadataProvider();
 
-        for (Map.Entry<Class<? extends Metadata>, Metadata> entry : metadata.entrySet()) {
-            copy.metadata.put(entry.getKey(), entry.getValue().copy());
-        }
+        copy.copyFrom(this);
 
         return copy;
     }

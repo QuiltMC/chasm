@@ -22,12 +22,13 @@ public class LazyClassNode extends AbstractMap<String, Node> implements MapNode 
     private final ClassReader classReader;
     private final ClassInfoProvider classInfoProvider;
     private final MapNode nonLazyChildren;
-    private MetadataProvider metadataProvider = new MetadataProvider();
+    private final MetadataProvider metadataProvider;
     private SoftReference<MapNode> fullNode = new SoftReference<>(null);
 
-    public LazyClassNode(ClassReader reader, ClassInfoProvider classInfoProvider) {
+    public LazyClassNode(ClassReader reader, ClassInfoProvider classInfoProvider, MetadataProvider metadataProvider) {
         this.classReader = reader;
         this.classInfoProvider = classInfoProvider;
+        this.metadataProvider = metadataProvider;
 
         // NOTE: Ensure parity with names in ChasmClassVisitor
         this.nonLazyChildren = new LinkedHashMapNode();
@@ -44,8 +45,7 @@ public class LazyClassNode extends AbstractMap<String, Node> implements MapNode 
 
     @Override
     public MapNode copy() {
-        LazyClassNode copy = new LazyClassNode(classReader, classInfoProvider);
-        copy.metadataProvider = metadataProvider.copy();
+        LazyClassNode copy = new LazyClassNode(classReader, classInfoProvider, metadataProvider.copy());
 
         for (Entry<String, Node> entry : nonLazyChildren.entrySet()) {
             copy.nonLazyChildren.put(entry.getKey(), entry.getValue().copy());
@@ -70,6 +70,7 @@ public class LazyClassNode extends AbstractMap<String, Node> implements MapNode 
             classReader.accept(classVisitor, 0);
             fullNode = classVisitor.getClassNode();
 
+            fullNode.getMetadata().copyFrom(this.getMetadata());
             if (getMetadata().get(PathMetadata.class) != null) {
                 PathInitializer.initialize(fullNode, getMetadata().get(PathMetadata.class));
             }
