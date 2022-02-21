@@ -1,5 +1,6 @@
 package org.quiltmc.chasm.gradle;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -95,9 +96,6 @@ public class ChasmRunner {
             });
         }
 
-        // Create hash file as marker for the next run
-        Files.createFile(hashFile);
-
         // Prepare Chasm
         // TODO: Use correct class loader for JDK libs
         ChasmProcessor chasmProcessor =
@@ -161,6 +159,7 @@ public class ChasmRunner {
 
             // Open the output file
             Path target = artifact.getTargetFile(baseDir, hash);
+            Files.createDirectories(target.getParent());
             ZipOutputStream outputStream = new ZipOutputStream(Files.newOutputStream(target));
 
             // Iterate the input file
@@ -180,14 +179,25 @@ public class ChasmRunner {
                 outputStream.putNextEntry(jarEntry);
                 outputStream.write(bytes);
             }
+
+            outputStream.close();
         }
 
         // Open the output file
-        ZipOutputStream outputStream = new ZipOutputStream(Files.newOutputStream(newJar));
-        for (Map.Entry<String, ClassData> classData : newClasses.entrySet()) {
-            outputStream.putNextEntry(new ZipEntry(classData.getKey()));
-            outputStream.write(classData.getValue().getClassBytes());
+        if (newClasses != null) {
+            Files.createDirectories(newJar.getParent());
+            ZipOutputStream outputStream = new ZipOutputStream(Files.newOutputStream(newJar));
+            for (Map.Entry<String, ClassData> classData : newClasses.entrySet()) {
+                outputStream.putNextEntry(new ZipEntry(classData.getKey()));
+                outputStream.write(classData.getValue().getClassBytes());
+            }
+
+            outputStream.close();
         }
+
+        // Create hash file as marker for the next run
+        Files.createDirectories(hashFile.getParent());
+        Files.createFile(hashFile);
 
         return hash;
     }

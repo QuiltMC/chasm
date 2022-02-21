@@ -100,7 +100,6 @@ public abstract class ChasmTask extends DefaultTask {
             ChasmRunner chasmRunner = new ChasmRunner(baseDir, newJar);
             chasmRunner.addArtifacts(artifacts.values());
             hash = chasmRunner.transform();
-
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -114,11 +113,15 @@ public abstract class ChasmTask extends DefaultTask {
 
         // Create artifact dependencies
         for (TransformableDependency dependency : dependencies) {
+
             getOutputConfiguration().get().getDependencies()
                     .add(dependency.getOutputDependency(project, baseDir, hash));
         }
 
         // Create dependency on new classes
-        getOutputConfiguration().get().getDependencies().add(project.getDependencies().create(project.files(newJar)));
+        if (Files.exists(newJar)) {
+            getOutputConfiguration().get().getDependencies()
+                    .add(project.getDependencies().create(project.files(newJar)));
+        }
     }
 }

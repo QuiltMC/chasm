@@ -64,7 +64,7 @@ public class TransformableArtifact {
 
     public boolean isJar() {
         if (artifact == null) {
-            return path.endsWith(".jar");
+            return path.getFileName().toString().endsWith(".jar");
         } else {
             return artifact.getExtension().equals("jar");
         }

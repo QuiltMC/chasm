@@ -48,14 +48,16 @@ public class ChasmPlugin implements Plugin<Project> {
         chasmTask.getInputConfiguration().set(chasmCompileClasspath);
         chasmTask.getOutputConfiguration().set(compileClasspath);
 
+        project.afterEvaluate(p -> {
+            // Move all super configurations into the chasm configuration.
+            // This would be better done later
+            chasmCompileClasspath.setExtendsFrom(compileClasspath.getExtendsFrom());
+            compileClasspath.setExtendsFrom(Collections.emptySet());
+        });
+
         // Specify task dependencies for inter project dependencies.
         // This is done lazily in order to happen as late as possible.
         chasmTask.dependsOn(project.provider(() -> {
-            // Move all super configurations into the chasm configuration.
-            // This is done here since this is the latest possible callback point.
-            chasmCompileClasspath.setExtendsFrom(compileClasspath.getExtendsFrom());
-            compileClasspath.setExtendsFrom(Collections.emptySet());
-
             // Collect all project build dependencies for the configuration.
             // This ensures that subproject jars are available to Chasm.
             Set<Task> tasks = new LinkedHashSet<>();

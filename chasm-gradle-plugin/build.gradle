@@ -8,7 +8,7 @@ version '1.0-SNAPSHOT'
 
 gradlePlugin {
     plugins {
-        minecarftMaven {
+        chasm {
             id = 'org.quiltmc.chasm'
             implementationClass = 'org.quiltmc.chasm.gradle.ChasmPlugin'
         }
