@@ -59,6 +59,7 @@ public class TransformableArtifact {
         return baseDir
                 .resolve(module.getGroup().replace('.', '/'))
                 .resolve(module.getName())
+                .resolve(module.getVersion() + "-" + hash)
                 .resolve(fileName.toString());
     }
 

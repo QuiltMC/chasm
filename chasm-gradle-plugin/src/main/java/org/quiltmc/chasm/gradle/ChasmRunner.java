@@ -22,6 +22,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.antlr.v4.runtime.CharStreams;
+import org.gradle.api.artifacts.FileCollectionDependency;
 import org.objectweb.asm.ClassReader;
 import org.quiltmc.chasm.api.ChasmProcessor;
 import org.quiltmc.chasm.api.ClassData;
@@ -49,7 +50,7 @@ public class ChasmRunner {
         }
     }
 
-    public String transform() throws IOException {
+    public String transform(boolean forceRerun) throws IOException {
         // Create hasher
         MessageDigest digest;
         try {
@@ -60,7 +61,7 @@ public class ChasmRunner {
 
         // Hash input jars
         for (TransformableArtifact jar : jars) {
-            digest.digest(Files.readAllBytes(jar.getSourceFile()));
+            digest.update(Files.readAllBytes(jar.getSourceFile()));
         }
 
         // Convert the digest to a short hash
@@ -68,7 +69,7 @@ public class ChasmRunner {
 
         // Check if hash file exists. If so, skip transformation.
         Path hashFile = baseDir.resolve(hash);
-        if (Files.exists(hashFile)) {
+        if (Files.exists(hashFile) && !forceRerun) {
             for (TransformableArtifact jar : jars) {
                 // If the transformed jar exists at the target location, it was transformed during the last run
                 Path target = jar.getTargetFile(baseDir, hash);
@@ -129,8 +130,6 @@ public class ChasmRunner {
                 }
             }
         }
-
-        // TODO: Load transformers from main project
 
         // Process Chasm
         List<ClassData> transformedClasses = chasmProcessor.process(true);

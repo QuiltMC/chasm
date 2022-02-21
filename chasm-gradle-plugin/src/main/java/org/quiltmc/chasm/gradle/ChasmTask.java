@@ -12,9 +12,12 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.gradle.StartParameter;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.FileCollectionDependency;
 import org.gradle.api.artifacts.LenientConfiguration;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.ResolvedConfiguration;
@@ -97,9 +100,11 @@ public abstract class ChasmTask extends DefaultTask {
         Path baseDir = getChasmDirectory().get();
         Path newJar = baseDir.resolve("new-chasm-classes.jar");
         try {
+            StartParameter startParameter = project.getGradle().getStartParameter();
+
             ChasmRunner chasmRunner = new ChasmRunner(baseDir, newJar);
             chasmRunner.addArtifacts(artifacts.values());
-            hash = chasmRunner.transform();
+            hash = chasmRunner.transform(startParameter.isRefreshDependencies() || startParameter.isRerunTasks());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -113,15 +118,14 @@ public abstract class ChasmTask extends DefaultTask {
 
         // Create artifact dependencies
         for (TransformableDependency dependency : dependencies) {
-
-            getOutputConfiguration().get().getDependencies()
-                    .add(dependency.getOutputDependency(project, baseDir, hash));
+            Dependency outputDependency = dependency.getOutputDependency(project, baseDir, hash);
+            getOutputConfiguration().get().getDependencies().add(outputDependency);
         }
 
         // Create dependency on new classes
         if (Files.exists(newJar)) {
-            getOutputConfiguration().get().getDependencies()
-                    .add(project.getDependencies().create(project.files(newJar)));
+            Dependency outputDependency = project.getDependencies().create(project.files(newJar));
+            getOutputConfiguration().get().getDependencies().add(outputDependency);
         }
     }
 }

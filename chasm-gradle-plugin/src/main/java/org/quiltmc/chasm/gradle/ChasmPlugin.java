@@ -15,17 +15,24 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.tasks.Copy;
+import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.compile.AbstractCompile;
 import org.gradle.api.tasks.compile.JavaCompile;
+import org.gradle.jvm.tasks.Jar;
 import org.gradle.plugins.ide.idea.IdeaPlugin;
 
 /**
  * A plugin to transform the compilation classpath using Chasm.
  */
 public class ChasmPlugin implements Plugin<Project> {
+
+    public static final String CHASM_TASK_NAME = "chasm";
+
+    public static final String TRANSFORMER_JAR_TASK_NAME = "transformerJar";
+
     @Override
     public void apply(Project project) {
         // The Java plugin is required
@@ -35,18 +42,29 @@ public class ChasmPlugin implements Plugin<Project> {
         Configuration compileClasspath =
                 project.getConfigurations().getByName(JavaPlugin.COMPILE_CLASSPATH_CONFIGURATION_NAME);
 
+        // Chasm cache directory
+        Path chasmDir = project.getBuildDir().toPath().resolve("chasm");
+
+        // Create jar containing the project's transformers
+        TaskProvider<Jar> transformerJar = project.getTasks().register(TRANSFORMER_JAR_TASK_NAME, Jar.class, jar -> {
+            Copy processResources = (Copy) project.getTasks().getByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME);
+            jar.dependsOn(processResources);
+            jar.from(project.fileTree(processResources.getDestinationDir()));
+            jar.getArchiveFileName().set("Transformer.jar");
+            jar.getDestinationDirectory().set(chasmDir.toFile());
+            jar.include("org/quiltmc/chasm/transformers/**/*.chasm");
+        });
+
         // Create configurations for chasm to work on
         Provider<Configuration> chasmInput = project.getConfigurations().register("chasmInput", configuration -> {
             configuration.setExtendsFrom(compileClasspath.getExtendsFrom());
+            configuration.getDependencies().add(project.getDependencies().create(project.files(transformerJar)));
         });
         Provider<Configuration> chasmOutput = project.getConfigurations().register("chasmOutput");
 
-        // Chasm cache directory
-        Path chasmDir = project.getRootDir().toPath().resolve(".gradle").resolve("chasm");
-
         // Create and configure the Chasm task
-        ChasmTask chasmTask = project.getTasks().create("chasm", ChasmTask.class, project);
-        chasmTask.getChasmDirectory().set(chasmDir);
+        ChasmTask chasmTask = project.getTasks().create(CHASM_TASK_NAME, ChasmTask.class, project);
+        chasmTask.getChasmDirectory().set(chasmDir.resolve("repository"));
         chasmTask.getInputConfiguration().set(chasmInput);
         chasmTask.getOutputConfiguration().set(chasmOutput);
         chasmTask.dependsOn(chasmInput.map(Configuration::getBuildDependencies));
@@ -71,7 +89,7 @@ public class ChasmPlugin implements Plugin<Project> {
         }
 
         @Override
-        public void execute(Task task) {
+        public void execute(@Nonnull Task task) {
             ((AbstractCompile) task).setClasspath(classpath.get());
         }
     }
