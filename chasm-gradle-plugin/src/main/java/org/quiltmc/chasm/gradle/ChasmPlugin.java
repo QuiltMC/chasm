@@ -4,21 +4,23 @@ package org.quiltmc.chasm.gradle;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.gradle.TaskExecutionRequest;
+import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.Dependency;
-import org.gradle.api.artifacts.ProjectDependency;
+import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.provider.Provider;
+import org.gradle.api.tasks.compile.AbstractCompile;
+import org.gradle.api.tasks.compile.JavaCompile;
+import org.gradle.plugins.ide.idea.IdeaPlugin;
 
 /**
  * A plugin to transform the compilation classpath using Chasm.
@@ -26,51 +28,52 @@ import org.gradle.api.plugins.JavaPlugin;
 public class ChasmPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
-        // Force IDEA to run the Chasm task on sync
-        if ("true".equals(project.getGradle().getStartParameter().getSystemPropertiesArgs().get("idea.sync.active"))) {
-            project.getGradle().getStartParameter().getTaskRequests().add(new ChasmTaskExecutionRequest());
-        }
-
-        // This plugin requires the java plugin to be applied
+        // The Java plugin is required
         project.getPlugins().apply(JavaPlugin.class);
 
-        // Obtain the configuration to modify and create a custom one for resolving
+        // Get the classpath configuration
         Configuration compileClasspath =
                 project.getConfigurations().getByName(JavaPlugin.COMPILE_CLASSPATH_CONFIGURATION_NAME);
-        Configuration chasmCompileClasspath = project.getConfigurations().register("chasmCompileClasspath").get();
 
-        // Obtain the Chasm cache directory
+        // Create configurations for chasm to work on
+        Provider<Configuration> chasmInput = project.getConfigurations().register("chasmInput", configuration -> {
+            configuration.setExtendsFrom(compileClasspath.getExtendsFrom());
+        });
+        Provider<Configuration> chasmOutput = project.getConfigurations().register("chasmOutput");
+
+        // Chasm cache directory
         Path chasmDir = project.getRootDir().toPath().resolve(".gradle").resolve("chasm");
 
         // Create and configure the Chasm task
         ChasmTask chasmTask = project.getTasks().create("chasm", ChasmTask.class, project);
         chasmTask.getChasmDirectory().set(chasmDir);
-        chasmTask.getInputConfiguration().set(chasmCompileClasspath);
-        chasmTask.getOutputConfiguration().set(compileClasspath);
+        chasmTask.getInputConfiguration().set(chasmInput);
+        chasmTask.getOutputConfiguration().set(chasmOutput);
+        chasmTask.dependsOn(chasmInput.map(Configuration::getBuildDependencies));
 
-        project.afterEvaluate(p -> {
-            // Move all super configurations into the chasm configuration.
-            // This would be better done later
-            chasmCompileClasspath.setExtendsFrom(compileClasspath.getExtendsFrom());
-            compileClasspath.setExtendsFrom(Collections.emptySet());
-        });
+        // Configure Compilation
+        JavaCompile compileJava = (JavaCompile) project.getTasks().getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME);
+        compileJava.dependsOn(chasmTask);
+        compileJava.doFirst(new SetClasspathAction(chasmOutput));
 
-        // Specify task dependencies for inter project dependencies.
-        // This is done lazily in order to happen as late as possible.
-        chasmTask.dependsOn(project.provider(() -> {
-            // Collect all project build dependencies for the configuration.
-            // This ensures that subproject jars are available to Chasm.
-            Set<Task> tasks = new LinkedHashSet<>();
-            for (Dependency dependency : chasmCompileClasspath.getAllDependencies()) {
-                if (dependency instanceof ProjectDependency projectDep) {
-                    tasks.addAll(projectDep.getBuildDependencies().getDependencies(null));
-                }
-            }
-            return tasks;
-        }));
+        // Force IDEA to run the Chasm task on sync and set the classpath
+        if ("true".equals(project.getGradle().getStartParameter().getSystemPropertiesArgs().get("idea.sync.active"))) {
+            project.getGradle().getStartParameter().getTaskRequests().add(new ChasmTaskExecutionRequest());
+            chasmTask.doLast(task -> compileClasspath.setExtendsFrom(Collections.singleton(chasmOutput.get())));
+        }
+    }
 
-        // Ensure that chasm is run before java compilation
-        project.getTasks().getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(chasmTask);
+    static class SetClasspathAction implements Action<Task> {
+        private final Provider<Configuration> classpath;
+
+        public SetClasspathAction(Provider<Configuration> classpath) {
+            this.classpath = classpath;
+        }
+
+        @Override
+        public void execute(Task task) {
+            ((AbstractCompile) task).setClasspath(classpath.get());
+        }
     }
 
     static class ChasmTaskExecutionRequest implements TaskExecutionRequest {
