@@ -2,10 +2,11 @@ plugins {
     id 'java'
     id 'antlr'
     id 'checkstyle'
+    id 'maven-publish'
 }
 
 group 'org.quiltmc.chasm'
-version '1.0-SNAPSHOT'
+version '0.0.1'
 
 compileJava {
     javaCompiler = javaToolchains.compilerFor {
@@ -47,4 +48,26 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+publishing {
+    repositories {
+        maven {
+            name = 'quiltSnapshot'
+            url = System.getenv('SNAPSHOT_URL')
+
+            credentials {
+                username = System.getenv('SNAPSHOT_USERNAME')
+                password = System.getenv('SNAPSHOT_PASSWORD')
+            }
+        }
+    }
+
+    publications {
+        snapshot(MavenPublication) {
+            version = project.version + "-SNAPSHOT"
+
+            from components.java
+        }
+    }
 }
