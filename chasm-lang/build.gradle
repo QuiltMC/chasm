@@ -54,11 +54,11 @@ publishing {
     repositories {
         maven {
             name = 'quiltSnapshot'
-            url = System.getenv('SNAPSHOT_URL')
+            url = System.getenv('SNAPSHOTS_URL')
 
             credentials {
-                username = System.getenv('SNAPSHOT_USERNAME')
-                password = System.getenv('SNAPSHOT_PASSWORD')
+                username = System.getenv('SNAPSHOTS_USERNAME')
+                password = System.getenv('SNAPSHOTS_PASSWORD')
             }
         }
     }
