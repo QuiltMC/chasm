@@ -13,13 +13,11 @@ jobs:
       image: openjdk:17-jdk
       options: --user root
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v1
-      - name: Publish snapshot
-        run: ./gradlew publishSnapshotPublicationToQuiltSnapshotRepository --stacktrace
-        env:
-          SNAPSHOTS_URL: ${{ secrets.SNAPSHOTS_URL }}
-          SNAPSHOTS_USERNAME: ${{ secrets.SNAPSHOTS_USERNAME }}
-          SNAPSHOTS_PASSWORD: ${{ secrets.SNAPSHOTS_PASSWORD }}
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Publish snapshot
+      run: ./gradlew publishSnapshotPublicationToQuiltSnapshotRepository --stacktrace
+      env:
+        SNAPSHOTS_URL: ${{ secrets.SNAPSHOTS_URL }}
+        SNAPSHOTS_USERNAME: ${{ secrets.SNAPSHOTS_USERNAME }}
+        SNAPSHOTS_PASSWORD: ${{ secrets.SNAPSHOTS_PASSWORD }}
