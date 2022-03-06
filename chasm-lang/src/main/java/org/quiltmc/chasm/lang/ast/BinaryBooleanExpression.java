@@ -29,9 +29,9 @@ public class BinaryBooleanExpression implements Expression {
 
         switch (operation) {
             case AND:
-                if(left instanceof ConstantBooleanExpression && ((ConstantBooleanExpression) left).value) {
+                if (left instanceof ConstantBooleanExpression && ((ConstantBooleanExpression) left).value) {
                     right = this.right.reduce(context);
-                    if(right instanceof ConstantBooleanExpression) {
+                    if (right instanceof ConstantBooleanExpression) {
                         return right;
                     }
                 }

@@ -1,10 +1,10 @@
 package org.quiltmc.chasm.lang.ast;
 
-import org.quiltmc.chasm.lang.ReductionContext;
-import org.quiltmc.chasm.lang.op.NumberLike;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.quiltmc.chasm.lang.ReductionContext;
+import org.quiltmc.chasm.lang.op.NumberLike;
 
 public class UnaryExpression implements Expression {
     private final Operation operation;
@@ -27,24 +27,28 @@ public class UnaryExpression implements Expression {
         Expression result = null;
 
         switch (operation) {
-            case PLUS: result = inner; break;
+            case PLUS:
+                result = inner;
+                break;
             case MIN: {
                 if (inner instanceof NumberLike) {
                     result = ((NumberLike) inner).negate();
-                    break;
                 }
+                break;
             }
             case INV: {
                 if (inner instanceof NumberLike) {
                     result = ((NumberLike) inner).invert();
-                    break;
                 }
+                break;
             }
             case NOT: {
                 if (inner instanceof ConstantBooleanExpression) {
                     result = new ConstantBooleanExpression(!((ConstantBooleanExpression) inner).value);
                 }
+                break;
             }
+            default:
         }
 
         if (result == null) {

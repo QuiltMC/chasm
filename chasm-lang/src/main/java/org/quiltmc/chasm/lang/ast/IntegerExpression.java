@@ -81,17 +81,17 @@ public class IntegerExpression extends LiteralExpression<Integer> implements Num
     }
 
     @Override
-    public boolean canBitwiseSHL(Expression expression) {
+    public boolean canLeftShift(Expression expression) {
         return expression instanceof IntegerExpression;
     }
 
     @Override
-    public boolean canBitwiseSHR(Expression expression) {
+    public boolean canRightShift(Expression expression) {
         return expression instanceof IntegerExpression;
     }
 
     @Override
-    public boolean canBitwiseUSHR(Expression expression) {
+    public boolean canUnsignedRightShift(Expression expression) {
         return expression instanceof IntegerExpression;
     }
 
@@ -126,19 +126,19 @@ public class IntegerExpression extends LiteralExpression<Integer> implements Num
     }
 
     @Override
-    public Expression bitwiseSHL(Expression expression) {
+    public Expression leftShift(Expression expression) {
         int result = value << ((IntegerExpression) expression).value;
         return new IntegerExpression(result);
     }
 
     @Override
-    public Expression bitwiseSHR(Expression expression) {
+    public Expression rightShift(Expression expression) {
         int result = value >> ((IntegerExpression) expression).value;
         return new IntegerExpression(result);
     }
 
     @Override
-    public Expression bitwiseUSHR(Expression expression) {
+    public Expression unsignedRightShift(Expression expression) {
         int result = value >>> ((IntegerExpression) expression).value;
         return new IntegerExpression(result);
     }

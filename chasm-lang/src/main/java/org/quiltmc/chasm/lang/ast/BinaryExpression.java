@@ -59,6 +59,7 @@ public class BinaryExpression implements Expression {
                 if (left instanceof NumberLike && ((NumberLike) left).canModulo(right)) {
                     result = ((NumberLike) left).modulo(right);
                 }
+                break;
             case EQUAL:
                 if (left instanceof NoneExpression) {
                     result = new ConstantBooleanExpression(right instanceof NoneExpression);
@@ -74,7 +75,7 @@ public class BinaryExpression implements Expression {
                 } else if (right instanceof NoneExpression) {
                     result = new ConstantBooleanExpression(true);
                 } else if (left instanceof Equatable && ((Equatable) left).canEquate(right)) {
-                    result = new UnaryExpression (UnaryExpression.Operation.NOT, ((Equatable) left).equate(right));
+                    result = new UnaryExpression(UnaryExpression.Operation.NOT, ((Equatable) left).equate(right));
                 }
                 break;
             case LESS_THAN:
@@ -113,18 +114,18 @@ public class BinaryExpression implements Expression {
                 }
                 break;
             case SHL:
-                if (left instanceof NumberLike && ((NumberLike) left).canBitwiseSHL(right)) {
-                    result = ((NumberLike) left).bitwiseSHL(right);
+                if (left instanceof NumberLike && ((NumberLike) left).canLeftShift(right)) {
+                    result = ((NumberLike) left).leftShift(right);
                 }
                 break;
             case SHR:
-                if (left instanceof NumberLike && ((NumberLike) left).canBitwiseSHR(right)) {
-                    result = ((NumberLike) left).bitwiseSHR(right);
+                if (left instanceof NumberLike && ((NumberLike) left).canRightShift(right)) {
+                    result = ((NumberLike) left).rightShift(right);
                 }
                 break;
             case USHR:
-                if (left instanceof NumberLike && ((NumberLike) left).canBitwiseUSHR(right)) {
-                    result = ((NumberLike) left).bitwiseUSHR(right);
+                if (left instanceof NumberLike && ((NumberLike) left).canUnsignedRightShift(right)) {
+                    result = ((NumberLike) left).unsignedRightShift(right);
                 }
                 break;
             default:
