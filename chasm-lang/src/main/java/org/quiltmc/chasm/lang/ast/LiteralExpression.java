@@ -49,6 +49,6 @@ public abstract class LiteralExpression<T> implements Expression, Equatable {
 
     @Override
     public Expression equate(Expression expression) {
-        return new BooleanExpression(Objects.equals(value, ((LiteralExpression<?>) expression).value));
+        return new ConstantBooleanExpression(Objects.equals(value, ((LiteralExpression<?>) expression).value));
     }
 }

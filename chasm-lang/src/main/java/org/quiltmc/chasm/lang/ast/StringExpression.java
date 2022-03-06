@@ -1,8 +1,9 @@
 package org.quiltmc.chasm.lang.ast;
 
+import org.quiltmc.chasm.lang.op.Addable;
 import org.quiltmc.chasm.lang.op.Indexable;
 
-public class StringExpression extends LiteralExpression<String> implements Indexable {
+public class StringExpression extends LiteralExpression<String> implements Indexable, Addable {
     public StringExpression(String value) {
         super(value);
     }
@@ -25,5 +26,15 @@ public class StringExpression extends LiteralExpression<String> implements Index
         }
 
         return new StringExpression(String.valueOf(value.charAt(index)));
+    }
+
+    @Override
+    public boolean canAdd(Expression expression) {
+        return expression instanceof StringExpression;
+    }
+
+    @Override
+    public Expression add(Expression expression) {
+        return new StringExpression(value + ((StringExpression) expression).getValue());
     }
 }

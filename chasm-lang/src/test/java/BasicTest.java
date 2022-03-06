@@ -40,6 +40,16 @@ public class BasicTest {
                     map_member: $.list.[3].name,
                     map_index: $.list.[3].["name"],
                     concat: [1, 2] + [3, 4],
+                    list_concat: [1, 2] + $.list,
+                    compareWeird: arg -> arg > 3 = arg < 5 * -arg + 1000,
+                    test: arg -> arg.a && arg.b || arg.c && arg.d,
+                    test_call: $.test({ a: true, b: false, c: true, d: true }),
+                    binop: x -> (x & ~7) | 1,
+                    binop_call: $.binop(125),
+                    shift: x -> x << 1,
+                    shift_call: $.shift(125),
+                    shifting: x -> x << 1 ^ x >> 1,
+                    xmas: "Hello " + "World" + "!"
                 }
                 """;
 

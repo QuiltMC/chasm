@@ -24,8 +24,8 @@ public class TernaryExpression implements Expression {
     public Expression reduce(ReductionContext context) {
         Expression condition = context.reduce(this.condition);
 
-        if (condition instanceof BooleanExpression) {
-            if (((BooleanExpression) condition).getValue()) {
+        if (condition instanceof ConstantBooleanExpression) {
+            if (((ConstantBooleanExpression) condition).getValue()) {
                 return context.reduce(trueExpression);
             } else {
                 return context.reduce(falseExpression);

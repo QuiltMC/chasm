@@ -8,8 +8,9 @@ import java.util.Map;
 import org.objectweb.asm.Type;
 import org.quiltmc.chasm.lang.antlr.ChasmBaseVisitor;
 import org.quiltmc.chasm.lang.antlr.ChasmParser;
+import org.quiltmc.chasm.lang.ast.BinaryBooleanExpression;
 import org.quiltmc.chasm.lang.ast.BinaryExpression;
-import org.quiltmc.chasm.lang.ast.BooleanExpression;
+import org.quiltmc.chasm.lang.ast.ConstantBooleanExpression;
 import org.quiltmc.chasm.lang.ast.CallExpression;
 import org.quiltmc.chasm.lang.ast.Expression;
 import org.quiltmc.chasm.lang.ast.FilterExpression;
@@ -23,6 +24,7 @@ import org.quiltmc.chasm.lang.ast.ReferenceExpression;
 import org.quiltmc.chasm.lang.ast.StringExpression;
 import org.quiltmc.chasm.lang.ast.TernaryExpression;
 import org.quiltmc.chasm.lang.ast.TypeExpression;
+import org.quiltmc.chasm.lang.ast.UnaryExpression;
 
 public class ChasmExpressionVisitor extends ChasmBaseVisitor<Expression> {
     @Override
@@ -73,35 +75,35 @@ public class ChasmExpressionVisitor extends ChasmBaseVisitor<Expression> {
     }
 
     @Override
-    public StringExpression visitStringExpression(ChasmParser.StringExpressionContext ctx) {
+    public StringExpression visitStringLiteral(ChasmParser.StringLiteralContext ctx) {
         String rawValue = ctx.STRING().getText();
         String value = rawValue.substring(1, rawValue.length() - 1);
         return new StringExpression(value);
     }
 
     @Override
-    public Expression visitTypeExpression(ChasmParser.TypeExpressionContext ctx) {
+    public Expression visitTypeLiteral(ChasmParser.TypeLiteralContext ctx) {
         String rawValue = ctx.TYPE().getText();
         Type value = Type.getType(rawValue.substring(2, rawValue.length() - 1));
         return new TypeExpression(value);
     }
 
     @Override
-    public IntegerExpression visitIntegerExpression(ChasmParser.IntegerExpressionContext ctx) {
+    public IntegerExpression visitIntegerLiteral(ChasmParser.IntegerLiteralContext ctx) {
         String rawValue = ctx.INTEGER().getText();
         int value = Integer.parseInt(rawValue);
         return new IntegerExpression(value);
     }
 
     @Override
-    public BooleanExpression visitBooleanExpression(ChasmParser.BooleanExpressionContext ctx) {
+    public ConstantBooleanExpression visitBooleanLiteral(ChasmParser.BooleanLiteralContext ctx) {
         String rawValue = ctx.BOOLEAN().getText();
         boolean value = Boolean.parseBoolean(rawValue);
-        return new BooleanExpression(value);
+        return new ConstantBooleanExpression(value);
     }
 
     @Override
-    public NoneExpression visitNoneExpression(ChasmParser.NoneExpressionContext ctx) {
+    public NoneExpression visitNoneLiteral(ChasmParser.NoneLiteralContext ctx) {
         return Expression.none();
     }
 
@@ -116,6 +118,23 @@ public class ChasmExpressionVisitor extends ChasmBaseVisitor<Expression> {
                 ctx.expression(0).accept(this),
                 BinaryExpression.Operation.of(ctx.op.getText()),
                 ctx.expression(1).accept(this)
+        );
+    }
+
+    @Override
+    public Expression visitBinaryBooleanExpression(ChasmParser.BinaryBooleanExpressionContext ctx) {
+        return new BinaryBooleanExpression(
+                ctx.expression(0).accept(this),
+                BinaryBooleanExpression.Operation.of(ctx.op.getText()),
+                ctx.expression(1).accept(this)
+        );
+    }
+
+    @Override
+    public Expression visitUnaryExpression(ChasmParser.UnaryExpressionContext ctx) {
+        return new UnaryExpression(
+                UnaryExpression.Operation.of(ctx.op.getText()),
+                ctx.expression().accept(this)
         );
     }
 

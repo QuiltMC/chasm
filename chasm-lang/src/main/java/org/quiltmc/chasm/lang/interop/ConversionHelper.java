@@ -8,7 +8,7 @@ import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.tree.ValueNode;
-import org.quiltmc.chasm.lang.ast.BooleanExpression;
+import org.quiltmc.chasm.lang.ast.ConstantBooleanExpression;
 import org.quiltmc.chasm.lang.ast.Expression;
 import org.quiltmc.chasm.lang.ast.ListExpression;
 import org.quiltmc.chasm.lang.ast.LiteralExpression;
@@ -61,7 +61,7 @@ public abstract class ConversionHelper {
             if (value instanceof Integer) {
                 return new ChasmIntegerNodeExpression(Node.asValue(node));
             }
-            if (value instanceof BooleanExpression) {
+            if (value instanceof ConstantBooleanExpression) {
                 return new ChasmBooleanNodeExpression(Node.asValue(node));
             }
         }

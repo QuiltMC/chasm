@@ -34,8 +34,8 @@ public class FilterExpression implements Expression {
             while (iterator.hasNext()) {
                 Expression entry = iterator.next();
                 Expression result = context.reduce(((FunctionExpression) filter).call(entry));
-                if (result instanceof BooleanExpression) {
-                    if (((BooleanExpression) result).getValue()) {
+                if (result instanceof ConstantBooleanExpression) {
+                    if (((ConstantBooleanExpression) result).getValue()) {
                         filteredEntries.add(context.reduce(entry));
                     }
                 } else {
