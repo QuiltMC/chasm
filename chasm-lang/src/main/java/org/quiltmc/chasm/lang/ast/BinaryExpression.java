@@ -7,6 +7,7 @@ import org.quiltmc.chasm.lang.ReductionContext;
 import org.quiltmc.chasm.lang.op.Addable;
 import org.quiltmc.chasm.lang.op.Equatable;
 import org.quiltmc.chasm.lang.op.Multiplicable;
+import org.quiltmc.chasm.lang.op.NumberLike;
 import org.quiltmc.chasm.lang.op.Subtractable;
 
 public class BinaryExpression implements Expression {
@@ -49,13 +50,82 @@ public class BinaryExpression implements Expression {
                     result = ((Multiplicable) left).multiply(right);
                 }
                 break;
+            case DIVIDE:
+                if (left instanceof NumberLike && ((NumberLike) left).canDivide(right)) {
+                    result = ((NumberLike) left).divide(right);
+                }
+                break;
+            case MOD:
+                if (left instanceof NumberLike && ((NumberLike) left).canModulo(right)) {
+                    result = ((NumberLike) left).modulo(right);
+                }
+                break;
             case EQUAL:
                 if (left instanceof NoneExpression) {
-                    result = new BooleanExpression(right instanceof NoneExpression);
+                    result = new ConstantBooleanExpression(right instanceof NoneExpression);
                 } else if (right instanceof NoneExpression) {
-                    result = new BooleanExpression(false);
+                    result = new ConstantBooleanExpression(false);
                 } else if (left instanceof Equatable && ((Equatable) left).canEquate(right)) {
                     result = ((Equatable) left).equate(right);
+                }
+                break;
+            case NOT_EQUAL:
+                if (left instanceof NoneExpression) {
+                    result = new ConstantBooleanExpression(!(right instanceof NoneExpression));
+                } else if (right instanceof NoneExpression) {
+                    result = new ConstantBooleanExpression(true);
+                } else if (left instanceof Equatable && ((Equatable) left).canEquate(right)) {
+                    result = new UnaryExpression(UnaryExpression.Operation.NOT, ((Equatable) left).equate(right));
+                }
+                break;
+            case LESS_THAN:
+                if (left instanceof NumberLike && ((NumberLike) left).canCompare(right)) {
+                    result = ((NumberLike) left).lessThan(right);
+                }
+                break;
+            case LESS_THAN_EQUAL:
+                if (left instanceof NumberLike && ((NumberLike) left).canCompare(right)) {
+                    result = ((NumberLike) left).lessThanOrEqual(right);
+                }
+                break;
+            case GREATER_THAN:
+                if (left instanceof NumberLike && ((NumberLike) left).canCompare(right)) {
+                    result = ((NumberLike) left).greaterThan(right);
+                }
+                break;
+            case GREATER_THAN_EQUAL:
+                if (left instanceof NumberLike && ((NumberLike) left).canCompare(right)) {
+                    result = ((NumberLike) left).greaterThanOrEqual(right);
+                }
+                break;
+            case AND:
+                if (left instanceof NumberLike && ((NumberLike) left).canBitwiseAnd(right)) {
+                    result = ((NumberLike) left).bitwiseAnd(right);
+                }
+                break;
+            case OR:
+                if (left instanceof NumberLike && ((NumberLike) left).canBitwiseOr(right)) {
+                    result = ((NumberLike) left).bitwiseOr(right);
+                }
+                break;
+            case XOR:
+                if (left instanceof NumberLike && ((NumberLike) left).canBitwiseXor(right)) {
+                    result = ((NumberLike) left).bitwiseXor(right);
+                }
+                break;
+            case SHL:
+                if (left instanceof NumberLike && ((NumberLike) left).canLeftShift(right)) {
+                    result = ((NumberLike) left).leftShift(right);
+                }
+                break;
+            case SHR:
+                if (left instanceof NumberLike && ((NumberLike) left).canRightShift(right)) {
+                    result = ((NumberLike) left).rightShift(right);
+                }
+                break;
+            case USHR:
+                if (left instanceof NumberLike && ((NumberLike) left).canUnsignedRightShift(right)) {
+                    result = ((NumberLike) left).unsignedRightShift(right);
                 }
                 break;
             default:
@@ -77,13 +147,22 @@ public class BinaryExpression implements Expression {
     public enum Operation {
         MULTIPLY("*"),
         DIVIDE("/"),
+        MOD("%"),
         ADD("+"),
         SUBTRACT("-"),
         LESS_THAN("<"),
         LESS_THAN_EQUAL("<="),
         EQUAL("="),
+        NOT_EQUAL("!="),
         GREATER_THAN_EQUAL(">="),
-        GREATER_THAN(">");
+        GREATER_THAN(">"),
+        AND("&"),
+        OR("|"),
+        XOR("^"),
+        SHL("<<"),
+        USHR(">>>"),
+        SHR(">>"),
+        ;
 
         private static final Map<String, Operation> tokenToOperation = new HashMap<>();
 
@@ -100,7 +179,11 @@ public class BinaryExpression implements Expression {
         }
 
         public static Operation of(String token) {
-            return tokenToOperation.get(token);
+            final Operation operation = tokenToOperation.get(token);
+            if (operation == null) {
+                throw new RuntimeException("Unknown operation: " + token);
+            }
+            return operation;
         }
 
         public String getToken() {

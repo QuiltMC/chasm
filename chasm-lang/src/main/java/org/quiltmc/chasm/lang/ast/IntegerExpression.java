@@ -1,10 +1,8 @@
 package org.quiltmc.chasm.lang.ast;
 
-import org.quiltmc.chasm.lang.op.Addable;
-import org.quiltmc.chasm.lang.op.Multiplicable;
-import org.quiltmc.chasm.lang.op.Subtractable;
+import org.quiltmc.chasm.lang.op.NumberLike;
 
-public class IntegerExpression extends LiteralExpression<Integer> implements Addable, Subtractable, Multiplicable {
+public class IntegerExpression extends LiteralExpression<Integer> implements NumberLike {
     public IntegerExpression(int value) {
         super(value);
     }
@@ -45,5 +43,128 @@ public class IntegerExpression extends LiteralExpression<Integer> implements Add
     public Expression multiply(Expression expression) {
         int result = value * ((IntegerExpression) expression).value;
         return new IntegerExpression(result);
+    }
+
+    @Override
+    public Expression negate() {
+        return new IntegerExpression(-value);
+    }
+
+    @Override
+    public Expression invert() {
+        return new IntegerExpression(~value);
+    }
+
+    @Override
+    public boolean canDivide(Expression expression) {
+        return expression instanceof IntegerExpression;
+    }
+
+    @Override
+    public boolean canModulo(Expression expression) {
+        return expression instanceof IntegerExpression;
+    }
+
+    @Override
+    public boolean canBitwiseAnd(Expression expression) {
+        return expression instanceof IntegerExpression;
+    }
+
+    @Override
+    public boolean canBitwiseOr(Expression expression) {
+        return expression instanceof IntegerExpression;
+    }
+
+    @Override
+    public boolean canBitwiseXor(Expression expression) {
+        return expression instanceof IntegerExpression;
+    }
+
+    @Override
+    public boolean canLeftShift(Expression expression) {
+        return expression instanceof IntegerExpression;
+    }
+
+    @Override
+    public boolean canRightShift(Expression expression) {
+        return expression instanceof IntegerExpression;
+    }
+
+    @Override
+    public boolean canUnsignedRightShift(Expression expression) {
+        return expression instanceof IntegerExpression;
+    }
+
+    @Override
+    public Expression divide(Expression expression) {
+        int result = value / ((IntegerExpression) expression).value;
+        return new IntegerExpression(result);
+    }
+
+    @Override
+    public Expression modulo(Expression expression) {
+        int result = value % ((IntegerExpression) expression).value;
+        return new IntegerExpression(result);
+    }
+
+    @Override
+    public Expression bitwiseAnd(Expression expression) {
+        int result = value & ((IntegerExpression) expression).value;
+        return new IntegerExpression(result);
+    }
+
+    @Override
+    public Expression bitwiseOr(Expression expression) {
+        int result = value | ((IntegerExpression) expression).value;
+        return new IntegerExpression(result);
+    }
+
+    @Override
+    public Expression bitwiseXor(Expression expression) {
+        int result = value ^ ((IntegerExpression) expression).value;
+        return new IntegerExpression(result);
+    }
+
+    @Override
+    public Expression leftShift(Expression expression) {
+        int result = value << ((IntegerExpression) expression).value;
+        return new IntegerExpression(result);
+    }
+
+    @Override
+    public Expression rightShift(Expression expression) {
+        int result = value >> ((IntegerExpression) expression).value;
+        return new IntegerExpression(result);
+    }
+
+    @Override
+    public Expression unsignedRightShift(Expression expression) {
+        int result = value >>> ((IntegerExpression) expression).value;
+        return new IntegerExpression(result);
+    }
+
+    @Override
+    public boolean canCompare(Expression expression) {
+        return expression instanceof IntegerExpression;
+    }
+
+    @Override
+    public Expression lessThan(Expression expression) {
+        return new ConstantBooleanExpression(value < ((IntegerExpression) expression).value);
+    }
+
+    @Override
+    public Expression lessThanOrEqual(Expression expression) {
+        return new ConstantBooleanExpression(value <= ((IntegerExpression) expression).value);
+    }
+
+    @Override
+    public Expression greaterThan(Expression expression) {
+        return new ConstantBooleanExpression(value > ((IntegerExpression) expression).value);
+    }
+
+    @Override
+    public Expression greaterThanOrEqual(Expression expression) {
+        return new ConstantBooleanExpression(value >= ((IntegerExpression) expression).value);
     }
 }

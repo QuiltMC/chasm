@@ -18,19 +18,27 @@ expression
     | list # ListExpression
     | literal # LiteralExpression
     | '(' expression ')' # GroupExpression
-    | expression op=('*' | '/') expression # BinaryExpression
+    | op=('+' | '-' | '!' | '~') expression # UnaryExpression
+    | expression op=('*' | '/' | '%') expression # BinaryExpression
     | expression op=('+' | '-') expression # BinaryExpression
-    | expression op=('<' | '<=' | '=' | '>=' | '>') expression # BinaryExpression
+    | expression op=('<<' | '>>' | '>>>') expression # BinaryExpression
+    | expression op=('<' | '<=' | '>=' | '>') expression # BinaryExpression
+    | expression op=('=' | '!=') expression # BinaryExpression
+    | expression op='&' expression # BinaryExpression
+    | expression op='^' expression # BinaryExpression
+    | expression op='|' expression # BinaryExpression
+    | expression op='&&' expression # BinaryBooleanExpression
+    | expression op='||' expression # BinaryBooleanExpression
     | <assoc=right> expression '?' expression ':' expression # TernaryExpression
     | IDENTIFIER '->' expression # LambdaExpression
     ;
 
 literal
-    : STRING # StringExpression
-    | TYPE # TypeExpression
-    | INTEGER # IntegerExpression
-    | BOOLEAN # BooleanExpression
-    | NONE # NoneExpression
+    : STRING # StringLiteral
+    | TYPE # TypeLiteral
+    | INTEGER # IntegerLiteral
+    | BOOLEAN # BooleanLiteral
+    | NONE # NoneLiteral
     ;
 
 map

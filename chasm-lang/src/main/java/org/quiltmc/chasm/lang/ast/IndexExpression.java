@@ -21,7 +21,8 @@ public class IndexExpression implements Expression {
             return context.reduce(((Indexable) object).index(index));
         }
 
-        throw new RuntimeException("Member access can only be performed on maps.");
+        throw new RuntimeException(
+                "Cannot index " + object.getClass().getSimpleName() + " with " + index.getClass().getSimpleName());
     }
 
     @Override
