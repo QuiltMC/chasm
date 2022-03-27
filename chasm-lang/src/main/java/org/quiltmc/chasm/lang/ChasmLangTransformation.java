@@ -42,11 +42,13 @@ public class ChasmLangTransformation implements Transformation {
         Expression sourcesResolved = ((AbstractMapExpression) transformation).get("sources");
         Expression sourcesReduced = evaluator.reduce(sourcesResolved);
         AbstractMapExpression sources = (AbstractMapExpression) sourcesReduced;
-        for (String key : sources.getKeys()) {
-            Expression sourceResolved = sources.get(key);
-            Expression sourceReduced = evaluator.reduce(sourceResolved);
-            Target source = parseTarget(sourceReduced);
-            this.sources.put(key, source);
+        if (sources != null) {
+            for (String key : sources.getKeys()) {
+                Expression sourceResolved = sources.get(key);
+                Expression sourceReduced = evaluator.reduce(sourceResolved);
+                Target source = parseTarget(sourceReduced);
+                this.sources.put(key, source);
+            }
         }
     }
 
@@ -67,17 +69,18 @@ public class ChasmLangTransformation implements Transformation {
 
     @Override
     public Node apply(Node targetNode, Map<String, Node> nodeSources) {
-        Expression applyResolved = ((AbstractMapExpression) transformation).get("apply");
-        Expression applyReduced = evaluator.reduce(applyResolved);
-        FunctionExpression apply = (FunctionExpression) applyReduced;
-
         HashMap<String, Expression> args = new HashMap<>();
         args.put("target", NodeExpression.from(null, targetNode));
+
         HashMap<String, Expression> sources = new HashMap<>();
         for (Map.Entry<String, Node> entry : nodeSources.entrySet()) {
             sources.put(entry.getKey(), NodeExpression.from(null, entry.getValue()));
         }
         args.put("sources", new SimpleMapExpression(null, sources));
+
+        Expression applyResolved = ((AbstractMapExpression) transformation).get("apply");
+        Expression applyReduced = evaluator.reduce(applyResolved);
+        FunctionExpression apply = (FunctionExpression) applyReduced;
 
         Expression resolvedResult = apply.call(new SimpleMapExpression(null, args));
         Expression reducedResult = evaluator.reduceRecursive(resolvedResult);

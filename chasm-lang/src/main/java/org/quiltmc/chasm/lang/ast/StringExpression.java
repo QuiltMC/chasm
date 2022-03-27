@@ -33,8 +33,8 @@ public class StringExpression extends LiteralExpression<String> implements Addab
     @Override
     public Expression index(ParseTree tree, Expression expression) {
         int i = ((IntegerExpression) expression).getValue().intValue();
-        return 0 <= i && i < value.length() ?
-                new StringExpression(tree, Character.toString(value.charAt(i))) :
-                new NullExpression(tree);
+        return 0 <= i && i < value.length()
+                ? new StringExpression(tree, Character.toString(value.charAt(i)))
+                : new NullExpression(tree);
     }
 }

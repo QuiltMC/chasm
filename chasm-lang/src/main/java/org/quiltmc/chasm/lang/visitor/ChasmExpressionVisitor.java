@@ -11,17 +11,17 @@ import org.quiltmc.chasm.lang.ast.BinaryBooleanExpression;
 import org.quiltmc.chasm.lang.ast.BinaryExpression;
 import org.quiltmc.chasm.lang.ast.CallExpression;
 import org.quiltmc.chasm.lang.ast.ConstantBooleanExpression;
-import org.quiltmc.chasm.lang.op.Expression;
-import org.quiltmc.chasm.lang.ast.LambdaExpression;
 import org.quiltmc.chasm.lang.ast.IndexExpression;
 import org.quiltmc.chasm.lang.ast.IntegerExpression;
-import org.quiltmc.chasm.lang.ast.SimpleListExpression;
-import org.quiltmc.chasm.lang.ast.SimpleMapExpression;
+import org.quiltmc.chasm.lang.ast.LambdaExpression;
 import org.quiltmc.chasm.lang.ast.NullExpression;
 import org.quiltmc.chasm.lang.ast.ReferenceExpression;
+import org.quiltmc.chasm.lang.ast.SimpleListExpression;
+import org.quiltmc.chasm.lang.ast.SimpleMapExpression;
 import org.quiltmc.chasm.lang.ast.StringExpression;
 import org.quiltmc.chasm.lang.ast.TernaryExpression;
 import org.quiltmc.chasm.lang.ast.UnaryExpression;
+import org.quiltmc.chasm.lang.op.Expression;
 
 public class ChasmExpressionVisitor extends ChasmBaseVisitor<Expression> {
     @Override

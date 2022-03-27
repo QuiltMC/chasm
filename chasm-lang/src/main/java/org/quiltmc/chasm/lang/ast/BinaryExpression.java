@@ -80,7 +80,8 @@ public class BinaryExpression extends AbstractExpression {
                 } else if (right instanceof NullExpression) {
                     result = new ConstantBooleanExpression(getParseTree(), true);
                 } else if (left instanceof EquatableExpression && ((EquatableExpression) left).canEquate(right)) {
-                    result = new ConstantBooleanExpression(getParseTree(),!((EquatableExpression) left).equate(getParseTree(), right).value);
+                    result = new ConstantBooleanExpression(getParseTree(),
+                            !((EquatableExpression) left).equate(getParseTree(), right).value);
                 }
                 break;
             case LESS_THAN:
