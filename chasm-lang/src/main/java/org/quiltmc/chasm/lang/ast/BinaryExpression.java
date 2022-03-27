@@ -3,191 +3,191 @@ package org.quiltmc.chasm.lang.ast;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.quiltmc.chasm.lang.ReductionContext;
-import org.quiltmc.chasm.lang.op.Addable;
-import org.quiltmc.chasm.lang.op.Equatable;
-import org.quiltmc.chasm.lang.op.Multiplicable;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.quiltmc.chasm.lang.Cache;
+import org.quiltmc.chasm.lang.ScopeStack;
+import org.quiltmc.chasm.lang.antlr.ChasmParser;
+import org.quiltmc.chasm.lang.op.AddableExpression;
+import org.quiltmc.chasm.lang.op.EquatableExpression;
+import org.quiltmc.chasm.lang.op.Expression;
+import org.quiltmc.chasm.lang.op.MultiplicableExpression;
 import org.quiltmc.chasm.lang.op.NumberLike;
 import org.quiltmc.chasm.lang.op.Subtractable;
 
-public class BinaryExpression implements Expression {
+public class BinaryExpression extends AbstractExpression {
     private final Expression left;
     private final Operation operation;
     private final Expression right;
 
-    public BinaryExpression(Expression left, Operation operation, Expression right) {
+    public BinaryExpression(ParseTree tree, Expression left, Operation operation, Expression right) {
+        super(tree);
         this.left = left;
         this.operation = operation;
         this.right = right;
     }
 
     @Override
-    public void resolve(String identifier, Expression value) {
-        left.resolve(identifier, value);
-        right.resolve(identifier, value);
+    public BinaryExpression resolve(ScopeStack scope) {
+        return new BinaryExpression(getParseTree(), left.resolve(scope), operation, right.resolve(scope));
     }
 
     @Override
-    public Expression reduce(ReductionContext context) {
-        Expression left = context.reduce(this.left);
-        Expression right = context.reduce(this.right);
+    public Expression reduce(Cache cache) {
+        Expression left = cache.reduceCached(this.left);
+        Expression right = cache.reduceCached(this.right);
 
         Expression result = null;
 
         switch (operation) {
             case ADD:
-                if (left instanceof Addable && ((Addable) left).canAdd(right)) {
-                    result = ((Addable) left).add(right);
+                if (left instanceof AddableExpression && ((AddableExpression) left).canAdd(right)) {
+                    result = ((AddableExpression) left).add(getParseTree(), right);
                 }
                 break;
             case SUBTRACT:
                 if (left instanceof Subtractable && ((Subtractable) left).canSubtract(right)) {
-                    result = ((Subtractable) left).subtract(right);
+                    result = ((Subtractable) left).subtract(getParseTree(), right);
                 }
                 break;
             case MULTIPLY:
-                if (left instanceof Multiplicable && ((Multiplicable) left).canMultiply(right)) {
-                    result = ((Multiplicable) left).multiply(right);
+                if (left instanceof MultiplicableExpression && ((MultiplicableExpression) left).canMultiply(right)) {
+                    result = ((MultiplicableExpression) left).multiply(getParseTree(), right);
                 }
                 break;
             case DIVIDE:
                 if (left instanceof NumberLike && ((NumberLike) left).canDivide(right)) {
-                    result = ((NumberLike) left).divide(right);
+                    result = ((NumberLike) left).divide(getParseTree(), right);
                 }
                 break;
             case MOD:
                 if (left instanceof NumberLike && ((NumberLike) left).canModulo(right)) {
-                    result = ((NumberLike) left).modulo(right);
+                    result = ((NumberLike) left).modulo(getParseTree(), right);
                 }
                 break;
             case EQUAL:
-                if (left instanceof NoneExpression) {
-                    result = new ConstantBooleanExpression(right instanceof NoneExpression);
-                } else if (right instanceof NoneExpression) {
-                    result = new ConstantBooleanExpression(false);
-                } else if (left instanceof Equatable && ((Equatable) left).canEquate(right)) {
-                    result = ((Equatable) left).equate(right);
+                if (left instanceof NullExpression) {
+                    result = new ConstantBooleanExpression(getParseTree(), right instanceof NullExpression);
+                } else if (right instanceof NullExpression) {
+                    result = new ConstantBooleanExpression(getParseTree(), false);
+                } else if (left instanceof EquatableExpression && ((EquatableExpression) left).canEquate(right)) {
+                    result = ((EquatableExpression) left).equate(getParseTree(), right);
                 }
                 break;
             case NOT_EQUAL:
-                if (left instanceof NoneExpression) {
-                    result = new ConstantBooleanExpression(!(right instanceof NoneExpression));
-                } else if (right instanceof NoneExpression) {
-                    result = new ConstantBooleanExpression(true);
-                } else if (left instanceof Equatable && ((Equatable) left).canEquate(right)) {
-                    result = new UnaryExpression(UnaryExpression.Operation.NOT, ((Equatable) left).equate(right));
+                if (left instanceof NullExpression) {
+                    result = new ConstantBooleanExpression(getParseTree(), !(right instanceof NullExpression));
+                } else if (right instanceof NullExpression) {
+                    result = new ConstantBooleanExpression(getParseTree(), true);
+                } else if (left instanceof EquatableExpression && ((EquatableExpression) left).canEquate(right)) {
+                    result = new ConstantBooleanExpression(getParseTree(),!((EquatableExpression) left).equate(getParseTree(), right).value);
                 }
                 break;
             case LESS_THAN:
                 if (left instanceof NumberLike && ((NumberLike) left).canCompare(right)) {
-                    result = ((NumberLike) left).lessThan(right);
+                    result = ((NumberLike) left).lessThan(getParseTree(), right);
                 }
                 break;
             case LESS_THAN_EQUAL:
                 if (left instanceof NumberLike && ((NumberLike) left).canCompare(right)) {
-                    result = ((NumberLike) left).lessThanOrEqual(right);
+                    result = ((NumberLike) left).lessThanOrEqual(getParseTree(), right);
                 }
                 break;
             case GREATER_THAN:
                 if (left instanceof NumberLike && ((NumberLike) left).canCompare(right)) {
-                    result = ((NumberLike) left).greaterThan(right);
+                    result = ((NumberLike) left).greaterThan(getParseTree(), right);
                 }
                 break;
             case GREATER_THAN_EQUAL:
                 if (left instanceof NumberLike && ((NumberLike) left).canCompare(right)) {
-                    result = ((NumberLike) left).greaterThanOrEqual(right);
+                    result = ((NumberLike) left).greaterThanOrEqual(getParseTree(), right);
                 }
                 break;
-            case AND:
+            case BITWISE_AND:
                 if (left instanceof NumberLike && ((NumberLike) left).canBitwiseAnd(right)) {
-                    result = ((NumberLike) left).bitwiseAnd(right);
+                    result = ((NumberLike) left).bitwiseAnd(getParseTree(), right);
                 }
                 break;
-            case OR:
+            case BITWISE_OR:
                 if (left instanceof NumberLike && ((NumberLike) left).canBitwiseOr(right)) {
-                    result = ((NumberLike) left).bitwiseOr(right);
+                    result = ((NumberLike) left).bitwiseOr(getParseTree(), right);
                 }
                 break;
-            case XOR:
+            case BITWISE_XOR:
                 if (left instanceof NumberLike && ((NumberLike) left).canBitwiseXor(right)) {
-                    result = ((NumberLike) left).bitwiseXor(right);
+                    result = ((NumberLike) left).bitwiseXor(getParseTree(), right);
                 }
                 break;
-            case SHL:
+            case SHIFT_LEFT:
                 if (left instanceof NumberLike && ((NumberLike) left).canLeftShift(right)) {
-                    result = ((NumberLike) left).leftShift(right);
+                    result = ((NumberLike) left).leftShift(getParseTree(), right);
                 }
                 break;
-            case SHR:
+            case SHIFT_RIGHT:
                 if (left instanceof NumberLike && ((NumberLike) left).canRightShift(right)) {
-                    result = ((NumberLike) left).rightShift(right);
+                    result = ((NumberLike) left).rightShift(getParseTree(), right);
                 }
                 break;
-            case USHR:
+            case UNSIGNED_SHIFT_RIGHT:
                 if (left instanceof NumberLike && ((NumberLike) left).canUnsignedRightShift(right)) {
-                    result = ((NumberLike) left).unsignedRightShift(right);
+                    result = ((NumberLike) left).unsignedRightShift(getParseTree(), right);
                 }
                 break;
             default:
         }
 
         if (result == null) {
-            throw new RuntimeException("Operation " + operation.getToken() + " is not implemented for "
+            throw new RuntimeException("Operation " + operation + " is not implemented for "
                     + left.getClass().getSimpleName() + " and " + right.getClass().getSimpleName());
         }
 
-        return context.reduce(result);
-    }
-
-    @Override
-    public BinaryExpression copy() {
-        return new BinaryExpression(left.copy(), operation, right.copy());
+        return cache.reduceCached(result);
     }
 
     public enum Operation {
-        MULTIPLY("*"),
-        DIVIDE("/"),
-        MOD("%"),
-        ADD("+"),
-        SUBTRACT("-"),
-        LESS_THAN("<"),
-        LESS_THAN_EQUAL("<="),
-        EQUAL("="),
-        NOT_EQUAL("!="),
-        GREATER_THAN_EQUAL(">="),
-        GREATER_THAN(">"),
-        AND("&"),
-        OR("|"),
-        XOR("^"),
-        SHL("<<"),
-        USHR(">>>"),
-        SHR(">>"),
+        MULTIPLY(ChasmParser.MULTIPLY),
+        DIVIDE(ChasmParser.DIVIDE),
+        MOD(ChasmParser.MODULO),
+        ADD(ChasmParser.PLUS),
+        SUBTRACT(ChasmParser.MINUS),
+        LESS_THAN(ChasmParser.LESS_THAN),
+        LESS_THAN_EQUAL(ChasmParser.LESS_THAN_EQUAL),
+        EQUAL(ChasmParser.EQUAL),
+        NOT_EQUAL(ChasmParser.NOT_EQUAL),
+        GREATER_THAN(ChasmParser.GREATER_THAN),
+        GREATER_THAN_EQUAL(ChasmParser.GREATER_THAN_EQUAL),
+        BITWISE_AND(ChasmParser.BITWISE_AND),
+        BITWISE_OR(ChasmParser.BITWISE_OR),
+        BITWISE_XOR(ChasmParser.BITWISE_XOR),
+        SHIFT_LEFT(ChasmParser.SHIFT_LEFT),
+        UNSIGNED_SHIFT_RIGHT(ChasmParser.UNSIGNED_SHIFT_RIGHT),
+        SHIFT_RIGHT(ChasmParser.SHIFT_RIGHT),
         ;
 
-        private static final Map<String, Operation> tokenToOperation = new HashMap<>();
+        private static final Map<Integer, Operation> tokenTypeToOperation = new HashMap<>();
 
         static {
             for (Operation op : Operation.values()) {
-                tokenToOperation.put(op.token, op);
+                tokenTypeToOperation.put(op.tokenType, op);
             }
         }
 
-        private final String token;
+        private final int tokenType;
 
-        Operation(String token) {
-            this.token = token;
+        Operation(int tokenType) {
+            this.tokenType = tokenType;
         }
 
-        public static Operation of(String token) {
-            final Operation operation = tokenToOperation.get(token);
+        public static Operation fromToken(Token token) {
+            Operation operation = tokenTypeToOperation.get(token.getType());
             if (operation == null) {
                 throw new RuntimeException("Unknown operation: " + token);
             }
             return operation;
         }
 
-        public String getToken() {
-            return token;
+        public String toString() {
+            return ChasmParser.VOCABULARY.getDisplayName(tokenType);
         }
     }
 }

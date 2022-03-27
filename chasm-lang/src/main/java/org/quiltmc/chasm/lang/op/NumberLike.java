@@ -1,11 +1,11 @@
 package org.quiltmc.chasm.lang.op;
 
-import org.quiltmc.chasm.lang.ast.Expression;
+import org.antlr.v4.runtime.tree.ParseTree;
 
-public interface NumberLike extends Addable, Subtractable, Multiplicable, Comparable {
-    Expression negate();
+public interface NumberLike extends AddableExpression, Subtractable, MultiplicableExpression, ComparableExpression {
+    Expression negate(ParseTree tree);
 
-    Expression invert();
+    Expression invert(ParseTree tree);
 
     boolean canDivide(Expression expression);
 
@@ -23,19 +23,19 @@ public interface NumberLike extends Addable, Subtractable, Multiplicable, Compar
 
     boolean canUnsignedRightShift(Expression expression);
 
-    Expression divide(Expression expression);
+    Expression divide(ParseTree tree, Expression expression);
 
-    Expression modulo(Expression expression);
+    Expression modulo(ParseTree tree, Expression expression);
 
-    Expression bitwiseAnd(Expression expression);
+    Expression bitwiseAnd(ParseTree tree, Expression expression);
 
-    Expression bitwiseOr(Expression expression);
+    Expression bitwiseOr(ParseTree tree, Expression expression);
 
-    Expression bitwiseXor(Expression expression);
+    Expression bitwiseXor(ParseTree tree, Expression expression);
 
-    Expression leftShift(Expression expression);
+    Expression leftShift(ParseTree tree, Expression expression);
 
-    Expression rightShift(Expression expression);
+    Expression rightShift(ParseTree tree, Expression expression);
 
-    Expression unsignedRightShift(Expression expression);
+    Expression unsignedRightShift(ParseTree tree, Expression expression);
 }

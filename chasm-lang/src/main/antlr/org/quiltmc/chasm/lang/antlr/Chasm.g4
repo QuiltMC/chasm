@@ -5,40 +5,39 @@ grammar Chasm;
 }
 
 file
-    : map EOF
+    : expression EOF
     ;
 
 expression
-    : IDENTIFIER # ReferenceExpression
+    : ('$'? IDENTIFIER) # ReferenceExpression
     | expression '.' IDENTIFIER # MemberExpression
-    | expression '.' '[' expression ']' # IndexExpression
-    | expression '.' '<' expression '>' # FilterExpression
+    | expression '[' expression ']' # IndexExpression
     | expression '(' expression ')' # CallExpression
     | map # MapExpression
     | list # ListExpression
     | literal # LiteralExpression
     | '(' expression ')' # GroupExpression
-    | op=('+' | '-' | '!' | '~') expression # UnaryExpression
-    | expression op=('*' | '/' | '%') expression # BinaryExpression
-    | expression op=('+' | '-') expression # BinaryExpression
-    | expression op=('<<' | '>>' | '>>>') expression # BinaryExpression
-    | expression op=('<' | '<=' | '>=' | '>') expression # BinaryExpression
-    | expression op=('=' | '!=') expression # BinaryExpression
-    | expression op='&' expression # BinaryExpression
-    | expression op='^' expression # BinaryExpression
-    | expression op='|' expression # BinaryExpression
-    | expression op='&&' expression # BinaryBooleanExpression
-    | expression op='||' expression # BinaryBooleanExpression
+    | op=(PLUS | MINUS | NOT | INVERT) expression # UnaryExpression
+    | expression op=(MULTIPLY | DIVIDE | MODULO) expression # BinaryExpression
+    | expression op=(PLUS | MINUS) expression # BinaryExpression
+    | expression op=(SHIFT_LEFT | SHIFT_RIGHT | UNSIGNED_SHIFT_RIGHT) expression # BinaryExpression
+    | expression op=(LESS_THAN | LESS_THAN_EQUAL | GREATER_THAN | GREATER_THAN_EQUAL) expression # BinaryExpression
+    | expression op=(EQUAL | NOT_EQUAL) expression # BinaryExpression
+    | expression op=BITWISE_AND expression # BinaryExpression
+    | expression op=BITWISE_XOR expression # BinaryExpression
+    | expression op=BITWISE_OR expression # BinaryExpression
+    | expression op=LOGICAL_AND expression # BinaryBooleanExpression
+    | expression op=LOGICAL_OR expression # BinaryBooleanExpression
     | <assoc=right> expression '?' expression ':' expression # TernaryExpression
     | IDENTIFIER '->' expression # LambdaExpression
     ;
 
 literal
-    : STRING # StringLiteral
-    | TYPE # TypeLiteral
-    | INTEGER # IntegerLiteral
+    : NULL # NullLiteral
     | BOOLEAN # BooleanLiteral
-    | NONE # NoneLiteral
+    | INTEGER # IntegerLiteral
+   // | FLOAT # FloatLiteral
+    | STRING # StringLiteral
     ;
 
 map
@@ -55,12 +54,33 @@ list
 
 WHITESPACE: (' '  | '\n' | '\r' | '\t') -> skip;
 
-OPERATOR: '+' | '-' | '*' | '/';
-
+NULL: 'null';
 BOOLEAN: 'true' | 'false';
-NONE: 'none';
-
-TYPE: 'T"' .*? '"';
+INTEGER: [+-]? [0-9]+ | '0x' [0-9a-fA-F]+ | '0b' [0-1]+;
+//FLOAT: [+-]? [0-9]+ '.' [0-9]+ ('e' [+-]? [0-9]+)?;
 STRING: '"' .*? '"';
-INTEGER: [+-]? [0-9]+;
-IDENTIFIER: [_$a-zA-Z] [_a-zA-Z0-9]*;
+
+IDENTIFIER: [_a-zA-Z] [_a-zA-Z0-9]*;
+
+// Operators
+PLUS: '+';
+MINUS: '-';
+NOT: '!';
+INVERT: '~';
+MULTIPLY: '*';
+DIVIDE: '/';
+MODULO: '%';
+SHIFT_LEFT: '<<';
+SHIFT_RIGHT: '>>';
+UNSIGNED_SHIFT_RIGHT: '>>>';
+LESS_THAN: '<';
+LESS_THAN_EQUAL: '<=';
+GREATER_THAN: '>';
+GREATER_THAN_EQUAL: '>=';
+EQUAL: '==';
+NOT_EQUAL: '!=';
+BITWISE_AND: '&';
+BITWISE_XOR: '^';
+BITWISE_OR: '|';
+LOGICAL_AND: '&&';
+LOGICAL_OR: '||';

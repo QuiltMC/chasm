@@ -1,12 +1,9 @@
 package org.quiltmc.chasm.lang.ast;
 
-public class ConstantBooleanExpression extends LiteralExpression<Boolean> {
-    public ConstantBooleanExpression(boolean value) {
-        super(value);
-    }
+import org.antlr.v4.runtime.tree.ParseTree;
 
-    @Override
-    public ConstantBooleanExpression copy() {
-        return new ConstantBooleanExpression(value);
+public class ConstantBooleanExpression extends LiteralExpression<Boolean> {
+    public ConstantBooleanExpression(ParseTree tree, boolean value) {
+        super(tree, value);
     }
 }

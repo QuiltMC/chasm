@@ -75,7 +75,7 @@ public class MethodNodeReader {
         for (Node paramNode : params) {
             MapNode param = Node.asMap(paramNode);
             remappedLocalIndexes.put(Node.asValue(param.get(NodeConstants.NAME)).getValueAsString(), nextLocalIndex[0]);
-            Type type = Node.asValue(param.get(NodeConstants.TYPE)).getValueAs(Type.class);
+            Type type = Type.getType(Node.asValue(param.get(NodeConstants.TYPE)).getValueAsString());
             nextLocalIndex[0] += type.getSize();
         }
 
@@ -531,12 +531,12 @@ public class MethodNodeReader {
         int access = Node.asValue(methodNode.get(NodeConstants.ACCESS)).getValueAsInt();
         String name = Node.asValue(methodNode.get(NodeConstants.NAME)).getValueAsString();
 
-        Type returnType = Node.asValue(methodNode.get(NodeConstants.RETURN_TYPE)).getValueAs(Type.class);
+        Type returnType = Type.getType(Node.asValue(methodNode.get(NodeConstants.RETURN_TYPE)).getValueAsString());
         ListNode parameters = Node.asList(methodNode.get(NodeConstants.PARAMETERS));
         Type[] parameterTypes = new Type[parameters.size()];
         for (int i = 0; i < parameters.size(); i++) {
             MapNode parameterNode = Node.asMap(parameters.get(i));
-            parameterTypes[i] = Node.asValue(parameterNode.get(NodeConstants.TYPE)).getValueAs(Type.class);
+            parameterTypes[i] = Type.getType(Node.asValue(parameterNode.get(NodeConstants.TYPE)).getValueAsString());
         }
         String descriptor = Type.getMethodDescriptor(returnType, parameterTypes);
 

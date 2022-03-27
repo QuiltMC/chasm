@@ -1,9 +1,9 @@
 package org.quiltmc.chasm.lang.op;
 
-import org.quiltmc.chasm.lang.ast.Expression;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 public interface Subtractable {
     boolean canSubtract(Expression expression);
 
-    Expression subtract(Expression expression);
+    Expression subtract(ParseTree tree, Expression expression);
 }

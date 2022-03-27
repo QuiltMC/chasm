@@ -1,38 +1,38 @@
 package org.quiltmc.chasm.lang.ast;
 
-import org.quiltmc.chasm.lang.ReductionContext;
-import org.quiltmc.chasm.lang.op.Callable;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.quiltmc.chasm.lang.Cache;
+import org.quiltmc.chasm.lang.ScopeStack;
+import org.quiltmc.chasm.lang.op.Expression;
+import org.quiltmc.chasm.lang.op.FunctionExpression;
 
-public class CallExpression implements Expression {
+public class CallExpression extends AbstractExpression {
     private final Expression function;
     private final Expression argument;
 
-    public CallExpression(Expression function, Expression argument) {
+    public CallExpression(ParseTree tree, Expression function, Expression argument) {
+        super(tree);
         this.function = function;
         this.argument = argument;
     }
 
     @Override
-    public void resolve(String identifier, Expression value) {
-        function.resolve(identifier, value);
-        argument.resolve(identifier, value);
+    public Expression resolve(ScopeStack scope) {
+        return new CallExpression(getParseTree(), function.resolve(scope), argument.resolve(scope));
     }
 
     @Override
-    public Expression reduce(ReductionContext context) {
-        Expression function = context.reduce(this.function);
-        Expression argument = context.reduce(this.argument);
+    public Expression reduce(Cache cache) {
+        Expression function = cache.reduceCached(this.function);
+        Expression argument = cache.reduceCached(this.argument);
 
-        if (function instanceof Callable) {
-            Expression result = ((Callable) function).call(argument);
-            return context.reduce(result);
+        if (function instanceof FunctionExpression) {
+            FunctionExpression functionExpression = (FunctionExpression) function;
+            Expression result = cache.callCached(functionExpression, argument);
+            return cache.reduceCached(result);
+        } else {
+            // TODO: Proper Error
+            throw new RuntimeException("Can only call functions.");
         }
-
-        throw new RuntimeException("Can only call functions.");
-    }
-
-    @Override
-    public CallExpression copy() {
-        return new CallExpression(function.copy(), argument.copy());
     }
 }

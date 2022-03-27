@@ -2,13 +2,17 @@ package org.quiltmc.chasm.lang.ast;
 
 import java.util.Objects;
 
-import org.quiltmc.chasm.lang.ReductionContext;
-import org.quiltmc.chasm.lang.op.Equatable;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.quiltmc.chasm.lang.Cache;
+import org.quiltmc.chasm.lang.ScopeStack;
+import org.quiltmc.chasm.lang.op.EquatableExpression;
+import org.quiltmc.chasm.lang.op.Expression;
 
-public abstract class LiteralExpression<T> implements Expression, Equatable {
+public abstract class LiteralExpression<T> extends AbstractExpression implements EquatableExpression {
     protected final T value;
 
-    protected LiteralExpression(T value) {
+    public LiteralExpression(ParseTree tree, T value) {
+        super(tree);
         this.value = value;
     }
 
@@ -17,11 +21,12 @@ public abstract class LiteralExpression<T> implements Expression, Equatable {
     }
 
     @Override
-    public void resolve(String identifier, Expression value) {
+    public LiteralExpression<T> resolve(ScopeStack scope) {
+        return this;
     }
 
     @Override
-    public Expression reduce(ReductionContext context) {
+    public LiteralExpression<T> reduce(Cache cache) {
         return this;
     }
 
@@ -43,12 +48,17 @@ public abstract class LiteralExpression<T> implements Expression, Equatable {
     }
 
     @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    @Override
     public boolean canEquate(Expression expression) {
         return expression instanceof LiteralExpression;
     }
 
     @Override
-    public Expression equate(Expression expression) {
-        return new ConstantBooleanExpression(Objects.equals(value, ((LiteralExpression<?>) expression).value));
+    public ConstantBooleanExpression equate(ParseTree tree, Expression expression) {
+        return new ConstantBooleanExpression(tree, Objects.equals(value, ((LiteralExpression<?>) expression).value));
     }
 }

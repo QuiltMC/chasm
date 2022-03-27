@@ -3,26 +3,32 @@ package org.quiltmc.chasm.lang.ast;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.quiltmc.chasm.lang.ReductionContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.quiltmc.chasm.lang.Cache;
+import org.quiltmc.chasm.lang.ScopeStack;
+import org.quiltmc.chasm.lang.antlr.ChasmParser;
+import org.quiltmc.chasm.lang.op.Expression;
 import org.quiltmc.chasm.lang.op.NumberLike;
 
-public class UnaryExpression implements Expression {
+public class UnaryExpression extends AbstractExpression {
     private final Operation operation;
     private final Expression inner;
 
-    public UnaryExpression(Operation operation, Expression inner) {
+    public UnaryExpression(ParseTree tree, Operation operation, Expression inner) {
+        super(tree);
         this.operation = operation;
         this.inner = inner;
     }
 
     @Override
-    public void resolve(String identifier, Expression value) {
-        this.inner.resolve(identifier, value);
+    public Expression resolve(ScopeStack scope) {
+        return new UnaryExpression(getParseTree(), operation, inner.resolve(scope));
     }
 
     @Override
-    public Expression reduce(ReductionContext context) {
-        Expression inner = context.reduce(this.inner);
+    public Expression reduce(Cache cache) {
+        Expression inner = cache.reduceCached(this.inner);
 
         Expression result = null;
 
@@ -30,21 +36,21 @@ public class UnaryExpression implements Expression {
             case PLUS:
                 result = inner;
                 break;
-            case MIN: {
+            case MINUS: {
                 if (inner instanceof NumberLike) {
-                    result = ((NumberLike) inner).negate();
+                    result = ((NumberLike) inner).negate(getParseTree());
                 }
                 break;
             }
-            case INV: {
+            case INVERT: {
                 if (inner instanceof NumberLike) {
-                    result = ((NumberLike) inner).invert();
+                    result = ((NumberLike) inner).invert(getParseTree());
                 }
                 break;
             }
             case NOT: {
                 if (inner instanceof ConstantBooleanExpression) {
-                    result = new ConstantBooleanExpression(!((ConstantBooleanExpression) inner).value);
+                    result = new ConstantBooleanExpression(getParseTree(), !((ConstantBooleanExpression) inner).value);
                 }
                 break;
             }
@@ -52,45 +58,44 @@ public class UnaryExpression implements Expression {
         }
 
         if (result == null) {
-            throw new RuntimeException("Operation " + operation.getToken() + " is not implemented for "
+            throw new RuntimeException("Operation " + operation + " is not implemented for "
                     + inner.getClass().getSimpleName());
         }
 
-        return context.reduce(result);
-    }
-
-    @Override
-    public UnaryExpression copy() {
-        return new UnaryExpression(operation, inner.copy());
+        return cache.reduceCached(result);
     }
 
     public enum Operation {
-        PLUS("+"),
-        MIN("-"),
-        NOT("!"),
-        INV("~"),
+        PLUS(ChasmParser.PLUS),
+        MINUS(ChasmParser.MINUS),
+        NOT(ChasmParser.NOT),
+        INVERT(ChasmParser.INVERT),
         ;
 
-        private static final Map<String, Operation> tokenToOperation = new HashMap<>();
+        private static final Map<Integer, Operation> tokenTypeToOperation = new HashMap<>();
 
         static {
             for (Operation op : Operation.values()) {
-                tokenToOperation.put(op.token, op);
+                tokenTypeToOperation.put(op.tokenType, op);
             }
         }
 
-        private final String token;
+        private final int tokenType;
 
-        Operation(String token) {
-            this.token = token;
+        Operation(int tokenType) {
+            this.tokenType = tokenType;
         }
 
-        public static Operation of(String token) {
-            return tokenToOperation.get(token);
+        public static Operation fromToken(Token token) {
+            Operation operation = tokenTypeToOperation.get(token.getType());
+            if (operation == null) {
+                throw new RuntimeException("Unknown operation: " + token);
+            }
+            return operation;
         }
 
-        public String getToken() {
-            return token;
+        public String toString() {
+            return ChasmParser.VOCABULARY.getDisplayName(tokenType);
         }
     }
 }

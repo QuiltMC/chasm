@@ -1,15 +1,12 @@
 package org.quiltmc.chasm.lang.ast;
 
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.quiltmc.chasm.lang.op.Expression;
 import org.quiltmc.chasm.lang.op.NumberLike;
 
 public class IntegerExpression extends LiteralExpression<Integer> implements NumberLike {
-    public IntegerExpression(int value) {
-        super(value);
-    }
-
-    @Override
-    public IntegerExpression copy() {
-        return new IntegerExpression(value);
+    public IntegerExpression(ParseTree tree, int value) {
+        super(tree, value);
     }
 
     @Override
@@ -18,9 +15,9 @@ public class IntegerExpression extends LiteralExpression<Integer> implements Num
     }
 
     @Override
-    public Expression add(Expression expression) {
+    public Expression add(ParseTree tree, Expression expression) {
         int result = value + ((IntegerExpression) expression).value;
-        return new IntegerExpression(result);
+        return new IntegerExpression(tree, result);
     }
 
     @Override
@@ -29,9 +26,9 @@ public class IntegerExpression extends LiteralExpression<Integer> implements Num
     }
 
     @Override
-    public Expression subtract(Expression expression) {
+    public Expression subtract(ParseTree tree, Expression expression) {
         int result = value - ((IntegerExpression) expression).value;
-        return new IntegerExpression(result);
+        return new IntegerExpression(tree, result);
     }
 
     @Override
@@ -40,19 +37,19 @@ public class IntegerExpression extends LiteralExpression<Integer> implements Num
     }
 
     @Override
-    public Expression multiply(Expression expression) {
+    public Expression multiply(ParseTree tree, Expression expression) {
         int result = value * ((IntegerExpression) expression).value;
-        return new IntegerExpression(result);
+        return new IntegerExpression(tree, result);
     }
 
     @Override
-    public Expression negate() {
-        return new IntegerExpression(-value);
+    public Expression negate(ParseTree tree) {
+        return new IntegerExpression(tree, -value);
     }
 
     @Override
-    public Expression invert() {
-        return new IntegerExpression(~value);
+    public Expression invert(ParseTree tree) {
+        return new IntegerExpression(tree, ~value);
     }
 
     @Override
@@ -96,51 +93,51 @@ public class IntegerExpression extends LiteralExpression<Integer> implements Num
     }
 
     @Override
-    public Expression divide(Expression expression) {
+    public Expression divide(ParseTree tree, Expression expression) {
         int result = value / ((IntegerExpression) expression).value;
-        return new IntegerExpression(result);
+        return new IntegerExpression(tree, result);
     }
 
     @Override
-    public Expression modulo(Expression expression) {
+    public Expression modulo(ParseTree tree, Expression expression) {
         int result = value % ((IntegerExpression) expression).value;
-        return new IntegerExpression(result);
+        return new IntegerExpression(tree, result);
     }
 
     @Override
-    public Expression bitwiseAnd(Expression expression) {
+    public Expression bitwiseAnd(ParseTree tree, Expression expression) {
         int result = value & ((IntegerExpression) expression).value;
-        return new IntegerExpression(result);
+        return new IntegerExpression(tree, result);
     }
 
     @Override
-    public Expression bitwiseOr(Expression expression) {
+    public Expression bitwiseOr(ParseTree tree, Expression expression) {
         int result = value | ((IntegerExpression) expression).value;
-        return new IntegerExpression(result);
+        return new IntegerExpression(tree, result);
     }
 
     @Override
-    public Expression bitwiseXor(Expression expression) {
+    public Expression bitwiseXor(ParseTree tree, Expression expression) {
         int result = value ^ ((IntegerExpression) expression).value;
-        return new IntegerExpression(result);
+        return new IntegerExpression(tree, result);
     }
 
     @Override
-    public Expression leftShift(Expression expression) {
+    public Expression leftShift(ParseTree tree, Expression expression) {
         int result = value << ((IntegerExpression) expression).value;
-        return new IntegerExpression(result);
+        return new IntegerExpression(tree, result);
     }
 
     @Override
-    public Expression rightShift(Expression expression) {
+    public Expression rightShift(ParseTree tree, Expression expression) {
         int result = value >> ((IntegerExpression) expression).value;
-        return new IntegerExpression(result);
+        return new IntegerExpression(tree, result);
     }
 
     @Override
-    public Expression unsignedRightShift(Expression expression) {
+    public Expression unsignedRightShift(ParseTree tree, Expression expression) {
         int result = value >>> ((IntegerExpression) expression).value;
-        return new IntegerExpression(result);
+        return new IntegerExpression(tree, result);
     }
 
     @Override
@@ -149,22 +146,22 @@ public class IntegerExpression extends LiteralExpression<Integer> implements Num
     }
 
     @Override
-    public Expression lessThan(Expression expression) {
-        return new ConstantBooleanExpression(value < ((IntegerExpression) expression).value);
+    public Expression lessThan(ParseTree tree, Expression expression) {
+        return new ConstantBooleanExpression(tree, value < ((IntegerExpression) expression).value);
     }
 
     @Override
-    public Expression lessThanOrEqual(Expression expression) {
-        return new ConstantBooleanExpression(value <= ((IntegerExpression) expression).value);
+    public Expression lessThanOrEqual(ParseTree tree, Expression expression) {
+        return new ConstantBooleanExpression(tree, value <= ((IntegerExpression) expression).value);
     }
 
     @Override
-    public Expression greaterThan(Expression expression) {
-        return new ConstantBooleanExpression(value > ((IntegerExpression) expression).value);
+    public Expression greaterThan(ParseTree tree, Expression expression) {
+        return new ConstantBooleanExpression(tree, value > ((IntegerExpression) expression).value);
     }
 
     @Override
-    public Expression greaterThanOrEqual(Expression expression) {
-        return new ConstantBooleanExpression(value >= ((IntegerExpression) expression).value);
+    public Expression greaterThanOrEqual(ParseTree tree, Expression expression) {
+        return new ConstantBooleanExpression(tree, value >= ((IntegerExpression) expression).value);
     }
 }
