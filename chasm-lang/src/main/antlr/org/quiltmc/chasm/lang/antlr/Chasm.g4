@@ -77,7 +77,7 @@ LESS_THAN: '<';
 LESS_THAN_EQUAL: '<=';
 GREATER_THAN: '>';
 GREATER_THAN_EQUAL: '>=';
-EQUAL: '==';
+EQUAL: '=';
 NOT_EQUAL: '!=';
 BITWISE_AND: '&';
 BITWISE_XOR: '^';

@@ -24,7 +24,7 @@ public class BasicTest {
     public void recursionTest() {
         String test = """
                 {
-                    run: state -> state.count == 0 ? "Done" : run({ count: state.count - 1 })
+                    run: state -> state.count = 0 ? "Done" : run({ count: state.count - 1 })
                 }
                 """;
 
@@ -70,7 +70,7 @@ public class BasicTest {
     public void recursionTest2() {
         String test = """
                 {
-                    run: state -> state == 0 ? "Done" : run(state - 1)
+                    run: state -> state = 0 ? "Done" : run(state - 1)
                 }
                 """;
 
@@ -99,8 +99,8 @@ public class BasicTest {
                     lambda: arg -> arg + 2,
                     call: lambda(4),
                     ternary: false ? "true" : "false",
-                    equals: 5 == 3,
-                    fibonacci: val -> val == 1 ? 1 : val == 2 ? 1 : fibonacci(val - 1) + fibonacci(val - 2),
+                    equals: 5 = 3,
+                    fibonacci: val -> val = 1 ? 1 : val = 2 ? 1 : fibonacci(val - 1) + fibonacci(val - 2),
                     call_fib: fibonacci(46),
                     curry: first -> second -> first - second,
                     call_curry: curry(5)(3),
@@ -111,8 +111,8 @@ public class BasicTest {
                     concat: [1, 2] + [3, 4],
                     list_concat: [1, 2] + list,
                     filter_source: [{name: "hi"}, {name: "how"}, {name: "are"}, {name: "you"}],
-                    filter: filter_source[entry -> entry.name[0] == "h"],
-                    compareWeird: arg -> arg > 3 == arg < 5 * -arg + 1000,
+                    filter: filter_source[entry -> entry.name[0] = "h"],
+                    compareWeird: arg -> arg > 3 = arg < 5 * -arg + 1000,
                     test: arg -> arg.a && arg.b || arg.c && arg.d,
                     test_call: test({ a: true, b: false, c: true, d: true }),
                     binop: x -> (x & ~7) | 1,
@@ -144,7 +144,7 @@ public class BasicTest {
                 {
                     id: "exampleTransformer",
                     target_name: "TestClass",
-                    target_class: classes[c -> c.name == target_name][0],
+                    target_class: classes[c -> c.name = target_name][0],
                     transformations: [
                         {
                             target: {
@@ -201,23 +201,23 @@ public class BasicTest {
         // TODO: remove len when there is a builtin length function
         String transformerString = """
                 {
-                    len_helper: map -> map.list[map.index] == null ? map.index
+                    len_helper: map -> map.list[map.index] = null ? map.index
                         : len_helper({list: map.list, index: map.index + 1}),
                     len: l -> len_helper({list: l, index: 0}),
                     tail: info -> {
-                        node: target_class.methods[m -> m.name == info.target_method][0].code.instructions,
+                        node: target_class.methods[m -> m.name = info.target_method][0].code.instructions,
                         start: len(transformations[info.index].target.node) * 2 - 3,
                         end: transformations[info.index].target.start
                     },
                     id: "exampleTransformer",
                     target_name: "TestLocalVariables",
-                    target_class: classes[c -> c.name == target_name][0],
+                    target_class: classes[c -> c.name = target_name][0],
                     transformations: [
                         {
                             target: tail({target_method: "staticMethod", index: 0}),
                             sources: {
                                 var_name: {
-                                    node: transformations[0].target.node[i -> i.opcode == 54][0].var
+                                    node: transformations[0].target.node[i -> i.opcode = 54][0].var
                                 },
                             },
                             apply: args -> [
@@ -232,7 +232,7 @@ public class BasicTest {
                             target: tail({target_method: "instanceMethod", index: 1}),
                             sources: {
                                 var_name: {
-                                    node: transformations[1].target.node[i -> i.opcode == 54][0].var
+                                    node: transformations[1].target.node[i -> i.opcode = 54][0].var
                                 },
                             },
                             apply: args -> [
@@ -247,11 +247,11 @@ public class BasicTest {
                             target: tail({target_method: "mergeVariable", index: 2}),
                             sources: {
                                 var1: {
-                                    node: transformations[2].target.node[i -> i.opcode == 54][0].var,
+                                    node: transformations[2].target.node[i -> i.opcode = 54][0].var,
                                 },
                                 var2: {
                                     node: transformations[2].target.node
-                                    [i -> i.opcode == 54 ? i.var == transformations[2].sources.var1.node
+                                    [i -> i.opcode = 54 ? i.var = transformations[2].sources.var1.node
                                         ? false : true : false]
                                     [0].var
                                 }
@@ -294,7 +294,7 @@ public class BasicTest {
         String test = """
                 {
                     data_size: 20,
-                    init_list: args -> args.length == 0 ? [] :
+                    init_list: args -> args.length = 0 ? [] :
                         [args.value] + init_list({value: args.value, length: args.length - 1}),
                     init: {
                         ptr: 0,
@@ -310,22 +310,22 @@ public class BasicTest {
                         out: []
                     },
                     set: args ->
-                        args.start == args.length ? args.result : set({
+                        args.start = args.length ? args.result : set({
                             start: args.start + 1,
-                            result: args.result + [args.start == args.index ? args.value : args.list[args.start]],
+                            result: args.result + [args.start = args.index ? args.value : args.list[args.start]],
                             list: args.list,
                             length: args.length,
                             index: args.index,
                             value: args.value
                         }),
                     jmp_forward: args ->
-                        args.depth == 0 ? args.pc :
-                        args.program[args.pc] == "[" ? jmp_forward({
+                        args.depth = 0 ? args.pc :
+                        args.program[args.pc] = "[" ? jmp_forward({
                             depth: args.depth + 1,
                             program: args.program,
                             pc: args.pc + 1
                         }) :
-                        args.program[args.pc] == "]" ? jmp_forward({
+                        args.program[args.pc] = "]" ? jmp_forward({
                             depth: args.depth - 1,
                             program: args.program,
                             pc: args.pc + 1
@@ -336,13 +336,13 @@ public class BasicTest {
                             pc: args.pc + 1
                         }),
                     jmp_back: args ->
-                        args.depth == 0 ? args.pc + 2 :
-                        args.program[args.pc] == "[" ?  jmp_back({
+                        args.depth = 0 ? args.pc + 2 :
+                        args.program[args.pc] = "[" ?  jmp_back({
                             depth: args.depth - 1,
                             program: args.program,
                             pc: args.pc - 1
                         }) :
-                        args.program[args.pc] == "]" ? jmp_back({
+                        args.program[args.pc] = "]" ? jmp_back({
                             depth: args.depth + 1,
                             program: args.program,
                             pc: args.pc - 1
@@ -353,29 +353,29 @@ public class BasicTest {
                             pc: args.pc - 1
                         }),
                     run: state ->
-                        state.program[state.pc] == null ? state.out :
-                        state.program[state.pc] == ">" ? run({
+                        state.program[state.pc] = null ? state.out :
+                        state.program[state.pc] = ">" ? run({
                             ptr: state.ptr + 1,
                             data: state.data,
                             pc: state.pc + 1,
                             program: state.program,
                             out: state.out
                         }) :
-                        state.program[state.pc] == "<" ? run({
+                        state.program[state.pc] = "<" ? run({
                             ptr: state.ptr - 1,
                             data: state.data,
                             pc: state.pc + 1,
                             program: state.program,
                             out: state.out
                         }) :
-                        state.program[state.pc] == "." ? run({
+                        state.program[state.pc] = "." ? run({
                             ptr: state.ptr,
                             data: state.data,
                             pc: state.pc + 1,
                             program: state.program,
                             out: state.out + [state.data[state.ptr]]
                         }) :
-                        state.program[state.pc] == "+" ? run({
+                        state.program[state.pc] = "+" ? run({
                             ptr: state.ptr,
                             data: set({
                                 start: 0,
@@ -389,7 +389,7 @@ public class BasicTest {
                             program: state.program,
                             out: state.out
                         }) :
-                        state.program[state.pc] == "-" ? run({
+                        state.program[state.pc] = "-" ? run({
                             ptr: state.ptr,
                             data: set({
                                 start: 0,
@@ -403,10 +403,10 @@ public class BasicTest {
                             program: state.program,
                             out: state.out
                         }) :
-                        state.program[state.pc] == "[" ? run({
+                        state.program[state.pc] = "[" ? run({
                             ptr: state.ptr,
                             data: state.data,
-                            pc: state.data[state.ptr] == 0 ?
+                            pc: state.data[state.ptr] = 0 ?
                                 jmp_forward({
                                     depth: 1,
                                     pc: state.pc + 1,
@@ -416,10 +416,10 @@ public class BasicTest {
                             program: state.program,
                             out: state.out
                         }) :
-                        state.program[state.pc] == "]" ? run({
+                        state.program[state.pc] = "]" ? run({
                             ptr: state.ptr,
                             data: state.data,
-                            pc: state.data[state.ptr] == 0 ?
+                            pc: state.data[state.ptr] = 0 ?
                                 state.pc + 1 :
                                 jmp_back({
                                     depth: 1,
