@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.antlr.v4.runtime.CharStreams;
@@ -13,6 +15,7 @@ import org.quiltmc.chasm.api.ClassData;
 import org.quiltmc.chasm.api.util.ClassLoaderClassInfoProvider;
 import org.quiltmc.chasm.lang.ChasmLangTransformer;
 import org.quiltmc.chasm.lang.Evaluator;
+import org.quiltmc.chasm.lang.Intrinsics;
 import org.quiltmc.chasm.lang.Scope;
 import org.quiltmc.chasm.lang.ast.IntegerExpression;
 import org.quiltmc.chasm.lang.ast.StringExpression;
@@ -201,9 +204,6 @@ public class BasicTest {
         // TODO: remove len when there is a builtin length function
         String transformerString = """
                 {
-                    len_helper: map -> map.list[map.index] = null ? map.index
-                        : len_helper({list: map.list, index: map.index + 1}),
-                    len: l -> len_helper({list: l, index: 0}),
                     tail: info -> {
                         node: target_class.methods[m -> m.name = info.target_method][0].code.instructions,
                         start: len(transformations[info.index].target.node) * 2 - 3,
@@ -274,6 +274,7 @@ public class BasicTest {
                 """;
 
         Evaluator evaluator = new Evaluator();
+        evaluator.getScope().push(Intrinsics.SCOPE);
         Expression parsed = Expression.parse(CharStreams.fromString(transformerString));
         ChasmLangTransformer transformer = new ChasmLangTransformer(evaluator, parsed);
         processor.addTransformer(transformer);

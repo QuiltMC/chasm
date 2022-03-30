@@ -33,4 +33,9 @@ public class SimpleListExpression extends AbstractListExpression {
     public List<Expression> getEntries() {
         return entries;
     }
+
+    @Override
+    public int getLength() {
+        return entries.size();
+    }
 }

@@ -35,4 +35,9 @@ public class ListNodeExpression extends AbstractListExpression implements NodeEx
     public Iterator<Expression> iterator() {
         return listNode.stream().map(n -> NodeExpression.from(getParseTree(), n)).iterator();
     }
+
+    @Override
+    public int getLength() {
+        return listNode.size();
+    }
 }
