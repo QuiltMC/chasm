@@ -1,42 +1,42 @@
 package org.quiltmc.chasm.lang.ast;
 
-import org.quiltmc.chasm.lang.ReductionContext;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.quiltmc.chasm.lang.Cache;
+import org.quiltmc.chasm.lang.ScopeStack;
+import org.quiltmc.chasm.lang.op.Expression;
 
-public class TernaryExpression implements Expression {
+public class TernaryExpression extends AbstractExpression {
     private final Expression condition;
     private final Expression trueExpression;
     private final Expression falseExpression;
 
-    public TernaryExpression(Expression condition, Expression trueExpression, Expression falseExpression) {
+    public TernaryExpression(ParseTree tree,
+                              Expression condition, Expression trueExpression, Expression falseExpression) {
+        super(tree);
         this.condition = condition;
         this.trueExpression = trueExpression;
         this.falseExpression = falseExpression;
     }
 
     @Override
-    public void resolve(String identifier, Expression value) {
-        condition.resolve(identifier, value);
-        trueExpression.resolve(identifier, value);
-        falseExpression.resolve(identifier, value);
+    public Expression resolve(ScopeStack scope) {
+        return new TernaryExpression(getParseTree(), condition.resolve(scope), trueExpression.resolve(scope),
+                falseExpression.resolve(
+                        scope));
     }
 
     @Override
-    public Expression reduce(ReductionContext context) {
-        Expression condition = context.reduce(this.condition);
+    public Expression reduce(Cache cache) {
+        Expression condition = cache.reduceCached(this.condition);
 
         if (condition instanceof ConstantBooleanExpression) {
             if (((ConstantBooleanExpression) condition).getValue()) {
-                return context.reduce(trueExpression);
+                return cache.reduceCached(trueExpression);
             } else {
-                return context.reduce(falseExpression);
+                return cache.reduceCached(falseExpression);
             }
         }
 
         throw new RuntimeException("Condition in ternary must be a boolean.");
-    }
-
-    @Override
-    public TernaryExpression copy() {
-        return new TernaryExpression(condition.copy(), trueExpression.copy(), falseExpression.copy());
     }
 }

@@ -81,13 +81,13 @@ public class ChasmMethodVisitor extends MethodVisitor {
         Type[] argumentTypes = Type.getArgumentTypes(descriptor);
         for (int i = 0; i < argumentTypes.length; i++) {
             MapNode parameterNode = new LinkedHashMapNode();
-            parameterNode.put(NodeConstants.TYPE, new ValueNode(argumentTypes[i]));
+            parameterNode.put(NodeConstants.TYPE, new ValueNode(argumentTypes[i].toString()));
             parameterNode.put(NodeConstants.NAME, new ValueNode("P" + i));
             this.parameters.add(parameterNode);
         }
 
         Type returnType = Type.getReturnType(descriptor);
-        methodNode.put(NodeConstants.RETURN_TYPE, new ValueNode(returnType));
+        methodNode.put(NodeConstants.RETURN_TYPE, new ValueNode(returnType.toString()));
 
         methodNode.put(NodeConstants.SIGNATURE, new ValueNode(signature));
 
@@ -625,7 +625,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
     private MapNode makeLocal(int index, Type type) {
         MapNode node = new LinkedHashMapNode();
         node.put(NodeConstants.INDEX, new ValueNode(index));
-        node.put(NodeConstants.TYPE, new ValueNode(type));
+        node.put(NodeConstants.TYPE, new ValueNode(type.toString()));
         return node;
     }
 }

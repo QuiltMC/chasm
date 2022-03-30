@@ -1,31 +1,18 @@
 package org.quiltmc.chasm.lang.ast;
 
-import org.quiltmc.chasm.lang.op.Addable;
-import org.quiltmc.chasm.lang.op.Indexable;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.quiltmc.chasm.lang.op.AddableExpression;
+import org.quiltmc.chasm.lang.op.Expression;
+import org.quiltmc.chasm.lang.op.IndexableExpression;
 
-public class StringExpression extends LiteralExpression<String> implements Indexable, Addable {
-    public StringExpression(String value) {
-        super(value);
+public class StringExpression extends LiteralExpression<String> implements AddableExpression, IndexableExpression {
+    public StringExpression(ParseTree tree, String value) {
+        super(tree, value);
     }
 
     @Override
-    public StringExpression copy() {
-        return new StringExpression(value);
-    }
-
-    @Override
-    public boolean canIndex(Expression expression) {
-        return expression instanceof IntegerExpression;
-    }
-
-    @Override
-    public Expression index(Expression expression) {
-        int index = ((IntegerExpression) expression).getValue();
-        if (index >= value.length()) {
-            return Expression.none();
-        }
-
-        return new StringExpression(String.valueOf(value.charAt(index)));
+    public String toString() {
+        return value;
     }
 
     @Override
@@ -34,7 +21,20 @@ public class StringExpression extends LiteralExpression<String> implements Index
     }
 
     @Override
-    public Expression add(Expression expression) {
-        return new StringExpression(value + ((StringExpression) expression).getValue());
+    public Expression add(ParseTree tree, Expression expression) {
+        return new StringExpression(tree, value + ((StringExpression) expression).getValue());
+    }
+
+    @Override
+    public boolean canIndex(Expression expression) {
+        return expression instanceof IntegerExpression;
+    }
+
+    @Override
+    public Expression index(ParseTree tree, Expression expression) {
+        int i = ((IntegerExpression) expression).getValue().intValue();
+        return 0 <= i && i < value.length()
+                ? new StringExpression(tree, Character.toString(value.charAt(i)))
+                : new NullExpression(tree);
     }
 }

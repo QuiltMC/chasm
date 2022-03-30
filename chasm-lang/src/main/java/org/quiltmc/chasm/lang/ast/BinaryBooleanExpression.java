@@ -3,50 +3,55 @@ package org.quiltmc.chasm.lang.ast;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.quiltmc.chasm.lang.ReductionContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.quiltmc.chasm.lang.Cache;
+import org.quiltmc.chasm.lang.ScopeStack;
+import org.quiltmc.chasm.lang.antlr.ChasmParser;
+import org.quiltmc.chasm.lang.op.Expression;
 
-public class BinaryBooleanExpression implements Expression {
+public class BinaryBooleanExpression extends AbstractExpression {
     private final Expression left;
     private final Operation operation;
     private final Expression right;
 
-    public BinaryBooleanExpression(Expression left, Operation operation, Expression right) {
+    public BinaryBooleanExpression(ParseTree tree, Expression left, Operation operation, Expression right) {
+        super(tree);
         this.left = left;
         this.operation = operation;
         this.right = right;
     }
 
     @Override
-    public void resolve(String identifier, Expression value) {
-        left.resolve(identifier, value);
-        right.resolve(identifier, value);
+    public BinaryBooleanExpression resolve(ScopeStack scope) {
+        return new BinaryBooleanExpression(getParseTree(), left.resolve(scope), operation, right.resolve(scope));
     }
 
     @Override
-    public Expression reduce(ReductionContext context) {
-        Expression left = context.reduce(this.left);
+    public ConstantBooleanExpression reduce(Cache cache) {
+        Expression left = cache.reduceCached(this.left);
         Expression right = null;
 
         switch (operation) {
-            case AND:
+            case LOGICAL_AND:
                 if (left instanceof ConstantBooleanExpression) {
                     if (!((ConstantBooleanExpression) left).value) {
-                        return left;
+                        return (ConstantBooleanExpression) left;
                     }
-                    right = this.right.reduce(context);
+                    right = cache.reduceCached(this.right);
                     if (right instanceof ConstantBooleanExpression) {
-                        return right;
+                        return (ConstantBooleanExpression) right;
                     }
                 }
                 break;
-            case OR:
+            case LOGICAL_OR:
                 if (left instanceof ConstantBooleanExpression) {
                     if (((ConstantBooleanExpression) left).value) {
-                        return left;
+                        return (ConstantBooleanExpression) left;
                     }
-                    right = this.right.reduce(context);
+                    right = cache.reduceCached(this.right);
                     if (right instanceof ConstantBooleanExpression) {
-                        return right;
+                        return (ConstantBooleanExpression) right;
                     }
                 }
                 break;
@@ -54,44 +59,43 @@ public class BinaryBooleanExpression implements Expression {
         }
 
         if (right == null) {
-            throw new RuntimeException("Operation " + operation.getToken() + " is not implemented for "
+            throw new RuntimeException("Operation " + operation + " is not implemented for "
                     + left.getClass().getSimpleName() + " as left hand side");
         } else {
-            throw new RuntimeException("Operation " + operation.getToken() + " is not implemented for "
+            throw new RuntimeException("Operation " + operation + " is not implemented for "
                     + left.getClass().getSimpleName() + " and " + right.getClass().getSimpleName());
         }
     }
 
-    @Override
-    public BinaryBooleanExpression copy() {
-        return new BinaryBooleanExpression(left.copy(), operation, right.copy());
-    }
-
     public enum Operation {
-        AND("&&"),
-        OR("||"),
+        LOGICAL_AND(ChasmParser.LOGICAL_AND),
+        LOGICAL_OR(ChasmParser.LOGICAL_OR),
         ;
 
-        private static final Map<String, Operation> tokenToOperation = new HashMap<>();
+        private static final Map<Integer, Operation> tokenTypeToOperation = new HashMap<>();
 
         static {
             for (Operation op : Operation.values()) {
-                tokenToOperation.put(op.token, op);
+                tokenTypeToOperation.put(op.tokenType, op);
             }
         }
 
-        private final String token;
+        private final int tokenType;
 
-        Operation(String token) {
-            this.token = token;
+        Operation(int tokenType) {
+            this.tokenType = tokenType;
         }
 
-        public static Operation of(String token) {
-            return tokenToOperation.get(token);
+        public static Operation fromToken(Token token) {
+            Operation operation = tokenTypeToOperation.get(token.getType());
+            if (operation == null) {
+                throw new RuntimeException("Unknown operation: " + token);
+            }
+            return operation;
         }
 
-        public String getToken() {
-            return token;
+        public String toString() {
+            return ChasmParser.VOCABULARY.getDisplayName(tokenType);
         }
     }
 }
