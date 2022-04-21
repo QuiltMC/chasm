@@ -17,12 +17,6 @@ public class ClassNodeReader {
     }
 
     public void accept(ClassVisitor visitor) {
-        // Unmodified class
-        if (classNode instanceof LazyClassNode) {
-            ((LazyClassNode) classNode).getClassReader().accept(visitor, 0);
-            return;
-        }
-
         // visit
         int version = Node.asValue(classNode.get(NodeConstants.VERSION)).getValueAsInt();
         int access = Node.asValue(classNode.get(NodeConstants.ACCESS)).getValueAsInt();

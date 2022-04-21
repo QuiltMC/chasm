@@ -1,10 +1,8 @@
 package org.quiltmc.chasm.internal;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,30 +18,38 @@ public class ChasmClassInfoProvider implements ClassInfoProvider {
     private static final String OBJECT = "java/lang/Object";
 
     private final ClassInfoProvider parent;
-    private final Map<String, ClassInfo> classNameToInfo = new HashMap<>();
+    private final ListNode classes;
 
     public ChasmClassInfoProvider(ClassInfoProvider parent, ListNode classes) {
         this.parent = parent;
+        this.classes = classes;
+    }
 
+    private ClassInfo getClassInfo(String className) {
         for (Node node : classes) {
             MapNode classNode = Node.asMap(node);
-            ValueNode className = Node.asValue(classNode.get(NodeConstants.NAME));
-            ValueNode superName = Node.asValue(classNode.get(NodeConstants.SUPER));
-            ValueNode access = Node.asValue(classNode.get(NodeConstants.ACCESS));
+            ValueNode nameNode = Node.asValue(classNode.get(NodeConstants.NAME));
+            if (!nameNode.getValueAsString().equals(className)) {
+                continue;
+            }
+
+            ValueNode superNode = Node.asValue(classNode.get(NodeConstants.SUPER));
+            ValueNode accessNode = Node.asValue(classNode.get(NodeConstants.ACCESS));
             ListNode interfacesList = Node.asList(classNode.get(NodeConstants.INTERFACES));
             List<String> interfaces = interfacesList == null ? Collections.emptyList()
                     : interfacesList.stream().map(n -> Node.asValue(n).getValueAsString()).collect(Collectors.toList());
-            classNameToInfo.put(className.getValueAsString(),
-                    new ClassInfo(
-                            superName == null ? OBJECT : superName.getValueAsString(),
-                            (access.getValueAsInt() & Opcodes.ACC_INTERFACE) != 0,
-                            interfaces));
+            return new ClassInfo(
+                            superNode == null ? OBJECT : superNode.getValueAsString(),
+                            (accessNode.getValueAsInt() & Opcodes.ACC_INTERFACE) != 0,
+                            interfaces);
         }
+
+        return null;
     }
 
     @Override
     public String getSuperClass(String className) {
-        ClassInfo classInfo = classNameToInfo.get(className);
+        ClassInfo classInfo = getClassInfo(className);
 
         if (classInfo == null) {
             return parent.getSuperClass(className);
@@ -54,7 +60,7 @@ public class ChasmClassInfoProvider implements ClassInfoProvider {
 
     @Override
     public boolean isInterface(String className) {
-        ClassInfo classInfo = classNameToInfo.get(className);
+        ClassInfo classInfo = getClassInfo(className);
 
         if (classInfo == null) {
             return parent.isInterface(className);
@@ -73,7 +79,7 @@ public class ChasmClassInfoProvider implements ClassInfoProvider {
         Set<String> interfacesToCheck = new HashSet<>(0);
         String tmpRightClass = rightClass;
         while (true) {
-            ClassInfo rightInfo = classNameToInfo.get(tmpRightClass);
+            ClassInfo rightInfo = getClassInfo(tmpRightClass);
             if (rightInfo == null) {
                 return parent.isAssignable(leftClass, rightClass);
             }

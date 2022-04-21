@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
-import org.quiltmc.chasm.api.metadata.MetadataProvider;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
@@ -84,10 +83,10 @@ public class ChasmProcessor {
      * Transforms this {@link ChasmProcessor}'s list of classes according
      * to this {@code ChasmProcessor}'s list of {@link Transformer}s.
      *
-     * @param onlyChangedClasses If this method should only return classes that changed during transformation.
+     * @param onlyModifiedClasses If this method should only return classes that changed during transformation.
      * @return The resulting list of class data.
      */
-    public List<ClassData> process(boolean onlyChangedClasses) {
+    public List<ClassData> process(boolean onlyModifiedClasses) {
         LOGGER.info("Processing {} classes...", classes.size());
 
         LOGGER.info("Initializing paths...");
@@ -112,18 +111,25 @@ public class ChasmProcessor {
         LOGGER.info("Writing {} classes...", classes.size());
         List<ClassData> classData = new ArrayList<>();
         for (Node node : classes) {
-            // Skip unchanged (still lazy) class nodes if requested
-            if (onlyChangedClasses && node instanceof LazyClassNode) {
-                continue;
-            }
-
             MapNode classNode = Node.asMap(node);
 
-            ClassNodeReader chasmWriter = new ClassNodeReader(classNode);
-            ClassWriter classWriter = new ChasmClassWriter(
-                    classInfoProvider);
-            chasmWriter.accept(classWriter);
-            classData.add(new ClassData(classWriter.toByteArray(), classNode.getMetadata()));
+            // Unmodified classes
+            if (node instanceof LazyClassNode) {
+                // Unmodified classes
+                if (onlyModifiedClasses) {
+                    // Skip if requested
+                    continue;
+                }
+                ClassWriter classWriter = new ClassWriter(0);
+                ((LazyClassNode) node).getClassReader().accept(classWriter, 0);
+                classData.add(new ClassData(classWriter.toByteArray(), classNode.getMetadata()));
+            } else {
+                // ModifiedClasses
+                ClassNodeReader chasmWriter = new ClassNodeReader(classNode);
+                ClassWriter classWriter = new ChasmClassWriter(classInfoProvider);
+                chasmWriter.accept(classWriter);
+                classData.add(new ClassData(classWriter.toByteArray(), classNode.getMetadata()));
+            }
         }
 
         LOGGER.info("Processing done!");

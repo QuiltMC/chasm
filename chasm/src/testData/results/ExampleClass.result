@@ -167,11 +167,11 @@ public abstract class unchanged/ExampleClass {
     INVOKESPECIAL java/lang/IllegalStateException.<init> (Ljava/lang/String;)V
     ATHROW
    L8
-   FRAME SAME1 java/lang/String
+   FRAME FULL [java/lang/String] [java/lang/String]
     GOTO L9
    L2
     LINENUMBER 41 L2
-   FRAME CHOP 3
+   FRAME CHOP 1
     LDC "Not 10"
    L9
     LINENUMBER 33 L9
