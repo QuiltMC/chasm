@@ -7,6 +7,7 @@ import java.util.Set;
 import org.objectweb.asm.ClassReader;
 import org.quiltmc.chasm.api.metadata.MetadataProvider;
 import org.quiltmc.chasm.api.tree.ArrayListNode;
+import org.quiltmc.chasm.api.tree.LazyNode;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
@@ -18,7 +19,7 @@ import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.internal.util.PathInitializer;
 
-public class LazyClassNode extends AbstractMap<String, Node> implements MapNode {
+public class LazyClassNode extends AbstractMap<String, Node> implements MapNode, LazyNode {
     private final ClassReader classReader;
     private final ClassInfoProvider classInfoProvider;
     private final MapNode nonLazyChildren;
@@ -47,6 +48,7 @@ public class LazyClassNode extends AbstractMap<String, Node> implements MapNode 
     public MapNode copy() {
         LazyClassNode copy = new LazyClassNode(classReader, classInfoProvider, metadataProvider.copy());
 
+        // TODO: Is this necessary?
         for (Entry<String, Node> entry : nonLazyChildren.entrySet()) {
             copy.nonLazyChildren.put(entry.getKey(), entry.getValue().copy());
         }
@@ -63,6 +65,7 @@ public class LazyClassNode extends AbstractMap<String, Node> implements MapNode 
         return this.fullNode.get();
     }
 
+    @Override
     public MapNode getFullNode() {
         MapNode fullNode = this.fullNode.get();
         if (fullNode == null) {

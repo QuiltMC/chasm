@@ -9,13 +9,13 @@ import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.target.NodeTarget;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.target.Target;
+import org.quiltmc.chasm.api.tree.LazyNode;
 import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
 import org.quiltmc.chasm.api.tree.ListNode;
 import org.quiltmc.chasm.api.tree.MapNode;
 import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.internal.metadata.OriginMetadata;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
-import org.quiltmc.chasm.internal.tree.LazyClassNode;
 
 public class TransformationApplier {
     private final ListNode classes;
@@ -66,7 +66,7 @@ public class TransformationApplier {
     }
 
     private void applyTransformation(Transformation transformation) {
-        Node target = resolveTarget(transformation.getTarget());
+        Node target = resolveNode(getPath(transformation.getTarget()), false);
         MapNode sources = resolveSources(transformation);
 
         // TODO: Replace copies with immutability
@@ -84,26 +84,24 @@ public class TransformationApplier {
         } else {
             throw new RuntimeException("Invalid replacement for target");
         }
-
     }
 
     private void replaceNode(NodeTarget nodeTarget, Node replacement) {
+        // Resolve containing node
         PathMetadata targetPath = getPath(nodeTarget);
+        Node parentNode = resolveNode(targetPath.parent(), true);
 
-        int classIndex = targetPath.get(0).asInteger();
-        if (classes.get(classIndex) instanceof LazyClassNode) {
-            classes.set(classIndex, ((LazyClassNode) classes.get(classIndex)).getFullNode());
-        }
-
-        Node parentNode = targetPath.parent().resolve(classes);
+        // Get index into parent node
         PathMetadata.Entry entry = targetPath.get(targetPath.size() - 1);
 
+        // Replace in list
         if (parentNode instanceof ListNode && entry.isInteger()) {
             ListNode parentList = Node.asList(parentNode);
             parentList.set(entry.asInteger(), replacement);
             return;
         }
 
+        // Replace in map
         if (parentNode instanceof MapNode && entry.isString()) {
             MapNode parentList = Node.asMap(parentNode);
             parentList.put(entry.asString(), replacement);
@@ -114,14 +112,9 @@ public class TransformationApplier {
     }
 
     private void replaceSlice(SliceTarget sliceTarget, ListNode replacement) {
+        // Resolve containing node
         PathMetadata targetPath = getPath(sliceTarget);
-
-        int classIndex = targetPath.get(0).asInteger();
-        if (classes.get(classIndex) instanceof LazyClassNode) {
-            classes.set(classIndex, ((LazyClassNode) classes.get(classIndex)).getFullNode());
-        }
-
-        Node parentNode = targetPath.resolve(classes);
+        Node parentNode = resolveNode(targetPath, true);
 
         if (!(parentNode instanceof ListNode)) {
             throw new UnsupportedOperationException("Replacement for slice target must be a list node.");
@@ -179,15 +172,36 @@ public class TransformationApplier {
         }
     }
 
-    private Node resolveTarget(Target target) {
+    private Node resolveNode(PathMetadata path, boolean resolveLazyNodes) {
         Node currentNode = classes;
-        PathMetadata path = getPath(target);
 
         for (PathMetadata.Entry entry : path) {
             if (currentNode instanceof ListNode && entry.isInteger()) {
-                currentNode = Node.asList(currentNode).get(entry.asInteger());
+                // Get next node
+                ListNode listNode = Node.asList(currentNode);
+                int index = entry.asInteger();
+                Node nextNode = listNode.get(index);
+
+                // Resolve lazy nodes
+                if (resolveLazyNodes && nextNode instanceof LazyNode) {
+                    nextNode = ((LazyNode) nextNode).getFullNode();
+                    listNode.set(index, nextNode);
+                }
+
+                currentNode = nextNode;
             } else if (currentNode instanceof MapNode && entry.isString()) {
-                currentNode = Node.asMap(currentNode).get(entry.asString());
+                // Get next node
+                MapNode mapNode = Node.asMap(currentNode);
+                String key = entry.asString();
+                Node nextNode = mapNode.get(key);
+
+                // Resolve lazy nodes
+                if (resolveLazyNodes && nextNode instanceof LazyNode) {
+                    nextNode = ((LazyNode) nextNode).getFullNode();
+                    mapNode.put(key, nextNode);
+                }
+
+                currentNode = nextNode;
             } else {
                 throw new RuntimeException("Can't resolve path " + path);
             }
@@ -199,7 +213,7 @@ public class TransformationApplier {
     private MapNode resolveSources(Transformation transformation) {
         MapNode resolvedSources = new LinkedHashMapNode();
         for (Map.Entry<String, Target> source : transformation.getSources().entrySet()) {
-            resolvedSources.put(source.getKey(), resolveTarget(source.getValue()));
+            resolvedSources.put(source.getKey(), resolveNode(getPath(source.getValue()), false));
         }
         return resolvedSources;
     }
