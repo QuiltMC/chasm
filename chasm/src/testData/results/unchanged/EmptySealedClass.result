@@ -1,0 +1,19 @@
+// class version 61.0 (61)
+// access flags 0x21
+public class empty/EmptySealedClass {
+
+  // compiled from: EmptySealedClass.java
+  PERMITTEDSUBCLASS empty/EmptySealedExtendsClass
+
+  // access flags 0x1
+  public <init>()V
+   L0
+    LINENUMBER 3 L0
+    ALOAD 0
+    INVOKESPECIAL java/lang/Object.<init> ()V
+    RETURN
+   L1
+    LOCALVARIABLE this Lempty/EmptySealedClass; L0 L1 0
+    MAXSTACK = 1
+    MAXLOCALS = 1
+}

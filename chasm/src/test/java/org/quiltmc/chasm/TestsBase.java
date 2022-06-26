@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,67 +24,31 @@ import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.api.ChasmProcessor;
 import org.quiltmc.chasm.api.ClassData;
 import org.quiltmc.chasm.api.Transformer;
-import org.quiltmc.chasm.api.metadata.Metadata;
 import org.quiltmc.chasm.api.util.ClassLoaderClassInfoProvider;
+import org.quiltmc.chasm.internal.transformer.ChasmLangTransformer;
+import org.quiltmc.chasm.lang.Evaluator;
+import org.quiltmc.chasm.lang.Intrinsics;
+import org.quiltmc.chasm.lang.op.Expression;
 
 public abstract class TestsBase {
     private static final Path TEST_CLASSES_DIR = Paths.get("build/classes/java/testData");
     private static final Path TEST_RESULTS_DIR = Paths.get("src/testData/results");
+    private static final Path TEST_TRANSFORMERS_DIR = Paths.get("src/testData/transformers");
 
     protected final List<TestDefinition> testDefinitions = new ArrayList<>();
     protected ChasmProcessor processor;
 
-    /**
-     * The default package used for test classes if the class did not have any.
-     */
-    protected String getDefaultTestPackage() {
-        return "pkg/";
-    }
-
-    /**
-     * The default package used for transformers if the class did not have any.
-     */
-    protected String getDefaultTransformerPackage() {
-        return "transformer/";
-    }
-
-    /**
-     * The base package appended to all classes.
-     * <p/>
-     * I.E. if the test class or transformer is in the package "test/" and the base package is "pkg/",
-     * then the full package will be "pkg/test/".
-     * If the test class has no package and the default package is "default/", then the full package will be
-     * "pkg/default/".
-     */
-    protected String getBasePackage() {
-        return "";
-    }
-
     protected abstract void registerAll();
 
-    protected final void register(String testClass, Transformer... transformers) {
-        List<Transformer> transformerList = Arrays.asList(transformers);
-        testDefinitions.add(new TestDefinition(getFullTestClassName(testClass), transformerList, new ArrayList<>()));
-    }
-
-    protected final void register(String testClass, String[] additionalClasses, Transformer... transformers) {
-        List<Transformer> transformerList = Arrays.asList(transformers);
-        List<String> additionalClassesList = Arrays.stream(additionalClasses).map(this::getFullTestClassName)
-                .collect(Collectors.toList());
-        testDefinitions.add(new TestDefinition(testClass, transformerList, additionalClassesList));
-    }
-
-    protected final void registerNamed(String testClass, String name, Transformer... transformers) {
-        List<Transformer> transformerList = Arrays.asList(transformers);
-        testDefinitions.add(new TestDefinition(getFullTestClassName(testClass), transformerList, new ArrayList<>(),
+    protected final void register(String testClass, String name, String... transformers) {
+        List<String> transformerList = Arrays.asList(transformers);
+        testDefinitions.add(new TestDefinition(testClass, transformerList, new ArrayList<>(),
                 name));
     }
 
-    protected final void registerNamed(String testClass, String name, String[] additionalClasses,
-                                       Transformer... transformers) {
-        List<Transformer> transformerList = Arrays.asList(transformers);
-        List<String> additionalClassesList = Arrays.stream(additionalClasses).map(this::getFullTestClassName)
-                .collect(Collectors.toList());
+    protected final void register(String testClass, String name, String[] additionalClasses, String... transformers) {
+        List<String> transformerList = Arrays.asList(transformers);
+        List<String> additionalClassesList = Arrays.stream(additionalClasses).collect(Collectors.toList());
         testDefinitions.add(new TestDefinition(testClass, transformerList, additionalClassesList, name));
     }
 
@@ -138,9 +103,14 @@ public abstract class TestsBase {
             processor.addClass(new ClassData(Files.readAllBytes(additionalClassFile)));
         }
 
+        Evaluator evaluator = new Evaluator();
+
         // Add transformers
-        for (Transformer transformer : testDefinition.transformers) {
-            processor.addTransformer(transformer);
+        for (String transformer : testDefinition.transformers) {
+            Path transformerFile = TEST_TRANSFORMERS_DIR.resolve(transformer + ".chasm");
+            Assertions.assertTrue(Files.isRegularFile(transformerFile), transformerFile + " does not exist");
+            Expression expression = Expression.parse(CharStreams.fromPath(transformerFile));
+            processor.addTransformer(new ChasmLangTransformer(evaluator, expression));
         }
 
         // Process the data
@@ -192,27 +162,19 @@ public abstract class TestsBase {
         }
     }
 
-    protected String getFullTestClassName(String className) {
-        if (className.indexOf('/') == -1) {
-            return getBasePackage() + getDefaultTestPackage() + className;
-        }
-
-        return getBasePackage() + className;
-    }
-
     static class TestDefinition {
         public final String testClass;
-        public final List<Transformer> transformers;
+        public final List<String> transformers;
         public final List<String> additionalClasses;
         private String name;
 
-        public TestDefinition(String testClass, List<Transformer> transformers, List<String> additionalClasses) {
+        public TestDefinition(String testClass, List<String> transformers, List<String> additionalClasses) {
             this.testClass = testClass;
             this.transformers = transformers;
             this.additionalClasses = additionalClasses;
         }
 
-        public TestDefinition(String testClass, List<Transformer> transformers, List<String> additionalClasses,
+        public TestDefinition(String testClass, List<String> transformers, List<String> additionalClasses,
                               String name) {
             this(testClass, transformers, additionalClasses);
             this.name = name;

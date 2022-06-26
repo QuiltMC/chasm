@@ -1,0 +1,24 @@
+// class version 61.0 (61)
+// access flags 0x21
+public class empty/EmptyOuterClass {
+
+  // compiled from: EmptyOuterClass.java
+  NESTMEMBER empty/EmptyOuterClass$EmptyInnerClass
+  NESTMEMBER empty/EmptyOuterClass$EmptyStaticNestedClass
+  // access flags 0x0
+  INNERCLASS empty/EmptyOuterClass$EmptyInnerClass empty/EmptyOuterClass EmptyInnerClass
+  // access flags 0x8
+  static INNERCLASS empty/EmptyOuterClass$EmptyStaticNestedClass empty/EmptyOuterClass EmptyStaticNestedClass
+
+  // access flags 0x1
+  public <init>()V
+   L0
+    LINENUMBER 3 L0
+    ALOAD 0
+    INVOKESPECIAL java/lang/Object.<init> ()V
+    RETURN
+   L1
+    LOCALVARIABLE this Lempty/EmptyOuterClass; L0 L1 0
+    MAXSTACK = 1
+    MAXLOCALS = 1
+}

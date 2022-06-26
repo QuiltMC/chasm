@@ -1,0 +1,67 @@
+{
+    id: "exampleTransformer",
+    tail: info -> {
+        node: target_class.methods[m -> m.name = info.target_method][0].code.instructions,
+        start: len(transformations[info.index].target.node) * 2 - 3,
+        end: transformations[info.index].target.start
+    },
+    target_class: classes[0],
+    transformations: [
+        {
+            target: tail({target_method: "staticMethod", index: 0}),
+            sources: {
+                var_name: {
+                    node: transformations[0].target.node[i -> i.opcode = 54][0].var
+                },
+            },
+            apply: args -> [
+                {
+                    opcode: 132,
+                    var: args.sources.var_name,
+                    increment: 1
+                },
+            ],
+        },
+        {
+            target: tail({target_method: "instanceMethod", index: 1}),
+            sources: {
+                var_name: {
+                    node: transformations[1].target.node[i -> i.opcode = 54][0].var
+                },
+            },
+            apply: args -> [
+                {
+                    opcode: 132,
+                    var: args.sources.var_name,
+                    increment: 1
+                },
+            ],
+        },
+        {
+            target: tail({target_method: "mergeVariable", index: 2}),
+            sources: {
+                var1: {
+                    node: transformations[2].target.node[i -> i.opcode = 54][0].var,
+                },
+                var2: {
+                    node: transformations[2].target.node
+                    [i -> i.opcode = 54 ? i.var = transformations[2].sources.var1.node
+                        ? false : true : false]
+                    [0].var
+                }
+            },
+            apply: args -> [
+                {
+                    opcode: 132,
+                    var: args.sources.var1,
+                    increment: 1
+                },
+                {
+                    opcode: 132,
+                    var: args.sources.var2,
+                    increment: 1
+                },
+            ],
+        },
+    ],
+}

@@ -1,0 +1,14 @@
+// class version 61.0 (61)
+// access flags 0x2600
+abstract @interface other/ExampleClass$ExampleAnnotation implements java/lang/annotation/Annotation {
+
+  // compiled from: ExampleClass.java
+  NESTHOST other/ExampleClass
+
+  @Ljava/lang/annotation/Retention;(value=Ljava/lang/annotation/RetentionPolicy;.RUNTIME)
+  // access flags 0x2608
+  static abstract INNERCLASS other/ExampleClass$ExampleAnnotation other/ExampleClass ExampleAnnotation
+
+  // access flags 0x401
+  public abstract value()Ljava/lang/String;
+}
