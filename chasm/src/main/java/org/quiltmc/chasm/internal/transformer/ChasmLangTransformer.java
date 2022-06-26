@@ -6,11 +6,11 @@ import java.util.Collection;
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.Transformer;
 import org.quiltmc.chasm.api.tree.ListNode;
+import org.quiltmc.chasm.internal.transformer.tree.NodeExpression;
 import org.quiltmc.chasm.lang.Evaluator;
 import org.quiltmc.chasm.lang.Scope;
 import org.quiltmc.chasm.lang.ast.AbstractMapExpression;
 import org.quiltmc.chasm.lang.ast.StringExpression;
-import org.quiltmc.chasm.internal.transformer.tree.NodeExpression;
 import org.quiltmc.chasm.lang.op.Expression;
 import org.quiltmc.chasm.lang.op.ListExpression;
 
