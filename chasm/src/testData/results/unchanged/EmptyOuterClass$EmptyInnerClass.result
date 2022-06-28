@@ -1,0 +1,28 @@
+// class version 61.0 (61)
+// access flags 0x20
+class empty/EmptyOuterClass$EmptyInnerClass {
+
+  // compiled from: EmptyOuterClass.java
+  NESTHOST empty/EmptyOuterClass
+  // access flags 0x0
+  INNERCLASS empty/EmptyOuterClass$EmptyInnerClass empty/EmptyOuterClass EmptyInnerClass
+
+  // access flags 0x1010
+  final synthetic Lempty/EmptyOuterClass; this$0
+
+  // access flags 0x0
+  <init>(Lempty/EmptyOuterClass;)V
+   L0
+    LINENUMBER 7 L0
+    ALOAD 0
+    ALOAD 1
+    PUTFIELD empty/EmptyOuterClass$EmptyInnerClass.this$0 : Lempty/EmptyOuterClass;
+    ALOAD 0
+    INVOKESPECIAL java/lang/Object.<init> ()V
+    RETURN
+   L1
+    LOCALVARIABLE this Lempty/EmptyOuterClass$EmptyInnerClass; L0 L1 0
+    LOCALVARIABLE this$0 Lempty/EmptyOuterClass; L0 L1 1
+    MAXSTACK = 2
+    MAXLOCALS = 2
+}

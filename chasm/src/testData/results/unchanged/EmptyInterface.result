@@ -1,0 +1,6 @@
+// class version 61.0 (61)
+// access flags 0x601
+public abstract interface empty/EmptyInterface {
+
+  // compiled from: EmptyInterface.java
+}

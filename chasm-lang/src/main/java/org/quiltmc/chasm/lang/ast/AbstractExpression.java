@@ -26,16 +26,6 @@ public abstract class AbstractExpression implements Expression {
 
     public abstract Expression reduce(Cache cache);
 
-    public static Expression parse(CharStream charStream) {
-        ChasmLexer lexer = new ChasmLexer(charStream);
-        TokenStream tokens = new CommonTokenStream(lexer);
-        ChasmParser parser = new ChasmParser(tokens);
-        ChasmExpressionVisitor visitor = new ChasmExpressionVisitor();
-
-        //parser.setErrorHandler(new BailErrorStrategy());
-        return parser.file().accept(visitor);
-    }
-
     @Override
     public String toString() {
         if (tree != null) {

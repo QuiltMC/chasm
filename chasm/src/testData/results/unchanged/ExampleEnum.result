@@ -1,0 +1,117 @@
+// class version 61.0 (61)
+// access flags 0x4021
+// signature Ljava/lang/Enum<Lother/ExampleEnum;>;
+// declaration: other/ExampleEnum extends java.lang.Enum<other.ExampleEnum>
+public enum other/ExampleEnum extends java/lang/Enum {
+
+  // compiled from: ExampleEnum.java
+  NESTMEMBER other/ExampleEnum$1
+  PERMITTEDSUBCLASS other/ExampleEnum$1
+  // access flags 0x4010
+  final enum INNERCLASS other/ExampleEnum$1 null null
+
+  // access flags 0x4019
+  public final static enum Lother/ExampleEnum; A
+
+  // access flags 0x4019
+  public final static enum Lother/ExampleEnum; B
+
+  // access flags 0x12
+  private final I value
+
+  // access flags 0x101A
+  private final static synthetic [Lother/ExampleEnum; $VALUES
+
+  // access flags 0x9
+  public static values()[Lother/ExampleEnum;
+   L0
+    LINENUMBER 3 L0
+    GETSTATIC other/ExampleEnum.$VALUES : [Lother/ExampleEnum;
+    INVOKEVIRTUAL [Lother/ExampleEnum;.clone ()Ljava/lang/Object;
+    CHECKCAST [Lother/ExampleEnum;
+    ARETURN
+    MAXSTACK = 1
+    MAXLOCALS = 0
+
+  // access flags 0x9
+  public static valueOf(Ljava/lang/String;)Lother/ExampleEnum;
+   L0
+    LINENUMBER 3 L0
+    LDC Lother/ExampleEnum;.class
+    ALOAD 0
+    INVOKESTATIC java/lang/Enum.valueOf (Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;
+    CHECKCAST other/ExampleEnum
+    ARETURN
+   L1
+    LOCALVARIABLE name Ljava/lang/String; L0 L1 0
+    MAXSTACK = 2
+    MAXLOCALS = 1
+
+  // access flags 0x2
+  // signature (I)V
+  // declaration: void <init>(int)
+  private <init>(Ljava/lang/String;II)V
+   L0
+    LINENUMBER 12 L0
+    ALOAD 0
+    ALOAD 1
+    ILOAD 2
+    INVOKESPECIAL java/lang/Enum.<init> (Ljava/lang/String;I)V
+   L1
+    LINENUMBER 13 L1
+    ALOAD 0
+    ILOAD 3
+    PUTFIELD other/ExampleEnum.value : I
+   L2
+    LINENUMBER 14 L2
+    RETURN
+   L3
+    LOCALVARIABLE this Lother/ExampleEnum; L0 L3 0
+    LOCALVARIABLE value I L0 L3 3
+    MAXSTACK = 3
+    MAXLOCALS = 4
+
+  // access flags 0x100A
+  private static synthetic $values()[Lother/ExampleEnum;
+   L0
+    LINENUMBER 3 L0
+    ICONST_2
+    ANEWARRAY other/ExampleEnum
+    DUP
+    ICONST_0
+    GETSTATIC other/ExampleEnum.A : Lother/ExampleEnum;
+    AASTORE
+    DUP
+    ICONST_1
+    GETSTATIC other/ExampleEnum.B : Lother/ExampleEnum;
+    AASTORE
+    ARETURN
+    MAXSTACK = 4
+    MAXLOCALS = 0
+
+  // access flags 0x8
+  static <clinit>()V
+   L0
+    LINENUMBER 4 L0
+    NEW other/ExampleEnum
+    DUP
+    LDC "A"
+    ICONST_0
+    ICONST_1
+    INVOKESPECIAL other/ExampleEnum.<init> (Ljava/lang/String;II)V
+    PUTSTATIC other/ExampleEnum.A : Lother/ExampleEnum;
+    NEW other/ExampleEnum$1
+    DUP
+    LDC "B"
+    ICONST_1
+    ICONST_2
+    INVOKESPECIAL other/ExampleEnum$1.<init> (Ljava/lang/String;II)V
+    PUTSTATIC other/ExampleEnum.B : Lother/ExampleEnum;
+   L1
+    LINENUMBER 3 L1
+    INVOKESTATIC other/ExampleEnum.$values ()[Lother/ExampleEnum;
+    PUTSTATIC other/ExampleEnum.$VALUES : [Lother/ExampleEnum;
+    RETURN
+    MAXSTACK = 5
+    MAXLOCALS = 0
+}

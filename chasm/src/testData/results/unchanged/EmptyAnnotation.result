@@ -1,0 +1,6 @@
+// class version 61.0 (61)
+// access flags 0x2601
+public abstract @interface empty/EmptyAnnotation implements java/lang/annotation/Annotation {
+
+  // compiled from: EmptyAnnotation.java
+}

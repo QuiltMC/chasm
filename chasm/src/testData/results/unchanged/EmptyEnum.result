@@ -1,0 +1,72 @@
+// class version 61.0 (61)
+// access flags 0x4031
+// signature Ljava/lang/Enum<Lempty/EmptyEnum;>;
+// declaration: empty/EmptyEnum extends java.lang.Enum<empty.EmptyEnum>
+public final enum empty/EmptyEnum extends java/lang/Enum {
+
+  // compiled from: EmptyEnum.java
+
+  // access flags 0x101A
+  private final static synthetic [Lempty/EmptyEnum; $VALUES
+
+  // access flags 0x9
+  public static values()[Lempty/EmptyEnum;
+   L0
+    LINENUMBER 3 L0
+    GETSTATIC empty/EmptyEnum.$VALUES : [Lempty/EmptyEnum;
+    INVOKEVIRTUAL [Lempty/EmptyEnum;.clone ()Ljava/lang/Object;
+    CHECKCAST [Lempty/EmptyEnum;
+    ARETURN
+    MAXSTACK = 1
+    MAXLOCALS = 0
+
+  // access flags 0x9
+  public static valueOf(Ljava/lang/String;)Lempty/EmptyEnum;
+   L0
+    LINENUMBER 3 L0
+    LDC Lempty/EmptyEnum;.class
+    ALOAD 0
+    INVOKESTATIC java/lang/Enum.valueOf (Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;
+    CHECKCAST empty/EmptyEnum
+    ARETURN
+   L1
+    LOCALVARIABLE name Ljava/lang/String; L0 L1 0
+    MAXSTACK = 2
+    MAXLOCALS = 1
+
+  // access flags 0x2
+  // signature ()V
+  // declaration: void <init>()
+  private <init>(Ljava/lang/String;I)V
+   L0
+    LINENUMBER 3 L0
+    ALOAD 0
+    ALOAD 1
+    ILOAD 2
+    INVOKESPECIAL java/lang/Enum.<init> (Ljava/lang/String;I)V
+    RETURN
+   L1
+    LOCALVARIABLE this Lempty/EmptyEnum; L0 L1 0
+    MAXSTACK = 3
+    MAXLOCALS = 3
+
+  // access flags 0x100A
+  private static synthetic $values()[Lempty/EmptyEnum;
+   L0
+    LINENUMBER 3 L0
+    ICONST_0
+    ANEWARRAY empty/EmptyEnum
+    ARETURN
+    MAXSTACK = 1
+    MAXLOCALS = 0
+
+  // access flags 0x8
+  static <clinit>()V
+   L0
+    LINENUMBER 3 L0
+    INVOKESTATIC empty/EmptyEnum.$values ()[Lempty/EmptyEnum;
+    PUTSTATIC empty/EmptyEnum.$VALUES : [Lempty/EmptyEnum;
+    RETURN
+    MAXSTACK = 1
+    MAXLOCALS = 0
+}

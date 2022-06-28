@@ -35,13 +35,8 @@ repositories {
 }
 
 dependencies {
-    implementation project(':chasm')
-    implementation 'org.ow2.asm:asm:9.2'
-
-
     antlr 'org.antlr:antlr4:4.9.3'
 
-    testImplementation 'org.ow2.asm:asm-util:9.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }

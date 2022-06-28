@@ -1,0 +1,134 @@
+// class version 61.0 (61)
+// RECORD
+// access flags 0x10031
+public final class other/ExampleClass$ExampleRecord extends java/lang/Record {
+
+  // compiled from: ExampleClass.java
+  NESTHOST other/ExampleClass
+  // access flags 0x19
+  public final static INNERCLASS other/ExampleClass$ExampleRecord other/ExampleClass ExampleRecord
+  // access flags 0x19
+  public final static INNERCLASS java/lang/invoke/MethodHandles$Lookup java/lang/invoke/MethodHandles Lookup
+  RECORDCOMPONENT   Ljava/lang/Integer; first
+  RECORDCOMPONENT   Ljava/lang/String; second
+
+  // access flags 0x12
+  private final Ljava/lang/Integer; first
+
+  // access flags 0x12
+  private final Ljava/lang/String; second
+
+  // access flags 0x1
+  public <init>(Ljava/lang/Integer;Ljava/lang/String;)V
+    // parameter  first
+    // parameter  second
+   L0
+    LINENUMBER 71 L0
+    ALOAD 0
+    INVOKESPECIAL java/lang/Record.<init> ()V
+    ALOAD 0
+    ALOAD 1
+    PUTFIELD other/ExampleClass$ExampleRecord.first : Ljava/lang/Integer;
+    ALOAD 0
+    ALOAD 2
+    PUTFIELD other/ExampleClass$ExampleRecord.second : Ljava/lang/String;
+    RETURN
+   L1
+    LOCALVARIABLE this Lother/ExampleClass$ExampleRecord; L0 L1 0
+    LOCALVARIABLE first Ljava/lang/Integer; L0 L1 1
+    LOCALVARIABLE second Ljava/lang/String; L0 L1 2
+    MAXSTACK = 2
+    MAXLOCALS = 3
+
+  // access flags 0x11
+  public final toString()Ljava/lang/String;
+   L0
+    LINENUMBER 71 L0
+    ALOAD 0
+    INVOKEDYNAMIC toString(Lother/ExampleClass$ExampleRecord;)Ljava/lang/String; [
+      // handle kind 0x6 : INVOKESTATIC
+      java/lang/runtime/ObjectMethods.bootstrap(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/TypeDescriptor;Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/invoke/MethodHandle;)Ljava/lang/Object;
+      // arguments:
+      other.ExampleClass$ExampleRecord.class, 
+      "first;second", 
+      // handle kind 0x1 : GETFIELD
+      other/ExampleClass$ExampleRecord.first(Ljava/lang/Integer;), 
+      // handle kind 0x1 : GETFIELD
+      other/ExampleClass$ExampleRecord.second(Ljava/lang/String;)
+    ]
+    ARETURN
+   L1
+    LOCALVARIABLE this Lother/ExampleClass$ExampleRecord; L0 L1 0
+    MAXSTACK = 1
+    MAXLOCALS = 1
+
+  // access flags 0x11
+  public final hashCode()I
+   L0
+    LINENUMBER 71 L0
+    ALOAD 0
+    INVOKEDYNAMIC hashCode(Lother/ExampleClass$ExampleRecord;)I [
+      // handle kind 0x6 : INVOKESTATIC
+      java/lang/runtime/ObjectMethods.bootstrap(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/TypeDescriptor;Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/invoke/MethodHandle;)Ljava/lang/Object;
+      // arguments:
+      other.ExampleClass$ExampleRecord.class, 
+      "first;second", 
+      // handle kind 0x1 : GETFIELD
+      other/ExampleClass$ExampleRecord.first(Ljava/lang/Integer;), 
+      // handle kind 0x1 : GETFIELD
+      other/ExampleClass$ExampleRecord.second(Ljava/lang/String;)
+    ]
+    IRETURN
+   L1
+    LOCALVARIABLE this Lother/ExampleClass$ExampleRecord; L0 L1 0
+    MAXSTACK = 1
+    MAXLOCALS = 1
+
+  // access flags 0x11
+  public final equals(Ljava/lang/Object;)Z
+   L0
+    LINENUMBER 71 L0
+    ALOAD 0
+    ALOAD 1
+    INVOKEDYNAMIC equals(Lother/ExampleClass$ExampleRecord;Ljava/lang/Object;)Z [
+      // handle kind 0x6 : INVOKESTATIC
+      java/lang/runtime/ObjectMethods.bootstrap(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/TypeDescriptor;Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/invoke/MethodHandle;)Ljava/lang/Object;
+      // arguments:
+      other.ExampleClass$ExampleRecord.class, 
+      "first;second", 
+      // handle kind 0x1 : GETFIELD
+      other/ExampleClass$ExampleRecord.first(Ljava/lang/Integer;), 
+      // handle kind 0x1 : GETFIELD
+      other/ExampleClass$ExampleRecord.second(Ljava/lang/String;)
+    ]
+    IRETURN
+   L1
+    LOCALVARIABLE this Lother/ExampleClass$ExampleRecord; L0 L1 0
+    LOCALVARIABLE o Ljava/lang/Object; L0 L1 1
+    MAXSTACK = 2
+    MAXLOCALS = 2
+
+  // access flags 0x1
+  public first()Ljava/lang/Integer;
+   L0
+    LINENUMBER 71 L0
+    ALOAD 0
+    GETFIELD other/ExampleClass$ExampleRecord.first : Ljava/lang/Integer;
+    ARETURN
+   L1
+    LOCALVARIABLE this Lother/ExampleClass$ExampleRecord; L0 L1 0
+    MAXSTACK = 1
+    MAXLOCALS = 1
+
+  // access flags 0x1
+  public second()Ljava/lang/String;
+   L0
+    LINENUMBER 71 L0
+    ALOAD 0
+    GETFIELD other/ExampleClass$ExampleRecord.second : Ljava/lang/String;
+    ARETURN
+   L1
+    LOCALVARIABLE this Lother/ExampleClass$ExampleRecord; L0 L1 0
+    MAXSTACK = 1
+    MAXLOCALS = 1
+}

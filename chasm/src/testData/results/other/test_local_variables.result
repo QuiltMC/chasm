@@ -1,0 +1,170 @@
+// class version 61.0 (61)
+// access flags 0x21
+public class other/TestLocalVariables {
+
+  // compiled from: TestLocalVariables.java
+
+  // access flags 0x8
+  static Ljava/util/Random; random
+
+  // access flags 0x1
+  public <init>()V
+   L0
+    LINENUMBER 5 L0
+    ALOAD 0
+    INVOKESPECIAL java/lang/Object.<init> ()V
+    RETURN
+   L1
+    LOCALVARIABLE this Lother/TestLocalVariables; L0 L1 0
+    MAXSTACK = 1
+    MAXLOCALS = 1
+
+  // access flags 0x8
+  static staticMethod(ID)V
+    // parameter  P0
+    // parameter  P1
+   L0
+    LINENUMBER 9 L0
+    GETSTATIC other/TestLocalVariables.random : Ljava/util/Random;
+    INVOKEVIRTUAL java/util/Random.nextInt ()I
+    ISTORE 3
+   L1
+    LINENUMBER 10 L1
+    IINC 3 1
+   L2
+    LINENUMBER 11 L2
+    GETSTATIC other/TestLocalVariables.random : Ljava/util/Random;
+    INVOKEVIRTUAL java/util/Random.nextDouble ()D
+    DSTORE 4
+   L3
+    LINENUMBER 12 L3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 0
+    I2D
+    DLOAD 1
+    DADD
+    ILOAD 3
+    I2D
+    DADD
+    DLOAD 4
+    DADD
+    INVOKEVIRTUAL java/io/PrintStream.println (D)V
+   L4
+    LINENUMBER 13 L4
+    IINC 3 1
+    RETURN
+   L5
+    LOCALVARIABLE param1 I L0 L5 0
+    LOCALVARIABLE param2 D L0 L5 1
+    LOCALVARIABLE local1 I L1 L5 3
+    LOCALVARIABLE local2 D L3 L5 4
+    MAXSTACK = 5
+    MAXLOCALS = 6
+
+  // access flags 0x0
+  instanceMethod(ID)V
+    // parameter  P0
+    // parameter  P1
+   L0
+    LINENUMBER 16 L0
+    GETSTATIC other/TestLocalVariables.random : Ljava/util/Random;
+    INVOKEVIRTUAL java/util/Random.nextInt ()I
+    ISTORE 4
+   L1
+    LINENUMBER 17 L1
+    GETSTATIC other/TestLocalVariables.random : Ljava/util/Random;
+    INVOKEVIRTUAL java/util/Random.nextDouble ()D
+    DSTORE 5
+   L2
+    LINENUMBER 18 L2
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 1
+    I2D
+    DLOAD 2
+    DADD
+    ILOAD 4
+    I2D
+    DADD
+    DLOAD 5
+    DADD
+    INVOKEVIRTUAL java/io/PrintStream.println (D)V
+   L3
+    LINENUMBER 19 L3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ALOAD 0
+    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/Object;)V
+   L4
+    LINENUMBER 20 L4
+    IINC 4 1
+    RETURN
+   L5
+    LOCALVARIABLE this Lother/TestLocalVariables; L0 L5 0
+    LOCALVARIABLE param1 I L0 L5 1
+    LOCALVARIABLE param2 D L0 L5 2
+    LOCALVARIABLE local1 I L1 L5 4
+    LOCALVARIABLE local2 D L2 L5 5
+    MAXSTACK = 5
+    MAXLOCALS = 7
+
+  // access flags 0x8
+  static mergeVariable()V
+   L0
+    LINENUMBER 24 L0
+    GETSTATIC other/TestLocalVariables.random : Ljava/util/Random;
+    INVOKEVIRTUAL java/util/Random.nextBoolean ()Z
+    IFEQ L1
+   L2
+    LINENUMBER 25 L2
+    GETSTATIC other/TestLocalVariables.random : Ljava/util/Random;
+    INVOKEVIRTUAL java/util/Random.nextInt ()I
+    ISTORE 0
+   L3
+    GOTO L4
+   L1
+    LINENUMBER 27 L1
+   FRAME SAME
+    GETSTATIC other/TestLocalVariables.random : Ljava/util/Random;
+    INVOKEVIRTUAL java/util/Random.nextInt ()I
+    ICONST_1
+    IADD
+    ISTORE 0
+   L4
+    LINENUMBER 29 L4
+   FRAME APPEND [I]
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 0
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+   L5
+    LINENUMBER 30 L5
+    GETSTATIC other/TestLocalVariables.random : Ljava/util/Random;
+    INVOKEVIRTUAL java/util/Random.nextInt ()I
+    ISTORE 1
+   L6
+    LINENUMBER 31 L6
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 1
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+   L7
+    LINENUMBER 32 L7
+    IINC 1 1
+    IINC 0 1
+    RETURN
+   L8
+    LOCALVARIABLE local I L3 L1 0
+    LOCALVARIABLE local I L4 L8 0
+    MAXSTACK = 2
+    MAXLOCALS = 2
+
+  // access flags 0x8
+  static <clinit>()V
+   L0
+    LINENUMBER 6 L0
+    NEW java/util/Random
+    DUP
+    LCONST_0
+    INVOKESPECIAL java/util/Random.<init> (J)V
+    PUTSTATIC other/TestLocalVariables.random : Ljava/util/Random;
+    RETURN
+    MAXSTACK = 4
+    MAXLOCALS = 0
+}

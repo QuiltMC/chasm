@@ -1,0 +1,32 @@
+{
+    id: "add_method",
+    target_class: classes[0],
+    transformations: [
+        {
+            target: {
+                node: target_class.methods,
+                start: 0,
+                end: 0,
+            },
+            apply: args -> [
+                {
+                    access: 1,
+                    name: "returnThis",
+                    parameters: [],
+                    returnType: "LTestClass;",
+                    code: {
+                        instructions: [
+                            {
+                                opcode: 25,
+                                var: "this"
+                            },
+                            {
+                                opcode: 176,
+                            },
+                        ]
+                    },
+                }
+            ]
+        },
+    ],
+}

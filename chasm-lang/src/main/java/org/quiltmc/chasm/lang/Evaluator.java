@@ -1,7 +1,6 @@
 package org.quiltmc.chasm.lang;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,10 @@ import org.quiltmc.chasm.lang.op.Expression;
 public class Evaluator {
     private final Cache cache = new Cache();
     private final ScopeStack scope = new ScopeStack();
+
+    public Evaluator() {
+        scope.push(Intrinsics.SCOPE);
+    }
 
     public ScopeStack getScope() {
         return scope;
