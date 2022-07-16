@@ -1,6 +1,29 @@
+buildscript {
+    repositories {
+        exclusiveContent {
+            forRepository {
+                ivy {
+                    url 'https://javacc.com/download/'
+
+                    patternLayout {
+                        artifact '/[module].[ext]'
+                    }
+
+                    metadataSources { artifact() }
+                }
+            }
+            filter {
+                includeGroup "javacc21"
+            }
+        }
+    }
+    dependencies {
+        classpath 'javacc21:javacc-full'
+    }
+}
+
 plugins {
     id 'java'
-    id 'antlr'
     id 'checkstyle'
     id 'maven-publish'
 }
@@ -20,11 +43,6 @@ compileTestJava {
     }
 }
 
-generateGrammarSource {
-    maxHeapSize = "64m"
-    arguments += ["-visitor", "-long-messages"]
-}
-
 checkstyle {
     toolVersion "9.1"
     ignoreFailures(false)
@@ -35,8 +53,6 @@ repositories {
 }
 
 dependencies {
-    antlr 'org.antlr:antlr4:4.9.3'
-
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
@@ -63,6 +79,45 @@ publishing {
             version = project.version + "-SNAPSHOT"
 
             from components.java
+        }
+    }
+}
+
+tasks.register("generateParser", JavaCCTask) {
+    grammarFile = file("src/main/java/org/quiltmc/chasm/lang/internal/parse/Parser.jj")
+    outputDir = file("$buildDir/generated/sources/javacc")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir generateParser.outputDir
+        }
+    }
+}
+
+abstract class JavaCCTask extends DefaultTask {
+    @InputFile
+    abstract RegularFileProperty getGrammarFile()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutputDir()
+
+    @TaskAction
+    def run() {
+        project.delete(outputDir)
+
+        def retVal = com.javacc.Main.mainProgram(
+                grammarFile.get().asFile.toPath(),
+                outputDir.get().asFile.toPath(),
+                "java",
+                8,
+                true,
+                new HashMap<String, String>()
+        )
+
+        if (retVal != 0) {
+            throw new RuntimeException("JavaCC returned a non-zero exit code.")
         }
     }
 }

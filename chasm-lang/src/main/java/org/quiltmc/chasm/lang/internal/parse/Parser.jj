@@ -1,0 +1,578 @@
+options {
+    PARSER_PACKAGE = "org.quiltmc.chasm.lang.internal.parse";
+    BASE_NAME = "";
+    TABS_TO_SPACES = 4;
+    TREE_BUILDING_ENABLED = false;
+}
+
+PARSER_BEGIN(Parser)
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
+import org.quiltmc.chasm.lang.api.ast.BinaryExpression;
+import org.quiltmc.chasm.lang.api.ast.CallExpression;
+import org.quiltmc.chasm.lang.api.ast.Expression;
+import org.quiltmc.chasm.lang.api.ast.IndexExpression;
+import org.quiltmc.chasm.lang.api.ast.LambdaExpression;
+import org.quiltmc.chasm.lang.api.ast.ListExpression;
+import org.quiltmc.chasm.lang.api.ast.LiteralExpression;
+import org.quiltmc.chasm.lang.api.ast.MapExpression;
+import org.quiltmc.chasm.lang.api.ast.MemberExpression;
+import org.quiltmc.chasm.lang.api.ast.ReferenceExpression;
+import org.quiltmc.chasm.lang.api.ast.TernaryExpression;
+import org.quiltmc.chasm.lang.api.ast.UnaryExpression;
+import org.quiltmc.chasm.lang.internal.parse.Token;
+
+public class Parser {
+
+}
+
+PARSER_END(Parser)
+
+// Productions
+Expression file():
+{
+    Expression e;
+}
+{
+    e = expression()
+    <EOF>
+    { return e; }
+}
+
+// Expressions
+// Note: These are nested according to operator precedence
+
+Expression literalExpression():
+{
+    Token t;
+    Expression e;
+}
+{
+    t = <NullLiteral>
+    { return new LiteralExpression(null); }
+    |
+    t = <BooleanLiteral>
+    { return new LiteralExpression(Boolean.parseBoolean(t.getImage())); }
+    |
+    t = <DecIntegerLiteral>
+    { return new LiteralExpression(Long.parseLong(t.getImage())); }
+    |
+    t = <HexIntegerLiteral>
+    { return new LiteralExpression(Long.parseLong(t.getImage().substring(2), 16)); }
+    |
+    t = <BinIntegerLiteral>
+    { return new LiteralExpression(Long.parseLong(t.getImage().substring(2), 2)); }
+    |
+    t = <FloatLiteral>
+    { return new LiteralExpression(Double.parseDouble(t.getImage())); }
+    |
+    t = <StringLiteral>
+    { return new LiteralExpression(t.getImage().substring(1, t.getImage().length() - 1)); }
+    |
+    t = <CharLiteral>
+    { return new LiteralExpression((long) t.getImage().charAt(1)); }
+}
+
+Expression referenceExpression():
+{
+    boolean g = false;
+    Token t;
+}
+{
+    (
+        "$"
+        { g = true; }
+    )?
+    t = <Identifier>
+    { return new ReferenceExpression(t.getImage(), g); }
+}
+
+Expression parenthesesExpression():
+{
+    Expression e;
+}
+{
+    <LeftParentheses>
+    e = expression()
+    <RightParentheses>
+    { return e; }
+}
+
+Expression listExpression():
+{
+    ArrayList<Expression> entries = new ArrayList<>();
+    Expression e;
+}
+{
+    <LeftBrackets>
+        (
+            e = expression()
+            { entries.add(e); }
+            (
+                <Comma>
+                e = expression()
+                { entries.add(e); }
+            )*
+            (
+                <Comma>
+            )?
+        )?
+    <RightBrackets>
+    { return new ListExpression(entries); }
+}
+
+Expression mapExpression():
+{
+    LinkedHashMap<String, Expression> entries = new LinkedHashMap<>();
+    Token t;
+    Expression e;
+}
+{
+    <LeftBraces>
+        (
+            t = <Identifier>
+            <Colon>
+            e = expression()
+            { entries.put(t.getImage(), e); }
+            (
+                <Comma>
+                t = <Identifier>
+                <Colon>
+                e = expression()
+                { entries.put(t.getImage(), e); }
+            )*
+            (
+                <Comma>
+            )?
+        )?
+    <RightBraces>
+    { return new MapExpression(entries); }
+}
+
+Expression primaryExpression():
+{
+    Expression e;
+}
+{
+    (
+        e = literalExpression()
+        |
+        e = referenceExpression()
+        |
+        e = parenthesesExpression()
+        |
+        e = listExpression()
+        |
+        e = mapExpression()
+    )
+    { return e; }
+}
+
+Expression argumentExpression():
+{
+    Expression e;
+    Expression a;
+    Token t;
+}
+{
+    e = primaryExpression()
+    (
+        (
+            <LeftParentheses>
+            a = expression()
+            <RightParentheses>
+            { e = new CallExpression(e, a); }
+        )
+        |
+        (
+            <LeftBrackets>
+            a = expression()
+            <RightBrackets>
+            { e = new IndexExpression(e, a); }
+        )
+        |
+        (
+            <Dot>
+            t = <Identifier>
+            { e = new MemberExpression(e, t.getImage()); }
+        )
+    )*
+    { return e; }
+}
+
+Expression unaryExpression():
+{
+    Expression e;
+    UnaryExpression.Operator o = null;
+}
+{
+    (
+        <PlusOperator>
+        { o = UnaryExpression.Operator.PLUS; }
+        |
+        <MinusOperator>
+        { o = UnaryExpression.Operator.MINUS; }
+        |
+        <NotOperator>
+        { o = UnaryExpression.Operator.NOT; }
+        |
+        <InvertOperator>
+        { o = UnaryExpression.Operator.INVERT; }
+    )?
+    e = argumentExpression()
+    {
+        if (o != null) {
+            return new UnaryExpression(e, o);
+        } else {
+            return e;
+        }
+    }
+}
+
+Expression multiplicativeExpression():
+{
+    Expression e;
+    Expression a;
+    BinaryExpression.Operator o;
+}
+{
+    e = unaryExpression()
+    (
+        (
+            <MultiplyOperator>
+            { o = BinaryExpression.Operator.MULTIPLY; }
+            |
+            <DivideOperator>
+            { o = BinaryExpression.Operator.DIVIDE; }
+            |
+            <ModuloOperator>
+            { o = BinaryExpression.Operator.MODULO; }
+        )
+        a = unaryExpression()
+        { e = new BinaryExpression(e, o, a); }
+    )*
+    { return e; }
+}
+
+Expression additiveExpression():
+{
+    Expression e;
+    Expression a;
+    BinaryExpression.Operator o;
+}
+{
+    e = multiplicativeExpression()
+    (
+        (
+            <PlusOperator>
+            { o = BinaryExpression.Operator.PLUS; }
+            |
+            <MinusOperator>
+            { o = BinaryExpression.Operator.MINUS; }
+        )
+        a = multiplicativeExpression()
+        { e = new BinaryExpression(e, o, a); }
+    )*
+    { return e; }
+}
+
+Expression shiftExpression():
+{
+    Expression e;
+    Expression a;
+    BinaryExpression.Operator o;
+}
+{
+    e = additiveExpression()
+    (
+        (
+            <ShiftLeftOperator>
+            { o = BinaryExpression.Operator.SHIFT_LEFT; }
+            |
+            <ShiftRightOperator>
+            { o = BinaryExpression.Operator.SHIFT_RIGHT; }
+            |
+            <ShiftRightUnsignedOperator>
+            { o = BinaryExpression.Operator.SHIFT_RIGHT_UNSIGNED; }
+        )
+        a = additiveExpression()
+        { e = new BinaryExpression(e, o, a); }
+    )*
+    { return e; }
+}
+
+Expression relationalExpression():
+{
+    Expression e;
+    Expression a;
+    BinaryExpression.Operator o;
+}
+{
+    e = shiftExpression()
+    (
+        (
+            <LessThanOperator>
+            { o = BinaryExpression.Operator.LESS_THAN; }
+            |
+            <LessThanOrEqualOperator>
+            { o = BinaryExpression.Operator.LESS_THAN_OR_EQUAL; }
+            |
+            <GreaterThanOperator>
+            { o = BinaryExpression.Operator.GREATER_THAN; }
+            |
+            <GreaterThanOrEqualOperator>
+            { o = BinaryExpression.Operator.GREATER_THAN_OR_EQUAL; }
+        )
+        a = shiftExpression()
+        { e = new BinaryExpression(e, o, a); }
+    )*
+    { return e; }
+}
+
+Expression equalityExpression():
+{
+    Expression e;
+    Expression a;
+    BinaryExpression.Operator o;
+}
+{
+    e = relationalExpression()
+    (
+        (
+            <EqualOperator>
+            { o = BinaryExpression.Operator.EQUAL; }
+            |
+            <NotEqualOperator>
+            { o = BinaryExpression.Operator.NOT_EQUAL; }
+        )
+        a = relationalExpression()
+        { e = new BinaryExpression(e, o, a); }
+    )*
+    { return e; }
+}
+
+Expression bitwiseAndExpression():
+{
+    Expression e;
+    Expression a;
+}
+{
+    e = equalityExpression()
+    (
+        <BitwiseAndOperator>
+        a = equalityExpression()
+        { e = new BinaryExpression(e, BinaryExpression.Operator.BITWISE_AND, a); }
+    )*
+    { return e; }
+}
+
+Expression bitwiseXorExpression():
+{
+    Expression e;
+    Expression a;
+}
+{
+    e = bitwiseAndExpression()
+    (
+        <BitwiseXorOperator>
+        a = bitwiseAndExpression()
+        { e = new BinaryExpression(e, BinaryExpression.Operator.BITWISE_XOR, a); }
+    )*
+    { return e; }
+}
+
+Expression bitwiseOrExpression():
+{
+    Expression e;
+    Expression a;
+}
+{
+    e = bitwiseXorExpression()
+    (
+        <BitwiseOrOperator>
+        a = bitwiseXorExpression()
+        { e = new BinaryExpression(e, BinaryExpression.Operator.BITWISE_OR, a); }
+    )*
+    { return e; }
+}
+
+Expression BooleanAndExpression():
+{
+    Expression e;
+    Expression a;
+}
+{
+    e = bitwiseOrExpression()
+    (
+        <BooleanAndOperator>
+        a = bitwiseOrExpression()
+        { e = new BinaryExpression(e, BinaryExpression.Operator.BOOLEAN_AND, a); }
+    )*
+    { return e; }
+}
+
+Expression booleanOrExpression():
+{
+    Expression e;
+    Expression a;
+}
+{
+    e = BooleanAndExpression()
+    (
+        <BooleanOrOperator>
+        a = BooleanAndExpression()
+        { e = new BinaryExpression(e, BinaryExpression.Operator.BOOLEAN_OR, a); }
+    )*
+    { return e; }
+}
+
+// Note: This disallows nesting ternaries without parentheses, which is probably a good thing
+Expression ternaryExpression():
+{
+    Expression e;
+    Expression t;
+    Expression f;
+}
+{
+    e = booleanOrExpression()
+    (
+        <TernaryOperator>
+        t = ternaryExpression()
+        <Colon>
+        f = ternaryExpression()
+        { return new TernaryExpression(e, t, f); }
+    )?
+    { return e; }
+}
+
+Expression lambdaExpression():
+{
+    Token t;
+    Expression e;
+}
+{
+    t = <Identifier>
+    <LambdaOperator>
+    e = expression()
+    { return new LambdaExpression(t.getImage(), e ); }
+}
+
+Expression expression():
+{
+    Expression e;
+}
+{
+    LOOKAHEAD(2)
+    e = lambdaExpression()
+    { return e; }
+    |
+    e = ternaryExpression()
+    { return e; }
+}
+
+// Tokens
+SKIP: {
+    <Space: [" "] >
+    |
+    <Newline: ["\n"] >
+}
+
+// Literal Tokens
+TOKEN: {
+    <NullLiteral: "null">
+    |
+    <BooleanLiteral: "true" | "false">
+    |
+    <DecIntegerLiteral: ("+" | "-")? (["0" - "9"])+ >
+    |
+    <HexIntegerLiteral: "0x" (["0" - "9", "a" - "f", "A"-"F"])+ >
+    |
+    <BinIntegerLiteral: "0b" (["0" - "1"])+ >
+    |
+    <FloatLiteral: ("+" | "-")? (["0" - "9"])+ "." (["0" - "9"])+ ("e" ("+" | "-")? (["0" - "9"])+)?>
+    |
+    <#StringChar: ~["\""] | "\\\"">
+    |
+    <StringLiteral: "\"" (<StringChar>)* "\"" >
+    |
+    <#Char: ~["'"] | "\\\'" >
+    |
+    <CharLiteral: "'" <Char> "'" >
+}
+
+// Identifier
+TOKEN: {
+    <Identifier: ["_", "a" - "z", "A" - "Z"] (["_", "a" - "z", "A" - "Z", "0" - "9"])* >
+}
+
+// Operators
+TOKEN : {
+    <PlusOperator: "+" >
+    |
+    <MinusOperator: "-" >
+    |
+    <NotOperator: "!" >
+    |
+    <InvertOperator: "~" >
+    |
+    <MultiplyOperator: "*" >
+    |
+    <DivideOperator: "/" >
+    |
+    <ModuloOperator: "%" >
+    |
+    <ShiftLeftOperator: "<<" >
+    |
+    <ShiftRightOperator: ">>" >
+    |
+    <ShiftRightUnsignedOperator: ">>>" >
+    |
+    <LessThanOperator: "<" >
+    |
+    <LessThanOrEqualOperator: "<=" >
+    |
+    <GreaterThanOperator: ">" >
+    |
+    <GreaterThanOrEqualOperator: ">=" >
+    |
+    <EqualOperator: "=" >
+    |
+    <NotEqualOperator: "!=" >
+    |
+    <BitwiseAndOperator: "&" >
+    |
+    <BitwiseXorOperator: "^" >
+    |
+    <BitwiseOrOperator: "|" >
+    |
+    <BooleanAndOperator: "&&" >
+    |
+    <BooleanOrOperator: "||" >
+    |
+    <TernaryOperator: "?" >
+    |
+    <LambdaOperator: "->" >
+}
+
+// Punctuation
+TOKEN : {
+    <Dot: ".">
+    |
+    <Comma: "," >
+    |
+    <Colon: ":" >
+    |
+    <LeftParentheses: "(" >
+    |
+    <RightParentheses: ")" >
+    |
+    <LeftBrackets: "[" >
+    |
+    <RightBrackets: "]" >
+    |
+    <LeftBraces: "{" >
+    |
+    <RightBraces: "}" >
+}
