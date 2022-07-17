@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import java.util.Objects;
+import org.quiltmc.chasm.lang.internal.render.RendererConfig;
 
 public class BinaryExpression extends Expression {
     private Expression left;
@@ -40,6 +40,13 @@ public class BinaryExpression extends Expression {
     @Override
     public BinaryExpression copy() {
         return new BinaryExpression(left.copy(), operator, right.copy());
+    }
+
+    @Override
+    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+        left.render(config, builder, currentIndentationMultiplier);
+        builder.append(' ').append(operator.image).append(' ');
+        right.render(config, builder, currentIndentationMultiplier);
     }
 
     public enum Operator {

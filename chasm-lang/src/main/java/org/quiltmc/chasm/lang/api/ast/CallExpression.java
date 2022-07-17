@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import java.util.Objects;
+import org.quiltmc.chasm.lang.internal.render.RendererConfig;
 
 public class CallExpression extends Expression {
     private Expression function;
@@ -25,6 +25,14 @@ public class CallExpression extends Expression {
 
     public void setArg(Expression arg) {
         this.arg = arg;
+    }
+
+    @Override
+    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+        function.render(config, builder, currentIndentationMultiplier);
+        builder.append('(');
+        arg.render(config, builder, currentIndentationMultiplier);
+        builder.append(')');
     }
 
     @Override

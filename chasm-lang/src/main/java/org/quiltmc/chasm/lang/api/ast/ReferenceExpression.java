@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import java.util.Objects;
+import org.quiltmc.chasm.lang.internal.render.RendererConfig;
 
 public class ReferenceExpression extends Expression {
     private String identifier;
@@ -30,5 +30,14 @@ public class ReferenceExpression extends Expression {
     @Override
     public Expression copy() {
         return new ReferenceExpression(identifier, global);
+    }
+
+    @Override
+    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+        if (global) {
+            builder.append("$");
+        }
+
+        builder.append(identifier);
     }
 }

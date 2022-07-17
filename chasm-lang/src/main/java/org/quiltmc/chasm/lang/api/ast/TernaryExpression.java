@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import java.util.Objects;
+import org.quiltmc.chasm.lang.internal.render.RendererConfig;
 
 public class TernaryExpression extends Expression {
     private Expression condition;
@@ -27,6 +27,15 @@ public class TernaryExpression extends Expression {
 
     public void setTrue(Expression trueExp) {
         this.trueExp = trueExp;
+    }
+
+    @Override
+    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+        condition.render(config, builder, currentIndentationMultiplier);
+        builder.append(" ? ");
+        trueExp.render(config, builder, currentIndentationMultiplier);
+        builder.append(" : ");
+        falseExp.render(config, builder, currentIndentationMultiplier);
     }
 
     public Expression getFalse() {

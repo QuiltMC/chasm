@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import java.util.Objects;
+import org.quiltmc.chasm.lang.internal.render.RendererConfig;
 
 public class LambdaExpression extends Expression {
     private String identifier;
@@ -25,6 +25,13 @@ public class LambdaExpression extends Expression {
 
     public void setInner(Expression inner) {
         this.inner = inner;
+    }
+
+    @Override
+    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+        builder.append(identifier);
+        builder.append(" -> ");
+        inner.render(config, builder, currentIndentationMultiplier);
     }
 
     @Override

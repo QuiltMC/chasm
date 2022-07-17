@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import java.util.Objects;
+import org.quiltmc.chasm.lang.internal.render.RendererConfig;
 
 public class UnaryExpression extends Expression {
     private Expression inner;
@@ -25,6 +25,12 @@ public class UnaryExpression extends Expression {
 
     public void setOperator(Operator operator) {
         this.operator = operator;
+    }
+
+    @Override
+    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+        builder.append(operator.image);
+        inner.render(config, builder, currentIndentationMultiplier);
     }
 
     @Override
