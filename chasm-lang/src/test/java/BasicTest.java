@@ -45,8 +45,8 @@ public class BasicTest {
         Expression expression = Expression.parse(test);
         Expression reduced = Evaluator.create().evaluate(expression);
 
-//        Assertions.assertInstanceOf(LiteralExpression.class, reduced);
-//        Assertions.assertEquals(4L, ((LiteralExpression) reduced).getValue());
+        Assertions.assertInstanceOf(LiteralExpression.class, reduced);
+        Assertions.assertEquals(4L, ((LiteralExpression) reduced).getValue());
         RendererConfig config = RendererConfigBuilder.create(4, ' ').prettyPrinting().insertEndingNewline().build();
         String firstRender = Renderer.render(expression, config);
         Expression firstRenderParsed = Expression.parse(firstRender);
