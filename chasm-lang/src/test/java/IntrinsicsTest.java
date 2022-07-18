@@ -30,6 +30,23 @@ public class IntrinsicsTest {
     }
 
     @Test
+    public void lenNonListTest() {
+        String test = """
+                {
+                    not_a_list: 0,
+                    length: len(not_a_list)
+                }
+                """;
+
+        Evaluator evaluator = new Evaluator();
+        Expression parsed = Expression.parse(CharStreams.fromString(test));
+        assertThrows(RuntimeException.class, () -> {
+            Expression resolved = evaluator.resolve(parsed);
+            Expression reduced = evaluator.reduceRecursive(resolved);
+        });
+    }
+
+    @Test
     public void flattenTest() {
         String test = """
                 {
