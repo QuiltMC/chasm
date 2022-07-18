@@ -99,4 +99,53 @@ public class IntrinsicsTest {
             Expression reduced = evaluator.reduceRecursive(resolved);
         });
     }
+
+    @Test
+    public void mapTest() {
+        String test = """
+                {
+                    mapped: map({list: [0, 1, 2, 3, 4], function: val -> val + 1})
+                }
+                """;
+        Evaluator evaluator = new Evaluator();
+        Expression parsed = Expression.parse(CharStreams.fromString(test));
+        Expression resolved = evaluator.resolve(parsed);
+        Expression reduced = evaluator.reduceRecursive(resolved);
+
+        assertInstanceOf(AbstractMapExpression.class, reduced);
+        var mapped = ((AbstractMapExpression) reduced).get("mapped");
+        assertInstanceOf(AbstractListExpression.class, mapped);
+        var mappedCasted = ((AbstractListExpression) mapped);
+        assertEquals("[1, 2, 3, 4, 5]", mappedCasted.toString());
+    }
+
+    @Test
+    public void mapNonListTest() {
+        String test = """
+                {
+                    mapped: map({list: 0, function: val -> val + 1})
+                }
+                """;
+        Evaluator evaluator = new Evaluator();
+        Expression parsed = Expression.parse(CharStreams.fromString(test));
+        assertThrows(RuntimeException.class, () -> {
+            Expression resolved = evaluator.resolve(parsed);
+            Expression reduced = evaluator.reduceRecursive(resolved);
+        });
+    }
+
+    @Test
+    public void mapNonFunctionTest() {
+        String test = """
+                {
+                    mapped: map({list: [0], function: 0})
+                }
+                """;
+        Evaluator evaluator = new Evaluator();
+        Expression parsed = Expression.parse(CharStreams.fromString(test));
+        assertThrows(RuntimeException.class, () -> {
+            Expression resolved = evaluator.resolve(parsed);
+            Expression reduced = evaluator.reduceRecursive(resolved);
+        });
+    }
 }
