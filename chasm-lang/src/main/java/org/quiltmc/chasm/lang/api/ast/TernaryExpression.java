@@ -31,7 +31,14 @@ public class TernaryExpression extends Expression {
 
     @Override
     public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+        boolean wrapWithBraces = condition instanceof TernaryExpression;
+        if (wrapWithBraces) {
+            builder.append('(');
+        }
         condition.render(config, builder, currentIndentationMultiplier);
+        if (wrapWithBraces) {
+            builder.append(')');
+        }
         builder.append(" ? ");
         trueExp.render(config, builder, currentIndentationMultiplier);
         builder.append(" : ");

@@ -14,21 +14,24 @@ public class BasicTest {
     public void recursionTest() {
         String test = """
                 {
-                    run: state -> state.count = 0 ? "Done" : run({ count: state.count - 1 })
-                }.run({count: 10})
+                    val: 5 > (3 < 5 ? 4 : 7) ? 1 : 12
+                }.val
                 """;
 
         Expression expression = Expression.parse(test);
         Expression reduced = Evaluator.create().evaluate(expression);
 
-        Assertions.assertInstanceOf(LiteralExpression.class, reduced);
-        Assertions.assertEquals("Done", ((LiteralExpression) reduced).getValue());
+//        Assertions.assertInstanceOf(LiteralExpression.class, reduced);
+//        Assertions.assertEquals("Done", ((LiteralExpression) reduced).getValue());
         RendererConfig config = RendererConfigBuilder.create(4, ' ').prettyPrinting().insertEndingNewline().build();
         String firstRender = Renderer.render(expression, config);
         Expression firstRenderParsed = Expression.parse(firstRender);
         String secondRender = Renderer.render(firstRenderParsed, config);
         Assertions.assertEquals(firstRender, secondRender);
         System.out.println(firstRender);
+        if (test.equals(secondRender)) {
+            System.out.println("input syntax and double parsed syntax are identical");
+        }
     }
 
     @Test
@@ -54,6 +57,9 @@ public class BasicTest {
         String secondRender = Renderer.render(firstRenderParsed, config);
         Assertions.assertEquals(firstRender, secondRender);
         System.out.println(firstRender);
+        if (test.equals(secondRender)) {
+            System.out.println("input syntax and double parsed syntax are identical");
+        }
     }
 
     @Test
@@ -75,6 +81,9 @@ public class BasicTest {
         String secondRender = Renderer.render(firstRenderParsed, config);
         Assertions.assertEquals(firstRender, secondRender);
         System.out.println(firstRender);
+        if (test.equals(secondRender)) {
+            System.out.println("input syntax and double parsed syntax are identical");
+        }
     }
 
     @Test
@@ -125,6 +134,9 @@ public class BasicTest {
         String secondRender = Renderer.render(firstRenderParsed, config);
         Assertions.assertEquals(firstRender, secondRender);
         System.out.println(firstRender);
+        if (test.equals(secondRender)) {
+            System.out.println("input syntax and double parsed syntax are identical");
+        }
     }
 
     @Test
@@ -296,5 +308,8 @@ public class BasicTest {
         String secondRender = Renderer.render(firstRenderParsed, config);
         Assertions.assertEquals(firstRender, secondRender);
         System.out.println(firstRender);
+        if (test.equals(secondRender)) {
+            System.out.println("input syntax and double parsed syntax are identical");
+        }
     }
 }
