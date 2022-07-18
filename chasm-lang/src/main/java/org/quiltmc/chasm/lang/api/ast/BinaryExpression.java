@@ -44,10 +44,16 @@ public class BinaryExpression extends Expression {
 
     @Override
     public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
-        boolean leftNeedsBrackets = left instanceof BinaryExpression && ((BinaryExpression) left).operator.morePrecedenceThan(operator.precedence)
+        boolean leftNeedsBrackets = left instanceof BinaryExpression && (
+                                    ((BinaryExpression) left).operator == operator && operator.requiresBracketsWithSelf
+                                    || ((BinaryExpression) left).operator.morePrecedenceThan(operator.precedence)
+                                 )
                                  || left instanceof UnaryExpression && ((UnaryExpression) left).getOperator().morePrecedenceThan(operator.precedence)
                                  || left instanceof TernaryExpression;
-        boolean rightNeedsBrackets = right instanceof BinaryExpression && ((BinaryExpression) right).operator.morePrecedenceThan(operator.precedence)
+        boolean rightNeedsBrackets = right instanceof BinaryExpression && (
+                                     ((BinaryExpression) right).operator == operator && operator.requiresBracketsWithSelf
+                                     || ((BinaryExpression) right).operator.morePrecedenceThan(operator.precedence)
+                                  )
                                   || right instanceof UnaryExpression && ((UnaryExpression) right).getOperator().morePrecedenceThan(operator.precedence)
                                   || right instanceof TernaryExpression;
 
@@ -71,32 +77,34 @@ public class BinaryExpression extends Expression {
     }
 
     public enum Operator {
-        PLUS("+", 4),
-        MINUS("-", 4),
-        MULTIPLY("*", 3),
-        DIVIDE("/", 3),
-        MODULO("%", 3),
-        SHIFT_LEFT("<<", 5),
-        SHIFT_RIGHT(">>", 5),
-        SHIFT_RIGHT_UNSIGNED(">>>", 5),
-        LESS_THAN("<", 6),
-        LESS_THAN_OR_EQUAL("<=", 6),
-        GREATER_THAN(">", 6),
-        GREATER_THAN_OR_EQUAL(">=", 6),
-        EQUAL("==", 7),
-        NOT_EQUAL("!=", 7),
-        BITWISE_AND("&", 8),
-        BITWISE_XOR("^", 9),
-        BITWISE_OR("|", 10),
-        BOOLEAN_AND("&&", 11),
-        BOOLEAN_OR("||", 12);
+        PLUS("+", 4, false),
+        MINUS("-", 4, true),
+        MULTIPLY("*", 3, false),
+        DIVIDE("/", 3, true),
+        MODULO("%", 3, false),
+        SHIFT_LEFT("<<", 5, false),
+        SHIFT_RIGHT(">>", 5, false),
+        SHIFT_RIGHT_UNSIGNED(">>>", 5, false),
+        LESS_THAN("<", 6, false),
+        LESS_THAN_OR_EQUAL("<=", 6, false),
+        GREATER_THAN(">", 6, false),
+        GREATER_THAN_OR_EQUAL(">=", 6, false),
+        EQUAL("==", 7, false),
+        NOT_EQUAL("!=", 7, false),
+        BITWISE_AND("&", 8, false),
+        BITWISE_XOR("^", 9, false),
+        BITWISE_OR("|", 10, false),
+        BOOLEAN_AND("&&", 11, false),
+        BOOLEAN_OR("||", 12, false);
 
         private final String image;
         private final int precedence;
+        private final boolean requiresBracketsWithSelf;
 
-        Operator(String image, int precedence) {
+        Operator(String image, int precedence, boolean requiresBracketsWithSelf) {
             this.image = image;
             this.precedence = precedence;
+            this.requiresBracketsWithSelf = requiresBracketsWithSelf;
         }
 
         public String getImage() {
@@ -112,8 +120,12 @@ public class BinaryExpression extends Expression {
             return image;
         }
 
-        public boolean morePrecedenceThan(int priority) {
-            return this.precedence > priority;
+        public boolean morePrecedenceThan(int precedence) {
+            return this.precedence > precedence;
+        }
+
+        public boolean requiresBracketsWithSelf() {
+            return requiresBracketsWithSelf;
         }
     }
 }

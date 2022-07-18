@@ -30,7 +30,7 @@ public class UnaryExpression extends Expression {
     @Override
     public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
         builder.append(operator.image);
-        boolean wrapWithBraces = inner instanceof BinaryExpression && ((BinaryExpression) inner).getOperator().morePrecedenceThan(operator.precedence)
+        boolean wrapWithBraces = inner instanceof BinaryExpression && ((BinaryExpression) inner).getOperator().morePrecedenceThan(operator.precedence) // we don't have to do the funky requiresBracketsWithSelf here luckily
                               || inner instanceof UnaryExpression && ((UnaryExpression) inner).operator.morePrecedenceThan(operator.precedence)
                               || inner instanceof TernaryExpression;
 
@@ -75,8 +75,8 @@ public class UnaryExpression extends Expression {
             return image;
         }
 
-        public boolean morePrecedenceThan(int priority) {
-            return this.precedence > priority;
+        public boolean morePrecedenceThan(int precedence) {
+            return this.precedence > precedence;
         }
     }
 }
