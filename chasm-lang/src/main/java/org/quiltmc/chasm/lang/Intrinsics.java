@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.quiltmc.chasm.lang.ast.AbstractMapExpression;
 import org.quiltmc.chasm.lang.ast.IntegerExpression;
 import org.quiltmc.chasm.lang.ast.SimpleListExpression;
 import org.quiltmc.chasm.lang.op.Expression;
@@ -19,6 +20,7 @@ public class Intrinsics {
     private Intrinsics() {
         entries.put("len", len());
         entries.put("flatten", flatten());
+        entries.put("map", map());
     }
 
     private Expression len() {
@@ -49,6 +51,31 @@ public class Intrinsics {
            } else {
                throw new RuntimeException("Function flatten can only be applied to lists of lists");
            }
+        });
+    }
+
+    private Expression map() {
+        return new IntrinsicFunctionExpression(expression -> {
+            if (expression instanceof AbstractMapExpression) {
+                AbstractMapExpression args = ((AbstractMapExpression) expression);
+                Expression listArg = args.get("list");
+                Expression functionArg = args.get("function");
+                if (!(listArg instanceof ListExpression) || !(functionArg instanceof FunctionExpression)) {
+                    throw new RuntimeException("Function map can only be applied to args: {list, function}");
+                }
+
+                ListExpression list = (ListExpression) listArg;
+                FunctionExpression function = (FunctionExpression) functionArg;
+
+                List<Expression> results = new ArrayList<>();
+                for (Expression entry : list) {
+                    results.add(function.call(entry));
+                }
+
+                return new SimpleListExpression(expression.getParseTree(), results);
+            } else {
+                throw new RuntimeException("Function map can only be applied to args: {list, function}");
+            }
         });
     }
 
