@@ -1,10 +1,13 @@
 package org.quiltmc.chasm.lang;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Function;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.quiltmc.chasm.lang.ast.IntegerExpression;
+import org.quiltmc.chasm.lang.ast.SimpleListExpression;
 import org.quiltmc.chasm.lang.op.Expression;
 import org.quiltmc.chasm.lang.op.FunctionExpression;
 import org.quiltmc.chasm.lang.op.ListExpression;
@@ -15,6 +18,7 @@ public class Intrinsics {
 
     private Intrinsics() {
         entries.put("len", len());
+        entries.put("flatten", flatten());
     }
 
     private Expression len() {
@@ -24,6 +28,27 @@ public class Intrinsics {
             } else {
                 throw new RuntimeException("Function len can only be applied to lists");
             }
+        });
+    }
+
+    private Expression flatten() {
+        return new IntrinsicFunctionExpression(expression -> {
+           if (expression instanceof ListExpression) {
+               List<Expression> results = new ArrayList<>();
+                for (Expression entry : (ListExpression) expression) {
+                    if (entry instanceof ListExpression) {
+                        for (Expression entry1 : (ListExpression) entry) {
+                            results.add(entry1);
+                        }
+                    } else {
+                        throw new RuntimeException("Function flatten can only be applied to lists of lists");
+                    }
+                }
+
+                return new SimpleListExpression(expression.getParseTree(), results);
+           } else {
+               throw new RuntimeException("Function flatten can only be applied to lists of lists");
+           }
         });
     }
 
