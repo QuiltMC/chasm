@@ -28,7 +28,7 @@ public class BasicTests {
 
         try (Stream<Path> paths = Files.walk(TESTS_DIR)) {
             paths.forEach(path -> {
-                if (Files.isRegularFile(path)) {
+                if (Files.isRegularFile(path) && path.toString().endsWith(".chasm")) {
                     Path relative = TESTS_DIR.relativize(path);
                     String name = relative.toString();
 

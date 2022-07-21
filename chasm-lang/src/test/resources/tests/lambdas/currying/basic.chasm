@@ -1,0 +1,3 @@
+{
+    curry: first -> second -> first - second
+}.curry(5)(3)

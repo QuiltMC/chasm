@@ -1,0 +1,4 @@
+{
+    val: "Pass!",
+    get_val: ignored -> $val
+}.get_val(null)

@@ -1,5 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.jetbrains.annotations.ApiStatus;
@@ -44,6 +45,18 @@ public class ClosureNode extends Node {
 
     @Override
     public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
-        throw new UnsupportedOperationException();
+        // Represent a closure as a capture-free lambda
+        // Note: This currently fails because of infinite recursion
+
+        /*
+        String bodyName = "__lambda_body";
+        MapNode mapNode = new MapNode(new HashMap<>(captures));
+        mapNode.getEntries().put(bodyName, lambda.getInner());
+        IndexNode indexNode = new IndexNode(mapNode, new LiteralNode(bodyName));
+        LambdaNode lambdaNode = new LambdaNode(lambda.getIdentifier(), indexNode);
+        lambdaNode.render(config, builder, currentIndentationMultiplier);
+        */
+
+        builder.append("<Closure can't be rendered>");
     }
 }

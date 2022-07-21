@@ -1,0 +1,48 @@
+{
+    int: 8, 
+    bool: true, 
+    string: "abc", 
+    ref: 8, 
+    self: 8, 
+    lambda: <Closure can't be rendered>, 
+    call: 6, 
+    ternary: "false", 
+    equals: false, 
+    fibonacci: <Closure can't be rendered>, 
+    call_fib: 55, 
+    curry: <Closure can't be rendered>, 
+    call_curry: 2, 
+    list: [1,"two",false,{
+            name: "object", 
+        },null,], 
+    list_index: "two", 
+    map_member: "object", 
+    map_index: "object", 
+    concat: [1,2,3,4,], 
+    list_concat: [1,2,1,"two",false,{
+            name: "object", 
+        },null,], 
+    filter_source: [{
+            name: "hi", 
+        },{
+            name: "how", 
+        },{
+            name: "are", 
+        },{
+            name: "you", 
+        },], 
+    filter: [{
+            name: "hi", 
+        },{
+            name: "how", 
+        },], 
+    compareWeird: <Closure can't be rendered>, 
+    test: <Closure can't be rendered>, 
+    test_call: true, 
+    binop: <Closure can't be rendered>, 
+    binop_call: 121, 
+    shift: <Closure can't be rendered>, 
+    shift_call: 250, 
+    shifting: <Closure can't be rendered>, 
+    xmas: "Hello World!", 
+}

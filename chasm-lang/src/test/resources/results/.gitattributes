@@ -1,0 +1,2 @@
+# Ensure line endings don't get changed for auto-generated results files
+*.chasm text eol=lf
