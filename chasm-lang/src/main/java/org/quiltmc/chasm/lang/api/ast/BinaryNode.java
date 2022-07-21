@@ -46,11 +46,6 @@ public class BinaryNode extends Node {
     }
 
     @Override
-    public BinaryNode copy() {
-        return new BinaryNode(left.copy(), operator, right.copy());
-    }
-
-    @Override
     @ApiStatus.OverrideOnly
     public void resolve(Resolver resolver) {
         left.resolve(resolver);

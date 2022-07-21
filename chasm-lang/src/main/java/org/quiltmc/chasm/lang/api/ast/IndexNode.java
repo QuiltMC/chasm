@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.ApiStatus;
+import org.quiltmc.chasm.lang.api.eval.ClosureNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
@@ -33,11 +34,6 @@ public class IndexNode extends Node {
 
     public void setIndex(Node index) {
         this.index = index;
-    }
-
-    @Override
-    public IndexNode copy() {
-        return new IndexNode(left.copy(), index.copy());
     }
 
     @Override

@@ -31,11 +31,6 @@ public class ReferenceNode extends Node {
     }
 
     @Override
-    public Node copy() {
-        return new ReferenceNode(identifier, global);
-    }
-
-    @Override
     @ApiStatus.OverrideOnly
     public void resolve(Resolver resolver) {
         resolver.resolveReference(this);

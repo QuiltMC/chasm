@@ -39,10 +39,6 @@ public class MemberNode extends Node {
         builder.append(".").append(identifier);
     }
 
-    public MemberNode copy() {
-        return new MemberNode(left.copy(), identifier);
-    }
-
     @Override
     @ApiStatus.OverrideOnly
     public void resolve(Resolver resolver) {

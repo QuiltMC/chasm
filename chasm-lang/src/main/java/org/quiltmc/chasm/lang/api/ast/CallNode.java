@@ -1,5 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
+import org.quiltmc.chasm.lang.api.eval.ClosureNode;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
@@ -40,10 +41,6 @@ public class CallNode extends Node {
         builder.append(')');
     }
 
-    public CallNode copy() {
-        return new CallNode(function.copy(), arg.copy());
-    }
-
     @Override
     @ApiStatus.OverrideOnly
     public void resolve(Resolver resolver) {
@@ -59,10 +56,6 @@ public class CallNode extends Node {
             return ((FunctionNode) function).apply(evaluator, arg.evaluate(evaluator));
         }
 
-        if (function instanceof ClosureNode) {
-            return evaluator.callClosure((ClosureNode) function, arg.evaluate(evaluator));
-        }
-
-        throw new EvaluationException("Can only call functions and closures, but found " + function);
+        throw new EvaluationException("Can only call functions but found " + function);
     }
 }

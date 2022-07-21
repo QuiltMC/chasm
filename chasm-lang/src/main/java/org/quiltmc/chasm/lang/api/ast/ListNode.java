@@ -20,17 +20,6 @@ public class ListNode extends Node {
     }
 
     @Override
-    public ListNode copy() {
-        List<Node> newEntries = new ArrayList<>();
-
-        for (Node entry : entries) {
-            newEntries.add(entry.copy());
-        }
-
-        return new ListNode(newEntries);
-    }
-
-    @Override
     @ApiStatus.OverrideOnly
     public void resolve(Resolver resolver) {
         entries.forEach(node -> node.resolve(resolver));

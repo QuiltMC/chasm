@@ -1,14 +1,16 @@
-package org.quiltmc.chasm.lang.api.ast;
+package org.quiltmc.chasm.lang.api.eval;
 
 import java.util.Map;
 
 import org.jetbrains.annotations.ApiStatus;
+import org.quiltmc.chasm.lang.api.ast.LambdaNode;
+import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
-public class ClosureNode extends Node {
+public class ClosureNode extends FunctionNode {
     private final LambdaNode lambda;
     private final Map<String, Node> captures;
 
@@ -26,20 +28,8 @@ public class ClosureNode extends Node {
     }
 
     @Override
-    public Node copy() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    @ApiStatus.OverrideOnly
-    public void resolve(Resolver resolver) {
-        throw new EvaluationException("Closures can't be resolved");
-    }
-
-    @Override
-    @ApiStatus.OverrideOnly
-    public Node evaluate(Evaluator evaluator) {
-        return this;
+    public Node apply(Evaluator evaluator, Node arg) {
+        return evaluator.callClosure(this, arg);
     }
 
     @Override

@@ -24,11 +24,8 @@ import org.quiltmc.chasm.api.ChasmProcessor;
 import org.quiltmc.chasm.api.ClassData;
 import org.quiltmc.chasm.api.util.ClassLoaderClassInfoProvider;
 import org.quiltmc.chasm.internal.transformer.ChasmLangTransformer;
-import org.quiltmc.chasm.lang.Evaluator;
-import org.quiltmc.chasm.lang.Intrinsics;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
-import org.quiltmc.chasm.lang.op.Expression;
 
 public abstract class TestsBase {
     private static final Path TEST_CLASSES_DIR = Paths.get("build/classes/java/testData");

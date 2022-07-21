@@ -47,10 +47,6 @@ public class UnaryNode extends Node {
         }
     }
 
-    public UnaryNode copy() {
-        return new UnaryNode(inner.copy(), operator);
-    }
-
     @Override
     @ApiStatus.OverrideOnly
     public void resolve(Resolver resolver) {

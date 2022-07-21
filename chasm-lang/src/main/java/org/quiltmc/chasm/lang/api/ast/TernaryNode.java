@@ -58,11 +58,6 @@ public class TernaryNode extends Node {
     }
 
     @Override
-    public TernaryNode copy() {
-        return new TernaryNode(condition.copy(), trueExp.copy(), falseExp.copy());
-    }
-
-    @Override
     @ApiStatus.OverrideOnly
     public void resolve(Resolver resolver) {
         condition.resolve(resolver);

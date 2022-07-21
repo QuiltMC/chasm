@@ -40,16 +40,6 @@ public class MapNode extends Node {
         builder.append('}');
     }
 
-    public MapNode copy() {
-        Map<String, Node> newEntries = new LinkedHashMap<>();
-
-        for (Map.Entry<String, Node> entry : entries.entrySet()) {
-            newEntries.put(entry.getKey(), entry.getValue().copy());
-        }
-
-        return new MapNode(newEntries);
-    }
-
     @Override
     @ApiStatus.OverrideOnly
     public void resolve(Resolver resolver) {

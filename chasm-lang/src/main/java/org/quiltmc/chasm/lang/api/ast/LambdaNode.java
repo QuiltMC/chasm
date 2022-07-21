@@ -37,10 +37,6 @@ public class LambdaNode extends Node {
         inner.render(renderer, builder, currentIndentationMultiplier);
     }
 
-    public LambdaNode copy() {
-        return new LambdaNode(identifier, inner.copy());
-    }
-
     @Override
     @ApiStatus.OverrideOnly
     public void resolve(Resolver resolver) {

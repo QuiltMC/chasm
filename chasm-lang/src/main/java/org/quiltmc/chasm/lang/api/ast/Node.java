@@ -16,15 +16,6 @@ import org.quiltmc.chasm.lang.internal.render.Renderer;
  * This class can be extended by an execution environment if it requires special behaviour for custom nodes.
  */
 public abstract class Node {
-    /**
-     * Creates a deep copy of this {@link Node}.
-     * An immutable node may return itself.
-     *
-     * @return A deep copy of this node.
-     *
-     */
-    public abstract Node copy();
-
     @ApiStatus.OverrideOnly
     public abstract void resolve(Resolver resolver);
 

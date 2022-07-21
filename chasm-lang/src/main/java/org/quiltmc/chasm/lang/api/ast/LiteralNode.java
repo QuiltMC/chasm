@@ -21,11 +21,6 @@ public class LiteralNode extends Node {
     }
 
     @Override
-    public Node copy() {
-        return new LiteralNode(value);
-    }
-
-    @Override
     public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
         if (value instanceof String) {
             builder.append('"').append(((String) value).replace("\\", "\\\\").replace("\"", "\\\"")).append('"');
