@@ -21,7 +21,7 @@ public class TestRendering extends TestBase {
 
         Node parsedAgain = Node.parse(expected);
         StringBuilder actualBuilder = new StringBuilder();
-        parsed.render(renderer, actualBuilder, 1);
+        parsedAgain.render(renderer, actualBuilder, 1);
         String actual = actualBuilder.toString();
 
         Assertions.assertEquals(expected, actual);
