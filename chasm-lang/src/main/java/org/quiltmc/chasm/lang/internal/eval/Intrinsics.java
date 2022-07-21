@@ -6,42 +6,40 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.quiltmc.chasm.lang.api.ast.Expression;
-import org.quiltmc.chasm.lang.api.ast.ListExpression;
-import org.quiltmc.chasm.lang.api.ast.LiteralExpression;
+import org.quiltmc.chasm.lang.api.ast.ListNode;
+import org.quiltmc.chasm.lang.api.ast.LiteralNode;
+import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
-import org.quiltmc.chasm.lang.api.eval.FunctionExpression;
+import org.quiltmc.chasm.lang.api.eval.FunctionNode;
+import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.render.RendererConfig;
 
 public class Intrinsics {
-    static final Map<String, Expression> INTRINSICS;
-    public static final Scope SCOPE;
+    static final Map<String, Node> INTRINSICS;
 
     static {
         INTRINSICS = new HashMap<>();
         INTRINSICS.put("chars", new CharsFunction());
         INTRINSICS.put("join", new JoinFunction());
-
-        SCOPE = new Scope(null, INTRINSICS);
     }
 
-    static class CharsFunction extends FunctionExpression {
+    static class CharsFunction extends FunctionNode {
         @Override
-        public Expression apply(Evaluator evaluator, Expression expression) {
-            if (!(expression instanceof LiteralExpression)
-                    || !(((LiteralExpression) expression).getValue() instanceof String)) {
+        public Node apply(Evaluator evaluator, Node node) {
+            if (!(node instanceof LiteralNode)
+                    || !(((LiteralNode) node).getValue() instanceof String)) {
                 throw new EvaluationException(
-                        "Built-in function \"chars\" can only be applied to Strings but found " + expression);
+                        "Built-in function \"chars\" can only be applied to Strings but found " + node);
             }
 
-            String value = (String) ((LiteralExpression) expression).getValue();
+            String value = (String) ((LiteralNode) node).getValue();
 
-            List<Expression> entries = new ArrayList<>();
+            List<Node> entries = new ArrayList<>();
             for (int i = 0; i < value.length(); i++) {
-                entries.add(new LiteralExpression((long) value.charAt(i)));
+                entries.add(new LiteralNode((long) value.charAt(i)));
             }
 
-            return new ListExpression(entries);
+            return new ListNode(entries);
         }
 
         @Override
@@ -50,28 +48,27 @@ public class Intrinsics {
         }
     }
 
-    static class JoinFunction extends FunctionExpression {
+    static class JoinFunction extends FunctionNode {
         @Override
-        public Expression apply(Evaluator evaluator, Expression expression) {
-            if (!(expression instanceof ListExpression)) {
+        public Node apply(Evaluator evaluator, Node node) {
+            if (!(node instanceof ListNode)) {
                 throw new EvaluationException(
-                        "Built-in function \"join\" can only be applied to list of integers but found " + expression);
+                        "Built-in function \"join\" can only be applied to list of integers but found " + node);
             }
 
-            List<Expression> entries = ((ListExpression) expression).getEntries().stream().map(evaluator::reduce)
-                    .collect(Collectors.toList());
+            List<Node> entries = ((ListNode) node).getEntries();
 
             if (!entries.stream().allMatch(
-                    e -> e instanceof LiteralExpression && ((LiteralExpression) e).getValue() instanceof Long)) {
+                    e -> e instanceof LiteralNode && ((LiteralNode) e).getValue() instanceof Long)) {
                 throw new EvaluationException(
-                        "Built-in function \"join\" can only be applied to list of integers but found " + expression);
+                        "Built-in function \"join\" can only be applied to list of integers but found " + node);
             }
 
             String joined = entries.stream()
-                    .map(e -> Character.toString((char) ((Long) ((LiteralExpression) e).getValue()).shortValue()))
+                    .map(e -> Character.toString((char) ((Long) ((LiteralNode) e).getValue()).shortValue()))
                     .collect(Collectors.joining());
 
-            return new LiteralExpression(joined);
+            return new LiteralNode(joined);
         }
 
         @Override

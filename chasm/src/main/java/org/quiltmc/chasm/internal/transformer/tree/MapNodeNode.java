@@ -9,10 +9,10 @@ import org.quiltmc.chasm.lang.ast.AbstractMapExpression;
 import org.quiltmc.chasm.lang.ast.NullExpression;
 import org.quiltmc.chasm.lang.op.Expression;
 
-public class MapNodeExpression extends AbstractMapExpression implements NodeExpression {
+public class MapNodeNode extends AbstractMapExpression implements NodeNode {
     private final MapNode mapNode;
 
-    public MapNodeExpression(ParseTree tree, MapNode mapNode) {
+    public MapNodeNode(ParseTree tree, MapNode mapNode) {
         super(tree);
         this.mapNode = mapNode;
     }
@@ -28,7 +28,7 @@ public class MapNodeExpression extends AbstractMapExpression implements NodeExpr
         if (result == null) {
             return new NullExpression(getParseTree());
         } else {
-            return NodeExpression.from(getParseTree(), result);
+            return NodeNode.from(getParseTree(), result);
         }
     }
 

@@ -14,11 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.antlr.v4.runtime.CharStreams;
 import org.quiltmc.chasm.api.Transformer;
 import org.quiltmc.chasm.internal.transformer.ChasmLangTransformer;
-import org.quiltmc.chasm.lang.Evaluator;
-import org.quiltmc.chasm.lang.op.Expression;
+import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.eval.Evaluator;
 
 public class ChasmEnvironment implements Closeable {
     private final List<Path> rootDirectories = new ArrayList<>();
@@ -43,7 +42,7 @@ public class ChasmEnvironment implements Closeable {
     }
 
     public Collection<Transformer> createTransformers() throws IOException {
-        Evaluator evaluator = new Evaluator();
+        Evaluator evaluator = Evaluator.create();
 
         Map<String, Transformer> transformers = new LinkedHashMap<>();
 
@@ -55,9 +54,9 @@ public class ChasmEnvironment implements Closeable {
             Iterator<Path> chasmFiles = fileStream.iterator();
             while (chasmFiles.hasNext()) {
                 Path path = chasmFiles.next();
-                String id = path.relativize(transformerRoot).toString();
-                Expression expression = Expression.parse(CharStreams.fromPath(path));
-                ChasmLangTransformer transformer = new ChasmLangTransformer(evaluator, expression);
+                String id = transformerRoot.relativize(path).toString();
+                Node node = Node.parse(path);
+                ChasmLangTransformer transformer = new ChasmLangTransformer(id, node, evaluator);
                 Transformer previous = transformers.put(id, transformer);
                 if (previous != null) {
                     throw new RuntimeException("Duplicate chasm transformer: " + id);

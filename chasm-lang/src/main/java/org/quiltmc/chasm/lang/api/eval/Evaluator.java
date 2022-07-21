@@ -1,21 +1,21 @@
 package org.quiltmc.chasm.lang.api.eval;
 
-import java.util.Collections;
-import java.util.Map;
-
-import org.quiltmc.chasm.lang.api.ast.Expression;
+import org.jetbrains.annotations.ApiStatus;
+import org.quiltmc.chasm.lang.api.ast.ClosureNode;
+import org.quiltmc.chasm.lang.api.ast.LambdaNode;
+import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.ast.ReferenceNode;
 import org.quiltmc.chasm.lang.internal.eval.EvaluatorImpl;
 
+@ApiStatus.NonExtendable
 public interface Evaluator {
-    Expression evaluate(Expression expression);
-
-    Expression reduce(Expression expression);
-
-    static Evaluator create() {
-        return new EvaluatorImpl(Collections.emptyMap());
+    static Evaluator create(Node node) {
+        return new EvaluatorImpl(node);
     }
 
-    static Evaluator create(Map<String, Expression> globals) {
-        return new EvaluatorImpl(globals);
-    }
+    Node resolveReference(ReferenceNode reference);
+
+    ClosureNode createClosure(LambdaNode lambdaNode);
+
+    Node callClosure(ClosureNode closure, Node arg);
 }

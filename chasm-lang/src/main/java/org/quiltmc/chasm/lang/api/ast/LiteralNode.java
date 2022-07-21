@@ -1,11 +1,14 @@
 package org.quiltmc.chasm.lang.api.ast;
 
+import org.jetbrains.annotations.ApiStatus;
+import org.quiltmc.chasm.lang.api.eval.Evaluator;
+import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.internal.render.RendererConfig;
 
-public class LiteralExpression extends Expression {
+public class LiteralNode extends Node {
     private Object value;
 
-    public LiteralExpression(Object value) {
+    public LiteralNode(Object value) {
         this.value = value;
     }
 
@@ -18,8 +21,8 @@ public class LiteralExpression extends Expression {
     }
 
     @Override
-    public Expression copy() {
-        return new LiteralExpression(value);
+    public Node copy() {
+        return new LiteralNode(value);
     }
 
     @Override
@@ -34,5 +37,16 @@ public class LiteralExpression extends Expression {
     @Override
     public String toString() {
         return String.valueOf(value);
+    }
+
+    @Override
+    @ApiStatus.OverrideOnly
+    public void resolve(Resolver resolver) {
+    }
+
+    @Override
+    @ApiStatus.OverrideOnly
+    public Node evaluate(Evaluator evaluator) {
+        return this;
     }
 }

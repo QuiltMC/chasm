@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,11 +22,12 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.api.ChasmProcessor;
 import org.quiltmc.chasm.api.ClassData;
-import org.quiltmc.chasm.api.Transformer;
 import org.quiltmc.chasm.api.util.ClassLoaderClassInfoProvider;
 import org.quiltmc.chasm.internal.transformer.ChasmLangTransformer;
 import org.quiltmc.chasm.lang.Evaluator;
 import org.quiltmc.chasm.lang.Intrinsics;
+import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.op.Expression;
 
 public abstract class TestsBase {
@@ -103,14 +103,14 @@ public abstract class TestsBase {
             processor.addClass(new ClassData(Files.readAllBytes(additionalClassFile)));
         }
 
-        Evaluator evaluator = new Evaluator();
+        Evaluator evaluator = Evaluator.create();
 
         // Add transformers
         for (String transformer : testDefinition.transformers) {
             Path transformerFile = TEST_TRANSFORMERS_DIR.resolve(transformer + ".chasm");
             Assertions.assertTrue(Files.isRegularFile(transformerFile), transformerFile + " does not exist");
-            Expression expression = Expression.parse(CharStreams.fromPath(transformerFile));
-            processor.addTransformer(new ChasmLangTransformer(evaluator, expression));
+            Node node = Node.parse(transformerFile);
+            processor.addTransformer(new ChasmLangTransformer(transformer, node, evaluator));
         }
 
         // Process the data

@@ -9,10 +9,10 @@ import org.quiltmc.chasm.lang.ast.AbstractListExpression;
 import org.quiltmc.chasm.lang.ast.NullExpression;
 import org.quiltmc.chasm.lang.op.Expression;
 
-public class ListNodeExpression extends AbstractListExpression implements NodeExpression {
+public class ListNodeNode extends AbstractListExpression implements NodeNode {
     private final ListNode listNode;
 
-    public ListNodeExpression(ParseTree tree, ListNode listNode) {
+    public ListNodeNode(ParseTree tree, ListNode listNode) {
         super(tree);
         this.listNode = listNode;
     }
@@ -25,7 +25,7 @@ public class ListNodeExpression extends AbstractListExpression implements NodeEx
     @Override
     public Expression get(ParseTree tree, int index) {
         if (0 <= index && index < listNode.size()) {
-            return NodeExpression.from(tree, listNode.get(index));
+            return NodeNode.from(tree, listNode.get(index));
         } else {
             return new NullExpression(tree);
         }
@@ -33,7 +33,7 @@ public class ListNodeExpression extends AbstractListExpression implements NodeEx
 
     @Override
     public Iterator<Expression> iterator() {
-        return listNode.stream().map(n -> NodeExpression.from(getParseTree(), n)).iterator();
+        return listNode.stream().map(n -> NodeNode.from(getParseTree(), n)).iterator();
     }
 
     @Override

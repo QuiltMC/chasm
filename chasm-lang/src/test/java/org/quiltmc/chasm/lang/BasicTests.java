@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.quiltmc.chasm.lang.api.ast.Expression;
+import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.internal.render.RendererConfig;
 import org.quiltmc.chasm.lang.internal.render.RendererConfigBuilder;
@@ -32,7 +32,7 @@ public class BasicTests {
                     Path relative = TESTS_DIR.relativize(path);
                     String name = relative.toString();
 
-                    DynamicTest test = DynamicTest.dynamicTest(name, () -> doTest(relative, RendererConfigBuilder.create(4, ' ').prettyPrinting().insertEndingNewline().build()));
+                    DynamicTest test = DynamicTest.dynamicTest(name, () -> doTest(relative));
 
                     tests.add(test);
                 }
@@ -44,15 +44,13 @@ public class BasicTests {
         return tests.stream();
     }
 
-    private void doTest(Path path, RendererConfig config) throws IOException {
+    private void doTest(Path path) throws IOException {
         Path testPath = TESTS_DIR.resolve(path);
         Path resultPath = RESULTS_DIR.resolve(path);
 
-        Expression parsed = Expression.read(testPath);
-        Expression result = Evaluator.create().evaluate(parsed);
-        StringBuilder sb = new StringBuilder();
-        result.render(config, sb, 1);
-        String rendered = sb.toString();
+        Node parsed = Node.parse(testPath);
+        Node result = parsed.evaluate(Evaluator.create(parsed));
+        String rendered = result.compose();
 
         // If result doesn't exist yet, create file but fail anyway
         if (!Files.exists(resultPath)) {

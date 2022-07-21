@@ -1,12 +1,15 @@
 package org.quiltmc.chasm.lang.api.ast;
 
 import org.quiltmc.chasm.lang.internal.render.RendererConfig;
+import org.jetbrains.annotations.ApiStatus;
+import org.quiltmc.chasm.lang.api.eval.Evaluator;
+import org.quiltmc.chasm.lang.api.eval.Resolver;
 
-public class ReferenceExpression extends Expression {
+public class ReferenceNode extends Node {
     private String identifier;
     private boolean global;
 
-    public ReferenceExpression(String identifier, boolean global) {
+    public ReferenceNode(String identifier, boolean global) {
         this.identifier = identifier;
         this.global = global;
     }
@@ -28,8 +31,20 @@ public class ReferenceExpression extends Expression {
     }
 
     @Override
-    public Expression copy() {
-        return new ReferenceExpression(identifier, global);
+    public Node copy() {
+        return new ReferenceNode(identifier, global);
+    }
+
+    @Override
+    @ApiStatus.OverrideOnly
+    public void resolve(Resolver resolver) {
+        resolver.resolveReference(this);
+    }
+
+    @Override
+    @ApiStatus.OverrideOnly
+    public Node evaluate(Evaluator evaluator) {
+        return evaluator.resolveReference(this).evaluate(evaluator);
     }
 
     @Override
