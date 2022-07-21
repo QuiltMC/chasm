@@ -23,6 +23,7 @@ import org.quiltmc.chasm.lang.api.ast.TernaryExpression;
 import org.quiltmc.chasm.lang.api.ast.UnaryExpression;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.FunctionExpression;
+import org.quiltmc.chasm.lang.internal.render.RendererConfig;
 
 public class EvaluatorImpl implements Evaluator {
     private final Scope rootScope;
@@ -49,6 +50,11 @@ public class EvaluatorImpl implements Evaluator {
         @Override
         public Expression copy() {
             return new FunctionArgReference(lambdaExpression);
+        }
+
+        @Override
+        public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+//            lambdaExpression.render(config, builder, currentIndentationMultiplier); cheater said to ignore, cheater is god
         }
     }
 

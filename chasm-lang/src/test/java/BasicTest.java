@@ -4,6 +4,9 @@ import org.quiltmc.chasm.lang.api.ast.Expression;
 import org.quiltmc.chasm.lang.api.ast.LiteralExpression;
 import org.quiltmc.chasm.lang.api.ast.MapExpression;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
+import org.quiltmc.chasm.lang.internal.render.RendererConfig;
+import org.quiltmc.chasm.lang.internal.render.RendererConfigBuilder;
 
 public class BasicTest {
 
@@ -20,6 +23,39 @@ public class BasicTest {
 
         Assertions.assertInstanceOf(LiteralExpression.class, reduced);
         Assertions.assertEquals("Done", ((LiteralExpression) reduced).getValue());
+        RendererConfig config = RendererConfigBuilder.create(4, ' ').prettyPrinting().insertEndingNewline().build();
+        String firstRender = Renderer.render(expression, config);
+        Expression firstRenderParsed = Expression.parse(firstRender);
+        String secondRender = Renderer.render(firstRenderParsed, config);
+        Assertions.assertEquals(firstRender, secondRender);
+        System.out.println(firstRender);
+        if (test.equals(secondRender)) {
+            System.out.println("input syntax and double parsed syntax are identical");
+        }
+    }
+
+    @Test
+    public void ternaryTest() {
+        String test = """
+                {
+                    val: 5 > (3 < 1 ? 4 : 7) ? 1 : 5 - (3 - 2)
+                }.val
+                """;
+
+        Expression expression = Expression.parse(test);
+        Expression reduced = Evaluator.create().evaluate(expression);
+
+        Assertions.assertInstanceOf(LiteralExpression.class, reduced);
+        Assertions.assertEquals(4L, ((LiteralExpression) reduced).getValue());
+        RendererConfig config = RendererConfigBuilder.create(4, ' ').prettyPrinting().insertEndingNewline().build();
+        String firstRender = Renderer.render(expression, config);
+        Expression firstRenderParsed = Expression.parse(firstRender);
+        String secondRender = Renderer.render(firstRenderParsed, config);
+        Assertions.assertEquals(firstRender, secondRender);
+        System.out.println(firstRender);
+        if (test.equals(secondRender)) {
+            System.out.println("input syntax and double parsed syntax are identical");
+        }
     }
 
     @Test
@@ -39,6 +75,15 @@ public class BasicTest {
 
         Assertions.assertInstanceOf(LiteralExpression.class, reduced);
         Assertions.assertEquals(1L, ((LiteralExpression) reduced).getValue());
+        RendererConfig config = RendererConfigBuilder.create(4, ' ').prettyPrinting().insertEndingNewline().build();
+        String firstRender = Renderer.render(expression, config);
+        Expression firstRenderParsed = Expression.parse(firstRender);
+        String secondRender = Renderer.render(firstRenderParsed, config);
+        Assertions.assertEquals(firstRender, secondRender);
+        System.out.println(firstRender);
+        if (test.equals(secondRender)) {
+            System.out.println("input syntax and double parsed syntax are identical");
+        }
     }
 
     @Test
@@ -54,6 +99,15 @@ public class BasicTest {
 
         Assertions.assertInstanceOf(LiteralExpression.class, reduced);
         Assertions.assertEquals("Done", ((LiteralExpression) reduced).getValue());
+        RendererConfig config = RendererConfigBuilder.create(4, ' ').prettyPrinting().insertEndingNewline().build();
+        String firstRender = Renderer.render(expression, config);
+        Expression firstRenderParsed = Expression.parse(firstRender);
+        String secondRender = Renderer.render(firstRenderParsed, config);
+        Assertions.assertEquals(firstRender, secondRender);
+        System.out.println(firstRender);
+        if (test.equals(secondRender)) {
+            System.out.println("input syntax and double parsed syntax are identical");
+        }
     }
 
     @Test
@@ -97,6 +151,16 @@ public class BasicTest {
         Expression reduced = Evaluator.create().evaluate(expression);
 
         Assertions.assertInstanceOf(MapExpression.class, reduced);
+
+        RendererConfig config = RendererConfigBuilder.create(4, ' ').prettyPrinting().insertEndingNewline().build();
+        String firstRender = Renderer.render(expression, config);
+        Expression firstRenderParsed = Expression.parse(firstRender);
+        String secondRender = Renderer.render(firstRenderParsed, config);
+        Assertions.assertEquals(firstRender, secondRender);
+        System.out.println(firstRender);
+        if (test.equals(secondRender)) {
+            System.out.println("input syntax and double parsed syntax are identical");
+        }
     }
 
     @Test
@@ -261,5 +325,15 @@ public class BasicTest {
         Assertions.assertEquals("Hello World!", value);
         long end = System.nanoTime();
         System.out.println("Total time: " + (end - start) / 1e9);
+
+        RendererConfig config = RendererConfigBuilder.create(4, ' ').prettyPrinting().insertEndingNewline().build();
+        String firstRender = Renderer.render(expression, config);
+        Expression firstRenderParsed = Expression.parse(firstRender);
+        String secondRender = Renderer.render(firstRenderParsed, config);
+        Assertions.assertEquals(firstRender, secondRender);
+        System.out.println(firstRender);
+        if (test.equals(secondRender)) {
+            System.out.println("input syntax and double parsed syntax are identical");
+        }
     }
 }

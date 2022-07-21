@@ -7,10 +7,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.quiltmc.chasm.lang.api.ast.Expression;
-import org.quiltmc.chasm.lang.api.eval.FunctionExpression;
 import org.quiltmc.chasm.lang.api.ast.ListExpression;
 import org.quiltmc.chasm.lang.api.ast.LiteralExpression;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
+import org.quiltmc.chasm.lang.api.eval.FunctionExpression;
+import org.quiltmc.chasm.lang.internal.render.RendererConfig;
 
 public class Intrinsics {
     static final Map<String, Expression> INTRINSICS;
@@ -42,6 +43,11 @@ public class Intrinsics {
 
             return new ListExpression(entries);
         }
+
+        @Override
+        public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+
+        }
     }
 
     static class JoinFunction extends FunctionExpression {
@@ -66,6 +72,11 @@ public class Intrinsics {
                     .collect(Collectors.joining());
 
             return new LiteralExpression(joined);
+        }
+
+        @Override
+        public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+
         }
     }
 }

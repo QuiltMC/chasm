@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import java.util.Objects;
+import org.quiltmc.chasm.lang.internal.render.RendererConfig;
 
 public class MemberExpression extends Expression {
     private Expression left;
@@ -25,6 +25,12 @@ public class MemberExpression extends Expression {
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    @Override
+    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+        left.render(config, builder, currentIndentationMultiplier);
+        builder.append(".").append(identifier);
     }
 
     @Override

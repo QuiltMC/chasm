@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import java.util.Objects;
+import org.quiltmc.chasm.lang.internal.render.RendererConfig;
 
 public class IndexExpression extends Expression {
     private Expression left;
@@ -21,6 +21,14 @@ public class IndexExpression extends Expression {
 
     public Expression getIndex() {
         return index;
+    }
+
+    @Override
+    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+        left.render(config, builder, currentIndentationMultiplier + 1);
+        builder.append('[');
+        index.render(config, builder, currentIndentationMultiplier + 1);
+        builder.append(']');
     }
 
     public void setIndex(Expression index) {
