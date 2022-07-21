@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import org.quiltmc.chasm.lang.internal.render.RendererConfig;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.FunctionNode;
@@ -33,10 +33,10 @@ public class CallNode extends Node {
     }
 
     @Override
-    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
-        function.render(config, builder, currentIndentationMultiplier);
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+        function.render(renderer, builder, currentIndentationMultiplier);
         builder.append('(');
-        arg.render(config, builder, currentIndentationMultiplier);
+        arg.render(renderer, builder, currentIndentationMultiplier);
         builder.append(')');
     }
 

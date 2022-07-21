@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import org.quiltmc.chasm.lang.internal.render.RendererConfig;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
@@ -48,7 +48,7 @@ public class ReferenceNode extends Node {
     }
 
     @Override
-    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
         if (global) {
             builder.append("$");
         }

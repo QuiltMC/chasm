@@ -10,7 +10,6 @@ import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.ParseException;
 import org.quiltmc.chasm.lang.internal.parse.Parser;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
-import org.quiltmc.chasm.lang.internal.render.RendererConfig;
 
 /**
  * The base class used to represent Nodes in the abstract syntax tree.
@@ -31,8 +30,7 @@ public abstract class Node {
 
     public abstract Node evaluate(Evaluator evaluator);
 
-    public abstract void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier);
-
+    public abstract void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier);
 
     /**
      * Parse a given file into a {@link Node}.
@@ -59,33 +57,10 @@ public abstract class Node {
         return parser.file();
     }
 
-    public void write(Path path, RendererConfig config) throws IOException {
+    public void write(Path path) throws IOException {
+        Renderer renderer = Renderer.builder().build();
         StringBuilder sb = new StringBuilder();
-        render(config, sb, 1);
+        render(renderer, sb, 1);
         Files.write(path, sb.toString().getBytes()); // what about utf16 support?
-    }
-
-    /**
-     * Convert this {@link Node} into its string representation.
-     *
-     * @return A string that can be parsed using {@link #parse(String)}.
-     */
-    public final String compose() {
-        return Renderer.render(this, new RendererConfig(4, ' ', true, true, true));
-    }
-
-    public final void compose(Path path) throws IOException {
-        Files.write(path, compose().getBytes());
-    }
-
-    protected static void indent(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
-        if (!config.prettyPrinting()) {
-            return;
-        }
-        builder.append('\n');
-        for (int i = 0; i < config.indentSize() * currentIndentationMultiplier; i++) {
-            builder.append(config.indentationChar());
-
-        }
     }
 }

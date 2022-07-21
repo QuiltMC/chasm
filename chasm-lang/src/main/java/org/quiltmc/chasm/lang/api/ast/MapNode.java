@@ -8,7 +8,7 @@ import java.util.Map;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
-import org.quiltmc.chasm.lang.internal.render.RendererConfig;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class MapNode extends Node {
     private final Map<String, Node> entries;
@@ -22,20 +22,20 @@ public class MapNode extends Node {
     }
 
     @Override
-    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
         builder.append('{');
         List<Map.Entry<String, Node>> list = new LinkedList<>();
         entries.entrySet().forEach(list::add);
         for (int i = 0; i < list.size(); i++) {
-            Node.indent(config, builder, currentIndentationMultiplier);
+            renderer.indent(builder, currentIndentationMultiplier);
             builder.append(list.get(i).getKey()).append(": ");
-            list.get(i).getValue().render(config, builder, currentIndentationMultiplier + 1);
-            if (i < entries.size() - 1 || config.trailingCommas()) {
+            list.get(i).getValue().render(renderer, builder, currentIndentationMultiplier + 1);
+            if (i < entries.size() - 1 || renderer.hasTrailingCommas()) {
                 builder.append(", ");
             }
         }
         if (list.size() > 0) {
-            Node.indent(config, builder, currentIndentationMultiplier - 1);
+            renderer.indent(builder, currentIndentationMultiplier - 1);
         }
         builder.append('}');
     }

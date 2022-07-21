@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import org.quiltmc.chasm.lang.internal.render.RendererConfig;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
@@ -32,7 +32,7 @@ public class UnaryNode extends Node {
     }
 
     @Override
-    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
         builder.append(operator.image);
         boolean wrapWithBraces = inner instanceof BinaryNode && ((BinaryNode) inner).getOperator().morePrecedenceThan(operator.precedence) // we don't have to do the funky requiresBracketsWithSelf here luckily
                               || inner instanceof UnaryNode && ((UnaryNode) inner).operator.morePrecedenceThan(operator.precedence)
@@ -41,7 +41,7 @@ public class UnaryNode extends Node {
         if (wrapWithBraces) {
             builder.append('(');
         }
-        inner.render(config, builder, currentIndentationMultiplier);
+        inner.render(renderer, builder, currentIndentationMultiplier);
         if (wrapWithBraces) {
             builder.append(')');
         }

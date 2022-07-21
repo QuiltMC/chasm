@@ -4,7 +4,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
-import org.quiltmc.chasm.lang.internal.render.RendererConfig;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class TernaryNode extends Node {
     private Node condition;
@@ -34,19 +34,19 @@ public class TernaryNode extends Node {
     }
 
     @Override
-    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
         boolean wrapWithBraces = condition instanceof TernaryNode;
         if (wrapWithBraces) {
             builder.append('(');
         }
-        condition.render(config, builder, currentIndentationMultiplier);
+        condition.render(renderer, builder, currentIndentationMultiplier);
         if (wrapWithBraces) {
             builder.append(')');
         }
         builder.append(" ? ");
-        trueExp.render(config, builder, currentIndentationMultiplier);
+        trueExp.render(renderer, builder, currentIndentationMultiplier);
         builder.append(" : ");
-        falseExp.render(config, builder, currentIndentationMultiplier);
+        falseExp.render(renderer, builder, currentIndentationMultiplier);
     }
 
     public Node getFalse() {

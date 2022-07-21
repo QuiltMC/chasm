@@ -8,7 +8,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
-import org.quiltmc.chasm.lang.internal.render.RendererConfig;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class BinaryNode extends Node {
     private Node left;
@@ -312,7 +312,7 @@ public class BinaryNode extends Node {
     }
 
     @Override
-    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
         boolean leftNeedsBrackets = left instanceof BinaryNode && (
                 ((BinaryNode) left).operator == operator && operator.requiresBracketsWithSelf
                         || ((BinaryNode) left).operator.morePrecedenceThan(operator.precedence)
@@ -329,7 +329,7 @@ public class BinaryNode extends Node {
         if (leftNeedsBrackets) {
             builder.append('(');
         }
-        left.render(config, builder, currentIndentationMultiplier);
+        left.render(renderer, builder, currentIndentationMultiplier);
         if (leftNeedsBrackets) {
             builder.append(')');
         }
@@ -339,7 +339,7 @@ public class BinaryNode extends Node {
         if (rightNeedsBrackets) {
             builder.append('(');
         }
-        right.render(config, builder, currentIndentationMultiplier);
+        right.render(renderer, builder, currentIndentationMultiplier);
         if (rightNeedsBrackets) {
             builder.append(')');
         }

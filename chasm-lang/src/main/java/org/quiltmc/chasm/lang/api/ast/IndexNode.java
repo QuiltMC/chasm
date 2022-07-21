@@ -8,7 +8,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
-import org.quiltmc.chasm.lang.internal.render.RendererConfig;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class IndexNode extends Node {
     private Node left;
@@ -106,10 +106,10 @@ public class IndexNode extends Node {
     }
 
     @Override
-    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
-        left.render(config, builder, currentIndentationMultiplier + 1);
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+        left.render(renderer, builder, currentIndentationMultiplier + 1);
         builder.append('[');
-        index.render(config, builder, currentIndentationMultiplier + 1);
+        index.render(renderer, builder, currentIndentationMultiplier + 1);
         builder.append(']');
     }
 }

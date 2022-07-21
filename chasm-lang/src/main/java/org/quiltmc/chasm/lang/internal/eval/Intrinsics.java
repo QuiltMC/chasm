@@ -12,7 +12,7 @@ import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.FunctionNode;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
-import org.quiltmc.chasm.lang.internal.render.RendererConfig;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class Intrinsics {
     static final Map<String, Node> INTRINSICS;
@@ -43,7 +43,7 @@ public class Intrinsics {
         }
 
         @Override
-        public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+        public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
 
         }
     }
@@ -72,7 +72,7 @@ public class Intrinsics {
         }
 
         @Override
-        public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+        public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
 
         }
     }

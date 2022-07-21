@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import org.quiltmc.chasm.lang.internal.render.RendererConfig;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
 import java.util.Map;
 
 import org.jetbrains.annotations.ApiStatus;
@@ -34,8 +34,8 @@ public class MemberNode extends Node {
     }
 
     @Override
-    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
-        left.render(config, builder, currentIndentationMultiplier);
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+        left.render(renderer, builder, currentIndentationMultiplier);
         builder.append(".").append(identifier);
     }
 

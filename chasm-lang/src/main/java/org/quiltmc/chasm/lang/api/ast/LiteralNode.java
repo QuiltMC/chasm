@@ -3,7 +3,7 @@ package org.quiltmc.chasm.lang.api.ast;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
-import org.quiltmc.chasm.lang.internal.render.RendererConfig;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class LiteralNode extends Node {
     private Object value;
@@ -26,7 +26,7 @@ public class LiteralNode extends Node {
     }
 
     @Override
-    public void render(RendererConfig config, StringBuilder builder, int currentIndentationMultiplier) {
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
         if (value instanceof String) {
             builder.append('"').append(((String) value).replace("\\", "\\\\").replace("\"", "\\\"")).append('"');
         } else {
