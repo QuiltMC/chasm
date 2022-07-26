@@ -1,5 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
+import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
@@ -39,7 +40,13 @@ public class ReferenceNode extends Node {
     @Override
     @ApiStatus.OverrideOnly
     public Node evaluate(Evaluator evaluator) {
-        return evaluator.resolveReference(this).evaluate(evaluator);
+        Node resolved = evaluator.resolveReference(this);
+
+        if (resolved == null) {
+            throw new EvaluationException("Failed to resolve reference: " + this);
+        }
+
+        return resolved.evaluate(evaluator);
     }
 
     @Override

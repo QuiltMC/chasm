@@ -45,7 +45,7 @@
                 },
                 var2: {
                     node: target.node
-                    [i -> i.opcode = 54 ? i.var = sources.var1.node
+                    [i -> i.opcode = 54 ? i.var = var1.node
                         ? false : true : false]
                     [0].var
                 }

@@ -1,6 +1,7 @@
 package org.quiltmc.chasm.internal.metadata;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
@@ -74,7 +75,7 @@ public class PathMetadata implements Metadata, Iterable<PathMetadata.Entry> {
     @Override
     public String toString() {
         if (parent == null) {
-            return entry.asString();
+            return entry.toString();
         }
 
         return parent + "/" + entry;
@@ -89,23 +90,19 @@ public class PathMetadata implements Metadata, Iterable<PathMetadata.Entry> {
 
             @Override
             public boolean hasNext() {
-                return parentIter != null || !isConsumed;
+                return parentIter != null && parentIter.hasNext() || !isConsumed;
             }
 
             @Override
             public Entry next() {
-                Entry next;
-                if (parentIter != null) {
-                    next = parentIter.next();
-                    parentIter = null;
+                if (parentIter != null && parentIter.hasNext()) {
+                    return parentIter.next();
                 } else if (!isConsumed) {
-                    next = entry;
                     isConsumed = true;
-                } else {
-                    throw new RuntimeException();
+                    return entry;
                 }
 
-                return next;
+                throw new NoSuchElementException();
             }
         };
     }
@@ -143,6 +140,11 @@ public class PathMetadata implements Metadata, Iterable<PathMetadata.Entry> {
 
         public void set(int value) {
             this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return value.toString();
         }
 
         @Override
