@@ -34,6 +34,10 @@ public class ListNode extends Node {
             newEntries.add(entry.evaluate(evaluator));
         }
 
+        if (newEntries.equals(entries)) {
+            return this;
+        }
+
         return new ListNode(newEntries);
     }
 

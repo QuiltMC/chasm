@@ -1,13 +1,14 @@
 package org.quiltmc.chasm.internal.asm.visitor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
-import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -20,14 +21,14 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.Frame;
-import org.quiltmc.chasm.api.tree.ArrayListNode;
-import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
-import org.quiltmc.chasm.api.tree.ListNode;
-import org.quiltmc.chasm.api.tree.MapNode;
-import org.quiltmc.chasm.api.tree.Node;
-import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.api.util.ClassInfoProvider;
 import org.quiltmc.chasm.internal.util.NodeConstants;
+import org.quiltmc.chasm.internal.util.NodeUtils;
+import org.quiltmc.chasm.lang.api.ast.BooleanNode;
+import org.quiltmc.chasm.lang.api.ast.IntegerNode;
+import org.quiltmc.chasm.lang.api.ast.ListNode;
+import org.quiltmc.chasm.lang.api.ast.MapNode;
+import org.quiltmc.chasm.lang.api.ast.StringNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,17 +43,15 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     private final MapNode methodNode;
 
-    private final ListNode parameters = new ArrayListNode();
+    private final ListNode parameters = new ListNode(new ArrayList<>());
+    private final ListNode annotations = new ListNode(new ArrayList<>());
 
-    private final ListNode annotations = new ArrayListNode();
-    private final ListNode attributes = new ArrayListNode();
+    private final MapNode code = new MapNode(new LinkedHashMap<>());
+    private final ListNode instructions = new ListNode(new ArrayList<>());
+    private final ListNode sourceLocals = new ListNode(new ArrayList<>());
+    private final ListNode tryCatchBlocks = new ListNode(new ArrayList<>());
 
-    private final MapNode code = new LinkedHashMapNode();
-    private final ListNode instructions = new ArrayListNode();
-    private final ListNode sourceLocals = new ArrayListNode();
-    private final ListNode tryCatchBlocks = new ArrayListNode();
-
-    private final ListNode lineNumbers = new ArrayListNode();
+    private final ListNode lineNumbers = new ListNode(new ArrayList<>());
 
     private int visitedParameterCount = 0;
     private int parameterAnnotationOffset = 0;
@@ -74,42 +73,41 @@ public class ChasmMethodVisitor extends MethodVisitor {
         this.currentClassIsInterface = currentClassIsInterface;
         this.methodNode = methodNode;
 
-        methodNode.put(NodeConstants.ACCESS, new ValueNode(access));
-        methodNode.put(NodeConstants.NAME, new ValueNode(name));
+        methodNode.getEntries().put(NodeConstants.ACCESS, new IntegerNode(access));
+        methodNode.getEntries().put(NodeConstants.NAME, new StringNode(name));
 
-        methodNode.put(NodeConstants.PARAMETERS, parameters);
+        methodNode.getEntries().put(NodeConstants.PARAMETERS, parameters);
         Type[] argumentTypes = Type.getArgumentTypes(descriptor);
         for (int i = 0; i < argumentTypes.length; i++) {
-            MapNode parameterNode = new LinkedHashMapNode();
-            parameterNode.put(NodeConstants.TYPE, new ValueNode(argumentTypes[i].toString()));
-            parameterNode.put(NodeConstants.NAME, new ValueNode("P" + i));
-            this.parameters.add(parameterNode);
+            MapNode parameterNode = new MapNode(new LinkedHashMap<>());
+            parameterNode.getEntries().put(NodeConstants.TYPE, new StringNode(argumentTypes[i].toString()));
+            parameterNode.getEntries().put(NodeConstants.NAME, new StringNode("P" + i));
+            this.parameters.getEntries().add(parameterNode);
         }
 
         Type returnType = Type.getReturnType(descriptor);
-        methodNode.put(NodeConstants.RETURN_TYPE, new ValueNode(returnType.toString()));
+        methodNode.getEntries().put(NodeConstants.RETURN_TYPE, new StringNode(returnType.toString()));
 
-        methodNode.put(NodeConstants.SIGNATURE, new ValueNode(signature));
+        methodNode.getEntries().put(NodeConstants.SIGNATURE, new StringNode(signature));
 
-        ListNode exceptionsNode = new ArrayListNode();
+        ListNode exceptionsNode = new ListNode(new ArrayList<>());
         if (exceptions != null) {
             for (String exception : exceptions) {
-                exceptionsNode.add(new ValueNode(exception));
+                exceptionsNode.getEntries().add(new StringNode(exception));
             }
         }
-        methodNode.put(NodeConstants.EXCEPTIONS, exceptionsNode);
+        methodNode.getEntries().put(NodeConstants.EXCEPTIONS, exceptionsNode);
 
-        methodNode.put(NodeConstants.ANNOTATIONS, annotations);
-        methodNode.put(NodeConstants.ATTRIBUTES, attributes);
+        methodNode.getEntries().put(NodeConstants.ANNOTATIONS, annotations);
     }
 
     @Override
     public void visitParameter(String name, int access) {
-        MapNode parameterNode = Node.asMap(this.parameters.get(visitedParameterCount++));
+        MapNode parameterNode = (MapNode) this.parameters.getEntries().get(visitedParameterCount++);
         if (name != null) {
-            parameterNode.put(NodeConstants.NAME, new ValueNode(name));
+            parameterNode.getEntries().put(NodeConstants.NAME, new StringNode(name));
         }
-        parameterNode.put(NodeConstants.ACCESS, new ValueNode(access));
+        parameterNode.getEntries().put(NodeConstants.ACCESS, new IntegerNode(access));
         super.visitParameter(name, access);
     }
 
@@ -117,9 +115,9 @@ public class ChasmMethodVisitor extends MethodVisitor {
     public void visitAnnotableParameterCount(int parameterCount, boolean visible) {
         // We simply right-align the annotations, assuming that non-annotable parameters are always at the start.
         if (visible) {
-            visibleParameterAnnotationOffset = this.parameters.size() - parameterCount;
+            visibleParameterAnnotationOffset = this.parameters.getEntries().size() - parameterCount;
         } else {
-            parameterAnnotationOffset = this.parameters.size() - parameterCount;
+            parameterAnnotationOffset = this.parameters.getEntries().size() - parameterCount;
         }
 
         super.visitAnnotableParameterCount(parameterCount, visible);
@@ -127,53 +125,53 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     @Override
     public AnnotationVisitor visitParameterAnnotation(int parameter, String descriptor, boolean visible) {
-        MapNode annotation = new LinkedHashMapNode();
-        ListNode values = new ArrayListNode();
-        annotation.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
-        annotation.put(NodeConstants.VISIBLE, new ValueNode(visible));
-        annotation.put(NodeConstants.VALUES, values);
+        MapNode annotation = new MapNode(new LinkedHashMap<>());
+        MapNode values = new MapNode(new LinkedHashMap<>());
+        annotation.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(descriptor));
+        annotation.getEntries().put(NodeConstants.VISIBLE, BooleanNode.from(visible));
+        annotation.getEntries().put(NodeConstants.VALUES, values);
 
         int actualIndex = parameter + (visible ? visibleParameterAnnotationOffset : parameterAnnotationOffset);
-        MapNode parameterNode = Node.asMap(this.parameters.get(actualIndex));
-        ListNode annotations =
-                Node.asList(parameterNode.computeIfAbsent(NodeConstants.ANNOTATIONS, s -> new ArrayListNode()));
-        annotations.add(annotation);
+        MapNode parameterNode = (MapNode) this.parameters.getEntries().get(actualIndex);
+        ListNode annotations = (ListNode) (parameterNode.getEntries()
+                .computeIfAbsent(NodeConstants.ANNOTATIONS, s -> new ListNode(new ArrayList<>())));
+        annotations.getEntries().add(annotation);
 
         return new ChasmAnnotationVisitor(api, values, super.visitParameterAnnotation(parameter, descriptor, visible));
     }
 
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
-        MapNode annotationDefault = new LinkedHashMapNode();
-        ListNode values = new ArrayListNode();
-        methodNode.put(NodeConstants.ANNOTATION_DEFAULT, annotationDefault);
-        methodNode.put(NodeConstants.VALUES, values);
+        MapNode annotationDefault = new MapNode(new LinkedHashMap<>());
+        ListNode values = new ListNode(new ArrayList<>());
+        methodNode.getEntries().put(NodeConstants.ANNOTATION_DEFAULT, annotationDefault);
+        methodNode.getEntries().put(NodeConstants.VALUES, values);
 
         return new ChasmAnnotationVisitor(api, values, super.visitAnnotationDefault());
     }
 
     @Override
     public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-        MapNode annotation = new LinkedHashMapNode();
-        ListNode values = new ArrayListNode();
-        annotation.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
-        annotation.put(NodeConstants.VISIBLE, new ValueNode(visible));
-        annotation.put(NodeConstants.VALUES, values);
-        annotations.add(annotation);
+        MapNode annotation = new MapNode(new LinkedHashMap<>());
+        MapNode values = new MapNode(new LinkedHashMap<>());
+        annotation.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(descriptor));
+        annotation.getEntries().put(NodeConstants.VISIBLE, BooleanNode.from(visible));
+        annotation.getEntries().put(NodeConstants.VALUES, values);
+        annotations.getEntries().add(annotation);
 
         return new ChasmAnnotationVisitor(api, values, super.visitAnnotation(descriptor, visible));
     }
 
     @Override
     public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
-        MapNode annotation = new LinkedHashMapNode();
-        ListNode values = new ArrayListNode();
-        annotation.put(NodeConstants.TYPE_REF, new ValueNode(typeRef));
-        annotation.put(NodeConstants.TYPE_PATH, new ValueNode(typePath.toString()));
-        annotation.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
-        annotation.put(NodeConstants.VISIBLE, new ValueNode(visible));
-        annotation.put(NodeConstants.VALUES, new ValueNode(values));
-        annotations.add(annotation);
+        MapNode annotation = new MapNode(new LinkedHashMap<>());
+        MapNode values = new MapNode(new LinkedHashMap<>());
+        annotation.getEntries().put(NodeConstants.TYPE_REF, new IntegerNode(typeRef));
+        annotation.getEntries().put(NodeConstants.TYPE_PATH, new StringNode(typePath.toString()));
+        annotation.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(descriptor));
+        annotation.getEntries().put(NodeConstants.VISIBLE, BooleanNode.from(visible));
+        annotation.getEntries().put(NodeConstants.VALUES, values);
+        annotations.getEntries().add(annotation);
 
         return new ChasmAnnotationVisitor(
                 api,
@@ -184,26 +182,25 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitAttribute(Attribute attribute) {
-        attributes.add(new ValueNode(attribute));
-        super.visitAttribute(attribute);
+        throw new RuntimeException("Unknown attribute: " + attribute.type);
     }
 
     @Override
     public void visitCode() {
         hasCode = true;
-        methodNode.put(NodeConstants.CODE, code);
-        code.put(NodeConstants.INSTRUCTIONS, instructions);
-        code.put(NodeConstants.SOURCE_LOCALS, sourceLocals);
-        code.put(NodeConstants.TRY_CATCH_BLOCKS, tryCatchBlocks);
-        code.put(NodeConstants.LINE_NUMBERS, lineNumbers);
+        methodNode.getEntries().put(NodeConstants.CODE, code);
+        code.getEntries().put(NodeConstants.INSTRUCTIONS, instructions);
+        code.getEntries().put(NodeConstants.SOURCE_LOCALS, sourceLocals);
+        code.getEntries().put(NodeConstants.TRY_CATCH_BLOCKS, tryCatchBlocks);
+        code.getEntries().put(NodeConstants.LINE_NUMBERS, lineNumbers);
         super.visitCode();
     }
 
     @Override
     public void visitLabel(Label label) {
-        MapNode labelNode = new LinkedHashMapNode();
-        labelNode.put(NodeConstants.LABEL, new ValueNode(getLabelId(label)));
-        instructions.add(labelNode);
+        MapNode labelNode = new MapNode(new LinkedHashMap<>());
+        labelNode.getEntries().put(NodeConstants.LABEL, new StringNode(getLabelId(label)));
+        instructions.getEntries().add(labelNode);
         super.visitLabel(label);
     }
 
@@ -215,198 +212,165 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitInsn(int opcode) {
-        MapNode instructionNode = new LinkedHashMapNode();
-        instructionNode.put(NodeConstants.OPCODE, new ValueNode(opcode));
-        instructions.add(instructionNode);
+        MapNode instructionNode = new MapNode(new LinkedHashMap<>());
+        instructionNode.getEntries().put(NodeConstants.OPCODE, new IntegerNode(opcode));
+        instructions.getEntries().add(instructionNode);
         super.visitInsn(opcode);
     }
 
     @Override
     public void visitIntInsn(int opcode, int operand) {
-        MapNode instructionNode = new LinkedHashMapNode();
-        instructionNode.put(NodeConstants.OPCODE, new ValueNode(opcode));
-        instructionNode.put(NodeConstants.OPERAND, new ValueNode(operand));
-        instructions.add(instructionNode);
+        MapNode instructionNode = new MapNode(new LinkedHashMap<>());
+        instructionNode.getEntries().put(NodeConstants.OPCODE, new IntegerNode(opcode));
+        instructionNode.getEntries().put(NodeConstants.OPERAND, new IntegerNode(operand));
+        instructions.getEntries().add(instructionNode);
         super.visitIntInsn(opcode, operand);
     }
 
     @Override
     public void visitVarInsn(int opcode, int var) {
-        MapNode instructionNode = new LinkedHashMapNode();
-        instructionNode.put(NodeConstants.OPCODE, new ValueNode(opcode));
-        instructions.add(instructionNode);
+        MapNode instructionNode = new MapNode(new LinkedHashMap<>());
+        instructionNode.getEntries().put(NodeConstants.OPCODE, new IntegerNode(opcode));
+        instructions.getEntries().add(instructionNode);
         super.visitVarInsn(opcode, var);
         localVariableSensitiveInstructions.put(((MethodNode) mv).instructions.getLast(), instructionNode);
     }
 
     @Override
     public void visitTypeInsn(int opcode, String type) {
-        MapNode instructionNode = new LinkedHashMapNode();
-        instructionNode.put(NodeConstants.OPCODE, new ValueNode(opcode));
-        instructionNode.put(NodeConstants.TYPE, new ValueNode(type));
-        instructions.add(instructionNode);
+        MapNode instructionNode = new MapNode(new LinkedHashMap<>());
+        instructionNode.getEntries().put(NodeConstants.OPCODE, new IntegerNode(opcode));
+        instructionNode.getEntries().put(NodeConstants.TYPE, new StringNode(type));
+        instructions.getEntries().add(instructionNode);
         super.visitTypeInsn(opcode, type);
     }
 
     @Override
     public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
-        MapNode instructionNode = new LinkedHashMapNode();
-        instructionNode.put(NodeConstants.OPCODE, new ValueNode(opcode));
-        instructionNode.put(NodeConstants.OWNER, new ValueNode(owner));
-        instructionNode.put(NodeConstants.NAME, new ValueNode(name));
-        instructionNode.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
-        instructions.add(instructionNode);
+        MapNode instructionNode = new MapNode(new LinkedHashMap<>());
+        instructionNode.getEntries().put(NodeConstants.OPCODE, new IntegerNode(opcode));
+        instructionNode.getEntries().put(NodeConstants.OWNER, new StringNode(owner));
+        instructionNode.getEntries().put(NodeConstants.NAME, new StringNode(name));
+        instructionNode.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(descriptor));
+        instructions.getEntries().add(instructionNode);
         super.visitFieldInsn(opcode, owner, name, descriptor);
     }
 
     @Override
     public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
-        MapNode instructionNode = new LinkedHashMapNode();
-        instructionNode.put(NodeConstants.OPCODE, new ValueNode(opcode));
-        instructionNode.put(NodeConstants.OWNER, new ValueNode(owner));
-        instructionNode.put(NodeConstants.NAME, new ValueNode(name));
-        instructionNode.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
-        instructionNode.put(NodeConstants.IS_INTERFACE, new ValueNode(isInterface));
-        instructions.add(instructionNode);
+        MapNode instructionNode = new MapNode(new LinkedHashMap<>());
+        instructionNode.getEntries().put(NodeConstants.OPCODE, new IntegerNode(opcode));
+        instructionNode.getEntries().put(NodeConstants.OWNER, new StringNode(owner));
+        instructionNode.getEntries().put(NodeConstants.NAME, new StringNode(name));
+        instructionNode.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(descriptor));
+        instructionNode.getEntries().put(NodeConstants.IS_INTERFACE, BooleanNode.from(isInterface));
+        instructions.getEntries().add(instructionNode);
         super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
     }
 
     @Override
     public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle,
                                        Object... bootstrapMethodArguments) {
-        MapNode instructionNode = new LinkedHashMapNode();
-        instructionNode.put(NodeConstants.OPCODE, new ValueNode(Opcodes.INVOKEDYNAMIC));
-        instructionNode.put(NodeConstants.NAME, new ValueNode(name));
-        instructionNode.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
-        instructionNode.put(NodeConstants.HANDLE, getHandleNode(bootstrapMethodHandle));
-        instructionNode.put(NodeConstants.ARGUMENTS, getArgumentsNode(bootstrapMethodArguments));
-        instructions.add(instructionNode);
+        MapNode instructionNode = new MapNode(new LinkedHashMap<>());
+        instructionNode.getEntries().put(NodeConstants.OPCODE, new IntegerNode(Opcodes.INVOKEDYNAMIC));
+        instructionNode.getEntries().put(NodeConstants.NAME, new StringNode(name));
+        instructionNode.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(descriptor));
+        instructionNode.getEntries().put(NodeConstants.HANDLE, NodeUtils.getHandleNode(bootstrapMethodHandle));
+        instructionNode.getEntries().put(NodeConstants.ARGUMENTS, NodeUtils.getValueListNode(bootstrapMethodArguments));
+        instructions.getEntries().add(instructionNode);
         super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
     }
 
-    private MapNode getHandleNode(Handle handle) {
-        MapNode handleNode = new LinkedHashMapNode();
-        handleNode.put(NodeConstants.TAG, new ValueNode(handle.getTag()));
-        handleNode.put(NodeConstants.OWNER, new ValueNode(handle.getOwner()));
-        handleNode.put(NodeConstants.NAME, new ValueNode(handle.getName()));
-        handleNode.put(NodeConstants.DESCRIPTOR, new ValueNode(handle.getDesc()));
-        handleNode.put(NodeConstants.IS_INTERFACE, new ValueNode(handle.isInterface()));
-        return handleNode;
-    }
-
-    private ListNode getArgumentsNode(Object[] bootstrapMethodArguments) {
-        ListNode argumentsNode = new ArrayListNode();
-        for (Object arg : bootstrapMethodArguments) {
-            if (arg instanceof Handle) {
-                argumentsNode.add(getHandleNode((Handle) arg));
-            } else if (arg instanceof ConstantDynamic) {
-                ConstantDynamic constantDynamic = (ConstantDynamic) arg;
-                MapNode constDynamicNode = new LinkedHashMapNode();
-                constDynamicNode.put(NodeConstants.NAME, new ValueNode(constantDynamic.getName()));
-                constDynamicNode.put(NodeConstants.DESCRIPTOR, new ValueNode(constantDynamic.getDescriptor()));
-                constDynamicNode.put(NodeConstants.HANDLE, getHandleNode(constantDynamic.getBootstrapMethod()));
-                Object[] arguments = new Object[constantDynamic.getBootstrapMethodArgumentCount()];
-                for (int i = 0; i < arguments.length; i++) {
-                    arguments[i] = constantDynamic.getBootstrapMethodArgument(i);
-                }
-                constDynamicNode.put(NodeConstants.ARGUMENTS, getArgumentsNode(arguments));
-                argumentsNode.add(constDynamicNode);
-            } else {
-                argumentsNode.add(new ValueNode(arg));
-            }
-        }
-        return argumentsNode;
-    }
 
     @Override
     public void visitJumpInsn(int opcode, Label label) {
-        MapNode instructionNode = new LinkedHashMapNode();
-        instructionNode.put(NodeConstants.OPCODE, new ValueNode(opcode));
-        instructionNode.put(NodeConstants.TARGET, new ValueNode(getLabelId(label)));
-        instructions.add(instructionNode);
+        MapNode instructionNode = new MapNode(new LinkedHashMap<>());
+        instructionNode.getEntries().put(NodeConstants.OPCODE, new IntegerNode(opcode));
+        instructionNode.getEntries().put(NodeConstants.TARGET, new StringNode(getLabelId(label)));
+        instructions.getEntries().add(instructionNode);
         super.visitJumpInsn(opcode, label);
     }
 
     @Override
     public void visitLdcInsn(Object value) {
-        MapNode instructionNode = new LinkedHashMapNode();
-        instructionNode.put(NodeConstants.OPCODE, new ValueNode(Opcodes.LDC));
-        instructionNode.put(NodeConstants.VALUE, new ValueNode(value));
-        instructions.add(instructionNode);
+        MapNode instructionNode = new MapNode(new LinkedHashMap<>());
+        instructionNode.getEntries().put(NodeConstants.OPCODE, new IntegerNode(Opcodes.LDC));
+        instructionNode.getEntries().put(NodeConstants.VALUE, NodeUtils.getValueNode(value));
+        instructions.getEntries().add(instructionNode);
         super.visitLdcInsn(value);
     }
 
     @Override
     public void visitIincInsn(int var, int increment) {
-        MapNode instructionNode = new LinkedHashMapNode();
-        instructionNode.put(NodeConstants.OPCODE, new ValueNode(Opcodes.IINC));
-        instructionNode.put(NodeConstants.INCREMENT, new ValueNode(increment));
-        instructions.add(instructionNode);
+        MapNode instructionNode = new MapNode(new LinkedHashMap<>());
+        instructionNode.getEntries().put(NodeConstants.OPCODE, new IntegerNode(Opcodes.IINC));
+        instructionNode.getEntries().put(NodeConstants.INCREMENT, new IntegerNode(increment));
+        instructions.getEntries().add(instructionNode);
         super.visitIincInsn(var, increment);
         localVariableSensitiveInstructions.put(((MethodNode) mv).instructions.getLast(), instructionNode);
     }
 
     @Override
     public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-        MapNode instructionNode = new LinkedHashMapNode();
-        instructionNode.put(NodeConstants.OPCODE, new ValueNode(Opcodes.TABLESWITCH));
-        instructionNode.put(NodeConstants.DEFAULT, new ValueNode(getLabelId(dflt)));
-        ListNode cases = new ArrayListNode();
+        MapNode instructionNode = new MapNode(new LinkedHashMap<>());
+        instructionNode.getEntries().put(NodeConstants.OPCODE, new IntegerNode(Opcodes.TABLESWITCH));
+        instructionNode.getEntries().put(NodeConstants.DEFAULT, new StringNode(getLabelId(dflt)));
+        ListNode cases = new ListNode(new ArrayList<>());
         for (int i = 0; i < labels.length; i++) {
-            MapNode caseNode = new LinkedHashMapNode();
-            caseNode.put(NodeConstants.KEY, new ValueNode(min + i));
-            caseNode.put(NodeConstants.LABEL, new ValueNode(getLabelId(labels[i])));
-            cases.add(caseNode);
+            MapNode caseNode = new MapNode(new LinkedHashMap<>());
+            caseNode.getEntries().put(NodeConstants.KEY, new IntegerNode(min + i));
+            caseNode.getEntries().put(NodeConstants.LABEL, new StringNode(getLabelId(labels[i])));
+            cases.getEntries().add(caseNode);
         }
-        instructionNode.put(NodeConstants.CASES, cases);
-        instructions.add(instructionNode);
+        instructionNode.getEntries().put(NodeConstants.CASES, cases);
+        instructions.getEntries().add(instructionNode);
         super.visitTableSwitchInsn(min, max, dflt, labels);
     }
 
     @Override
     public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-        MapNode instructionNode = new LinkedHashMapNode();
-        instructionNode.put(NodeConstants.OPCODE, new ValueNode(Opcodes.LOOKUPSWITCH));
-        instructionNode.put(NodeConstants.DEFAULT, new ValueNode(getLabelId(dflt)));
-        ListNode cases = new ArrayListNode();
+        MapNode instructionNode = new MapNode(new LinkedHashMap<>());
+        instructionNode.getEntries().put(NodeConstants.OPCODE, new IntegerNode(Opcodes.LOOKUPSWITCH));
+        instructionNode.getEntries().put(NodeConstants.DEFAULT, new StringNode(getLabelId(dflt)));
+        ListNode cases = new ListNode(new ArrayList<>());
         for (int i = 0; i < labels.length; i++) {
-            MapNode caseNode = new LinkedHashMapNode();
-            caseNode.put(NodeConstants.KEY, new ValueNode(keys[i]));
-            caseNode.put(NodeConstants.LABEL, new ValueNode(getLabelId(labels[i])));
-            cases.add(caseNode);
+            MapNode caseNode = new MapNode(new LinkedHashMap<>());
+            caseNode.getEntries().put(NodeConstants.KEY, new IntegerNode(keys[i]));
+            caseNode.getEntries().put(NodeConstants.LABEL, new StringNode(getLabelId(labels[i])));
+            cases.getEntries().add(caseNode);
         }
-        instructionNode.put(NodeConstants.CASES, cases);
-        instructions.add(instructionNode);
+        instructionNode.getEntries().put(NodeConstants.CASES, cases);
+        instructions.getEntries().add(instructionNode);
 
         super.visitLookupSwitchInsn(dflt, keys, labels);
     }
 
     @Override
     public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
-        MapNode instructionNode = new LinkedHashMapNode();
-        instructionNode.put(NodeConstants.OPCODE, new ValueNode(Opcodes.MULTIANEWARRAY));
-        instructionNode.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
-        instructionNode.put(NodeConstants.DIMENSIONS, new ValueNode(numDimensions));
-        instructions.add(instructionNode);
+        MapNode instructionNode = new MapNode(new LinkedHashMap<>());
+        instructionNode.getEntries().put(NodeConstants.OPCODE, new IntegerNode(Opcodes.MULTIANEWARRAY));
+        instructionNode.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(descriptor));
+        instructionNode.getEntries().put(NodeConstants.DIMENSIONS, new IntegerNode(numDimensions));
+        instructions.getEntries().add(instructionNode);
 
         super.visitMultiANewArrayInsn(descriptor, numDimensions);
     }
 
     @Override
     public AnnotationVisitor visitInsnAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
-        MapNode instructionNode = Node.asMap(instructions.get(instructions.size() - 1));
+        MapNode instructionNode = (MapNode) instructions.getEntries().get(instructions.getEntries().size() - 1);
 
-        MapNode annotation = new LinkedHashMapNode();
-        ListNode values = new ArrayListNode();
-        annotation.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
-        annotation.put(NodeConstants.VISIBLE, new ValueNode(visible));
-        annotation.put(NodeConstants.VALUES, new ValueNode(values));
-        annotation.put(NodeConstants.TYPE_REF, new ValueNode(typeRef));
-        annotation.put(NodeConstants.TYPE_PATH, new ValueNode(typePath.toString()));
+        MapNode annotation = new MapNode(new LinkedHashMap<>());
+        MapNode values = new MapNode(new LinkedHashMap<>());
+        annotation.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(descriptor));
+        annotation.getEntries().put(NodeConstants.VISIBLE, BooleanNode.from(visible));
+        annotation.getEntries().put(NodeConstants.VALUES, values);
+        annotation.getEntries().put(NodeConstants.TYPE_REF, new IntegerNode(typeRef));
+        annotation.getEntries().put(NodeConstants.TYPE_PATH, new StringNode(typePath.toString()));
 
-        ListNode annotations = Node.asList(Node.asMap(instructionNode)
-                .computeIfAbsent(NodeConstants.ANNOTATIONS, s -> new ArrayListNode()));
-        annotations.add(annotation);
+        ListNode annotations = (ListNode) instructionNode.getEntries()
+                .computeIfAbsent(NodeConstants.ANNOTATIONS, s -> new ListNode(new ArrayList<>()));
+        annotations.getEntries().add(annotation);
 
         return new ChasmAnnotationVisitor(
                 api,
@@ -417,13 +381,13 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
-        MapNode tryCatchBlock = new LinkedHashMapNode();
-        tryCatchBlock.put(NodeConstants.START, new ValueNode(getLabelId(start)));
-        tryCatchBlock.put(NodeConstants.END, new ValueNode(getLabelId(end)));
-        tryCatchBlock.put(NodeConstants.HANDLER, new ValueNode(getLabelId(handler)));
-        tryCatchBlock.put(NodeConstants.TYPE, new ValueNode(type));
-        tryCatchBlock.put(NodeConstants.ANNOTATIONS, new ArrayListNode());
-        tryCatchBlocks.add(tryCatchBlock);
+        MapNode tryCatchBlock = new MapNode(new LinkedHashMap<>());
+        tryCatchBlock.getEntries().put(NodeConstants.START, new StringNode(getLabelId(start)));
+        tryCatchBlock.getEntries().put(NodeConstants.END, new StringNode(getLabelId(end)));
+        tryCatchBlock.getEntries().put(NodeConstants.HANDLER, new StringNode(getLabelId(handler)));
+        tryCatchBlock.getEntries().put(NodeConstants.TYPE, new StringNode(type));
+        tryCatchBlock.getEntries().put(NodeConstants.ANNOTATIONS, new ListNode(new ArrayList<>()));
+        tryCatchBlocks.getEntries().add(tryCatchBlock);
 
         super.visitTryCatchBlock(start, end, handler, type);
     }
@@ -431,18 +395,18 @@ public class ChasmMethodVisitor extends MethodVisitor {
     @Override
     public AnnotationVisitor visitTryCatchAnnotation(int typeRef, TypePath typePath, String descriptor,
                                                      boolean visible) {
-        MapNode tryCatchBlock = Node.asMap(tryCatchBlocks.get(tryCatchBlocks.size() - 1));
+        MapNode tryCatchBlock = (MapNode) tryCatchBlocks.getEntries().get(tryCatchBlocks.getEntries().size() - 1);
 
-        MapNode annotation = new LinkedHashMapNode();
-        ListNode values = new ArrayListNode();
-        annotation.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
-        annotation.put(NodeConstants.VISIBLE, new ValueNode(visible));
-        annotation.put(NodeConstants.VALUES, new ValueNode(values));
-        annotation.put(NodeConstants.TYPE_REF, new ValueNode(typeRef));
-        annotation.put(NodeConstants.TYPE_PATH, new ValueNode(typePath.toString()));
+        MapNode annotation = new MapNode(new LinkedHashMap<>());
+        MapNode values = new MapNode(new LinkedHashMap<>());
+        annotation.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(descriptor));
+        annotation.getEntries().put(NodeConstants.VISIBLE, BooleanNode.from(visible));
+        annotation.getEntries().put(NodeConstants.VALUES, values);
+        annotation.getEntries().put(NodeConstants.TYPE_REF, new IntegerNode(typeRef));
+        annotation.getEntries().put(NodeConstants.TYPE_PATH, new StringNode(typePath.toString()));
 
-        ListNode annotations = Node.asList(tryCatchBlock.get(NodeConstants.ANNOTATIONS));
-        annotations.add(annotation);
+        ListNode annotations = (ListNode) tryCatchBlock.getEntries().get(NodeConstants.ANNOTATIONS);
+        annotations.getEntries().add(annotation);
 
         return new ChasmAnnotationVisitor(
                 api,
@@ -460,15 +424,15 @@ public class ChasmMethodVisitor extends MethodVisitor {
             Label end,
             int index
     ) {
-        MapNode localNode = new LinkedHashMapNode();
-        localNode.put(NodeConstants.NAME, new ValueNode(name));
-        localNode.put(NodeConstants.DESCRIPTOR, new ValueNode(descriptor));
-        localNode.put(NodeConstants.SIGNATURE, new ValueNode(signature));
-        localNode.put(NodeConstants.START, new ValueNode(getLabelId(start)));
-        localNode.put(NodeConstants.END, new ValueNode(getLabelId(end)));
+        MapNode localNode = new MapNode(new LinkedHashMap<>());
+        localNode.getEntries().put(NodeConstants.NAME, new StringNode(name));
+        localNode.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(descriptor));
+        localNode.getEntries().put(NodeConstants.SIGNATURE, new StringNode(signature));
+        localNode.getEntries().put(NodeConstants.START, new StringNode(getLabelId(start)));
+        localNode.getEntries().put(NodeConstants.END, new StringNode(getLabelId(end)));
         // TODO: what should we do about this index?
-        localNode.put(NodeConstants.INDEX, new ValueNode(index));
-        sourceLocals.add(localNode);
+        localNode.getEntries().put(NodeConstants.INDEX, new IntegerNode(index));
+        sourceLocals.getEntries().add(localNode);
 
         super.visitLocalVariable(name, descriptor, signature, start, end, index);
     }
@@ -482,10 +446,10 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitLineNumber(int line, Label start) {
-        MapNode lineNode = new LinkedHashMapNode();
-        lineNode.put(NodeConstants.LINE, new ValueNode(line));
-        lineNode.put(NodeConstants.LABEL, new ValueNode(getLabelId(start)));
-        lineNumbers.add(lineNode);
+        MapNode lineNode = new MapNode(new LinkedHashMap<>());
+        lineNode.getEntries().put(NodeConstants.LINE, new IntegerNode(line));
+        lineNode.getEntries().put(NodeConstants.LABEL, new StringNode(getLabelId(start)));
+        lineNumbers.getEntries().add(lineNode);
         super.visitLineNumber(line, start);
     }
 
@@ -571,7 +535,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
                 }
             }
             if (localLabel != null) {
-                chasmInsn.put(NodeConstants.VAR, new ValueNode(localLabel));
+                chasmInsn.getEntries().put(NodeConstants.VAR, new StringNode(localLabel));
             }
         });
     }
@@ -623,9 +587,9 @@ public class ChasmMethodVisitor extends MethodVisitor {
     }
 
     private MapNode makeLocal(int index, Type type) {
-        MapNode node = new LinkedHashMapNode();
-        node.put(NodeConstants.INDEX, new ValueNode(index));
-        node.put(NodeConstants.TYPE, new ValueNode(type.toString()));
+        MapNode node = new MapNode(new LinkedHashMap<>());
+        node.getEntries().put(NodeConstants.INDEX, new IntegerNode(index));
+        node.getEntries().put(NodeConstants.TYPE, new StringNode(type.toString()));
         return node;
     }
 }

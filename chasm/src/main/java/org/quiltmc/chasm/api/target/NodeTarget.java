@@ -1,7 +1,7 @@
 package org.quiltmc.chasm.api.target;
 
 import org.quiltmc.chasm.api.Lock;
-import org.quiltmc.chasm.api.tree.Node;
+import org.quiltmc.chasm.lang.api.ast.Node;
 
 /**
  * Locates a {@link Node}, as a {@link Target}.

@@ -2,46 +2,41 @@ package org.quiltmc.chasm.internal.util;
 
 import java.util.Map;
 
-import org.quiltmc.chasm.api.tree.ListNode;
-import org.quiltmc.chasm.api.tree.MapNode;
-import org.quiltmc.chasm.api.tree.Node;
+import org.quiltmc.chasm.internal.metadata.MetadataCache;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
-import org.quiltmc.chasm.internal.tree.LazyClassNode;
+import org.quiltmc.chasm.internal.tree.ClassNode;
+import org.quiltmc.chasm.lang.api.ast.ListNode;
+import org.quiltmc.chasm.lang.api.ast.MapNode;
+import org.quiltmc.chasm.lang.api.ast.Node;
 
 public abstract class PathInitializer {
     private PathInitializer() {
     }
 
-    public static void initialize(Node root, PathMetadata path) {
+    public static void initialize(MetadataCache metadataCache, Node root, PathMetadata path) {
         // Set the path for the root
-        root.getMetadata().put(PathMetadata.class, path);
+        metadataCache.get(root).put(PathMetadata.class, path);
 
-        if (root instanceof LazyClassNode) {
-            LazyClassNode lazyClassNode = (LazyClassNode) root;
+        if (root instanceof ClassNode) {
+            ClassNode lazyClassNode = (ClassNode) root;
 
             // Recursively set the path for all non-lazy entries
-            for (Map.Entry<String, Node> entry : lazyClassNode.getNonLazyEntrySet()) {
-                initialize(entry.getValue(), path.append(entry.getKey()));
-            }
-
-            // Set the path for all lazy entries if they are loaded
-            MapNode fullNode = lazyClassNode.getFullNodeOrNull();
-            if (fullNode != null) {
-                initialize(fullNode, path);
+            for (Map.Entry<String, Node> entry : lazyClassNode.getStaticEntries().entrySet()) {
+                initialize(metadataCache, entry.getValue(), new PathMetadata(path, entry.getKey()));
             }
         } else if (root instanceof MapNode) {
-            MapNode mapNode = Node.asMap(root);
+            MapNode mapNode = (MapNode) root;
 
             // Recursively set the path for all entries
-            for (Map.Entry<String, Node> entry : mapNode.entrySet()) {
-                initialize(entry.getValue(), path.append(entry.getKey()));
+            for (Map.Entry<String, Node> entry : mapNode.getEntries().entrySet()) {
+                initialize(metadataCache, entry.getValue(), new PathMetadata(path, entry.getKey()));
             }
         } else if (root instanceof ListNode) {
-            ListNode listNode = Node.asList(root);
+            ListNode listNode = (ListNode) root;
 
             // Recursively set the path for all entries
-            for (int i = 0; i < listNode.size(); i++) {
-                initialize(listNode.get(i), path.append(i));
+            for (int i = 0; i < listNode.getEntries().size(); i++) {
+                initialize(metadataCache, listNode.getEntries().get(i), new PathMetadata(path, i));
             }
         }
     }

@@ -5,34 +5,30 @@ import java.util.Collection;
 
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.Transformer;
-import org.quiltmc.chasm.internal.transformer.tree.NodeNode;
 import org.quiltmc.chasm.lang.api.ast.CallNode;
-import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.ast.LambdaNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
+import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 
 public class ChasmLangTransformer implements Transformer {
-    private final Evaluator evaluator;
     private final Node parsed;
 
     private final String id;
 
-    public ChasmLangTransformer(String id, Node parsed, Evaluator evaluator) {
+    public ChasmLangTransformer(String id, Node parsed) {
         this.id = id;
-        this.evaluator = evaluator;
         this.parsed = parsed;
     }
 
     @Override
-    public Collection<Transformation> apply(org.quiltmc.chasm.api.tree.ListNode classes) {
-        Node classesNode = NodeNode.from(null, classes);
-
+    public Collection<Transformation> apply(ListNode classes) {
         LambdaNode lambdaExpression = new LambdaNode("classes", parsed);
-        CallNode callExpression = new CallNode(lambdaExpression, classesNode);
+        CallNode callExpression = new CallNode(lambdaExpression, classes);
 
-        Node evaluated = evaluator.evaluate(callExpression);
+        Evaluator evaluator = Evaluator.create(callExpression);
+        Node evaluated = callExpression.evaluate(evaluator);
         if (!(evaluated instanceof MapNode)) {
             throw new RuntimeException("Transformers must be maps");
         }

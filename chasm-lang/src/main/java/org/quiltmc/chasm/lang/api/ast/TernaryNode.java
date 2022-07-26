@@ -70,12 +70,11 @@ public class TernaryNode extends Node {
     public Node evaluate(Evaluator evaluator) {
         Node condition = this.condition.evaluate(evaluator);
 
-        if (!(condition instanceof LiteralNode)
-                || !(((LiteralNode) condition).getValue() instanceof Boolean)) {
+        if (!(condition instanceof BooleanNode)) {
             throw new EvaluationException("Condition in ternary must evaluate to a boolean but found " + condition);
         }
 
-        if ((Boolean) ((LiteralNode) condition).getValue()) {
+        if (((BooleanNode) condition).getValue()) {
             return trueExp.evaluate(evaluator);
         } else {
             return falseExp.evaluate(evaluator);

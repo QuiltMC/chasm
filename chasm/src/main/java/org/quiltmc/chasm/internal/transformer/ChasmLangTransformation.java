@@ -9,21 +9,20 @@ import org.quiltmc.chasm.api.Transformer;
 import org.quiltmc.chasm.api.target.NodeTarget;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.target.Target;
-import org.quiltmc.chasm.api.tree.ArrayListNode;
-import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
-import org.quiltmc.chasm.api.tree.ValueNode;
-import org.quiltmc.chasm.internal.transformer.tree.NodeNode;
+import org.quiltmc.chasm.internal.util.NodeUtils;
 import org.quiltmc.chasm.lang.api.ast.CallNode;
-import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.ast.IntegerNode;
 import org.quiltmc.chasm.lang.api.ast.LambdaNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
+import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
+import org.quiltmc.chasm.lang.api.eval.FunctionNode;
 
 public class ChasmLangTransformation implements Transformation {
     private final Transformer parent;
     private final Evaluator evaluator;
-    private final LambdaNode apply;
+    private final FunctionNode apply;
     private final Target target;
     private final Map<String, Target> sources = new LinkedHashMap<>();
 
@@ -44,10 +43,10 @@ public class ChasmLangTransformation implements Transformation {
         this.target = parseTarget((MapNode) targetNode);
 
         Node applyNode = transformationExpression.getEntries().get("apply");
-        if (!(applyNode instanceof LambdaNode)) {
+        if (!(applyNode instanceof FunctionNode)) {
             throw new RuntimeException("Transformations must declare a function \"apply\" in their root map");
         }
-        this.apply = (LambdaNode) applyNode;
+        this.apply = (FunctionNode) applyNode;
 
         Node sourcesNode = transformationExpression.getEntries().get("sources");
         if (sourcesNode != null) {
@@ -82,70 +81,34 @@ public class ChasmLangTransformation implements Transformation {
     }
 
     @Override
-    public org.quiltmc.chasm.api.tree.Node apply(org.quiltmc.chasm.api.tree.Node targetNode, Map<String, org.quiltmc.chasm.api.tree.Node> nodeSources) {
+    public Node apply(Node targetNode, Map<String, Node> nodeSources) {
         HashMap<String, Node> args = new HashMap<>();
-        args.put("target", NodeNode.from(null, targetNode));
-
-        HashMap<String, Node> sources = new HashMap<>();
-        for (Map.Entry<String, org.quiltmc.chasm.api.tree.Node> entry : nodeSources.entrySet()) {
-            sources.put(entry.getKey(), NodeNode.from(null, entry.getValue()));
-        }
-        args.put("sources", new MapNode(sources));
+        args.put("target", targetNode);
+        args.put("sources", new MapNode(nodeSources));
 
         CallNode callExpression = new CallNode(apply, new MapNode(args));
-        Node result = evaluator.evaluate(callExpression);
-
-        return parseNode(result);
+        return callExpression.evaluate(evaluator);
     }
 
-    private Target parseTarget(Node expression) {
-        AbstractMapExpression target = (AbstractMapExpression) expression;
-
-        Node nodeResolved = target.get("node");
-        Node nodeReduced = evaluator.reduce(nodeResolved);
-        org.quiltmc.chasm.api.tree.Node node = ((NodeNode) nodeReduced).getNode();
+    private Target parseTarget(MapNode target) {
+        Node targetNode = NodeUtils.get(target, "node");
 
         Integer start = null;
-        Node startResolved = target.get("start");
-        if (startResolved != null) {
-            Node startReduced = evaluator.reduce(startResolved);
-            start = ((IntegerExpression) startReduced).getValue();
+        Node startNode = NodeUtils.get(target, "start");
+        if (startNode instanceof IntegerNode) {
+            start = ((IntegerNode) startNode).getValue().intValue();
         }
 
         Integer end = null;
-        Node endResolved = target.get("end");
-        if (endResolved != null) {
-            Node endReduced = evaluator.reduce(endResolved);
-            end = ((IntegerExpression) endReduced).getValue();
+        Node endNode = NodeUtils.get(target, "end");
+        if (endNode instanceof IntegerNode) {
+            end = ((IntegerNode) endNode).getValue().intValue();
         }
 
-        if (node instanceof org.quiltmc.chasm.api.tree.ListNode && start != null && end != null) {
-            return new SliceTarget((org.quiltmc.chasm.api.tree.ListNode) node, start, end);
+        if (targetNode instanceof ListNode && start != null && end != null) {
+            return new SliceTarget((ListNode) targetNode, start, end);
         } else {
-            return new NodeTarget(node);
-        }
-    }
-
-    private org.quiltmc.chasm.api.tree.Node parseNode(Node node) {
-        if (node instanceof AbstractMapExpression) {
-            LinkedHashMapNode mapNode = new LinkedHashMapNode();
-            AbstractMapExpression mapExpression = (AbstractMapExpression) node;
-            for (String key : mapExpression.getKeys()) {
-                mapNode.put(key, parseNode(mapExpression.get(key)));
-            }
-            return mapNode;
-        } else if (node instanceof ListNode) {
-            ArrayListNode listNode = new ArrayListNode();
-            ListNode listExpression = (ListNode) node;
-            for (Node entry : listExpression) {
-                listNode.add(parseNode(entry));
-            }
-            return listNode;
-        } else if (node instanceof LiteralExpression) {
-            LiteralExpression<?> literal = (LiteralExpression<?>) node;
-            return new ValueNode(literal.getValue());
-        } else {
-            throw new RuntimeException("Can't convert expression to chasm node: " + node.getClass());
+            return new NodeTarget(targetNode);
         }
     }
 }

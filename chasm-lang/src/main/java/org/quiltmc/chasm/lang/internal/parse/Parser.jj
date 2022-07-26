@@ -11,11 +11,15 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.quiltmc.chasm.lang.api.ast.BinaryNode;
+import org.quiltmc.chasm.lang.api.ast.BooleanNode;
 import org.quiltmc.chasm.lang.api.ast.CallNode;
+import org.quiltmc.chasm.lang.api.ast.FloatNode;
 import org.quiltmc.chasm.lang.api.ast.IndexNode;
+import org.quiltmc.chasm.lang.api.ast.IntegerNode;
 import org.quiltmc.chasm.lang.api.ast.LambdaNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
-import org.quiltmc.chasm.lang.api.ast.LiteralNode;
+import org.quiltmc.chasm.lang.api.ast.NullNode;
+import org.quiltmc.chasm.lang.api.ast.StringNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.MemberNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
@@ -50,28 +54,28 @@ Node literalExpression():
 }
 {
     t = <NullLiteral>
-    { return new LiteralNode(null); }
+    { return NullNode.INSTANCE; }
     |
     t = <BooleanLiteral>
-    { return new LiteralNode(Boolean.parseBoolean(t.getImage())); }
+    { return BooleanNode.from(Boolean.parseBoolean(t.getImage())); }
     |
     t = <DecIntegerLiteral>
-    { return new LiteralNode(Long.parseLong(t.getImage())); }
+    { return new IntegerNode(Long.parseLong(t.getImage())); }
     |
     t = <HexIntegerLiteral>
-    { return new LiteralNode(Long.parseLong(t.getImage().substring(2), 16)); }
+    { return new IntegerNode(Long.parseLong(t.getImage().substring(2), 16)); }
     |
     t = <BinIntegerLiteral>
-    { return new LiteralNode(Long.parseLong(t.getImage().substring(2), 2)); }
+    { return new IntegerNode(Long.parseLong(t.getImage().substring(2), 2)); }
     |
     t = <FloatLiteral>
-    { return new LiteralNode(Double.parseDouble(t.getImage())); }
+    { return new FloatNode(Double.parseDouble(t.getImage())); }
     |
     t = <StringLiteral>
-    { return new LiteralNode(t.getImage().substring(1, t.getImage().length() - 1)); }
+    { return new StringNode(t.getImage().substring(1, t.getImage().length() - 1)); }
     |
     t = <CharLiteral>
-    { return new LiteralNode((long) t.getImage().charAt(1)); }
+    { return new IntegerNode((long) t.getImage().charAt(1)); }
 }
 
 Node referenceExpression():

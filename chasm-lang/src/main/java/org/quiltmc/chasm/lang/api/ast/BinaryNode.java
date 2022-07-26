@@ -55,26 +55,24 @@ public class BinaryNode extends Node {
     @Override
     public Node evaluate(Evaluator evaluator) {
         Node left = this.left.evaluate(evaluator);
-        Object leftValue = left instanceof LiteralNode ? ((LiteralNode) left).getValue() : null;
 
         // Short-circuiting operators:
         if (operator == Operator.BOOLEAN_AND || operator == Operator.BOOLEAN_OR) {
-            if (!(leftValue instanceof Boolean)) {
+            if (!(left instanceof BooleanNode)) {
                 throw new EvaluationException("The left side of boolean operator " + operator
                         + " must be a boolean but found " + left);
             }
 
-            if (operator == BinaryNode.Operator.BOOLEAN_OR && (Boolean) leftValue) {
-                return left;
+            if (operator == BinaryNode.Operator.BOOLEAN_OR && ((BooleanNode) left).getValue()) {
+                return BooleanNode.TRUE;
             }
 
-            if (operator == BinaryNode.Operator.BOOLEAN_AND && !(Boolean) leftValue) {
-                return left;
+            if (operator == BinaryNode.Operator.BOOLEAN_AND && !((BooleanNode) left).getValue()) {
+                return BooleanNode.FALSE;
             }
         }
 
         Node right = this.right.evaluate(evaluator);
-        Object rightValue = right instanceof LiteralNode ? ((LiteralNode) right).getValue() : null;
 
         switch (operator) {
             case PLUS: {
@@ -88,221 +86,249 @@ public class BinaryNode extends Node {
                     return new ListNode(newEntries);
                 }
 
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue + (Long) rightValue);
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() + ((IntegerNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Double) {
-                    return new LiteralNode((Double) leftValue + (Double) rightValue);
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return new FloatNode(((FloatNode) left).getValue() + ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Long && rightValue instanceof Double) {
-                    return new LiteralNode((Long) leftValue + (Double) rightValue);
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return new FloatNode(((IntegerNode) left).getValue() + ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Long) {
-                    return new LiteralNode((Double) leftValue + (Long) rightValue);
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return new FloatNode(((FloatNode) left).getValue() + ((IntegerNode) right).getValue());
                 }
 
-                if (leftValue instanceof String || rightValue instanceof String) {
-                    return new LiteralNode(String.valueOf(leftValue) + rightValue);
+                if (left instanceof StringNode && right instanceof ValueNode) {
+                    return new StringNode(((StringNode) left).getValue() + ((ValueNode<?>) right).getValue());
                 }
-            } break;
+
+                if (left instanceof ValueNode && right instanceof StringNode) {
+                    return new StringNode(((ValueNode<?>) left).getValue() + ((StringNode) right).getValue());
+                }
+            }
+            break;
             case MINUS: {
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue - (Long) rightValue);
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() - ((IntegerNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Double) {
-                    return new LiteralNode((Double) leftValue - (Double) rightValue);
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return new FloatNode(((FloatNode) left).getValue() - ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Long && rightValue instanceof Double) {
-                    return new LiteralNode((Long) leftValue - (Double) rightValue);
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return new FloatNode(((IntegerNode) left).getValue() - ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Long) {
-                    return new LiteralNode((Double) leftValue - (Long) rightValue);
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return new FloatNode(((FloatNode) left).getValue() - ((IntegerNode) right).getValue());
                 }
-            } break;
+            }
+            break;
             case MULTIPLY: {
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue * (Long) rightValue);
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() * ((IntegerNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Double) {
-                    return new LiteralNode((Double) leftValue * (Double) rightValue);
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return new FloatNode(((FloatNode) left).getValue() * ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Long && rightValue instanceof Double) {
-                    return new LiteralNode((Long) leftValue * (Double) rightValue);
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return new FloatNode(((IntegerNode) left).getValue() * ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Long) {
-                    return new LiteralNode((Double) leftValue * (Long) rightValue);
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return new FloatNode(((FloatNode) left).getValue() * ((IntegerNode) right).getValue());
                 }
-            } break;
+            }
+            break;
             case DIVIDE: {
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue / (Long) rightValue);
+
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() / ((IntegerNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Double) {
-                    return new LiteralNode((Double) leftValue / (Double) rightValue);
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return new FloatNode(((FloatNode) left).getValue() / ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Long && rightValue instanceof Double) {
-                    return new LiteralNode((Long) leftValue / (Double) rightValue);
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return new FloatNode(((IntegerNode) left).getValue() / ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Long) {
-                    return new LiteralNode((Double) leftValue / (Long) rightValue);
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return new FloatNode(((FloatNode) left).getValue() / ((IntegerNode) right).getValue());
                 }
-            } break;
+            }
+            break;
             case MODULO: {
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue % (Long) rightValue);
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() % ((IntegerNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Double) {
-                    return new LiteralNode((Double) leftValue % (Double) rightValue);
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return new FloatNode(((FloatNode) left).getValue() % ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Long && rightValue instanceof Double) {
-                    return new LiteralNode((Long) leftValue % (Double) rightValue);
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return new FloatNode(((IntegerNode) left).getValue() % ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Long) {
-                    return new LiteralNode((Double) leftValue % (Long) rightValue);
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return new FloatNode(((FloatNode) left).getValue() % ((IntegerNode) right).getValue());
                 }
-            } break;
+            }
+            break;
             case SHIFT_LEFT: {
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue << (Long) rightValue);
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() << ((IntegerNode) right).getValue());
                 }
-            } break;
+            }
+            break;
             case SHIFT_RIGHT: {
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue >> (Long) rightValue);
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() >> ((IntegerNode) right).getValue());
                 }
-            } break;
+            }
+            break;
             case SHIFT_RIGHT_UNSIGNED: {
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue >>> (Long) rightValue);
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() >>> ((IntegerNode) right).getValue());
                 }
-            } break;
+            }
+            break;
             case LESS_THAN: {
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue < (Long) rightValue);
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() < ((IntegerNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Double) {
-                    return new LiteralNode((Double) leftValue < (Double) rightValue);
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() < ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Long && rightValue instanceof Double) {
-                    return new LiteralNode((Long) leftValue < (Double) rightValue);
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() < ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Long) {
-                    return new LiteralNode((Double) leftValue < (Long) rightValue);
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() < ((IntegerNode) right).getValue());
                 }
-            } break;
+            }
+            break;
             case LESS_THAN_OR_EQUAL: {
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue <= (Long) rightValue);
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() <= ((IntegerNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Double) {
-                    return new LiteralNode((Double) leftValue <= (Double) rightValue);
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() <= ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Long && rightValue instanceof Double) {
-                    return new LiteralNode((Long) leftValue <= (Double) rightValue);
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() <= ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Long) {
-                    return new LiteralNode((Double) leftValue <= (Long) rightValue);
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() <= ((IntegerNode) right).getValue());
                 }
-            } break;
+            }
+            break;
             case GREATER_THAN: {
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue > (Long) rightValue);
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() > ((IntegerNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Double) {
-                    return new LiteralNode((Double) leftValue > (Double) rightValue);
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() > ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Long && rightValue instanceof Double) {
-                    return new LiteralNode((Long) leftValue > (Double) rightValue);
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() > ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Long) {
-                    return new LiteralNode((Double) leftValue > (Long) rightValue);
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() > ((IntegerNode) right).getValue());
                 }
-            } break;
+            }
+            break;
             case GREATER_THAN_OR_EQUAL: {
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue >= (Long) rightValue);
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() >= ((IntegerNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Double) {
-                    return new LiteralNode((Double) leftValue >= (Double) rightValue);
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() >= ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Long && rightValue instanceof Double) {
-                    return new LiteralNode((Long) leftValue >= (Double) rightValue);
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() >= ((FloatNode) right).getValue());
                 }
 
-                if (leftValue instanceof Double && rightValue instanceof Long) {
-                    return new LiteralNode((Double) leftValue >= (Long) rightValue);
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() >= ((IntegerNode) right).getValue());
                 }
-            } break;
+            }
+            break;
             case EQUAL: {
-                if (left instanceof LiteralNode && right instanceof LiteralNode) {
-                    return new LiteralNode(Objects.equals(leftValue, rightValue));
+                if (left instanceof ValueNode && right instanceof ValueNode) {
+                    return BooleanNode.from(
+                            Objects.equals(((ValueNode<?>) left).getValue(), ((ValueNode<?>) right).getValue())
+                    );
                 }
-            } break;
+            }
+            break;
             case NOT_EQUAL: {
-                if (left instanceof LiteralNode && right instanceof LiteralNode) {
-                    return new LiteralNode(!Objects.equals(leftValue, rightValue));
+                if (left instanceof ValueNode && right instanceof ValueNode) {
+                    return BooleanNode.from(
+                            !Objects.equals(((ValueNode<?>) left).getValue(), ((ValueNode<?>) right).getValue())
+                    );
                 }
-            } break;
+            }
+            break;
             case BOOLEAN_AND: {
-                // leftValue was already checked before
-                if (rightValue instanceof Boolean) {
+                // Left side was already checked before
+                if (right instanceof BooleanNode) {
                     return right;
                 }
-            } break;
+            }
+            break;
             case BOOLEAN_OR: {
-                // leftValue was already checked before
-                if (rightValue instanceof Boolean) {
+                // Left side was already checked before
+                if (right instanceof BooleanNode) {
                     return right;
                 }
-            } break;
+            }
+            break;
             case BITWISE_AND: {
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue & (Long) rightValue);
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() & ((IntegerNode) right).getValue());
                 }
-            } break;
+            }
+            break;
             case BITWISE_XOR: {
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue ^ (Long) rightValue);
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() ^ ((IntegerNode) right).getValue());
                 }
-            } break;
+            }
+            break;
             case BITWISE_OR: {
-                if (leftValue instanceof Long && rightValue instanceof Long) {
-                    return new LiteralNode((Long) leftValue | (Long) rightValue);
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() | ((IntegerNode) right).getValue());
                 }
-            } break;
+            }
+            break;
             default: {
                 throw new EvaluationException("Unexpected operator " + operator);
             }
         }
 
         throw new EvaluationException(
-                "Can't apply operator " + operator + " to " + left + " and " + right
+                "Can't apply binary operator " + operator + " to " + left + " and " + right
         );
     }
 
@@ -318,7 +344,8 @@ public class BinaryNode extends Node {
                 ((BinaryNode) right).operator == operator && operator.requiresBracketsWithSelf
                         || ((BinaryNode) right).operator.morePrecedenceThan(operator.precedence)
         )
-                || right instanceof UnaryNode && ((UnaryNode) right).getOperator().morePrecedenceThan(operator.precedence)
+                || right instanceof UnaryNode && ((UnaryNode) right).getOperator()
+                .morePrecedenceThan(operator.precedence)
                 || right instanceof TernaryNode;
 
         if (leftNeedsBrackets) {

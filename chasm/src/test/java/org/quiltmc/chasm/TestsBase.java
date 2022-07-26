@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -77,7 +78,11 @@ public abstract class TestsBase {
             URI testSourceUri = Files.exists(resultFile) ? resultFile.toUri() : classFile.toUri();
             DynamicTest test = DynamicTest.dynamicTest(name, testSourceUri, () -> {
                 setUp();
+                long start = System.nanoTime();
                 doTest(testDefinition);
+                long end = System.nanoTime();
+                double time = (end - start) * 1e-6;
+                System.out.printf(Locale.US, "%s: %.2fms\n", name, time);
                 tearDown();
             });
 
@@ -100,14 +105,13 @@ public abstract class TestsBase {
             processor.addClass(new ClassData(Files.readAllBytes(additionalClassFile)));
         }
 
-        Evaluator evaluator = Evaluator.create();
 
         // Add transformers
         for (String transformer : testDefinition.transformers) {
             Path transformerFile = TEST_TRANSFORMERS_DIR.resolve(transformer + ".chasm");
             Assertions.assertTrue(Files.isRegularFile(transformerFile), transformerFile + " does not exist");
             Node node = Node.parse(transformerFile);
-            processor.addTransformer(new ChasmLangTransformer(transformer, node, evaluator));
+            processor.addTransformer(new ChasmLangTransformer(transformer, node));
         }
 
         // Process the data

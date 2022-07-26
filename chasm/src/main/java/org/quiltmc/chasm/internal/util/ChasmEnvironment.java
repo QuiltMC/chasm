@@ -42,7 +42,6 @@ public class ChasmEnvironment implements Closeable {
     }
 
     public Collection<Transformer> createTransformers() throws IOException {
-        Evaluator evaluator = Evaluator.create();
 
         Map<String, Transformer> transformers = new LinkedHashMap<>();
 
@@ -56,7 +55,7 @@ public class ChasmEnvironment implements Closeable {
                 Path path = chasmFiles.next();
                 String id = transformerRoot.relativize(path).toString();
                 Node node = Node.parse(path);
-                ChasmLangTransformer transformer = new ChasmLangTransformer(id, node, evaluator);
+                ChasmLangTransformer transformer = new ChasmLangTransformer(id, node);
                 Transformer previous = transformers.put(id, transformer);
                 if (previous != null) {
                     throw new RuntimeException("Duplicate chasm transformer: " + id);

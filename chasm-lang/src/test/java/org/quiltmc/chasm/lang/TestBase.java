@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -31,7 +32,13 @@ public abstract class TestBase {
                     String name = relative.toString();
 
                     Path resultPath = RESULTS_DIR.resolve(relative);
-                    DynamicTest test = DynamicTest.dynamicTest(name, () -> doTest(path, resultPath));
+                    DynamicTest test = DynamicTest.dynamicTest(name, () ->  {
+                        long start = System.nanoTime();
+                        doTest(path, resultPath);
+                        long end = System.nanoTime();
+                        double time = (end - start) * 1e-6;
+                        System.out.printf(Locale.US, "%s: %.2fms\n", name, time);
+                    });
 
                     tests.add(test);
                 }

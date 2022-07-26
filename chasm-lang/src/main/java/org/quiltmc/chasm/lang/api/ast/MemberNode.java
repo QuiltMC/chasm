@@ -57,7 +57,7 @@ public class MemberNode extends Node {
         Map<String, Node> entries = ((MapNode) left).getEntries();
 
         if (!entries.containsKey(identifier)) {
-            throw new EvaluationException("Map doesn't contain member " + identifier);
+            return NullNode.INSTANCE;
         }
 
         return entries.get(identifier).evaluate(evaluator);

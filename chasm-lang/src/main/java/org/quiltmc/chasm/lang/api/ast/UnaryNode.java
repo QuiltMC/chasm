@@ -1,10 +1,10 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import org.quiltmc.chasm.lang.internal.render.Renderer;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class UnaryNode extends Node {
     private Node inner;
@@ -34,9 +34,11 @@ public class UnaryNode extends Node {
     @Override
     public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
         builder.append(operator.image);
-        boolean wrapWithBraces = inner instanceof BinaryNode && ((BinaryNode) inner).getOperator().morePrecedenceThan(operator.precedence) // we don't have to do the funky requiresBracketsWithSelf here luckily
-                              || inner instanceof UnaryNode && ((UnaryNode) inner).operator.morePrecedenceThan(operator.precedence)
-                              || inner instanceof TernaryNode;
+        boolean wrapWithBraces = inner instanceof BinaryNode && ((BinaryNode) inner).getOperator()
+                .morePrecedenceThan(operator.precedence)
+                // we don't have to do the funky requiresBracketsWithSelf here luckily
+                || inner instanceof UnaryNode && ((UnaryNode) inner).operator.morePrecedenceThan(operator.precedence)
+                || inner instanceof TernaryNode;
 
         if (wrapWithBraces) {
             builder.append('(');
@@ -58,54 +60,47 @@ public class UnaryNode extends Node {
     public Node evaluate(Evaluator evaluator) {
         Node inner = this.inner.evaluate(evaluator);
 
-        if (!(inner instanceof LiteralNode)) {
-            throw new EvaluationException("Unary expression can only be applied to literal values but found " + inner);
-        }
-
-        Object value = ((LiteralNode) inner).getValue();
-
         switch (operator) {
             case PLUS: {
-                if (value instanceof Long || value instanceof Double) {
+                if (inner instanceof IntegerNode) {
                     return inner;
                 }
-                throw new EvaluationException(
-                        "Unary plus operator can only be applied to integers and floats but found " + value.getClass()
-                );
+
+                if (inner instanceof FloatNode) {
+                    return inner;
+                }
             }
+            break;
             case MINUS: {
-                if (value instanceof Long) {
-                    return new LiteralNode(-(Long) value);
+                if (inner instanceof IntegerNode) {
+                    return new IntegerNode(-((IntegerNode) inner).getValue());
                 }
-                if (value instanceof Double) {
-                    return new LiteralNode(-(Double) value);
+
+                if (inner instanceof FloatNode) {
+                    return new FloatNode(-((FloatNode) inner).getValue());
                 }
-                throw new EvaluationException(
-                        "Unary minus operator can only be applied to integers and floats but found " + value.getClass()
-                );
             }
+            break;
             case NOT: {
-                if (value instanceof Boolean) {
-                    return new LiteralNode(!(Boolean) value);
+                if (inner instanceof BooleanNode) {
+                    return BooleanNode.from(!((BooleanNode) inner).getValue());
                 }
-                throw new EvaluationException(
-                        "Unary not operator can only be applied to booleans but found " + value.getClass()
-                );
             }
+            break;
             case INVERT: {
-                if (value instanceof Long) {
-                    return new LiteralNode(~(Long) value);
+                if (inner instanceof IntegerNode) {
+                    return new IntegerNode(~((IntegerNode) inner).getValue());
                 }
-                throw new EvaluationException(
-                        "Unary invert operator can only be applied to integers but found " + value.getClass()
-                );
             }
+            break;
             default: {
                 throw new EvaluationException(
                         "Unknown unary operator " + operator
                 );
             }
         }
+
+        throw new EvaluationException("Can't apply unary operator " + operator + " to " + inner);
     }
 
     public enum Operator {

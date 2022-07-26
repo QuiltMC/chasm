@@ -6,7 +6,7 @@
             target: {
                 node: target_class.methods,
                 start: 0,
-                end: 0,
+                end: 0
             },
             apply: args -> [
                 {
@@ -21,12 +21,12 @@
                                 var: "this"
                             },
                             {
-                                opcode: 176,
-                            },
+                                opcode: 176
+                            }
                         ]
-                    },
+                    }
                 }
             ]
-        },
-    ],
+        }
+    ]
 }

@@ -50,13 +50,12 @@ public class IndexNode extends Node {
         Node indexNode = this.index.evaluate(evaluator);
 
         // Index list
-        if (leftNode instanceof ListNode && indexNode instanceof LiteralNode
-                && ((LiteralNode) indexNode).getValue() instanceof Long) {
-            long index = (Long) ((LiteralNode) indexNode).getValue();
+        if (leftNode instanceof ListNode && indexNode instanceof IntegerNode) {
+            long index = ((IntegerNode) indexNode).getValue();
             List<Node> entries = ((ListNode) leftNode).getEntries();
 
             if (index < 0 || index >= entries.size()) {
-                return new LiteralNode(null);
+                return NullNode.INSTANCE;
             }
 
             return entries.get((int) index).evaluate(evaluator);
@@ -71,13 +70,11 @@ public class IndexNode extends Node {
             for (Node entry : entries) {
                 CallNode callExpression = new CallNode(closure, entry);
                 Node reduced = callExpression.evaluate(evaluator);
-                if (!(reduced instanceof LiteralNode)
-                        || !(((LiteralNode) reduced).getValue() instanceof Boolean)) {
+                if (!(reduced instanceof BooleanNode)) {
                     throw new EvaluationException("Filter function must return a boolean but found " + reduced);
                 }
 
-                boolean result = (boolean) ((LiteralNode) reduced).getValue();
-                if (result) {
+                if (((BooleanNode) reduced).getValue()) {
                     newEntries.add(entry.evaluate(evaluator));
                 }
             }
@@ -86,13 +83,12 @@ public class IndexNode extends Node {
         }
 
         // Index map
-        if (leftNode instanceof MapNode && indexNode instanceof LiteralNode
-                && ((LiteralNode) indexNode).getValue() instanceof String) {
-            String key = (String) ((LiteralNode) indexNode).getValue();
+        if (leftNode instanceof MapNode && indexNode instanceof StringNode) {
+            String key = ((StringNode) indexNode).getValue();
             Map<String, Node> entries = ((MapNode) leftNode).getEntries();
 
             if (!entries.containsKey(key)) {
-                return new LiteralNode(null);
+                return NullNode.INSTANCE;
             }
 
             return entries.get(key).evaluate(evaluator);

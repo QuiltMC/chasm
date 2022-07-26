@@ -5,18 +5,18 @@ import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
-public class LiteralNode extends Node {
-    private Object value;
+public abstract class ValueNode<T> extends Node {
+    private T value;
 
-    public LiteralNode(Object value) {
+    public ValueNode(T value) {
         this.value = value;
     }
 
-    public Object getValue() {
+    public T getValue() {
         return value;
     }
 
-    public void setValue(Object value) {
+    public void setValue(T value) {
         this.value = value;
     }
 

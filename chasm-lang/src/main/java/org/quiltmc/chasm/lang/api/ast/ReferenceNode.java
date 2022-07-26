@@ -50,4 +50,9 @@ public class ReferenceNode extends Node {
 
         builder.append(identifier);
     }
+
+    @Override
+    public String toString() {
+        return "Ref<" + identifier + ">";
+    }
 }

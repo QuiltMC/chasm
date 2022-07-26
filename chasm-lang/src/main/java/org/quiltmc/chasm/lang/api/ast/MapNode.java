@@ -57,6 +57,10 @@ public class MapNode extends Node {
             newEntries.put(entry.getKey(), entry.getValue().evaluate(evaluator));
         }
 
+        if (newEntries.equals(entries)) {
+            return this;
+        }
+
         return new MapNode(newEntries);
     }
 }

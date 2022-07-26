@@ -6,15 +6,15 @@
             target: {
                 node: target_class.fields,
                 start: 0,
-                end: 0,
+                end: 0
             },
             apply: args -> [
                 {
                     access: 1,
                     name: "field1",
-                    descriptor: "I",
+                    descriptor: "I"
                 }
             ]
-        },
-    ],
+        }
+    ]
 }
