@@ -1,12 +1,12 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import org.quiltmc.chasm.lang.internal.render.Renderer;
 import java.util.Map;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class MemberNode extends Node {
     private Node left;

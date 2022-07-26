@@ -1,12 +1,11 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import org.quiltmc.chasm.lang.api.eval.ClosureNode;
-import org.quiltmc.chasm.lang.internal.render.Renderer;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.FunctionNode;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class CallNode extends Node {
     private Node function;

@@ -17,8 +17,8 @@ import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 
 public abstract class TestBase {
-    private final Path TESTS_DIR = Paths.get("src/test/resources/tests");
-    private final Path RESULTS_DIR = Paths.get("src/test/resources/results");
+    private static final Path TESTS_DIR = Paths.get("src/test/resources/tests");
+    private static final Path RESULTS_DIR = Paths.get("src/test/resources/results");
 
     @TestFactory
     public Stream<DynamicTest> testAll() {

@@ -334,13 +334,13 @@ public class BinaryNode extends Node {
 
     @Override
     public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
-        boolean leftNeedsBrackets = left instanceof BinaryNode && (
+        final boolean leftNeedsBrackets = left instanceof BinaryNode && (
                 ((BinaryNode) left).operator == operator && operator.requiresBracketsWithSelf
                         || ((BinaryNode) left).operator.morePrecedenceThan(operator.precedence)
         )
                 || left instanceof UnaryNode && ((UnaryNode) left).getOperator().morePrecedenceThan(operator.precedence)
                 || left instanceof TernaryNode;
-        boolean rightNeedsBrackets = right instanceof BinaryNode && (
+        final boolean rightNeedsBrackets = right instanceof BinaryNode && (
                 ((BinaryNode) right).operator == operator && operator.requiresBracketsWithSelf
                         || ((BinaryNode) right).operator.morePrecedenceThan(operator.precedence)
         )
@@ -380,7 +380,7 @@ public class BinaryNode extends Node {
         LESS_THAN_OR_EQUAL("<=", 6, false),
         GREATER_THAN(">", 6, false),
         GREATER_THAN_OR_EQUAL(">=", 6, false),
-        EQUAL("==", 7, false),
+        EQUAL("=", 7, false),
         NOT_EQUAL("!=", 7, false),
         BITWISE_AND("&", 8, false),
         BITWISE_XOR("^", 9, false),

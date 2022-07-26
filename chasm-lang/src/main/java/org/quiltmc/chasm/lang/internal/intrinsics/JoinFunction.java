@@ -5,9 +5,8 @@ import java.util.stream.Collectors;
 
 import org.quiltmc.chasm.lang.api.ast.IntegerNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
-import org.quiltmc.chasm.lang.api.ast.StringNode;
-import org.quiltmc.chasm.lang.api.ast.ValueNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.ast.StringNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
