@@ -1,0 +1,4 @@
+{
+    run1: state -> run2(state - 1),
+    run2: state -> state = 0 ? "Pass!" : run1(state)
+}.run1(10)

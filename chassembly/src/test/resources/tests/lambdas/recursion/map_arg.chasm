@@ -1,0 +1,3 @@
+{
+    run: state -> state.count = 0 ? "Pass!" : run({ count: state.count - 1 })
+}.run({count: 10})

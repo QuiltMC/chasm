@@ -7,12 +7,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.objectweb.asm.Opcodes;
-import org.quiltmc.chasm.api.tree.ListNode;
-import org.quiltmc.chasm.api.tree.MapNode;
-import org.quiltmc.chasm.api.tree.Node;
-import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.api.util.ClassInfoProvider;
 import org.quiltmc.chasm.internal.util.NodeConstants;
+import org.quiltmc.chasm.lang.api.ast.IntegerNode;
+import org.quiltmc.chasm.lang.api.ast.ListNode;
+import org.quiltmc.chasm.lang.api.ast.MapNode;
+import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.ast.StringNode;
 
 public class ChasmClassInfoProvider implements ClassInfoProvider {
     private static final String OBJECT = "java/lang/Object";
@@ -26,22 +27,28 @@ public class ChasmClassInfoProvider implements ClassInfoProvider {
     }
 
     private ClassInfo getClassInfo(String className) {
-        for (Node node : classes) {
-            MapNode classNode = Node.asMap(node);
-            ValueNode nameNode = Node.asValue(classNode.get(NodeConstants.NAME));
-            if (!nameNode.getValueAsString().equals(className)) {
+        for (Node node : classes.getEntries()) {
+            MapNode classNode = (MapNode) node;
+            StringNode nameNode = (StringNode) classNode.getEntries().get(NodeConstants.NAME);
+            if (!nameNode.getValue().equals(className)) {
                 continue;
             }
 
-            ValueNode superNode = Node.asValue(classNode.get(NodeConstants.SUPER));
-            ValueNode accessNode = Node.asValue(classNode.get(NodeConstants.ACCESS));
-            ListNode interfacesList = Node.asList(classNode.get(NodeConstants.INTERFACES));
-            List<String> interfaces = interfacesList == null ? Collections.emptyList()
-                    : interfacesList.stream().map(n -> Node.asValue(n).getValueAsString()).collect(Collectors.toList());
+            StringNode superNode = (StringNode) classNode.getEntries().get(NodeConstants.SUPER);
+            IntegerNode accessNode = (IntegerNode) classNode.getEntries().get(NodeConstants.ACCESS);
+            ListNode interfacesList = (ListNode) classNode.getEntries().get(NodeConstants.INTERFACES);
+            List<String> interfaces;
+            if (interfacesList == null) {
+                interfaces = Collections.emptyList();
+            } else {
+                interfaces = interfacesList.getEntries().stream().map(n -> ((StringNode) n).getValue())
+                        .collect(Collectors.toList());
+            }
             return new ClassInfo(
-                            superNode == null ? OBJECT : superNode.getValueAsString(),
-                            (accessNode.getValueAsInt() & Opcodes.ACC_INTERFACE) != 0,
-                            interfaces);
+                    superNode == null ? OBJECT : superNode.getValue(),
+                    (accessNode.getValue() & Opcodes.ACC_INTERFACE) != 0,
+                    interfaces
+            );
         }
 
         return null;

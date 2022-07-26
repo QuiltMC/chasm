@@ -30,6 +30,7 @@
     <property name="severity" value="error"/>
 
     <property name="fileExtensions" value="java, properties, xml"/>
+
     <!-- Excludes all 'module-info.java' files              -->
     <!-- See https://checkstyle.org/config_filefilters.html -->
     <module name="BeforeExecutionExclusionFileFilter">
@@ -37,7 +38,7 @@
     </module>
 
     <module name="BeforeExecutionExclusionFileFilter">
-        <property name="fileNamePattern" value=".*[\\/]build[\\/]generated-src[\\/].*$"/>
+        <property name="fileNamePattern" value=".*[\\/]build[\\/]generated[\\/]sources[\\/].*$"/>
     </module>
 
     <!-- Checks for whitespace                               -->

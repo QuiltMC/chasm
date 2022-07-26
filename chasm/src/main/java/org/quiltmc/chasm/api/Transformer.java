@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-import org.quiltmc.chasm.api.tree.ListNode;
+import org.quiltmc.chasm.lang.api.ast.ListNode;
 
 /**
  * Bulk-instantiates {@link Transformation}s of classes.

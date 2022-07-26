@@ -1,12 +1,14 @@
 package org.quiltmc.chasm.internal.tree.reader;
 
+import java.util.Map;
+
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.TypePath;
-import org.quiltmc.chasm.api.tree.ListNode;
-import org.quiltmc.chasm.api.tree.MapNode;
-import org.quiltmc.chasm.api.tree.Node;
-import org.quiltmc.chasm.api.tree.ValueNode;
 import org.quiltmc.chasm.internal.util.NodeConstants;
+import org.quiltmc.chasm.internal.util.NodeUtils;
+import org.quiltmc.chasm.lang.api.ast.ListNode;
+import org.quiltmc.chasm.lang.api.ast.MapNode;
+import org.quiltmc.chasm.lang.api.ast.Node;
 
 public class AnnotationNodeReader {
     private final Node annotationNode;
@@ -15,77 +17,73 @@ public class AnnotationNodeReader {
         this.annotationNode = annotationNode;
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public void visitAnnotation(AnnotationVisitor visitor) {
-        ListNode values;
-        if (annotationNode instanceof MapNode) {
-            values = Node.asList(Node.asMap(annotationNode).get(NodeConstants.VALUES));
-        } else {
-            values = Node.asList(annotationNode);
-        }
-        if (values == null) {
-            visitor.visitEnd();
-            return;
-        }
+    public static void visitAnnotationValue(AnnotationVisitor visitor, String name, Node node) {
+        if (node instanceof ListNode) {
+            AnnotationVisitor arrayVisitor = visitor.visitArray(name);
 
-        for (Node value : values) {
-            String name = null;
-            if (value instanceof MapNode && (Node.asMap(value)).containsKey(NodeConstants.NAME)) {
-                MapNode mapNode = Node.asMap(value);
-                // Name-value pairs
-                name = Node.asValue(mapNode.get(NodeConstants.NAME)).getValueAsString();
-                value = mapNode.get(NodeConstants.VALUE);
+            for (Node entry : NodeUtils.asList(node).getEntries()) {
+                arrayVisitor.visit(null, entry);
             }
+            arrayVisitor.visitEnd();
+        } else if (node instanceof MapNode) {
+            String type = NodeUtils.getAsString(node, NodeConstants.TYPE);
+            String descriptor = NodeUtils.getAsString(node, NodeConstants.DESCRIPTOR);
+            MapNode annotationValues = NodeUtils.getAsMap(node, NodeConstants.VALUES);
+            String enumValue = NodeUtils.getAsString(node, NodeConstants.VALUE);
 
-            if (value instanceof ValueNode) {
-                visitor.visit(name, Node.asValue(value).getValue());
-            } else if (value instanceof ListNode) {
-                AnnotationVisitor arrayVisitor = visitor.visitArray(name);
-
-                new AnnotationNodeReader(value).visitAnnotation(arrayVisitor);
+            if (type != null) {
+                visitor.visit(name, NodeUtils.fromValueNode(node));
+            } else if (descriptor != null && annotationValues != null) {
+                AnnotationVisitor annotationVisitor = visitor.visitAnnotation(name, descriptor);
+                visitValues(annotationVisitor, annotationValues);
+            } else if (descriptor != null && enumValue != null) {
+                visitor.visitEnum(name, descriptor, enumValue);
             } else {
-                MapNode mapNode = Node.asMap(value);
-                if (mapNode.containsKey(NodeConstants.VALUE)) {
-                    String descriptor = Node.asValue(mapNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
-                    String enumValue = Node.asValue(mapNode.get(NodeConstants.VALUE)).getValueAsString();
-
-                    visitor.visitEnum(name, descriptor, enumValue);
-                } else {
-                    String descriptor = Node.asValue(mapNode.get(NodeConstants.DESCRIPTOR)).getValueAsString();
-                    ListNode annotationValues = Node.asList(mapNode.get(NodeConstants.VALUES));
-
-                    AnnotationVisitor annotationVisitor = visitor.visitAnnotation(name, descriptor);
-                    new AnnotationNodeReader(annotationValues).visitAnnotation(annotationVisitor);
-                }
+                throw new RuntimeException("Invalid annotation value: " + node);
             }
+        } else {
+            throw new RuntimeException("Invalid annotation value: " + node);
+        }
+    }
+
+    public static void visitValues(AnnotationVisitor visitor, Node node) {
+        if (node instanceof MapNode) {
+            for (Map.Entry<String, Node> entry : NodeUtils.asMap(node).getEntries().entrySet()) {
+                visitAnnotationValue(visitor, entry.getKey(), entry.getValue());
+            }
+        } else if (node instanceof ListNode) {
+            for (Node entry : NodeUtils.asList(node).getEntries()) {
+                visitAnnotationValue(visitor, null, entry);
+            }
+        } else {
+            throw new RuntimeException("Invalid annotation values: " + node);
         }
 
         visitor.visitEnd();
     }
 
-    public void visitAnnotation(VisitAnnotation visitAnnotation, VisitTypeAnnotation visitTypeAnnotation) {
-        ValueNode annotationDesc = Node.asValue(Node.asMap(annotationNode).get(NodeConstants.DESCRIPTOR));
-        ValueNode visible = Node.asValue(Node.asMap(annotationNode).get(NodeConstants.VISIBLE));
-        ValueNode typeRef = Node.asValue(Node.asMap(annotationNode).get(NodeConstants.TYPE_REF));
-        ValueNode typePath = Node.asValue(Node.asMap(annotationNode).get(NodeConstants.TYPE_PATH));
-        AnnotationVisitor annotationVisitor;
-        if (typeRef == null) {
-            annotationVisitor = visitAnnotation.visitAnnotation(annotationDesc.getValueAsString(),
-                    visible.getValueAsBoolean());
+    public void accept(AnnotationVisitorFactory factory, TypeAnnotationVisitorFactory typeFactory) {
+        String descriptor = NodeUtils.getAsString(annotationNode, NodeConstants.DESCRIPTOR);
+        boolean visible = NodeUtils.getAsBoolean(annotationNode, NodeConstants.VISIBLE);
+        Long typeRef = NodeUtils.getAsLong(annotationNode, NodeConstants.TYPE_REF);
+        String typePath = NodeUtils.getAsString(annotationNode, NodeConstants.TYPE_PATH);
+        Node values = NodeUtils.get(annotationNode, NodeConstants.VALUES);
+
+        AnnotationVisitor visitor;
+        if (typePath != null) {
+            visitor = typeFactory.create(typeRef.intValue(), TypePath.fromString(typePath), descriptor, visible);
         } else {
-            annotationVisitor = visitTypeAnnotation.visitTypeAnnotation(typeRef.getValueAsInt(),
-                    TypePath.fromString(typePath.getValueAsString()), annotationDesc.getValueAsString(),
-                    visible.getValueAsBoolean());
+            visitor = factory.create(descriptor, visible);
         }
-        visitAnnotation(annotationVisitor);
+
+        visitValues(visitor, values);
     }
 
-    interface VisitAnnotation {
-        AnnotationVisitor visitAnnotation(final String descriptor, final boolean visible);
+    public interface AnnotationVisitorFactory {
+        AnnotationVisitor create(String descriptor, boolean visible);
     }
 
-    interface VisitTypeAnnotation {
-        AnnotationVisitor visitTypeAnnotation(final int typeRef, final TypePath typePath, final String descriptor,
-                                              final boolean visible);
+    public interface TypeAnnotationVisitorFactory {
+        AnnotationVisitor create(int typeRef, TypePath typePath, String descriptor, boolean visible);
     }
 }

@@ -1,0 +1,41 @@
+subprojects {
+    apply plugin: 'checkstyle'
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+
+    group 'org.quiltmc.chasm'
+    version '0.1.0'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
+
+    checkstyle {
+        toolVersion "9.1"
+        ignoreFailures(false)
+    }
+
+    publishing {
+        repositories {
+            maven {
+                name = 'quiltSnapshot'
+                url = System.getenv('SNAPSHOTS_URL')
+
+                credentials {
+                    username = System.getenv('SNAPSHOTS_USERNAME')
+                    password = System.getenv('SNAPSHOTS_PASSWORD')
+                }
+            }
+        }
+
+        publications {
+            snapshot(MavenPublication) {
+                version = project.version + "-SNAPSHOT"
+
+                from components.java
+            }
+        }
+    }
+}

@@ -10,10 +10,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,12 +23,10 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.api.ChasmProcessor;
 import org.quiltmc.chasm.api.ClassData;
-import org.quiltmc.chasm.api.Transformer;
 import org.quiltmc.chasm.api.util.ClassLoaderClassInfoProvider;
 import org.quiltmc.chasm.internal.transformer.ChasmLangTransformer;
-import org.quiltmc.chasm.lang.Evaluator;
-import org.quiltmc.chasm.lang.Intrinsics;
-import org.quiltmc.chasm.lang.op.Expression;
+import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.eval.Evaluator;
 
 public abstract class TestsBase {
     private static final Path TEST_CLASSES_DIR = Paths.get("build/classes/java/testData");
@@ -80,7 +78,11 @@ public abstract class TestsBase {
             URI testSourceUri = Files.exists(resultFile) ? resultFile.toUri() : classFile.toUri();
             DynamicTest test = DynamicTest.dynamicTest(name, testSourceUri, () -> {
                 setUp();
+                long start = System.nanoTime();
                 doTest(testDefinition);
+                long end = System.nanoTime();
+                double time = (end - start) * 1e-6;
+                System.out.printf(Locale.US, "%s: %.2fms\n", name, time);
                 tearDown();
             });
 
@@ -103,14 +105,13 @@ public abstract class TestsBase {
             processor.addClass(new ClassData(Files.readAllBytes(additionalClassFile)));
         }
 
-        Evaluator evaluator = new Evaluator();
 
         // Add transformers
         for (String transformer : testDefinition.transformers) {
             Path transformerFile = TEST_TRANSFORMERS_DIR.resolve(transformer + ".chasm");
             Assertions.assertTrue(Files.isRegularFile(transformerFile), transformerFile + " does not exist");
-            Expression expression = Expression.parse(CharStreams.fromPath(transformerFile));
-            processor.addTransformer(new ChasmLangTransformer(evaluator, expression));
+            Node node = Node.parse(transformerFile);
+            processor.addTransformer(new ChasmLangTransformer(transformer, node));
         }
 
         // Process the data

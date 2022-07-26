@@ -14,8 +14,7 @@ public class OriginMetadata implements Metadata {
         this.transformerId = transformerId;
     }
 
-    @Override
-    public OriginMetadata copy() {
-        return new OriginMetadata(transformerId);
+    public String getTransformerId() {
+        return transformerId;
     }
 }

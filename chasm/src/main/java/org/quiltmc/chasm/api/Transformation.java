@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.quiltmc.chasm.api.target.Target;
-import org.quiltmc.chasm.api.tree.Node;
+import org.quiltmc.chasm.lang.api.ast.Node;
 
 /**
  * A Transformation of a {@link #getTarget() target} using specified {@link #getSources() sources}.

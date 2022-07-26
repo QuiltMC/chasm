@@ -9,46 +9,58 @@ import org.quiltmc.chasm.api.Transformer;
 import org.quiltmc.chasm.api.target.NodeTarget;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.target.Target;
-import org.quiltmc.chasm.api.tree.ArrayListNode;
-import org.quiltmc.chasm.api.tree.LinkedHashMapNode;
-import org.quiltmc.chasm.api.tree.ListNode;
-import org.quiltmc.chasm.api.tree.Node;
-import org.quiltmc.chasm.api.tree.ValueNode;
-import org.quiltmc.chasm.internal.transformer.tree.NodeExpression;
-import org.quiltmc.chasm.lang.Evaluator;
-import org.quiltmc.chasm.lang.ast.AbstractMapExpression;
-import org.quiltmc.chasm.lang.ast.IntegerExpression;
-import org.quiltmc.chasm.lang.ast.LiteralExpression;
-import org.quiltmc.chasm.lang.ast.SimpleMapExpression;
-import org.quiltmc.chasm.lang.op.Expression;
-import org.quiltmc.chasm.lang.op.FunctionExpression;
-import org.quiltmc.chasm.lang.op.ListExpression;
+import org.quiltmc.chasm.internal.util.NodeUtils;
+import org.quiltmc.chasm.lang.api.ast.CallNode;
+import org.quiltmc.chasm.lang.api.ast.IntegerNode;
+import org.quiltmc.chasm.lang.api.ast.LambdaNode;
+import org.quiltmc.chasm.lang.api.ast.ListNode;
+import org.quiltmc.chasm.lang.api.ast.MapNode;
+import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.eval.Evaluator;
+import org.quiltmc.chasm.lang.api.eval.FunctionNode;
 
 public class ChasmLangTransformation implements Transformation {
     private final Transformer parent;
     private final Evaluator evaluator;
-    private final Expression transformation;
+    private final FunctionNode apply;
     private final Target target;
     private final Map<String, Target> sources = new LinkedHashMap<>();
 
-    public ChasmLangTransformation(Transformer parent, Evaluator evaluator, Expression transformation) {
+    public ChasmLangTransformation(Transformer parent, Node node, Evaluator evaluator) {
         this.parent = parent;
         this.evaluator = evaluator;
-        this.transformation = transformation;
 
-        Expression targetResolved = ((AbstractMapExpression) transformation).get("target");
-        Expression targetReduced = evaluator.reduce(targetResolved);
-        this.target = parseTarget(targetReduced);
+        if (!(node instanceof MapNode)) {
+            throw new RuntimeException("Transformations must be maps");
+        }
 
-        Expression sourcesResolved = ((AbstractMapExpression) transformation).get("sources");
-        Expression sourcesReduced = evaluator.reduce(sourcesResolved);
-        AbstractMapExpression sources = (AbstractMapExpression) sourcesReduced;
-        if (sources != null) {
-            for (String key : sources.getKeys()) {
-                Expression sourceResolved = sources.get(key);
-                Expression sourceReduced = evaluator.reduce(sourceResolved);
-                Target source = parseTarget(sourceReduced);
-                this.sources.put(key, source);
+        MapNode transformationExpression = (MapNode) node;
+
+        Node targetNode = transformationExpression.getEntries().get("target");
+        if (!(targetNode instanceof MapNode)) {
+            throw new RuntimeException("Transformations must declare a map \"target\" in their root map");
+        }
+        this.target = parseTarget((MapNode) targetNode);
+
+        Node applyNode = transformationExpression.getEntries().get("apply");
+        if (!(applyNode instanceof FunctionNode)) {
+            throw new RuntimeException("Transformations must declare a function \"apply\" in their root map");
+        }
+        this.apply = (FunctionNode) applyNode;
+
+        Node sourcesNode = transformationExpression.getEntries().get("sources");
+        if (sourcesNode != null) {
+            if (!(sourcesNode instanceof MapNode)) {
+                throw new RuntimeException("Element \"sources\" in transformation must be a map");
+            }
+
+            for (Map.Entry<String, Node> entry : ((MapNode) sourcesNode).getEntries().entrySet()) {
+                if (!(entry.getValue() instanceof MapNode)) {
+                    throw new RuntimeException("Transformation sources must be maps");
+                }
+
+                Target source = parseTarget((MapNode) entry.getValue());
+                this.sources.put(entry.getKey(), source);
             }
         }
     }
@@ -70,72 +82,33 @@ public class ChasmLangTransformation implements Transformation {
 
     @Override
     public Node apply(Node targetNode, Map<String, Node> nodeSources) {
-        HashMap<String, Expression> args = new HashMap<>();
-        args.put("target", NodeExpression.from(null, targetNode));
+        HashMap<String, Node> args = new HashMap<>();
+        args.put("target", targetNode);
+        args.put("sources", new MapNode(nodeSources));
 
-        HashMap<String, Expression> sources = new HashMap<>();
-        for (Map.Entry<String, Node> entry : nodeSources.entrySet()) {
-            sources.put(entry.getKey(), NodeExpression.from(null, entry.getValue()));
-        }
-        args.put("sources", new SimpleMapExpression(null, sources));
-
-        Expression applyResolved = ((AbstractMapExpression) transformation).get("apply");
-        Expression applyReduced = evaluator.reduce(applyResolved);
-        FunctionExpression apply = (FunctionExpression) applyReduced;
-
-        Expression resolvedResult = apply.call(new SimpleMapExpression(null, args));
-        Expression reducedResult = evaluator.reduceRecursive(resolvedResult);
-        return parseNode(reducedResult);
+        CallNode callExpression = new CallNode(apply, new MapNode(args));
+        return callExpression.evaluate(evaluator);
     }
 
-    private Target parseTarget(Expression expression) {
-        AbstractMapExpression target = (AbstractMapExpression) expression;
-
-        Expression nodeResolved = target.get("node");
-        Expression nodeReduced = evaluator.reduce(nodeResolved);
-        Node node = ((NodeExpression) nodeReduced).getNode();
+    private Target parseTarget(MapNode target) {
+        Node targetNode = NodeUtils.get(target, "node");
 
         Integer start = null;
-        Expression startResolved = target.get("start");
-        if (startResolved != null) {
-            Expression startReduced = evaluator.reduce(startResolved);
-            start = ((IntegerExpression) startReduced).getValue();
+        Node startNode = NodeUtils.get(target, "start");
+        if (startNode instanceof IntegerNode) {
+            start = ((IntegerNode) startNode).getValue().intValue();
         }
 
         Integer end = null;
-        Expression endResolved = target.get("end");
-        if (endResolved != null) {
-            Expression endReduced = evaluator.reduce(endResolved);
-            end = ((IntegerExpression) endReduced).getValue();
+        Node endNode = NodeUtils.get(target, "end");
+        if (endNode instanceof IntegerNode) {
+            end = ((IntegerNode) endNode).getValue().intValue();
         }
 
-        if (node instanceof ListNode && start != null && end != null) {
-            return new SliceTarget((ListNode) node, start, end);
+        if (targetNode instanceof ListNode && start != null && end != null) {
+            return new SliceTarget((ListNode) targetNode, start, end);
         } else {
-            return new NodeTarget(node);
-        }
-    }
-
-    private Node parseNode(Expression expression) {
-        if (expression instanceof AbstractMapExpression) {
-            LinkedHashMapNode mapNode = new LinkedHashMapNode();
-            AbstractMapExpression mapExpression = (AbstractMapExpression) expression;
-            for (String key : mapExpression.getKeys()) {
-                mapNode.put(key, parseNode(mapExpression.get(key)));
-            }
-            return mapNode;
-        } else if (expression instanceof ListExpression) {
-            ArrayListNode listNode = new ArrayListNode();
-            ListExpression listExpression = (ListExpression) expression;
-            for (Expression entry : listExpression) {
-                listNode.add(parseNode(entry));
-            }
-            return listNode;
-        } else if (expression instanceof LiteralExpression) {
-            LiteralExpression<?> literal = (LiteralExpression<?>) expression;
-            return new ValueNode(literal.getValue());
-        } else {
-            throw new RuntimeException("Can't convert expression to chasm node: " + expression.getClass());
+            return new NodeTarget(targetNode);
         }
     }
 }

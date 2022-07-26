@@ -5,20 +5,18 @@ import java.util.List;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
-import org.quiltmc.chasm.api.tree.ArrayListNode;
-import org.quiltmc.chasm.api.tree.ListNode;
-import org.quiltmc.chasm.api.tree.MapNode;
-import org.quiltmc.chasm.api.tree.Node;
 import org.quiltmc.chasm.api.util.ClassInfoProvider;
 import org.quiltmc.chasm.internal.ChasmClassInfoProvider;
 import org.quiltmc.chasm.internal.TransformationApplier;
 import org.quiltmc.chasm.internal.TransformationSorter;
 import org.quiltmc.chasm.internal.TransformerSorter;
 import org.quiltmc.chasm.internal.asm.ChasmClassWriter;
-import org.quiltmc.chasm.internal.metadata.PathMetadata;
-import org.quiltmc.chasm.internal.tree.LazyClassNode;
+import org.quiltmc.chasm.internal.metadata.MetadataCache;
+import org.quiltmc.chasm.internal.tree.ClassNode;
 import org.quiltmc.chasm.internal.tree.reader.ClassNodeReader;
-import org.quiltmc.chasm.internal.util.PathInitializer;
+import org.quiltmc.chasm.lang.api.ast.ListNode;
+import org.quiltmc.chasm.lang.api.ast.MapNode;
+import org.quiltmc.chasm.lang.api.ast.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +31,8 @@ public class ChasmProcessor {
     private final ListNode classes;
     private final List<Transformer> transformers = new ArrayList<>();
 
+    private final MetadataCache metadataCache = new MetadataCache();
+
     /**
      * Creates a new {@link ChasmProcessor} that uses the given {@link ClassInfoProvider}.
      *
@@ -40,7 +40,7 @@ public class ChasmProcessor {
      *            transformed.
      */
     public ChasmProcessor(ClassInfoProvider classInfoProvider) {
-        classes = new ArrayListNode();
+        classes = new ListNode(new ArrayList<>());
         this.classInfoProvider = new ChasmClassInfoProvider(classInfoProvider, classes);
     }
 
@@ -63,8 +63,9 @@ public class ChasmProcessor {
      */
     public void addClass(ClassData classData) {
         ClassReader classReader = new ClassReader(classData.getClassBytes());
-        LazyClassNode classNode = new LazyClassNode(classReader, classInfoProvider, classData.getMetadataProvider());
-        classes.add(classNode);
+        ClassNode classNode = new ClassNode(classReader, classInfoProvider, metadataCache, classes.getEntries().size());
+        metadataCache.put(classNode, classData.getMetadataProvider());
+        classes.getEntries().add(classNode);
     }
 
 
@@ -87,10 +88,7 @@ public class ChasmProcessor {
      * @return The resulting list of class data.
      */
     public List<ClassData> process(boolean onlyModifiedClasses) {
-        LOGGER.info("Processing {} classes...", classes.size());
-
-        LOGGER.info("Initializing paths...");
-        PathInitializer.initialize(classes, new PathMetadata());
+        LOGGER.info("Processing {} classes...", classes.getEntries().size());
 
         LOGGER.info("Sorting {} transformers...", transformers.size());
         List<List<Transformer>> rounds = TransformerSorter.sort(transformers);
@@ -101,34 +99,34 @@ public class ChasmProcessor {
             List<Transformation> transformations = applyTransformers(round, classes);
 
             LOGGER.info("Sorting {} transformations...", transformations.size());
-            List<Transformation> sorted = TransformationSorter.sort(transformations);
+            List<Transformation> sorted = TransformationSorter.sort(transformations, metadataCache);
 
             LOGGER.info("Applying transformations...");
-            TransformationApplier transformationApplier = new TransformationApplier(classes, sorted);
+            TransformationApplier transformationApplier = new TransformationApplier(metadataCache, classes, sorted);
             transformationApplier.applyAll();
         }
 
-        LOGGER.info("Writing {} classes...", classes.size());
+        LOGGER.info("Writing {} classes...", classes.getEntries().size());
         List<ClassData> classData = new ArrayList<>();
-        for (Node node : classes) {
-            MapNode classNode = Node.asMap(node);
+        for (Node node : classes.getEntries()) {
+            MapNode classNode = (MapNode) node;
 
             // Unmodified classes
-            if (node instanceof LazyClassNode) {
+            if (node instanceof ClassNode) {
                 // Unmodified classes
                 if (onlyModifiedClasses) {
                     // Skip if requested
                     continue;
                 }
                 ClassWriter classWriter = new ClassWriter(0);
-                ((LazyClassNode) node).getClassReader().accept(classWriter, 0);
-                classData.add(new ClassData(classWriter.toByteArray(), classNode.getMetadata()));
+                ((ClassNode) node).getClassReader().accept(classWriter, 0);
+                classData.add(new ClassData(classWriter.toByteArray(), metadataCache.get(classNode)));
             } else {
                 // ModifiedClasses
                 ClassNodeReader chasmWriter = new ClassNodeReader(classNode);
                 ClassWriter classWriter = new ChasmClassWriter(classInfoProvider);
                 chasmWriter.accept(classWriter);
-                classData.add(new ClassData(classWriter.toByteArray(), classNode.getMetadata()));
+                classData.add(new ClassData(classWriter.toByteArray(), metadataCache.get(classNode)));
             }
         }
 
@@ -141,7 +139,7 @@ public class ChasmProcessor {
 
         for (Transformer transformer : transformers) {
             // TODO: Replace copy with immutability
-            transformations.addAll(transformer.apply(classes.copy()));
+            transformations.addAll(transformer.apply(classes));
         }
 
         return transformations;

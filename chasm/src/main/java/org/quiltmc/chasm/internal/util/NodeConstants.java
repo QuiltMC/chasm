@@ -6,17 +6,22 @@ public class NodeConstants {
     public static final String ANNOTATION_DEFAULT = "annotationDefault";
     public static final String ARGS = "args";
     public static final String ARGUMENTS = "arguments";
-    public static final String ATTRIBUTES = "attributes";
+    public static final String BOOLEAN = "bool";
+    public static final String BYTE = "byte";
     public static final String CASES = "cases";
+    public static final String CHARACTER = "char";
     public static final String CODE = "code";
+    public static final String CONSTANT_DYNAMIC = "constantDynamic";
     public static final String DEBUG = "debug";
     public static final String DEFAULT = "default";
     public static final String DESCRIPTOR = "descriptor";
     public static final String DIMENSIONS = "dimensions";
+    public static final String DOUBLE = "double";
     public static final String END = "end";
     public static final String EXCEPTIONS = "exceptions";
     public static final String EXPORTS = "exports";
     public static final String FIELDS = "fields";
+    public static final String FLOAT = "float";
     public static final String HANDLE = "handle";
     public static final String HANDLER = "handler";
     public static final String INCREMENT = "increment";
@@ -24,6 +29,9 @@ public class NodeConstants {
     public static final String INNER_CLASSES = "innerClasses";
     public static final String INNER_NAME = "innerName";
     public static final String INSTRUCTIONS = "instructions";
+
+    public static final String INTEGER = "integer";
+
     public static final String INTERFACES = "interfaces";
     public static final String IS_INTERFACE = "isInterface";
     public static final String KEY = "key";
@@ -31,6 +39,8 @@ public class NodeConstants {
     public static final String LINE = "line";
     public static final String LINE_NUMBERS = "lineNumbers";
     public static final String LOCALS = "locals";
+    public static final String LONG = "long";
+
     public static final String MAIN = "main";
     public static final String METHODS = "methods";
     public static final String MODULE = "module";
@@ -56,10 +66,12 @@ public class NodeConstants {
     public static final String REQUIRES = "requires";
     public static final String RETURN_TYPE = "returnType";
     public static final String SERVICE = "service";
+    public static final String SHORT = "short";
     public static final String SIGNATURE = "signature";
     public static final String SOURCE = "source";
     public static final String SOURCE_LOCALS = "sourceLocals";
     public static final String START = "start";
+    public static final String STRING = "string";
     public static final String SUPER = "super";
     public static final String TAG = "tag";
     public static final String TARGET = "target";

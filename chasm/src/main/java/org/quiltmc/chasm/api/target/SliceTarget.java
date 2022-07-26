@@ -3,8 +3,7 @@ package org.quiltmc.chasm.api.target;
 import java.util.List;
 
 import org.quiltmc.chasm.api.Lock;
-import org.quiltmc.chasm.api.tree.ListNode;
-import org.quiltmc.chasm.api.tree.Node;
+import org.quiltmc.chasm.lang.api.ast.ListNode;
 
 /**
  * Slices a {@link ListNode}, as a {@link Target}.

@@ -10,6 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,14 +18,15 @@ import org.quiltmc.chasm.api.Lock;
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.target.Target;
+import org.quiltmc.chasm.internal.metadata.MetadataCache;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 
 public class TransformationSorter {
-    public static List<Transformation> sort(Collection<Transformation> transformations) {
+    public static List<Transformation> sort(Collection<Transformation> transformations, MetadataCache metadata) {
         List<TransformationInfo> infos = transformations.stream().map(TransformationInfo::new)
                 .collect(Collectors.toCollection(LinkedList::new));
 
-        computeDependencies(infos);
+        computeDependencies(infos, metadata);
 
         List<Transformation> sorted = new ArrayList<>(transformations.size());
 
@@ -72,7 +74,7 @@ public class TransformationSorter {
         return sorted;
     }
 
-    private static void computeDependencies(Collection<TransformationInfo> transformations) {
+    private static void computeDependencies(Collection<TransformationInfo> transformations, MetadataCache metadata) {
         // Group by Transformer ID
         Map<String, List<TransformationInfo>> byTransformerId = new HashMap<>();
         for (TransformationInfo info : transformations) {
@@ -98,10 +100,15 @@ public class TransformationSorter {
         // Extract target information
         List<TargetInfo> targets = new ArrayList<>();
         for (TransformationInfo transformation : transformations) {
-            targets.add(new TargetInfo(transformation, transformation.get().getTarget(), TargetType.TARGET));
+            Target target = transformation.get().getTarget();
+            PathMetadata targetPath = metadata.get(target.getTarget()).get(PathMetadata.class);
+            Objects.requireNonNull(targetPath);
+            targets.add(new TargetInfo(transformation, target, TargetType.TARGET, targetPath));
 
-            for (Target target : transformation.get().getSources().values()) {
-                targets.add(new TargetInfo(transformation, target, TargetType.SOURCE));
+            for (Target source : transformation.get().getSources().values()) {
+                PathMetadata sourcePath = metadata.get(target.getTarget()).get(PathMetadata.class);
+                Objects.requireNonNull(sourcePath);
+                targets.add(new TargetInfo(transformation, source, TargetType.SOURCE, sourcePath));
             }
         }
 
@@ -114,7 +121,7 @@ public class TransformationSorter {
         Map<PathMetadata.Entry, List<TargetInfo>> childrenByKey = new LinkedHashMap<>();
         for (TargetInfo target : targets) {
             PathMetadata path = target.getPath();
-            PathMetadata.Entry entry = path.size() > depth ? path.get(depth) : null;
+            PathMetadata.Entry entry = path.getSize() > depth ? path.getEntry(depth) : null;
             childrenByKey.computeIfAbsent(entry, e -> new ArrayList<>());
         }
 
@@ -231,12 +238,14 @@ public class TransformationSorter {
 
         private final PathMetadata path;
 
-        public TargetInfo(TransformationInfo parent, Target target, TargetType type) {
+        public TargetInfo(TransformationInfo parent, Target target, TargetType type, PathMetadata path) {
             this.parent = parent;
             this.target = target;
             this.type = type;
-
-            this.path = target.getTarget().getMetadata().get(PathMetadata.class);
+            this.path = path;
+            if (path == null) {
+                System.out.println();
+            }
         }
 
         public PathMetadata getPath() {
