@@ -1,0 +1,23 @@
+repositories {
+    exclusiveContent {
+        forRepository {
+            ivy {
+                url 'https://javacc.com/download/'
+
+                patternLayout {
+                    artifact '/[module].[ext]'
+                }
+
+                metadataSources { artifact() }
+            }
+        }
+        filter {
+            includeGroup "javacc21"
+        }
+    }
+}
+
+
+dependencies {
+    implementation 'javacc21:javacc-full'
+}

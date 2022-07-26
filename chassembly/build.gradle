@@ -1,0 +1,33 @@
+compileJava {
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'org.jetbrains:annotations:23.0.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.register("generateParser", GenerateParserTask) {
+    grammarFile = file("src/main/java/org/quiltmc/chasm/lang/internal/parse/Parser.jj")
+    outputDir = file("$buildDir/generated/sources/javacc")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir generateParser.outputDir
+        }
+    }
+}
