@@ -1,0 +1,6 @@
+{
+    string: "hello there!",
+    split: chars("hello there!"),
+    rejoined: join(split),
+    together: string + rejoined
+}.together
