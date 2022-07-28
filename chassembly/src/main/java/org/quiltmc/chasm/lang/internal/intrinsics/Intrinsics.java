@@ -12,6 +12,7 @@ public class Intrinsics {
         register(new CharsFunction());
         register(new JoinFunction());
         register(new LenFunction());
+        register(new MapFunction());
     }
 
     static void register(IntrinsicFunction function) {
