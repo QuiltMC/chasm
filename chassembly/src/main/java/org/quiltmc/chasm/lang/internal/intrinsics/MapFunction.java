@@ -9,6 +9,10 @@ import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.FunctionNode;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
+/**
+ * The map intrinsic, which takes in a list and a function, and returns a new list of the result of applying the
+ * function to each element in the list.
+ */
 public class MapFunction extends IntrinsicFunction {
     @Override
     public Node apply(Evaluator evaluator, Node arg) {

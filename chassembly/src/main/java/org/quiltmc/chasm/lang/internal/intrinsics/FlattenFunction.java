@@ -5,6 +5,9 @@ import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
+/**
+ * The flatten intrinsic, which takes in a list of lists and returns a new list with the contents of the sublists.
+ */
 public class FlattenFunction extends IntrinsicFunction {
     @Override
     public Node apply(Evaluator evaluator, Node arg) {
