@@ -2,6 +2,7 @@ package org.quiltmc.chasm.lang.api.ast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collector;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
@@ -51,5 +52,17 @@ public class ListNode extends Node {
             }
         }
         builder.append("]");
+    }
+
+    public static Collector<Node, List<Node>, ListNode> collector() {
+        return Collector.of(
+                ArrayList::new,
+                List::add,
+                (l, r) -> {
+                    l.addAll(r);
+                    return l;
+                },
+                ListNode::new
+        );
     }
 }
