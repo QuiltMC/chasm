@@ -88,12 +88,12 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
                 throw new RuntimeException("Annotation value is missing name");
             }
 
-            NodeUtils.asMap(values).getEntries().put(name, NodeUtils.getValueNode(value));
+            NodeUtils.asMap(values).getEntries().put(name, value);
         }
 
         // If this is processing a list, name must not be set
         if (values instanceof ListNode) {
-            NodeUtils.asList(values).getEntries().add(NodeUtils.getValueNode(value));
+            NodeUtils.asList(values).getEntries().add(value);
         }
     }
 }
