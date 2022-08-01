@@ -22,6 +22,11 @@
     list_concat: [1,2,1,"two",false,{
             name: "object", 
         },null,], 
+    map_concat: {
+        a: "b", 
+        b: "c", 
+        c: "d", 
+    }, 
     filter_source: [{
             name: "hi", 
         },{
@@ -35,6 +40,16 @@
             name: "hi", 
         },{
             name: "how", 
+        },], 
+    map_pairs: [{
+            key: "a", 
+            value: "b", 
+        },{
+            key: "b", 
+            value: "c", 
+        },{
+            key: "c", 
+            value: "d", 
         },], 
     compareWeird: <Closure can't be rendered>, 
     test: <Closure can't be rendered>, 

@@ -1,7 +1,9 @@
 package org.quiltmc.chasm.lang.api.ast;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.jetbrains.annotations.ApiStatus;
@@ -76,6 +78,16 @@ public class BinaryNode extends Node {
 
         switch (operator) {
             case PLUS: {
+                if (left instanceof MapNode && right instanceof MapNode) {
+                    Map<String, Node> leftEntries = ((MapNode) left).getEntries();
+                    Map<String, Node> rightEntries = ((MapNode) right).getEntries();
+
+                    Map<String, Node> newEntries = new LinkedHashMap<>(leftEntries);
+                    newEntries.putAll(rightEntries);
+
+                    return new MapNode(newEntries);
+                }
+
                 if (left instanceof ListNode && right instanceof ListNode) {
                     List<Node> leftEntries = ((ListNode) left).getEntries();
                     List<Node> rightEntries = ((ListNode) right).getEntries();
