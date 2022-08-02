@@ -2,7 +2,6 @@ package org.quiltmc.chasm.lang.api.ast;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collector;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
