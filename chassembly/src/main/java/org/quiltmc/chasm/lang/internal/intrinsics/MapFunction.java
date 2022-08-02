@@ -23,7 +23,7 @@ public class MapFunction extends IntrinsicFunction {
 
         Map<String, Node> args = ((MapNode) arg).getEntries();
         Node list = args.get("list");
-        Node function = args.get("function");
+        Node function = args.get("func");
         if (!(list instanceof ListNode) || !(function instanceof FunctionNode)) {
             throw createArgsException(arg);
         }
@@ -40,7 +40,7 @@ public class MapFunction extends IntrinsicFunction {
 
     private static EvaluationException createArgsException(Node arg) {
         return new EvaluationException(
-                "Built-in function \"map\" can only be applied to args {list, function} but found " + arg
+                "Built-in function \"map\" can only be applied to args {list, func} but found " + arg
         );
     }
 }
