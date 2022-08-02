@@ -1,0 +1,3 @@
+{
+    mapped: map({list: [0, 1, 2, 3, 4], func: val -> val + 1})
+}.mapped
