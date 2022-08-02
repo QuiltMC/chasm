@@ -1,0 +1,9 @@
+{
+    flattened_list: [0,1,2,3,100,10,3,"hello!","world!",4,[5,],[6,7,8,],], 
+    flattened_map: {
+        foo: "bar", 
+        x: 10, 
+        y: 15, 
+        z: 20, 
+    }, 
+}

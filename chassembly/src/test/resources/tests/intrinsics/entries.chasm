@@ -1,0 +1,4 @@
+{
+    map: {a: "b", b: "c", c: "d", d: "e"},
+    map_entries: entries(map)
+}.map_entries

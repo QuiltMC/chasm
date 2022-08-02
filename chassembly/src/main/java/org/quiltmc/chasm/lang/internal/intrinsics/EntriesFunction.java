@@ -12,27 +12,27 @@ import org.quiltmc.chasm.lang.api.ast.StringNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
-public class PairsFunction extends IntrinsicFunction {
+public class EntriesFunction extends IntrinsicFunction {
     @Override
     public Node apply(Evaluator evaluator, Node arg) {
         if (arg instanceof MapNode) {
-            List<Node> pairList = new ArrayList<>();
+            List<Node> entryList = new ArrayList<>();
 
             ((MapNode) arg).getEntries().forEach((key, value) -> {
-                Map<String, Node> pair = new LinkedHashMap<>();
-                pair.put("key", new StringNode(key));
-                pair.put("value", value);
+                Map<String, Node> entry = new LinkedHashMap<>();
+                entry.put("key", new StringNode(key));
+                entry.put("value", value);
 
-                pairList.add(new MapNode(pair));
+                entryList.add(new MapNode(entry));
             });
 
-            return new ListNode(pairList);
+            return new ListNode(entryList);
         }
-        throw new EvaluationException("Built-in function \"pairs\" can only be applied to maps but found " + arg);
+        throw new EvaluationException("Built-in function \"entries\" can only be applied to maps but found " + arg);
     }
 
     @Override
     String getName() {
-        return "pairs";
+        return "entries";
     }
 }

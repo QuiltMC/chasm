@@ -41,16 +41,6 @@
         },{
             name: "how", 
         },], 
-    map_pairs: [{
-            key: "a", 
-            value: "b", 
-        },{
-            key: "b", 
-            value: "c", 
-        },{
-            key: "c", 
-            value: "d", 
-        },], 
     compareWeird: <Closure can't be rendered>, 
     test: <Closure can't be rendered>, 
     test_call: true, 
