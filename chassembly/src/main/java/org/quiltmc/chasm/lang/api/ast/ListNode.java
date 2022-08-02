@@ -53,21 +53,4 @@ public class ListNode extends Node {
         }
         builder.append("]");
     }
-
-    /**
-     * Creates a {@link Collector} which accumulates a sequence of nodes into a ListNode.
-     *
-     * @return the collector
-     */
-    public static Collector<Node, List<Node>, ListNode> collector() {
-        return Collector.of(
-                ArrayList::new,
-                List::add,
-                (l, r) -> {
-                    l.addAll(r);
-                    return l;
-                },
-                ListNode::new
-        );
-    }
 }

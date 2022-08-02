@@ -1,6 +1,7 @@
 package org.quiltmc.chasm.lang.internal.intrinsics;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
@@ -27,9 +28,9 @@ public class MapFunction extends IntrinsicFunction {
             throw createArgsException(arg);
         }
 
-        return ((ListNode) list).getEntries().stream()
+        return new ListNode(((ListNode) list).getEntries().stream()
                 .map(entry -> ((FunctionNode) function).apply(evaluator, entry))
-                .collect(ListNode.collector());
+                .collect(Collectors.toList()));
     }
 
     @Override

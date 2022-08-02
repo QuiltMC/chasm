@@ -1,5 +1,7 @@
 package org.quiltmc.chasm.lang.internal.intrinsics;
 
+import java.util.stream.Collectors;
+
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
@@ -15,7 +17,7 @@ public class FlattenFunction extends IntrinsicFunction {
             throw createArgsException(arg);
         }
 
-        return ((ListNode) arg).getEntries()
+        return new ListNode(((ListNode) arg).getEntries()
                 .stream()
                 .map(entry -> {
                     if (entry instanceof ListNode) {
@@ -25,7 +27,7 @@ public class FlattenFunction extends IntrinsicFunction {
                     }
                 })
                 .flatMap(entry -> entry.getEntries().stream())
-                .collect(ListNode.collector());
+                .collect(Collectors.toList()));
     }
 
     @Override
