@@ -29,15 +29,14 @@ public class AnnotationNodeReader {
             String type = NodeUtils.getAsString(node, NodeConstants.TYPE);
             String descriptor = NodeUtils.getAsString(node, NodeConstants.DESCRIPTOR);
             MapNode annotationValues = NodeUtils.getAsMap(node, NodeConstants.VALUES);
-            String enumValue = NodeUtils.getAsString(node, NodeConstants.VALUE);
 
             if (type != null) {
                 visitor.visit(name, NodeUtils.fromValueNode(node));
             } else if (descriptor != null && annotationValues != null) {
                 AnnotationVisitor annotationVisitor = visitor.visitAnnotation(name, descriptor);
                 visitValues(annotationVisitor, annotationValues);
-            } else if (descriptor != null && enumValue != null) {
-                visitor.visitEnum(name, descriptor, enumValue);
+            } else if (descriptor != null && NodeUtils.has(node, NodeConstants.VALUE)) {
+                visitor.visitEnum(name, descriptor, NodeUtils.getAsString(node, NodeConstants.VALUE));
             } else {
                 throw new RuntimeException("Invalid annotation value: " + node);
             }

@@ -22,6 +22,10 @@ public class NodeUtils {
         return asMap(node).getEntries().get(key);
     }
 
+    public static boolean has(Node node, String key) {
+        return asMap(node).getEntries().containsKey(key);
+    }
+
     public static MapNode getAsMap(Node node, String key) {
         return asMap(get(node, key));
     }
@@ -175,7 +179,7 @@ public class NodeUtils {
             case NodeConstants.CONSTANT_DYNAMIC:
                 return asConstantDynamic(valueNode);
             default:
-                throw new RuntimeException("Invalid value type: " + valueNode);
+                throw new RuntimeException("Invalid value type: " + type);
         }
     }
 
