@@ -1,0 +1,4 @@
+{
+    to_reduce: ["I have ", (5 + 5), " apples"],
+    reduced: reduce({list: to_reduce, func: args -> args.first + args.second})
+}.reduced

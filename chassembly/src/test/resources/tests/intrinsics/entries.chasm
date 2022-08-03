@@ -1,4 +1,7 @@
 {
-    map: {a: "b", b: "c", c: "d", d: "e"},
-    map_entries: entries(map)
-}.map_entries
+    input_map: {a: "b", b: "c", c: "d", d: "e"},
+    result: {
+        entries_result: entries(input_map),
+        from_entries_result: from_entries(entries_result[entry -> entry.key != "b"])
+    }
+}.result

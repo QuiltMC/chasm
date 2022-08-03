@@ -1,13 +1,20 @@
-[{
-        key: "a", 
-        value: "b", 
-    },{
-        key: "b", 
-        value: "c", 
-    },{
-        key: "c", 
-        value: "d", 
-    },{
-        key: "d", 
-        value: "e", 
-    },]
+{
+    entries_result: [{
+            key: "a", 
+            value: "b", 
+        },{
+            key: "b", 
+            value: "c", 
+        },{
+            key: "c", 
+            value: "d", 
+        },{
+            key: "d", 
+            value: "e", 
+        },], 
+    from_entries_result: {
+        a: "b", 
+        c: "d", 
+        d: "e", 
+    }, 
+}
