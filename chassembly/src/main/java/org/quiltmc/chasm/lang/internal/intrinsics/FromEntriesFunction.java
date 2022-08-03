@@ -41,7 +41,8 @@ public class FromEntriesFunction extends IntrinsicFunction {
 
     private static EvaluationException createException(Node arg) {
         return new EvaluationException(
-                "Built-in function \"from_entries\" can only be applied to lists of maps, each with {key: string, value: any}, but found " + arg
+                "Built-in function \"from_entries\" can only be applied to lists of maps, " +
+                "each with {key: string, value: any}, but found " + arg
         );
     }
 

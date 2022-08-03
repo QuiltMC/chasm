@@ -32,7 +32,9 @@ public class ReduceFunction extends IntrinsicFunction {
             }
         }
 
-        throw new EvaluationException("Built-in function \"reduce\" can only be applied to args {list, func} but found " + arg);
+        throw new EvaluationException(
+                "Built-in function \"reduce\" can only be applied to args {list, func} but found " + arg
+        );
     }
 
     @Override
