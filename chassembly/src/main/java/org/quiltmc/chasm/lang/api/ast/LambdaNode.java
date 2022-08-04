@@ -32,14 +32,14 @@ public class LambdaNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority) {
+    public void render(Renderer renderer, StringBuilder builder, int indentation, OperatorPriority minPriority) {
         boolean needsBrackets = !OperatorPriority.ANY.allowedFor(minPriority);
         if (needsBrackets) {
             builder.append('(');
         }
         builder.append(identifier);
         builder.append(" -> ");
-        inner.render(renderer, builder, currentIndentationMultiplier, OperatorPriority.ANY);
+        inner.render(renderer, builder, indentation, OperatorPriority.ANY);
         if (needsBrackets) {
             builder.append(')');
         }

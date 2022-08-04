@@ -33,7 +33,7 @@ public class UnaryNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier,
+    public void render(Renderer renderer, StringBuilder builder, int indentation,
                        OperatorPriority minPriority) {
         boolean needsBrackets = !OperatorPriority.UNARY.allowedFor(minPriority);
         if (needsBrackets) {
@@ -41,7 +41,7 @@ public class UnaryNode extends Node {
         }
 
         builder.append(operator.image);
-        inner.render(renderer, builder, currentIndentationMultiplier, OperatorPriority.UNARY);
+        inner.render(renderer, builder, indentation, OperatorPriority.UNARY);
 
         if (needsBrackets) {
             builder.append(')');

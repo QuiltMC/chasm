@@ -35,12 +35,12 @@ public class MemberNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority) {
+    public void render(Renderer renderer, StringBuilder builder, int indentation, OperatorPriority minPriority) {
         boolean needsBrackets = !OperatorPriority.ARGUMENT_PRIMARY.allowedFor(minPriority);
         if (needsBrackets) {
             builder.append('(');
         }
-        left.render(renderer, builder, currentIndentationMultiplier, OperatorPriority.ARGUMENT_PRIMARY);
+        left.render(renderer, builder, indentation, OperatorPriority.ARGUMENT_PRIMARY);
         builder.append(".").append(identifier);
         if (needsBrackets) {
             builder.append(')');

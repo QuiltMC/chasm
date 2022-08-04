@@ -34,7 +34,8 @@ public class ClosureNode extends FunctionNode {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority) {
+    public void render(
+            Renderer renderer, StringBuilder builder, int indentation, OperatorPriority minPriority) {
         // Represent a closure as a capture-free lambda
         // Note: This currently fails because of infinite recursion
 
@@ -44,7 +45,7 @@ public class ClosureNode extends FunctionNode {
         mapNode.getEntries().put(bodyName, lambda.getInner());
         IndexNode indexNode = new IndexNode(mapNode, new LiteralNode(bodyName));
         LambdaNode lambdaNode = new LambdaNode(lambda.getIdentifier(), indexNode);
-        lambdaNode.render(config, builder, currentIndentationMultiplier);
+        lambdaNode.render(config, builder, indentation);
         */
 
         builder.append("<Closure can't be rendered>");

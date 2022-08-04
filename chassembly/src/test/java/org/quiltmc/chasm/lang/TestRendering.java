@@ -31,7 +31,7 @@ public class TestRendering extends TestBase {
         parsed.render(renderer, expectedBuilder, 1);
         String expected = expectedBuilder.toString();
 
-         System.out.println(expected);
+        System.out.println(expected);
 
         Node parsedAgain = Node.parse(expected);
 
@@ -66,7 +66,8 @@ public class TestRendering extends TestBase {
             Assertions.assertEquals(((ValueNode<?>) expected).getValue(), ((ValueNode<?>) actual).getValue());
         } else if (expected instanceof ReferenceNode) {
             Assertions.assertTrue(actual instanceof ReferenceNode);
-            Assertions.assertEquals(((ReferenceNode) expected).getIdentifier(), ((ReferenceNode) actual).getIdentifier());
+            Assertions.assertEquals(
+                    ((ReferenceNode) expected).getIdentifier(), ((ReferenceNode) actual).getIdentifier());
             Assertions.assertEquals(((ReferenceNode) expected).isGlobal(), ((ReferenceNode) actual).isGlobal());
         } else if (expected instanceof LambdaNode) {
             Assertions.assertTrue(actual instanceof LambdaNode);

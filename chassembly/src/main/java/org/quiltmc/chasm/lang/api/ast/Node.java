@@ -26,7 +26,9 @@ public abstract class Node {
     public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
         this.render(renderer, builder, currentIndentationMultiplier, OperatorPriority.ANY);
     }
-    public abstract void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority);
+
+    public abstract void render(
+            Renderer renderer, StringBuilder builder, int indentation, OperatorPriority minPriority);
 
     /**
      * Parse a given file into a {@link Node}.

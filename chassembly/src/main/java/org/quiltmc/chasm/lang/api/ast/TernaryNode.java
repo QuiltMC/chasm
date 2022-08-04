@@ -35,16 +35,16 @@ public class TernaryNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority) {
+    public void render(Renderer renderer, StringBuilder builder, int indentation, OperatorPriority minPriority) {
         boolean needsBrackets = !OperatorPriority.ANY.allowedFor(minPriority);
         if (needsBrackets) {
             builder.append('(');
         }
-        condition.render(renderer, builder, currentIndentationMultiplier, OperatorPriority.ANY.inc());
+        condition.render(renderer, builder, indentation, OperatorPriority.ANY.inc());
         builder.append(" ? ");
-        trueExp.render(renderer, builder, currentIndentationMultiplier, OperatorPriority.ANY);
+        trueExp.render(renderer, builder, indentation, OperatorPriority.ANY);
         builder.append(" : ");
-        falseExp.render(renderer, builder, currentIndentationMultiplier, OperatorPriority.ANY);
+        falseExp.render(renderer, builder, indentation, OperatorPriority.ANY);
         if (needsBrackets) {
             builder.append(')');
         }

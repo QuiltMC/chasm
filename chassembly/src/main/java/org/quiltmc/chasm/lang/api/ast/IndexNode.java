@@ -99,14 +99,14 @@ public class IndexNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority) {
+    public void render(Renderer renderer, StringBuilder builder, int indentation, OperatorPriority minPriority) {
         boolean needsBrackets = !OperatorPriority.ARGUMENT_PRIMARY.allowedFor(minPriority);
         if (needsBrackets) {
             builder.append('(');
         }
-        left.render(renderer, builder, currentIndentationMultiplier + 1, OperatorPriority.ARGUMENT_PRIMARY);
+        left.render(renderer, builder, indentation + 1, OperatorPriority.ARGUMENT_PRIMARY);
         builder.append('[');
-        index.render(renderer, builder, currentIndentationMultiplier + 1, OperatorPriority.ANY);
+        index.render(renderer, builder, indentation + 1, OperatorPriority.ANY);
         builder.append(']');
         if (needsBrackets) {
             builder.append(')');

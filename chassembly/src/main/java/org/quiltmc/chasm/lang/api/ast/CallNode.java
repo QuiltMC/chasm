@@ -34,14 +34,14 @@ public class CallNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority) {
+    public void render(Renderer renderer, StringBuilder builder, int indentation, OperatorPriority minPriority) {
         boolean needsBrackets = !OperatorPriority.ARGUMENT_PRIMARY.allowedFor(minPriority);
         if (needsBrackets) {
             builder.append('(');
         }
-        function.render(renderer, builder, currentIndentationMultiplier, OperatorPriority.ARGUMENT_PRIMARY);
+        function.render(renderer, builder, indentation, OperatorPriority.ARGUMENT_PRIMARY);
         builder.append('(');
-        arg.render(renderer, builder, currentIndentationMultiplier, OperatorPriority.ANY);
+        arg.render(renderer, builder, indentation, OperatorPriority.ANY);
         builder.append(')');
         if (needsBrackets) {
             builder.append(')');

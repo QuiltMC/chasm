@@ -43,14 +43,14 @@ public class ListNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority) {
+    public void render(Renderer renderer, StringBuilder builder, int indentation, OperatorPriority minPriority) {
         boolean needsBrackets = !OperatorPriority.ARGUMENT_PRIMARY.allowedFor(minPriority);
         if (needsBrackets) {
             builder.append('(');
         }
         builder.append("[");
         for (int i = 0; i < entries.size(); i++) {
-            entries.get(i).render(renderer, builder, currentIndentationMultiplier + 1, OperatorPriority.ANY);
+            entries.get(i).render(renderer, builder, indentation + 1, OperatorPriority.ANY);
             if (i < entries.size() - 1 || renderer.hasTrailingCommas()) {
                 builder.append(", ");
             }

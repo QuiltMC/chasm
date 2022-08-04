@@ -334,17 +334,17 @@ public class BinaryNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority) {
+    public void render(Renderer renderer, StringBuilder builder, int indentation, OperatorPriority minPriority) {
         boolean needsBrackets = !this.operator.precedence.allowedFor(minPriority);
         if (needsBrackets) {
             builder.append('(');
         }
 
-        left.render(renderer, builder, currentIndentationMultiplier, this.operator.precedence);
+        left.render(renderer, builder, indentation, this.operator.precedence);
 
         builder.append(' ').append(operator.image).append(' ');
 
-        right.render(renderer, builder, currentIndentationMultiplier, this.operator.precedence.inc());
+        right.render(renderer, builder, indentation, this.operator.precedence.inc());
         if (needsBrackets) {
             builder.append(')');
         }

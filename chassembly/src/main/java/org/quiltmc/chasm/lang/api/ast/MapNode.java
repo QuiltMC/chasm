@@ -23,7 +23,7 @@ public class MapNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority) {
+    public void render(Renderer renderer, StringBuilder builder, int indentation, OperatorPriority minPriority) {
         boolean needsBrackets = !OperatorPriority.ARGUMENT_PRIMARY.allowedFor(minPriority);
         if (needsBrackets) {
             builder.append('(');
@@ -32,15 +32,15 @@ public class MapNode extends Node {
         List<Map.Entry<String, Node>> list = new LinkedList<>();
         entries.entrySet().forEach(list::add);
         for (int i = 0; i < list.size(); i++) {
-            renderer.indent(builder, currentIndentationMultiplier);
+            renderer.indent(builder, indentation);
             builder.append(list.get(i).getKey()).append(": ");
-            list.get(i).getValue().render(renderer, builder, currentIndentationMultiplier + 1, OperatorPriority.ANY);
+            list.get(i).getValue().render(renderer, builder, indentation + 1, OperatorPriority.ANY);
             if (i < entries.size() - 1 || renderer.hasTrailingCommas()) {
                 builder.append(",");
             }
         }
         if (list.size() > 0) {
-            renderer.indent(builder, currentIndentationMultiplier - 1);
+            renderer.indent(builder, indentation - 1);
         }
         builder.append('}');
         if (needsBrackets) {
