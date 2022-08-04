@@ -9,6 +9,7 @@ import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.ParseException;
 import org.quiltmc.chasm.lang.internal.parse.Parser;
+import org.quiltmc.chasm.lang.internal.render.OperatorPriority;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 /**
@@ -21,7 +22,11 @@ public abstract class Node {
 
     public abstract Node evaluate(Evaluator evaluator);
 
-    public abstract void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier);
+
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+        this.render(renderer, builder, currentIndentationMultiplier, OperatorPriority.ANY);
+    }
+    public abstract void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority);
 
     /**
      * Parse a given file into a {@link Node}.

@@ -5,6 +5,7 @@ import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.FunctionNode;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+import org.quiltmc.chasm.lang.internal.render.OperatorPriority;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class CallNode extends Node {
@@ -33,11 +34,18 @@ public class CallNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
-        function.render(renderer, builder, currentIndentationMultiplier);
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority) {
+        boolean needsBrackets = !OperatorPriority.ARGUMENT_PRIMARY.allowedFor(minPriority);
+        if (needsBrackets) {
+            builder.append('(');
+        }
+        function.render(renderer, builder, currentIndentationMultiplier, OperatorPriority.ARGUMENT_PRIMARY);
         builder.append('(');
-        arg.render(renderer, builder, currentIndentationMultiplier);
+        arg.render(renderer, builder, currentIndentationMultiplier, OperatorPriority.ANY);
         builder.append(')');
+        if (needsBrackets) {
+            builder.append(')');
+        }
     }
 
     @Override

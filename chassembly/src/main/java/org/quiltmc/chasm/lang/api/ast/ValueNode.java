@@ -3,6 +3,7 @@ package org.quiltmc.chasm.lang.api.ast;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
+import org.quiltmc.chasm.lang.internal.render.OperatorPriority;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public abstract class ValueNode<T> extends Node {
@@ -21,11 +22,18 @@ public abstract class ValueNode<T> extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority) {
+        boolean needsBrackets = !OperatorPriority.ARGUMENT_PRIMARY.allowedFor(minPriority);
+        if (needsBrackets) {
+            builder.append('(');
+        }
         if (value instanceof String) {
             builder.append('"').append(((String) value).replace("\\", "\\\\").replace("\"", "\\\"")).append('"');
         } else {
             builder.append(value);
+        }
+        if (needsBrackets) {
+            builder.append(')');
         }
     }
 

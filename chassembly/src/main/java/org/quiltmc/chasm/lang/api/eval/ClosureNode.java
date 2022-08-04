@@ -8,6 +8,7 @@ import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+import org.quiltmc.chasm.lang.internal.render.OperatorPriority;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class ClosureNode extends FunctionNode {
@@ -33,7 +34,7 @@ public class ClosureNode extends FunctionNode {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority) {
         // Represent a closure as a capture-free lambda
         // Note: This currently fails because of infinite recursion
 

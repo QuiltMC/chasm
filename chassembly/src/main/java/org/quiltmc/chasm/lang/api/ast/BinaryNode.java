@@ -8,6 +8,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+import org.quiltmc.chasm.lang.internal.render.OperatorPriority;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class BinaryNode extends Node {
@@ -333,90 +334,58 @@ public class BinaryNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
-        final boolean leftNeedsBrackets = left instanceof BinaryNode && (
-                ((BinaryNode) left).operator == operator && operator.requiresBracketsWithSelf
-                        || ((BinaryNode) left).operator.morePrecedenceThan(operator.precedence)
-        )
-                || left instanceof UnaryNode && ((UnaryNode) left).getOperator().morePrecedenceThan(operator.precedence)
-                || left instanceof TernaryNode;
-        final boolean rightNeedsBrackets = right instanceof BinaryNode && (
-                ((BinaryNode) right).operator == operator && operator.requiresBracketsWithSelf
-                        || ((BinaryNode) right).operator.morePrecedenceThan(operator.precedence)
-        )
-                || right instanceof UnaryNode && ((UnaryNode) right).getOperator()
-                .morePrecedenceThan(operator.precedence)
-                || right instanceof TernaryNode;
-
-        if (leftNeedsBrackets) {
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority) {
+        boolean needsBrackets = !this.operator.precedence.allowedFor(minPriority);
+        if (needsBrackets) {
             builder.append('(');
         }
-        left.render(renderer, builder, currentIndentationMultiplier);
-        if (leftNeedsBrackets) {
-            builder.append(')');
-        }
+
+        left.render(renderer, builder, currentIndentationMultiplier, this.operator.precedence);
 
         builder.append(' ').append(operator.image).append(' ');
 
-        if (rightNeedsBrackets) {
-            builder.append('(');
-        }
-        right.render(renderer, builder, currentIndentationMultiplier);
-        if (rightNeedsBrackets) {
+        right.render(renderer, builder, currentIndentationMultiplier, this.operator.precedence.inc());
+        if (needsBrackets) {
             builder.append(')');
         }
     }
 
     public enum Operator {
-        PLUS("+", 4, false),
-        MINUS("-", 4, true),
-        MULTIPLY("*", 3, false),
-        DIVIDE("/", 3, true),
-        MODULO("%", 3, false),
-        SHIFT_LEFT("<<", 5, false),
-        SHIFT_RIGHT(">>", 5, false),
-        SHIFT_RIGHT_UNSIGNED(">>>", 5, false),
-        LESS_THAN("<", 6, false),
-        LESS_THAN_OR_EQUAL("<=", 6, false),
-        GREATER_THAN(">", 6, false),
-        GREATER_THAN_OR_EQUAL(">=", 6, false),
-        EQUAL("=", 7, false),
-        NOT_EQUAL("!=", 7, false),
-        BITWISE_AND("&", 8, false),
-        BITWISE_XOR("^", 9, false),
-        BITWISE_OR("|", 10, false),
-        BOOLEAN_AND("&&", 11, false),
-        BOOLEAN_OR("||", 12, false);
+        PLUS("+", OperatorPriority.ADDITION),
+        MINUS("-", OperatorPriority.ADDITION),
+        MULTIPLY("*", OperatorPriority.MULTIPLICATIVE),
+        DIVIDE("/", OperatorPriority.MULTIPLICATIVE),
+        MODULO("%", OperatorPriority.MULTIPLICATIVE),
+        SHIFT_LEFT("<<", OperatorPriority.SHIFT),
+        SHIFT_RIGHT(">>", OperatorPriority.SHIFT),
+        SHIFT_RIGHT_UNSIGNED(">>>", OperatorPriority.SHIFT),
+        LESS_THAN("<", OperatorPriority.RELATIONAL),
+        LESS_THAN_OR_EQUAL("<=", OperatorPriority.RELATIONAL),
+        GREATER_THAN(">", OperatorPriority.RELATIONAL),
+        GREATER_THAN_OR_EQUAL(">=", OperatorPriority.RELATIONAL),
+        EQUAL("=", OperatorPriority.EQUALITY),
+        NOT_EQUAL("!=", OperatorPriority.EQUALITY),
+        BITWISE_AND("&", OperatorPriority.BITWISE_AND),
+        BITWISE_XOR("^", OperatorPriority.BITWISE_XOR),
+        BITWISE_OR("|", OperatorPriority.BITWISE_OR),
+        BOOLEAN_AND("&&", OperatorPriority.BOOLEAN_AND),
+        BOOLEAN_OR("||", OperatorPriority.BOOLEAN_OR);
 
         private final String image;
-        private final int precedence;
-        private final boolean requiresBracketsWithSelf;
+        private final OperatorPriority precedence;
 
-        Operator(String image, int precedence, boolean requiresBracketsWithSelf) {
+        Operator(String image, OperatorPriority precedence) {
             this.image = image;
             this.precedence = precedence;
-            this.requiresBracketsWithSelf = requiresBracketsWithSelf;
         }
 
         public String getImage() {
             return image;
         }
 
-        public int getPrecedence() {
-            return precedence;
-        }
-
         @Override
         public String toString() {
             return image;
-        }
-
-        public boolean morePrecedenceThan(int precedence) {
-            return this.precedence > precedence;
-        }
-
-        public boolean requiresBracketsWithSelf() {
-            return requiresBracketsWithSelf;
         }
     }
 }

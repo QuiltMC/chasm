@@ -3,6 +3,7 @@ package org.quiltmc.chasm.lang.api.ast;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
+import org.quiltmc.chasm.lang.internal.render.OperatorPriority;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class LambdaNode extends Node {
@@ -31,10 +32,17 @@ public class LambdaNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier, OperatorPriority minPriority) {
+        boolean needsBrackets = !OperatorPriority.ANY.allowedFor(minPriority);
+        if (needsBrackets) {
+            builder.append('(');
+        }
         builder.append(identifier);
         builder.append(" -> ");
-        inner.render(renderer, builder, currentIndentationMultiplier);
+        inner.render(renderer, builder, currentIndentationMultiplier, OperatorPriority.ANY);
+        if (needsBrackets) {
+            builder.append(')');
+        }
     }
 
     @Override
