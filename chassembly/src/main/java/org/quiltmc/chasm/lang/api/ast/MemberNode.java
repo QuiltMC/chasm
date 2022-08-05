@@ -60,6 +60,12 @@ public class MemberNode extends Node {
             return NullNode.INSTANCE;
         }
 
-        return entries.get(identifier).evaluate(evaluator);
+        Node entry = entries.get(identifier);
+
+        evaluator.pushTrace(entry, "member \""+this.identifier+"\"");
+        Node result = entry.evaluate(evaluator);
+        evaluator.popTrace();
+
+        return result;
     }
 }

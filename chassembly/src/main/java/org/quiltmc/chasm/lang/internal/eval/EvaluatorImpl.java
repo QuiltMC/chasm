@@ -14,8 +14,11 @@ import org.quiltmc.chasm.lang.api.eval.ClosureNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.intrinsics.Intrinsics;
+import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class EvaluatorImpl implements Evaluator {
+    private static final Renderer traceEntryRenderer = Renderer.builder().trailingCommas(false).build();
+
     ResolverImpl resolver = new ResolverImpl(new MapNode(Intrinsics.ALL));
 
     ArrayDeque<CallStackEntry> callStack = new ArrayDeque<>();
@@ -56,6 +59,18 @@ public class EvaluatorImpl implements Evaluator {
         @Override
         public int hashCode() {
             return Objects.hash(lambdaNode, callStack);
+        }
+    }
+
+    ArrayDeque<TraceStackEntry> traceStack = new ArrayDeque<>();
+
+    static class TraceStackEntry {
+        final Node beingEvaluated;
+        final String entry;
+
+        TraceStackEntry(Node beingEvaluated, String entry) {
+            this.beingEvaluated = beingEvaluated;
+            this.entry = entry;
         }
     }
 
@@ -114,5 +129,32 @@ public class EvaluatorImpl implements Evaluator {
         callStack.pop();
 
         return result;
+    }
+
+    @Override
+    public void pushTrace(Node beingEvaluated, String traceEntry) {
+        this.traceStack.addLast(new TraceStackEntry(beingEvaluated, traceEntry));
+    }
+
+    @Override
+    public void popTrace() {
+        this.traceStack.removeLast();
+    }
+
+    @Override
+    public String renderTrace() {
+        String nodeBeingEvaluated = "<Last traceback entry not found>";
+        TraceStackEntry topEntry = traceStack.peekLast();
+        if (topEntry != null) {
+            nodeBeingEvaluated = traceEntryRenderer.render(topEntry.beingEvaluated)
+                .replaceAll("\n", ""); // Remove trailing newline at the end of render
+        }
+
+        String traceback = this.traceStack.stream()
+                .map(entry -> entry.entry)
+                .reduce((a, b) -> a + " > " + b)
+                .orElse("<Unable to render traceback>");
+
+        return "SOURCE: <" + nodeBeingEvaluated + ">\n AT: " + traceback;
     }
 }

@@ -6,4 +6,9 @@ public final class NullNode extends ValueNode<Void> {
     private NullNode() {
         super(null);
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + " @" + Integer.toHexString(this.hashCode());
+    }
 }

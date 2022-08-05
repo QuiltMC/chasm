@@ -16,6 +16,8 @@ import org.quiltmc.chasm.lang.internal.render.Renderer;
  * This class can be extended by an execution environment if it requires special behaviour for custom nodes.
  */
 public abstract class Node {
+    private static final Renderer renderer = Renderer.builder().trailingCommas(false).build();
+
     @ApiStatus.OverrideOnly
     public abstract void resolve(Resolver resolver);
 
@@ -53,5 +55,13 @@ public abstract class Node {
         StringBuilder sb = new StringBuilder();
         render(renderer, sb, 1);
         Files.write(path, sb.toString().getBytes()); // what about utf16 support?
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + " "
+                + renderer.render(this)
+                        .replaceAll("\n", "") // Remove trailing newline at the end of render
+                + " @" + Integer.toHexString(this.hashCode());
     }
 }

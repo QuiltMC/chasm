@@ -11,6 +11,7 @@ import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
+import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 public class ChasmLangTransformer implements Transformer {
     private final Node parsed;
@@ -28,23 +29,28 @@ public class ChasmLangTransformer implements Transformer {
         CallNode callExpression = new CallNode(lambdaExpression, classes);
 
         Evaluator evaluator = Evaluator.create(callExpression);
-        Node evaluated = callExpression.evaluate(evaluator);
-        if (!(evaluated instanceof MapNode)) {
-            throw new RuntimeException("Transformers must be maps");
-        }
+        try {
+            evaluator.pushTrace(callExpression, "transformer \""+id+"\"");
+            Node evaluated = callExpression.evaluate(evaluator);
+            if (!(evaluated instanceof MapNode)) {
+                throw new RuntimeException("Transformers must be maps");
+            }
 
-        MapNode transformerExpression = (MapNode) evaluated;
-        Node transformationsNode = transformerExpression.getEntries().get("transformations");
-        if (!(transformationsNode instanceof ListNode)) {
-            throw new RuntimeException("Transformers must declare a list \"transformations\" in their root map");
-        }
+            MapNode transformerExpression = (MapNode) evaluated;
+            Node transformationsNode = transformerExpression.getEntries().get("transformations");
+            if (!(transformationsNode instanceof ListNode)) {
+                throw new RuntimeException("Transformers must declare a list \"transformations\" in their root map");
+            }
 
-        ArrayList<Transformation> transformations = new ArrayList<>();
-        for (Node entry : ((ListNode) transformationsNode).getEntries()) {
-            transformations.add(new ChasmLangTransformation(this, entry, evaluator));
-        }
+            ArrayList<Transformation> transformations = new ArrayList<>();
+            for (Node entry : ((ListNode) transformationsNode).getEntries()) {
+                transformations.add(new ChasmLangTransformation(this, entry, evaluator));
+            }
 
-        return transformations;
+            return transformations;
+        } catch (EvaluationException ex) {
+            throw ex.withTraceback(evaluator);
+        }
     }
 
     @Override

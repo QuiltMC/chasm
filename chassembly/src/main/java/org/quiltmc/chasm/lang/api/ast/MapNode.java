@@ -54,7 +54,9 @@ public class MapNode extends Node {
         Map<String, Node> newEntries = new LinkedHashMap<>();
 
         for (Map.Entry<String, Node> entry : entries.entrySet()) {
+            evaluator.pushTrace(entry.getValue(), "map entry \""+entry.getKey()+"\"");
             newEntries.put(entry.getKey(), entry.getValue().evaluate(evaluator));
+            evaluator.popTrace();
         }
 
         if (newEntries.equals(entries)) {

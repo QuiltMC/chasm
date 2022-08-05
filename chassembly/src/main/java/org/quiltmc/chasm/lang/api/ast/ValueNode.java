@@ -31,7 +31,7 @@ public abstract class ValueNode<T> extends Node {
 
     @Override
     public String toString() {
-        return String.valueOf(value);
+        return this.getClass().getSimpleName() + " " + this.value + " @" + Integer.toHexString(this.hashCode());
     }
 
     @Override

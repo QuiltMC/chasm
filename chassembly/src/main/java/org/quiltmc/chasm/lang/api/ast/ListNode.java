@@ -30,8 +30,12 @@ public class ListNode extends Node {
     public Node evaluate(Evaluator evaluator) {
         List<Node> newEntries = new ArrayList<>();
 
-        for (Node entry : entries) {
+        for (int i = 0; i < entries.size(); i++) {
+            Node entry = entries.get(i);
+
+            evaluator.pushTrace(entry, "list entry ["+i+"]");
             newEntries.add(entry.evaluate(evaluator));
+            evaluator.popTrace();
         }
 
         if (newEntries.equals(entries)) {

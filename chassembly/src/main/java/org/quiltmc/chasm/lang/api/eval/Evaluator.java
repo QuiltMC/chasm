@@ -1,6 +1,7 @@
 package org.quiltmc.chasm.lang.api.eval;
 
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.quiltmc.chasm.lang.api.ast.LambdaNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.ast.ReferenceNode;
@@ -17,4 +18,10 @@ public interface Evaluator {
     ClosureNode createClosure(LambdaNode lambdaNode);
 
     Node callClosure(ClosureNode closure, Node arg);
+
+    void pushTrace(Node beingEvaluated, String traceEntry);
+
+    void popTrace();
+
+    String renderTrace();
 }

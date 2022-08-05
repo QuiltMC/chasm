@@ -48,6 +48,10 @@ public class LambdaNode extends Node {
     @Override
     @ApiStatus.OverrideOnly
     public Node evaluate(Evaluator evaluator) {
-        return evaluator.createClosure(this);
+        evaluator.pushTrace(this, "lambda ("+this.identifier+")");
+        Node result = evaluator.createClosure(this);
+        evaluator.popTrace();
+
+        return result;
     }
 }

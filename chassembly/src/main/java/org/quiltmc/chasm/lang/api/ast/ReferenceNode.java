@@ -46,7 +46,11 @@ public class ReferenceNode extends Node {
             throw new EvaluationException("Failed to resolve reference: " + this);
         }
 
-        return resolved.evaluate(evaluator);
+        evaluator.pushTrace(resolved, this.global ? "global ref <" : "ref <"+this.identifier+">");
+        Node result = resolved.evaluate(evaluator);
+        evaluator.popTrace();
+
+        return result;
     }
 
     @Override
@@ -60,6 +64,7 @@ public class ReferenceNode extends Node {
 
     @Override
     public String toString() {
-        return "Ref<" + identifier + ">";
+        return this.getClass().getSimpleName()
+                + (this.global ? " <$" : " <") + this.identifier + "> @" + Integer.toHexString(this.hashCode());
     }
 }
