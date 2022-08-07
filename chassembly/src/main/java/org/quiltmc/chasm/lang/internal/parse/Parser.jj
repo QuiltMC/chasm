@@ -1,122 +1,283 @@
-options {
-    PARSER_PACKAGE = "org.quiltmc.chasm.lang.internal.parse";
-    BASE_NAME = "";
-    TABS_TO_SPACES = 4;
-    TREE_BUILDING_ENABLED = false;
+//PARSER_PACKAGE = "org.quiltmc.chasm.lang.internal.parse" ;
+PARSER_PACKAGE = "org.quiltmc.chasm.lang.api.ast" ;
+BASE_NAME = "";
+TABS_TO_SPACES = 4;
+BASE_SRC_DIR="../../../../../..";
+//TREE_BUILDING_ENABLED = false;
+
+INJECT Node :
+   import org.quiltmc.chasm.lang.api.eval.Evaluator;
+   import org.quiltmc.chasm.lang.api.eval.Resolver;
+   import org.quiltmc.chasm.lang.internal.render.Renderer;
+{
+   default Node evaluate(Evaluator evaluator) {throw new UnsupportedOperationException("unimplemented");}
+   default void resolve(Resolver resolver) {throw new UnsupportedOperationException("unimplemented");}
+   default void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {throw new UnsupportedOperationException("unimplemented");}
 }
 
-PARSER_BEGIN(Parser)
+INJECT BaseNode :
+   import java.io.IOException;
+   import java.nio.file.Files;
+   import java.nio.file.Path;
+   import org.quiltmc.chasm.lang.internal.render.Renderer;
+{
+   /**
+     * Parse a given file into a {@link Node}.
+     *
+     * @param path Path to a valid source file containing a single node.
+     * @return The node parsed from the given source file.
+     * @throws IOException If there is an error reading the file.
+     * @throws ParseException If the source contains syntax errors.
+     */
+    public static Node parse(Path path) throws IOException {
+        Parser parser = new Parser(path);
+        return parser.file();
+    }
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+    /**
+     * Parse a given {@link String} into a {@link Node}.
+     *
+     * @param string A string containing a single node.
+     * @return The node parsed from the given source file.
+     * @throws ParseException If the source contains syntax errors.
+     */
+    public static Node parse(String string) {
+        Parser parser = new Parser(string);
+        return parser.file();
+    }
 
-import org.quiltmc.chasm.lang.api.ast.BinaryNode;
-import org.quiltmc.chasm.lang.api.ast.BooleanNode;
-import org.quiltmc.chasm.lang.api.ast.CallNode;
-import org.quiltmc.chasm.lang.api.ast.FloatNode;
-import org.quiltmc.chasm.lang.api.ast.IndexNode;
-import org.quiltmc.chasm.lang.api.ast.IntegerNode;
-import org.quiltmc.chasm.lang.api.ast.LambdaNode;
-import org.quiltmc.chasm.lang.api.ast.ListNode;
-import org.quiltmc.chasm.lang.api.ast.NullNode;
-import org.quiltmc.chasm.lang.api.ast.StringNode;
-import org.quiltmc.chasm.lang.api.ast.MapNode;
-import org.quiltmc.chasm.lang.api.ast.MemberNode;
-import org.quiltmc.chasm.lang.api.ast.Node;
-import org.quiltmc.chasm.lang.api.ast.ReferenceNode;
-import org.quiltmc.chasm.lang.api.ast.TernaryNode;
-import org.quiltmc.chasm.lang.api.ast.UnaryNode;
-
-public class Parser {
-
+    public void write(Path path) throws IOException {
+        Renderer renderer = Renderer.builder().build();
+        StringBuilder sb = new StringBuilder();
+        render(renderer, sb, 1);
+        Files.write(path, sb.toString().getBytes()); // what about utf16 support?
+    }    
 }
-
-PARSER_END(Parser)
 
 // Productions
-Node file():
+Node file :
 {
-    Node e;
+    Node n;
 }
-{
-    e = expression()
+    n = expression
     <EOF>
-    { return e; }
-}
+    { return n; }
+;
 
 // Expressions
 // Note: These are nested according to operator precedence
 
-Node literalExpression():
+INJECT IntegerNode : 
 {
-    Token t;
-    Node e;
-}
-{
-    t = <NullLiteral>
-    { return NullNode.INSTANCE; }
-    |
-    t = <BooleanLiteral>
-    { return BooleanNode.from(Boolean.parseBoolean(t.getImage())); }
-    |
-    t = <DecIntegerLiteral>
-    { return new IntegerNode(Long.parseLong(t.getImage())); }
-    |
-    t = <HexIntegerLiteral>
-    { return new IntegerNode(Long.parseLong(t.getImage().substring(2), 16)); }
-    |
-    t = <BinIntegerLiteral>
-    { return new IntegerNode(Long.parseLong(t.getImage().substring(2), 2)); }
-    |
-    t = <FloatLiteral>
-    { return new FloatNode(Double.parseDouble(t.getImage())); }
-    |
-    t = <StringLiteral>
-    { return new StringNode(t.getImage().substring(1, t.getImage().length() - 1)); }
-    |
-    t = <CharLiteral>
-    { return new IntegerNode((long) t.getImage().charAt(1)); }
+    @Property long value;
+
+    public IntegerNode(long value) {
+        super(TokenType.DecIntegerLiteral, null, 0,0);
+        this.value = value;
+    }
 }
 
-Node referenceExpression():
+INJECT FloatNode :
 {
-    boolean g = false;
-    Token t;
+    @Property double value;
+
+    FloatNode(double value) {
+        super(TokenType.FloatLiteral, null, 0, 0);
+        this.value = value;
+    }
 }
+
+
+
+INJECT StringNode :
 {
+    @Property String value;
+
+    public StringNode(String value) {
+        super(TokenType.StringLiteral, null, 0, 0);
+        this.value = value;
+    }
+}
+
+INJECT BooleanNode :
+{
+    @Property boolean value;
+    public static final BooleanNode TRUE = new BooleanNode(true);
+    public static final BooleanNode FALSE = new BooleanNode(false);
+
+    BooleanNode(Boolean value) {
+        super(TokenType.BooleanLiteral, null, 0, 0);
+        this.value = value;
+    }
+
+    public boolean getValue() {
+        return value;
+    }
+
+    public static BooleanNode from(boolean value) {
+        return value ? TRUE : FALSE;
+    }
+}
+
+INJECT NullNode :
+{
+    public static final NullNode INSTANCE = new NullNode(TokenType.NullLiteral, null, 0, 0);
+    public NullNode() {
+        super(TokenType.NullLiteral, null, 0, 0);
+    }
+}
+
+
+Node literalExpression :
+{
+    long longValue =0L;
+}
+    <NullLiteral> 
+    { 
+        return lastConsumedToken;
+    }
+    |
+    <BooleanLiteral> 
+    {
+        boolean boolValue = Boolean.parseBoolean(lastConsumedToken.getImage()); 
+        ((BooleanNode)lastConsumedToken).setValue(boolValue);
+        return lastConsumedToken;
+    }
+    |
+    <DecIntegerLiteral>
+    { 
+        longValue = Long.parseLong(lastConsumedToken.getImage());
+        ((IntegerNode) lastConsumedToken).setValue(longValue);
+        return lastConsumedToken;
+    }
+    |
+    <HexIntegerLiteral>
+    { 
+        longValue = Long.parseLong(lastConsumedToken.getImage().substring(2), 16); 
+        ((IntegerNode) lastConsumedToken).setValue(longValue);
+        return lastConsumedToken;
+    }
+    |
+    <BinIntegerLiteral>
+    { 
+        longValue = Long.parseLong(lastConsumedToken.getImage().substring(2), 2); 
+        ((IntegerNode) lastConsumedToken).setValue(longValue);
+        return lastConsumedToken;
+    }
+    |
+    <FloatLiteral>
+    { 
+        double floatValue = Double.parseDouble(lastConsumedToken.getImage());
+        ((FloatNode) lastConsumedToken).setValue(floatValue);
+        return lastConsumedToken;
+    }
+    |
+    <StringLiteral>
+    { return new StringNode(lastConsumedToken.getImage().substring(1, lastConsumedToken.getImage().length() - 1)); }
+    |
+    <CharLiteral>
+    {  
+        longValue = lastConsumedToken.getImage().charAt(1); 
+        ((IntegerNode) lastConsumedToken).setValue(longValue);
+        return lastConsumedToken;
+    }
+;
+
+INJECT ReferenceNode :
+{
+    @Property boolean global;
+    @Property String identifier;
+}
+
+Node referenceExpression #ReferenceNode :
     (
         "$"
-        { g = true; }
+        { CURRENT_NODE.setGlobal(true);}
     )?
-    t = <Identifier>
-    { return new ReferenceNode(t.getImage(), g); }
-}
+    <Identifier> {CURRENT_NODE.setIdentifier(lastConsumedToken.getImage());}
+    {return CURRENT_NODE;}
+;
 
-Node parenthesesExpression():
+Node parenthesesExpression :
 {
-    Node e;
+    Node n;
 }
-{
     <LeftParentheses>
-    e = expression()
+    n = expression
     <RightParentheses>
-    { return e; }
+    { return n; }
+;
+
+INJECT ListNode :
+   import java.util.ArrayList;
+   import java.util.List;
+   import org.quiltmc.chasm.lang.api.eval.Evaluator;
+   import org.quiltmc.chasm.lang.api.eval.Resolver;
+   import org.quiltmc.chasm.lang.internal.render.Renderer;
+   import PARSER_PACKAGE.CONSTANTS_CLASS.TokenType;
+{
+    List<Node> entries;
+
+    public ListNode() {}
+
+    public ListNode(List<Node> entries) {this.entries = entries;}
+
+    public void close() {
+        entries = new ArrayList<>();
+        for (Node child : children()) {
+            if (child instanceof Token) {
+                TokenType type = ((Token)child).getType();
+                if (type == TokenType.LeftBrackets || type == TokenType.RightBrackets || type == TokenType.Comma) continue;
+            }
+            entries.add(child);
+        }
+    }
+    
+    public List<Node> getEntries() {return entries;}
+
+    public void resolve(Resolver resolver) {
+        entries.forEach(node -> node.resolve(resolver));
+    }
+    public Node evaluate(Evaluator evaluator) {
+        List<Node> newEntries = new ArrayList<>();
+
+        for (Node entry : entries) {
+            newEntries.add(entry.evaluate(evaluator));
+        }
+
+        if (newEntries.equals(entries)) {
+            return this;
+        }
+
+        return new ListNode(newEntries);
+    }
+
+    @Override
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+        builder.append("[");
+        for (int i = 0; i < entries.size(); i++) {
+            entries.get(i).render(renderer, builder, currentIndentationMultiplier + 1);
+            if (i < entries.size() - 1 || renderer.hasTrailingCommas()) {
+                builder.append(',');
+            }
+        }
+        builder.append("]");
+    }
 }
 
-Node listExpression():
+Node listExpression#ListNode :
 {
     ArrayList<Node> entries = new ArrayList<>();
-    Node e;
+    Node n;
 }
-{
     <LeftBrackets>
         (
-            e = expression()
-            { entries.add(e); }
+            n = expression
+            { entries.add(n); }
             (
                 <Comma>
-                e = expression()
-                { entries.add(e); }
+                n = expression
+                { entries.add(n); }
             )*
             (
                 <Comma>
@@ -124,394 +285,1130 @@ Node listExpression():
         )?
     <RightBrackets>
     { return new ListNode(entries); }
-}
+;
 
-Node mapExpression():
-{
-    LinkedHashMap<String, Node> entries = new LinkedHashMap<>();
-    Token t;
-    Node e;
-}
-{
+INJECT PARSER_CLASS : import java.util.LinkedHashMap;
+
+Node mapExpression#MapNode :
     <LeftBraces>
+    (
+       <Identifier>
+       <Colon>
+       expression
+       (
+           <Comma>
+           <Identifier>
+           <Colon>
+           expression
+        )*
         (
-            t = <Identifier>
-            <Colon>
-            e = expression()
-            { entries.put(t.getImage(), e); }
-            (
-                <Comma>
-                t = <Identifier>
-                <Colon>
-                e = expression()
-                { entries.put(t.getImage(), e); }
-            )*
-            (
-                <Comma>
-            )?
+            <Comma>
         )?
-    <RightBraces>
-    { return new MapNode(entries); }
-}
-
-Node primaryExpression():
-{
-    Node e;
-}
-{
-    (
-        e = literalExpression()
-        |
-        e = referenceExpression()
-        |
-        e = parenthesesExpression()
-        |
-        e = listExpression()
-        |
-        e = mapExpression()
-    )
-    { return e; }
-}
-
-Node argumentExpression():
-{
-    Node e;
-    Node a;
-    Token t;
-}
-{
-    e = primaryExpression()
-    (
-        (
-            <LeftParentheses>
-            a = expression()
-            <RightParentheses>
-            { e = new CallNode(e, a); }
-        )
-        |
-        (
-            <LeftBrackets>
-            a = expression()
-            <RightBrackets>
-            { e = new IndexNode(e, a); }
-        )
-        |
-        (
-            <Dot>
-            t = <Identifier>
-            { e = new MemberNode(e, t.getImage()); }
-        )
-    )*
-    { return e; }
-}
-
-Node unaryExpression():
-{
-    Node e;
-    UnaryNode.Operator o = null;
-}
-{
-    (
-        <PlusOperator>
-        { o = UnaryNode.Operator.PLUS; }
-        |
-        <MinusOperator>
-        { o = UnaryNode.Operator.MINUS; }
-        |
-        <NotOperator>
-        { o = UnaryNode.Operator.NOT; }
-        |
-        <InvertOperator>
-        { o = UnaryNode.Operator.INVERT; }
     )?
-    e = argumentExpression()
-    {
-        if (o != null) {
-            return new UnaryNode(e, o);
-        } else {
-            return e;
+    <RightBraces>
+    { return CURRENT_NODE; }
+;
+
+INJECT MapNode : 
+   import org.quiltmc.chasm.lang.api.eval.Evaluator;
+   import org.quiltmc.chasm.lang.api.eval.Resolver;
+   import org.quiltmc.chasm.lang.internal.render.Renderer;
+   import PARSER_PACKAGE.CONSTANTS_CLASS.TokenType;
+   import java.util.*;
+{
+    private Map<String,Node> entries;
+
+    public Map<String,Node> getEntries() {return entries;}
+
+    public MapNode() {
+         entries = new LinkedHashMap<>();
+    }
+
+    public MapNode(Map<String,Node> entries) {this.entries = entries;}
+
+    @Override
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+        builder.append('{');
+        List<Map.Entry<String, Node>> list = new LinkedList<>();
+        entries.entrySet().forEach(list::add);
+        for (int i = 0; i < list.size(); i++) {
+            renderer.indent(builder, currentIndentationMultiplier);
+            builder.append(list.get(i).getKey()).append(": ");
+            list.get(i).getValue().render(renderer, builder, currentIndentationMultiplier + 1);
+            if (i < entries.size() - 1 || renderer.hasTrailingCommas()) {
+                builder.append(", ");
+            }
+        }
+        if (list.size() > 0) {
+            renderer.indent(builder, currentIndentationMultiplier - 1);
+        }
+        builder.append('}');
+    }
+
+    @Override
+    //@ApiStatus.OverrideOnly
+    public void resolve(Resolver resolver) {
+        resolver.enterMap(this);
+        entries.values().forEach(node -> node.resolve(resolver));
+        resolver.exitMap();
+    }
+
+    @Override
+    ////@ApiStatus.OverrideOnly
+    public Node evaluate(Evaluator evaluator) {
+        Map<String, Node> newEntries = new LinkedHashMap<>();
+
+        for (Map.Entry<String, Node> entry : entries.entrySet()) {
+            newEntries.put(entry.getKey(), entry.getValue().evaluate(evaluator));
+        }
+
+        if (newEntries.equals(entries)) {
+            return this;
+        }
+
+        return new MapNode(newEntries);
+    }
+
+    public void close() {
+        Node key = null;
+        for (Node child : children()) {
+            if (child instanceof Token) {
+                TokenType type = ((Token)child).getType();
+                if (type == TokenType.LeftBraces || type == TokenType.RightBraces || type == TokenType.Comma || type == TokenType.Colon) {
+                    continue;
+                }
+            }
+            if (key != null) {
+                entries.put(key.toString(), child);
+                key = null;
+            } else {
+                key = child;
+            }
         }
     }
 }
 
-Node multiplicativeExpression():
+Node primaryExpression#void :
 {
-    Node e;
-    Node a;
-    BinaryNode.Operator o;
+    Node n;
 }
-{
-    e = unaryExpression()
     (
+        n = literalExpression
+        |
+        n = referenceExpression
+        |
+        n = parenthesesExpression
+        |
+        n = listExpression
+        |
+        n = mapExpression
+    )
+    { return n; }
+;
+
+INJECT CallNode :
+   import org.quiltmc.chasm.lang.api.eval.Evaluator;
+   import org.quiltmc.chasm.lang.api.eval.FunctionNode;
+   import org.quiltmc.chasm.lang.api.eval.Resolver;
+   import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+   import org.quiltmc.chasm.lang.internal.render.Renderer;
+{
+    @Property Node function, arg;
+    @Override
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+        function.render(renderer, builder, currentIndentationMultiplier);
+        builder.append('(');
+        arg.render(renderer, builder, currentIndentationMultiplier);
+        builder.append(')');
+    }
+
+    @Override
+    public void resolve(Resolver resolver) {
+        function.resolve(resolver);
+        arg.resolve(resolver);
+    }
+
+    @Override
+    public Node evaluate(Evaluator evaluator) {
+        Node function = this.function.evaluate(evaluator);
+
+        if (function instanceof FunctionNode) {
+            return ((FunctionNode) function).apply(evaluator, arg.evaluate(evaluator));
+        }
+
+        throw new EvaluationException("Can only call functions but found " + function);
+    }
+}
+
+INJECT IndexNode :
+   import org.quiltmc.chasm.lang.api.eval.Evaluator;
+   import org.quiltmc.chasm.lang.api.eval.FunctionNode;
+   import org.quiltmc.chasm.lang.api.eval.Resolver;
+   import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+   import org.quiltmc.chasm.lang.internal.render.Renderer;
+{
+    @Property Node function, arg;
+
+    @Override
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+        function.render(renderer, builder, currentIndentationMultiplier);
+        builder.append('(');
+        arg.render(renderer, builder, currentIndentationMultiplier);
+        builder.append(')');
+    }
+
+    @Override
+    //@ApiStatus.OverrideOnly
+    public void resolve(Resolver resolver) {
+        function.resolve(resolver);
+        arg.resolve(resolver);
+    }
+
+    @Override
+    public Node evaluate(Evaluator evaluator) {
+        Node function = this.function.evaluate(evaluator);
+
+        if (function instanceof FunctionNode) {
+            return ((FunctionNode) function).apply(evaluator, arg.evaluate(evaluator));
+        }
+
+        throw new EvaluationException("Can only call functions but found " + function);
+    }
+}
+
+INJECT MemberNode :
+   import org.quiltmc.chasm.lang.api.eval.Evaluator;
+   import org.quiltmc.chasm.lang.api.eval.FunctionNode;
+   import org.quiltmc.chasm.lang.api.eval.Resolver;
+   import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+   import org.quiltmc.chasm.lang.internal.render.Renderer;
+   import java.util.Map;
+{
+    @Property Node left;
+    @Property String identifier;
+
+    @Override
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+        left.render(renderer, builder, currentIndentationMultiplier);
+        builder.append(".").append(identifier);
+    }
+
+    @Override
+    //@ApiStatus.OverrideOnly
+    public void resolve(Resolver resolver) {
+        left.resolve(resolver);
+    }
+
+    @Override
+    //@ApiStatus.OverrideOnly
+    public Node evaluate(Evaluator evaluator) {
+        Node left = this.left.evaluate(evaluator);
+
+        if (!(left instanceof MapNode)) {
+            throw new EvaluationException("Member access expected a map, but got a " + left);
+        }
+
+        Map<String, Node> entries = ((MapNode) left).getEntries();
+
+        if (!entries.containsKey(identifier)) {
+            return NullNode.INSTANCE;
+        }
+
+        return entries.get(identifier).evaluate(evaluator);
+    }
+}
+
+Node argumentExpression#void :
+{Node n;}
+    n=primaryExpression
+    (
+        (
+            <LeftParentheses>
+            expression
+            {
+                CURRENT_NODE.setFunction(n);
+                CURRENT_NODE.setArg(peekNode());
+            }
+            <RightParentheses>
+        ) #CallNode(+1)
+        |
+        (
+            <LeftBrackets>
+            expression 
+            {
+                CURRENT_NODE.setFunction(n);
+                CURRENT_NODE.setArg(peekNode());
+            }
+            <RightBrackets>
+        ) #IndexNode(+1)
+        |
+        (
+            <Dot>
+            <Identifier>
+            {
+               CURRENT_NODE.setLeft(n);
+               CURRENT_NODE.setIdentifier(lastConsumedToken.getImage());
+            }
+        ) #MemberNode(+1)
+    )*
+    { return peekNode(); }
+;
+
+INJECT UnaryNode :
+   import org.quiltmc.chasm.lang.api.eval.Evaluator;
+   import org.quiltmc.chasm.lang.api.eval.Resolver;
+   import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+   import org.quiltmc.chasm.lang.internal.render.Renderer;
+{
+    @Property Node inner;
+    @Property Operator operator;
+
+    public UnaryNode(Node inner, Operator operator) {
+        this.inner = inner;
+        this.operator = operator;
+    }
+
+    public UnaryNode() {}
+
+    @Override
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+        builder.append(operator.image);
+        boolean wrapWithBraces = inner instanceof BinaryNode && ((BinaryNode) inner).getOperator()
+                .morePrecedenceThan(operator.precedence)
+                // we don't have to do the funky requiresBracketsWithSelf here luckily
+                || inner instanceof UnaryNode && ((UnaryNode) inner).operator.morePrecedenceThan(operator.precedence)
+                || inner instanceof TernaryNode;
+
+        if (wrapWithBraces) {
+            builder.append('(');
+        }
+        inner.render(renderer, builder, currentIndentationMultiplier);
+        if (wrapWithBraces) {
+            builder.append(')');
+        }
+    }
+
+    @Override
+    //@ApiStatus.OverrideOnly
+    public void resolve(Resolver resolver) {
+        inner.resolve(resolver);
+    }
+
+    @Override
+    ////@ApiStatus.OverrideOnly
+    public Node evaluate(Evaluator evaluator) {
+        Node inner = this.inner.evaluate(evaluator);
+
+        switch (operator) {
+            case PLUS: {
+                if (inner instanceof IntegerNode) {
+                    return inner;
+                }
+
+                if (inner instanceof FloatNode) {
+                    return inner;
+                }
+            }
+            break;
+            case MINUS: {
+                if (inner instanceof IntegerNode) {
+                    return new IntegerNode(-((IntegerNode) inner).getValue());
+                }
+
+                if (inner instanceof FloatNode) {
+                    return new FloatNode(-((FloatNode) inner).getValue());
+                }
+            }
+            break;
+            case NOT: {
+                if (inner instanceof BooleanNode) {
+                    return BooleanNode.from(!((BooleanNode) inner).getValue());
+                }
+            }
+            break;
+            case INVERT: {
+                if (inner instanceof IntegerNode) {
+                    return new IntegerNode(~((IntegerNode) inner).getValue());
+                }
+            }
+            break;
+            default: {
+                throw new EvaluationException(
+                        "Unknown unary operator " + operator
+                );
+            }
+        }
+
+        throw new EvaluationException("Can't apply unary operator " + operator + " to " + inner);
+    }
+
+    public enum Operator {
+        PLUS("+", 2),
+        MINUS("-", 2),
+        NOT("!", 2),
+        INVERT("~", 2);
+
+        private final String image;
+        private final int precedence;
+
+        Operator(String image, int precedence) {
+            this.image = image;
+            this.precedence = precedence;
+        }
+
+        public String getImage() {
+            return image;
+        }
+
+        public int getPrecedence() {
+            return precedence;
+        }
+
+        @Override
+        public String toString() {
+            return image;
+        }
+
+        public boolean morePrecedenceThan(int precedence) {
+            return this.precedence > precedence;
+        }
+    }
+}
+
+Node unaryExpression#UnaryNode(>1) :
+{
+    Node n;
+}
+    (
+        <PlusOperator>
+        { CURRENT_NODE.setOperator(UnaryNode.Operator.PLUS); }
+        |
+        <MinusOperator>
+        { CURRENT_NODE.setOperator(UnaryNode.Operator.MINUS); }
+        |
+        <NotOperator>
+        { CURRENT_NODE.setOperator(UnaryNode.Operator.NOT); }
+        |
+        <InvertOperator>
+        { CURRENT_NODE.setOperator(UnaryNode.Operator.INVERT); }
+    )?
+    n = argumentExpression
+    {
+        if (nodeArity() ==1) {
+            return n;
+        } 
+        return CURRENT_NODE;
+    }
+;
+
+INJECT BinaryNode :
+   import java.util.ArrayList;
+   import java.util.List;
+   import java.util.Objects;
+
+   import org.quiltmc.chasm.lang.api.eval.Evaluator;
+   import org.quiltmc.chasm.lang.api.eval.Resolver;
+   import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+   import org.quiltmc.chasm.lang.internal.render.Renderer;
+{
+    @Property Node left, right;
+    @Property Operator operator;
+
+    public BinaryNode(Node left, Operator operator, Node right) {
+        this.left = left;
+        this.operator = operator;
+        this.right = right;
+    }
+
+    public BinaryNode() {}
+
+    @Override
+    public void resolve(Resolver resolver) {
+        left.resolve(resolver);
+        right.resolve(resolver);
+    }
+
+    @Override
+    public Node evaluate(Evaluator evaluator) {
+        Node left = this.left.evaluate(evaluator);
+
+        // Short-circuiting operators:
+        if (operator == Operator.BOOLEAN_AND || operator == Operator.BOOLEAN_OR) {
+            if (!(left instanceof BooleanNode)) {
+                throw new EvaluationException("The left side of boolean operator " + operator
+                        + " must be a boolean but found " + left);
+            }
+
+            if (operator == BinaryNode.Operator.BOOLEAN_OR && ((BooleanNode) left).getValue()) {
+                return BooleanNode.TRUE;
+            }
+
+            if (operator == BinaryNode.Operator.BOOLEAN_AND && !((BooleanNode) left).getValue()) {
+                return BooleanNode.FALSE;
+            }
+        }
+
+        Node right = this.right.evaluate(evaluator);
+
+        switch (operator) {
+            case PLUS: {
+                if (left instanceof ListNode && right instanceof ListNode) {
+                    List<Node> leftEntries = ((ListNode) left).getEntries();
+                    List<Node> rightEntries = ((ListNode) right).getEntries();
+
+                    ArrayList<Node> newEntries = new ArrayList<>(leftEntries);
+                    newEntries.addAll(rightEntries);
+
+                    return new ListNode(newEntries);
+                }
+
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() + ((IntegerNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return new FloatNode(((FloatNode) left).getValue() + ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return new FloatNode(((IntegerNode) left).getValue() + ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return new FloatNode(((FloatNode) left).getValue() + ((IntegerNode) right).getValue());
+                }
+
+                if (left instanceof StringNode && right instanceof ValueNode) {
+                    return new StringNode(((StringNode) left).getValue() + ((ValueNode<?>) right).getValue());
+                }
+
+                if (left instanceof ValueNode && right instanceof StringNode) {
+                    return new StringNode(((ValueNode<?>) left).getValue() + ((StringNode) right).getValue());
+                }
+            }
+            break;
+            case MINUS: {
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() - ((IntegerNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return new FloatNode(((FloatNode) left).getValue() - ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return new FloatNode(((IntegerNode) left).getValue() - ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return new FloatNode(((FloatNode) left).getValue() - ((IntegerNode) right).getValue());
+                }
+            }
+            break;
+            case MULTIPLY: {
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() * ((IntegerNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return new FloatNode(((FloatNode) left).getValue() * ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return new FloatNode(((IntegerNode) left).getValue() * ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return new FloatNode(((FloatNode) left).getValue() * ((IntegerNode) right).getValue());
+                }
+            }
+            break;
+            case DIVIDE: {
+
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() / ((IntegerNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return new FloatNode(((FloatNode) left).getValue() / ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return new FloatNode(((IntegerNode) left).getValue() / ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return new FloatNode(((FloatNode) left).getValue() / ((IntegerNode) right).getValue());
+                }
+            }
+            break;
+            case MODULO: {
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() % ((IntegerNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return new FloatNode(((FloatNode) left).getValue() % ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return new FloatNode(((IntegerNode) left).getValue() % ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return new FloatNode(((FloatNode) left).getValue() % ((IntegerNode) right).getValue());
+                }
+            }
+            break;
+            case SHIFT_LEFT: {
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() << ((IntegerNode) right).getValue());
+                }
+            }
+            break;
+            case SHIFT_RIGHT: {
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() >> ((IntegerNode) right).getValue());
+                }
+            }
+            break;
+            case SHIFT_RIGHT_UNSIGNED: {
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() >>> ((IntegerNode) right).getValue());
+                }
+            }
+            break;
+            case LESS_THAN: {
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() < ((IntegerNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() < ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() < ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() < ((IntegerNode) right).getValue());
+                }
+            }
+            break;
+            case LESS_THAN_OR_EQUAL: {
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() <= ((IntegerNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() <= ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() <= ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() <= ((IntegerNode) right).getValue());
+                }
+            }
+            break;
+            case GREATER_THAN: {
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() > ((IntegerNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() > ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() > ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() > ((IntegerNode) right).getValue());
+                }
+            }
+            break;
+            case GREATER_THAN_OR_EQUAL: {
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() >= ((IntegerNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() >= ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof IntegerNode && right instanceof FloatNode) {
+                    return BooleanNode.from(((IntegerNode) left).getValue() >= ((FloatNode) right).getValue());
+                }
+
+                if (left instanceof FloatNode && right instanceof IntegerNode) {
+                    return BooleanNode.from(((FloatNode) left).getValue() >= ((IntegerNode) right).getValue());
+                }
+            }
+            break;
+            case EQUAL: {
+                if (left instanceof ValueNode && right instanceof ValueNode) {
+                    return BooleanNode.from(
+                            Objects.equals(((ValueNode<?>) left).getValue(), ((ValueNode<?>) right).getValue())
+                    );
+                }
+            }
+            break;
+            case NOT_EQUAL: {
+                if (left instanceof ValueNode && right instanceof ValueNode) {
+                    return BooleanNode.from(
+                            !Objects.equals(((ValueNode<?>) left).getValue(), ((ValueNode<?>) right).getValue())
+                    );
+                }
+            }
+            break;
+            case BOOLEAN_AND: {
+                // Left side was already checked before
+                if (right instanceof BooleanNode) {
+                    return right;
+                }
+            }
+            break;
+            case BOOLEAN_OR: {
+                // Left side was already checked before
+                if (right instanceof BooleanNode) {
+                    return right;
+                }
+            }
+            break;
+            case BITWISE_AND: {
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() & ((IntegerNode) right).getValue());
+                }
+            }
+            break;
+            case BITWISE_XOR: {
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() ^ ((IntegerNode) right).getValue());
+                }
+            }
+            break;
+            case BITWISE_OR: {
+                if (left instanceof IntegerNode && right instanceof IntegerNode) {
+                    return new IntegerNode(((IntegerNode) left).getValue() | ((IntegerNode) right).getValue());
+                }
+            }
+            break;
+            default: {
+                throw new EvaluationException("Unexpected operator " + operator);
+            }
+        }
+
+        throw new EvaluationException(
+                "Can't apply binary operator " + operator + " to " + left + " and " + right
+        );
+    }
+
+    @Override
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+        final boolean leftNeedsBrackets = left instanceof BinaryNode && (
+                ((BinaryNode) left).operator == operator && operator.requiresBracketsWithSelf
+                        || ((BinaryNode) left).operator.morePrecedenceThan(operator.precedence)
+        )
+                || left instanceof UnaryNode && ((UnaryNode) left).getOperator().morePrecedenceThan(operator.precedence)
+                || left instanceof TernaryNode;
+        final boolean rightNeedsBrackets = right instanceof BinaryNode && (
+                ((BinaryNode) right).operator == operator && operator.requiresBracketsWithSelf
+                        || ((BinaryNode) right).operator.morePrecedenceThan(operator.precedence)
+        )
+                || right instanceof UnaryNode && ((UnaryNode) right).getOperator()
+                .morePrecedenceThan(operator.precedence)
+                || right instanceof TernaryNode;
+
+        if (leftNeedsBrackets) {
+            builder.append('(');
+        }
+        left.render(renderer, builder, currentIndentationMultiplier);
+        if (leftNeedsBrackets) {
+            builder.append(')');
+        }
+
+        builder.append(' ').append(operator.image).append(' ');
+
+        if (rightNeedsBrackets) {
+            builder.append('(');
+        }
+        right.render(renderer, builder, currentIndentationMultiplier);
+        if (rightNeedsBrackets) {
+            builder.append(')');
+        }
+    }
+
+    public enum Operator {
+        PLUS("+", 4, false),
+        MINUS("-", 4, true),
+        MULTIPLY("*", 3, false),
+        DIVIDE("/", 3, true),
+        MODULO("%", 3, false),
+        SHIFT_LEFT("<<", 5, false),
+        SHIFT_RIGHT(">>", 5, false),
+        SHIFT_RIGHT_UNSIGNED(">>>", 5, false),
+        LESS_THAN("<", 6, false),
+        LESS_THAN_OR_EQUAL("<=", 6, false),
+        GREATER_THAN(">", 6, false),
+        GREATER_THAN_OR_EQUAL(">=", 6, false),
+        EQUAL("=", 7, false),
+        NOT_EQUAL("!=", 7, false),
+        BITWISE_AND("&", 8, false),
+        BITWISE_XOR("^", 9, false),
+        BITWISE_OR("|", 10, false),
+        BOOLEAN_AND("&&", 11, false),
+        BOOLEAN_OR("||", 12, false);
+
+        private final String image;
+        private final int precedence;
+        private final boolean requiresBracketsWithSelf;
+
+        Operator(String image, int precedence, boolean requiresBracketsWithSelf) {
+            this.image = image;
+            this.precedence = precedence;
+            this.requiresBracketsWithSelf = requiresBracketsWithSelf;
+        }
+
+        public String getImage() {
+            return image;
+        }
+
+        public int getPrecedence() {
+            return precedence;
+        }
+
+        @Override
+        public String toString() {
+            return image;
+        }
+
+        public boolean morePrecedenceThan(int precedence) {
+            return this.precedence > precedence;
+        }
+
+        public boolean requiresBracketsWithSelf() {
+            return requiresBracketsWithSelf;
+        }
+    }
+}
+
+
+
+Node multiplicativeExpression#void :
+    unaryExpression 
+    (
+      (
         (
             <MultiplyOperator>
-            { o = BinaryNode.Operator.MULTIPLY; }
+            { CURRENT_NODE.setOperator(BinaryNode.Operator.MULTIPLY); }
             |
             <DivideOperator>
-            { o = BinaryNode.Operator.DIVIDE; }
+            { CURRENT_NODE.setOperator(BinaryNode.Operator.MINUS); }
             |
             <ModuloOperator>
-            { o = BinaryNode.Operator.MODULO; }
+            { CURRENT_NODE.setOperator(BinaryNode.Operator.MODULO);}
         )
-        a = unaryExpression()
-        { e = new BinaryNode(e, o, a); }
+        unaryExpression
+      ) #BinaryNode(3)
     )*
-    { return e; }
-}
+    { return peekNode();}
+;
 
-Node additiveExpression():
-{
-    Node e;
-    Node a;
-    BinaryNode.Operator o;
-}
-{
-    e = multiplicativeExpression()
+Node additiveExpression#void :
+    multiplicativeExpression
     (
+      (
         (
             <PlusOperator>
-            { o = BinaryNode.Operator.PLUS; }
+            { CURRENT_NODE.setOperator(BinaryNode.Operator.PLUS); }
             |
             <MinusOperator>
-            { o = BinaryNode.Operator.MINUS; }
+            { CURRENT_NODE.setOperator(BinaryNode.Operator.MINUS); }
         )
-        a = multiplicativeExpression()
-        { e = new BinaryNode(e, o, a); }
+        multiplicativeExpression
+      ) #BinaryNode(3)
     )*
-    { return e; }
-}
+    { return peekNode(); }
+;
 
-Node shiftExpression():
-{
-    Node e;
-    Node a;
-    BinaryNode.Operator o;
-}
-{
-    e = additiveExpression()
+Node shiftExpression#void :
+    additiveExpression
     (
+      (
         (
             <ShiftLeftOperator>
-            { o = BinaryNode.Operator.SHIFT_LEFT; }
+            { CURRENT_NODE.setOperator(BinaryNode.Operator.SHIFT_LEFT); }
             |
             <ShiftRightOperator>
-            { o = BinaryNode.Operator.SHIFT_RIGHT; }
+            { CURRENT_NODE.setOperator(BinaryNode.Operator.SHIFT_RIGHT); }
             |
             <ShiftRightUnsignedOperator>
-            { o = BinaryNode.Operator.SHIFT_RIGHT_UNSIGNED; }
+            { CURRENT_NODE.setOperator(BinaryNode.Operator.SHIFT_RIGHT_UNSIGNED); }
         )
-        a = additiveExpression()
-        { e = new BinaryNode(e, o, a); }
+        additiveExpression
+       ) #BinaryNode(3)
     )*
-    { return e; }
-}
+    { return peekNode(); }
+;
 
-Node relationalExpression():
-{
-    Node e;
-    Node a;
-    BinaryNode.Operator o;
-}
-{
-    e = shiftExpression()
+Node relationalExpression#void :
+    shiftExpression
     (
+      (
         (
             <LessThanOperator>
-            { o = BinaryNode.Operator.LESS_THAN; }
+            { CURRENT_NODE.setOperator(BinaryNode.Operator.LESS_THAN); }
             |
             <LessThanOrEqualOperator>
-            { o = BinaryNode.Operator.LESS_THAN_OR_EQUAL; }
+            { CURRENT_NODE.setOperator(BinaryNode.Operator.LESS_THAN_OR_EQUAL); }
             |
             <GreaterThanOperator>
-            { o = BinaryNode.Operator.GREATER_THAN; }
+            { CURRENT_NODE.setOperator(BinaryNode.Operator.GREATER_THAN); }
             |
             <GreaterThanOrEqualOperator>
-            { o = BinaryNode.Operator.GREATER_THAN_OR_EQUAL; }
+            { CURRENT_NODE.setOperator(BinaryNode.Operator.GREATER_THAN_OR_EQUAL); }
         )
-        a = shiftExpression()
-        { e = new BinaryNode(e, o, a); }
+        shiftExpression
+      )#BinaryNode(3)
     )*
-    { return e; }
-}
+    { return peekNode(); }
+;
 
-Node equalityExpression():
-{
-    Node e;
-    Node a;
-    BinaryNode.Operator o;
-}
-{
-    e = relationalExpression()
+Node equalityExpression#void : 
+    relationalExpression
     (
+      (
         (
             <EqualOperator>
-            { o = BinaryNode.Operator.EQUAL; }
+            { CURRENT_NODE.setOperator(BinaryNode.Operator.EQUAL); }
             |
             <NotEqualOperator>
-            { o = BinaryNode.Operator.NOT_EQUAL; }
+            { CURRENT_NODE.setOperator(BinaryNode.Operator.NOT_EQUAL); }
         )
-        a = relationalExpression()
-        { e = new BinaryNode(e, o, a); }
+        relationalExpression
+      )#BinaryNode(3)
     )*
-    { return e; }
-}
+    { return peekNode(); }
+;
 
-Node bitwiseAndExpression():
-{
-    Node e;
-    Node a;
-}
-{
-    e = equalityExpression()
+Node bitwiseAndExpression#void :
+    equalityExpression
     (
+      (
         <BitwiseAndOperator>
-        a = equalityExpression()
-        { e = new BinaryNode(e, BinaryNode.Operator.BITWISE_AND, a); }
+        equalityExpression
+      )#BinaryNode(3)
     )*
-    { return e; }
-}
+    { return peekNode(); }
+;
 
-Node bitwiseXorExpression():
-{
-    Node e;
-    Node a;
-}
-{
-    e = bitwiseAndExpression()
+Node bitwiseXorExpression#void :
+    bitwiseAndExpression
     (
+      (
         <BitwiseXorOperator>
-        a = bitwiseAndExpression()
-        { e = new BinaryNode(e, BinaryNode.Operator.BITWISE_XOR, a); }
+        {CURRENT_NODE.setOperator(BinaryNode.Operator.BITWISE_XOR);}
+        bitwiseAndExpression
+      )#BinaryNode(3)
     )*
-    { return e; }
-}
+    { return peekNode(); }
+;
 
-Node bitwiseOrExpression():
-{
-    Node e;
-    Node a;
-}
-{
-    e = bitwiseXorExpression()
+Node bitwiseOrExpression#void :
+    bitwiseXorExpression
     (
+      (
         <BitwiseOrOperator>
-        a = bitwiseXorExpression()
-        { e = new BinaryNode(e, BinaryNode.Operator.BITWISE_OR, a); }
+        {CURRENT_NODE.setOperator(BinaryNode.Operator.BITWISE_OR);}
+        bitwiseXorExpression
+      ) #BinaryNode(3)
     )*
-    { return e; }
-}
+    { return peekNode(); }
+;
 
-Node BooleanAndExpression():
-{
-    Node e;
-    Node a;
-}
-{
-    e = bitwiseOrExpression()
+Node BooleanAndExpression#BinaryNode(>1) :
+    bitwiseOrExpression
     (
+      (
         <BooleanAndOperator>
-        a = bitwiseOrExpression()
-        { e = new BinaryNode(e, BinaryNode.Operator.BOOLEAN_AND, a); }
+        {CURRENT_NODE.setOperator(BinaryNode.Operator.BOOLEAN_AND);}
+        bitwiseOrExpression
+      ) #BinaryNode(3)
     )*
-    { return e; }
-}
+    { return peekNode(); }
+;
 
-Node booleanOrExpression():
-{
-    Node e;
-    Node a;
-}
-{
-    e = BooleanAndExpression()
+Node booleanOrExpression#void :
+    BooleanAndExpression
     (
+      (
         <BooleanOrOperator>
-        a = BooleanAndExpression()
-        { e = new BinaryNode(e, BinaryNode.Operator.BOOLEAN_OR, a); }
+        {CURRENT_NODE.setOperator(BinaryNode.Operator.BOOLEAN_OR);}
+        BooleanAndExpression
+      )#BinaryNode(3)
     )*
-    { return e; }
+    { return peekNode(); }
+;
+
+INJECT TernaryNode :
+   import org.quiltmc.chasm.lang.api.eval.Resolver;
+   import org.quiltmc.chasm.lang.internal.render.Renderer;
+   import org.quiltmc.chasm.lang.api.eval.Evaluator;
+   import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+{
+    @Property Node condition, trueExp, falseExp;
+
+    public Node getTrue() {return trueExp;}
+    public void setTrue(Node exp) {this.trueExp = exp;}
+    public Node getFalse() {return falseExp;}
+    public void setFalse(Node exp) {this.falseExp = exp;}
+
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+        boolean wrapWithBraces = condition instanceof TernaryNode;
+        if (wrapWithBraces) {
+            builder.append('(');
+        }
+        condition.render(renderer, builder, currentIndentationMultiplier);
+        if (wrapWithBraces) {
+            builder.append(')');
+        }
+        builder.append(" ? ");
+        trueExp.render(renderer, builder, currentIndentationMultiplier);
+        builder.append(" : ");
+        falseExp.render(renderer, builder, currentIndentationMultiplier);
+    }
+
+    @Override
+    public void resolve(Resolver resolver) {
+        condition.resolve(resolver);
+        trueExp.resolve(resolver);
+        falseExp.resolve(resolver);
+    }
+
+    @Override
+    public Node evaluate(Evaluator evaluator) {
+        Node condition = this.condition.evaluate(evaluator);
+
+        if (!(condition instanceof BooleanNode)) {
+            throw new EvaluationException("Condition in ternary must evaluate to a boolean but found " + condition);
+        }
+
+        if (((BooleanNode) condition).getValue()) {
+            return trueExp.evaluate(evaluator);
+        } else {
+            return falseExp.evaluate(evaluator);
+        }
+    }
 }
 
 // Note: This disallows nesting ternaries without parentheses, which is probably a good thing
-Node ternaryExpression():
+Node ternaryExpression#TernaryNode(>1) :
 {
-    Node e;
-    Node t;
-    Node f;
+    Node n, t, f;
 }
-{
-    e = booleanOrExpression()
+    n = booleanOrExpression {CURRENT_NODE.setCondition(n);}
     (
         <TernaryOperator>
-        t = ternaryExpression()
+        t = ternaryExpression {CURRENT_NODE.setTrue(t);}
         <Colon>
-        f = ternaryExpression()
-        { return new TernaryNode(e, t, f); }
+        f = ternaryExpression {CURRENT_NODE.setFalse(f);}
+        { return CURRENT_NODE; }
     )?
-    { return e; }
+    { return n; }
+;
+
+INJECT LambdaNode :
+   import org.quiltmc.chasm.lang.api.eval.Resolver;
+   import org.quiltmc.chasm.lang.internal.render.Renderer;
+   import org.quiltmc.chasm.lang.api.eval.Evaluator;
+{
+    @Property String identifier;
+    @Property Node inner;
+
+    @Override
+    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+        builder.append(identifier);
+        builder.append(" -> ");
+        inner.render(renderer, builder, currentIndentationMultiplier);
+    }
+
+    @Override
+    public void resolve(Resolver resolver) {
+        resolver.enterLambda(this);
+        inner.resolve(resolver);
+        resolver.exitLambda();
+    }
+
+    @Override
+    public Node evaluate(Evaluator evaluator) {
+        return evaluator.createClosure(this);
+    }
 }
 
-Node lambdaExpression():
+Node lambdaExpression#LambdaNode :
 {
-    Token t;
-    Node e;
+    Node n;
 }
-{
-    t = <Identifier>
+    <Identifier> {CURRENT_NODE.setIdentifier(lastConsumedToken.getImage());}
     <LambdaOperator>
-    e = expression()
-    { return new LambdaNode(t.getImage(), e ); }
-}
+    =>||
+    n=expression {CURRENT_NODE.setInner(n);}
+    { return CURRENT_NODE;}
+;
 
-Node expression():
+Node expression :
 {
-    Node e;
+    Node n;
 }
-{
-    LOOKAHEAD(2)
-    e = lambdaExpression()
-    { return e; }
+    n = lambdaExpression
+    { return n; }
     |
-    e = ternaryExpression()
-    { return e; }
-}
+    n = ternaryExpression
+    { return n; }
+;
 
 // Tokens
-SKIP: {
+SKIP: 
     <Space: [" "] >
     |
     <Newline: ["\n"] >
-}
+;
 
 // Literal Tokens
-TOKEN: {
-    <NullLiteral: "null">
+TOKEN #LiteralNode : 
+    <NullLiteral: "null"> #NullNode
     |
-    <BooleanLiteral: "true" | "false">
+    <BooleanLiteral: "true" | "false"> #BooleanNode
     |
-    <DecIntegerLiteral: ("+" | "-")? (["0" - "9"])+ >
+    <DecIntegerLiteral: ("+" | "-")? (["0" - "9"])+ > #IntegerNode
     |
-    <HexIntegerLiteral: "0x" (["0" - "9", "a" - "f", "A"-"F"])+ >
+    <HexIntegerLiteral: "0x" (["0" - "9", "a" - "f", "A"-"F"])+ > #IntegerNode
     |
-    <BinIntegerLiteral: "0b" (["0" - "1"])+ >
+    <BinIntegerLiteral: "0b" (["0" - "1"])+ > #IntegerNode
     |
-    <FloatLiteral: ("+" | "-")? (["0" - "9"])+ "." (["0" - "9"])+ ("e" ("+" | "-")? (["0" - "9"])+)?>
+    <FloatLiteral: ("+" | "-")? (["0" - "9"])+ "." (["0" - "9"])+ ("e" ("+" | "-")? (["0" - "9"])+)?> #FloatNode
     |
     <#StringChar: ~["\""] | "\\\"">
     |
-    <StringLiteral: "\"" (<StringChar>)* "\"" >
+    <StringLiteral: "\"" (<StringChar>)* "\"" > #StringNode
     |
     <#Char: ~["'"] | "\\\'" >
     |
-    <CharLiteral: "'" <Char> "'" >
-}
+    <CharLiteral: "'" <Char> "'" > #IntegerNode
+;
 
 // Identifier
-TOKEN: {
+TOKEN: 
     <Identifier: ["_", "a" - "z", "A" - "Z"] (["_", "a" - "z", "A" - "Z", "0" - "9"])* >
-}
+;
 
 // Operators
-TOKEN : {
+TOKEN : 
     <PlusOperator: "+" >
     |
     <MinusOperator: "-" >
@@ -520,7 +1417,7 @@ TOKEN : {
     |
     <InvertOperator: "~" >
     |
-    <MultiplyOperator: "*" >
+    <MultiplyOperator: "*" > 
     |
     <DivideOperator: "/" >
     |
@@ -557,10 +1454,10 @@ TOKEN : {
     <TernaryOperator: "?" >
     |
     <LambdaOperator: "->" >
-}
+;
 
 // Punctuation
-TOKEN : {
+TOKEN : 
     <Dot: ".">
     |
     <Comma: "," >
@@ -578,4 +1475,4 @@ TOKEN : {
     <LeftBraces: "{" >
     |
     <RightBraces: "}" >
-}
+;

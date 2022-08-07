@@ -1,8 +1,9 @@
 package org.quiltmc.chasm.lang.api.eval;
 
 import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.ast.BaseNode;
 
-public abstract class FunctionNode extends Node {
+public abstract class FunctionNode extends BaseNode {
     public abstract Node apply(Evaluator evaluator, Node arg);
 
     @Override

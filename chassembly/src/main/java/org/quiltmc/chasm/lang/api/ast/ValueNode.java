@@ -1,11 +1,11 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import org.jetbrains.annotations.ApiStatus;
+//import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
-public abstract class ValueNode<T> extends Node {
+public abstract class ValueNode<T> extends BaseNode {
     private T value;
 
     public ValueNode(T value) {
@@ -35,12 +35,12 @@ public abstract class ValueNode<T> extends Node {
     }
 
     @Override
-    @ApiStatus.OverrideOnly
+//    @ApiStatus.OverrideOnly
     public void resolve(Resolver resolver) {
     }
 
     @Override
-    @ApiStatus.OverrideOnly
+//    @ApiStatus.OverrideOnly
     public Node evaluate(Evaluator evaluator) {
         return this;
     }
