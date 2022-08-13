@@ -1,0 +1,20 @@
+{
+    id: "add_field",
+    target_class: classes[0],
+    transformations: [
+        {
+            target: {
+                node: target_class.fields,
+                start: 0,
+                end: 0
+            },
+            apply: args -> [
+                {
+                    access: 1,
+                    name: "field2",
+                    descriptor: "I"
+                }
+            ]
+        }
+    ]
+}
