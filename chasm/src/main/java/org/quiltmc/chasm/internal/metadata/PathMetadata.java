@@ -5,9 +5,8 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
-import org.quiltmc.chasm.api.metadata.Metadata;
 
-public class PathMetadata implements Metadata, Iterable<PathMetadata.Entry> {
+public class PathMetadata implements Iterable<PathMetadata.Entry> {
     private final PathMetadata parent;
     private final Entry entry;
 

@@ -8,6 +8,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.ParseException;
+import org.quiltmc.chasm.lang.api.metadata.Metadata;
 import org.quiltmc.chasm.lang.internal.parse.Parser;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
@@ -16,12 +17,18 @@ import org.quiltmc.chasm.lang.internal.render.Renderer;
  * This class can be extended by an execution environment if it requires special behaviour for custom nodes.
  */
 public abstract class Node {
+    private final Metadata metadata = new Metadata();
+
     @ApiStatus.OverrideOnly
     public abstract void resolve(Resolver resolver);
 
     public abstract Node evaluate(Evaluator evaluator);
 
     public abstract void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier);
+
+    public Metadata getMetadata() {
+        return metadata;
+    }
 
     /**
      * Parse a given file into a {@link Node}.
