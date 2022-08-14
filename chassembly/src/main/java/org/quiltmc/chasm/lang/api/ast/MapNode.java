@@ -8,6 +8,7 @@ import java.util.Map;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
+import org.quiltmc.chasm.lang.internal.render.OperatorPriority;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class MapNode extends Node {
@@ -22,22 +23,29 @@ public class MapNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+    public void render(Renderer renderer, StringBuilder builder, int indentation, OperatorPriority minPriority) {
+        boolean needsBrackets = !OperatorPriority.ARGUMENT_PRIMARY.allowedFor(minPriority);
+        if (needsBrackets) {
+            builder.append('(');
+        }
         builder.append('{');
         List<Map.Entry<String, Node>> list = new LinkedList<>();
         entries.entrySet().forEach(list::add);
         for (int i = 0; i < list.size(); i++) {
-            renderer.indent(builder, currentIndentationMultiplier);
+            renderer.indent(builder, indentation);
             builder.append(list.get(i).getKey()).append(": ");
-            list.get(i).getValue().render(renderer, builder, currentIndentationMultiplier + 1);
+            list.get(i).getValue().render(renderer, builder, indentation + 1, OperatorPriority.ANY);
             if (i < entries.size() - 1 || renderer.hasTrailingCommas()) {
-                builder.append(", ");
+                builder.append(",");
             }
         }
         if (list.size() > 0) {
-            renderer.indent(builder, currentIndentationMultiplier - 1);
+            renderer.indent(builder, indentation - 1);
         }
         builder.append('}');
+        if (needsBrackets) {
+            builder.append(')');
+        }
     }
 
     @Override

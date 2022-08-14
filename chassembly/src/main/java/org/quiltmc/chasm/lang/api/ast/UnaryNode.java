@@ -4,6 +4,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+import org.quiltmc.chasm.lang.internal.render.OperatorPriority;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class UnaryNode extends Node {
@@ -32,19 +33,17 @@ public class UnaryNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
-        builder.append(operator.image);
-        boolean wrapWithBraces = inner instanceof BinaryNode && ((BinaryNode) inner).getOperator()
-                .morePrecedenceThan(operator.precedence)
-                // we don't have to do the funky requiresBracketsWithSelf here luckily
-                || inner instanceof UnaryNode && ((UnaryNode) inner).operator.morePrecedenceThan(operator.precedence)
-                || inner instanceof TernaryNode;
-
-        if (wrapWithBraces) {
+    public void render(Renderer renderer, StringBuilder builder, int indentation,
+                       OperatorPriority minPriority) {
+        boolean needsBrackets = !OperatorPriority.UNARY.allowedFor(minPriority);
+        if (needsBrackets) {
             builder.append('(');
         }
-        inner.render(renderer, builder, currentIndentationMultiplier);
-        if (wrapWithBraces) {
+
+        builder.append(operator.image);
+        inner.render(renderer, builder, indentation, OperatorPriority.UNARY);
+
+        if (needsBrackets) {
             builder.append(')');
         }
     }
@@ -104,34 +103,24 @@ public class UnaryNode extends Node {
     }
 
     public enum Operator {
-        PLUS("+", 2),
-        MINUS("-", 2),
-        NOT("!", 2),
-        INVERT("~", 2);
+        PLUS("+"),
+        MINUS("-"),
+        NOT("!"),
+        INVERT("~");
 
         private final String image;
-        private final int precedence;
 
-        Operator(String image, int precedence) {
+        Operator(String image) {
             this.image = image;
-            this.precedence = precedence;
         }
 
         public String getImage() {
             return image;
         }
 
-        public int getPrecedence() {
-            return precedence;
-        }
-
         @Override
         public String toString() {
             return image;
-        }
-
-        public boolean morePrecedenceThan(int precedence) {
-            return this.precedence > precedence;
         }
     }
 }

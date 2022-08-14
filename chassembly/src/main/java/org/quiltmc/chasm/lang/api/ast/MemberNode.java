@@ -6,6 +6,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+import org.quiltmc.chasm.lang.internal.render.OperatorPriority;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class MemberNode extends Node {
@@ -34,9 +35,16 @@ public class MemberNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
-        left.render(renderer, builder, currentIndentationMultiplier);
+    public void render(Renderer renderer, StringBuilder builder, int indentation, OperatorPriority minPriority) {
+        boolean needsBrackets = !OperatorPriority.ARGUMENT_PRIMARY.allowedFor(minPriority);
+        if (needsBrackets) {
+            builder.append('(');
+        }
+        left.render(renderer, builder, indentation, OperatorPriority.ARGUMENT_PRIMARY);
         builder.append(".").append(identifier);
+        if (needsBrackets) {
+            builder.append(')');
+        }
     }
 
     @Override

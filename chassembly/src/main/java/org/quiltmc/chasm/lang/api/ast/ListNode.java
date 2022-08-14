@@ -6,6 +6,7 @@ import java.util.List;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
+import org.quiltmc.chasm.lang.internal.render.OperatorPriority;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class ListNode extends Node {
@@ -42,14 +43,21 @@ public class ListNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
+    public void render(Renderer renderer, StringBuilder builder, int indentation, OperatorPriority minPriority) {
+        boolean needsBrackets = !OperatorPriority.ARGUMENT_PRIMARY.allowedFor(minPriority);
+        if (needsBrackets) {
+            builder.append('(');
+        }
         builder.append("[");
         for (int i = 0; i < entries.size(); i++) {
-            entries.get(i).render(renderer, builder, currentIndentationMultiplier + 1);
+            entries.get(i).render(renderer, builder, indentation + 1, OperatorPriority.ANY);
             if (i < entries.size() - 1 || renderer.hasTrailingCommas()) {
-                builder.append(',');
+                builder.append(", ");
             }
         }
         builder.append("]");
+        if (needsBrackets) {
+            builder.append(')');
+        }
     }
 }

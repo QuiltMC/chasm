@@ -4,6 +4,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+import org.quiltmc.chasm.lang.internal.render.OperatorPriority;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class TernaryNode extends Node {
@@ -34,19 +35,20 @@ public class TernaryNode extends Node {
     }
 
     @Override
-    public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
-        boolean wrapWithBraces = condition instanceof TernaryNode;
-        if (wrapWithBraces) {
+    public void render(Renderer renderer, StringBuilder builder, int indentation, OperatorPriority minPriority) {
+        boolean needsBrackets = !OperatorPriority.ANY.allowedFor(minPriority);
+        if (needsBrackets) {
             builder.append('(');
         }
-        condition.render(renderer, builder, currentIndentationMultiplier);
-        if (wrapWithBraces) {
+        condition.render(renderer, builder, indentation, OperatorPriority.ANY.inc());
+        builder.append(" ? ");
+        trueExp.render(renderer, builder, indentation, OperatorPriority.ANY);
+        builder.append(" : ");
+        falseExp.render(renderer, builder, indentation, OperatorPriority.ANY);
+        if (needsBrackets) {
             builder.append(')');
         }
-        builder.append(" ? ");
-        trueExp.render(renderer, builder, currentIndentationMultiplier);
-        builder.append(" : ");
-        falseExp.render(renderer, builder, currentIndentationMultiplier);
+
     }
 
     public Node getFalse() {
