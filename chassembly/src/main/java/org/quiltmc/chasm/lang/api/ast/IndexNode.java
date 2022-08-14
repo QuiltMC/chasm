@@ -55,7 +55,7 @@ public class IndexNode extends Node {
             List<Node> entries = ((ListNode) leftNode).getEntries();
 
             if (index < 0 || index >= entries.size()) {
-                return NullNode.INSTANCE;
+                return new NullNode();
             }
 
             return entries.get((int) index).evaluate(evaluator);
@@ -88,7 +88,7 @@ public class IndexNode extends Node {
             Map<String, Node> entries = ((MapNode) leftNode).getEntries();
 
             if (!entries.containsKey(key)) {
-                return NullNode.INSTANCE;
+                return new NullNode();
             }
 
             return entries.get(key).evaluate(evaluator);

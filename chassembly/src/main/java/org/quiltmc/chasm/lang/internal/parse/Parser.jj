@@ -26,6 +26,7 @@ import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.ast.ReferenceNode;
 import org.quiltmc.chasm.lang.api.ast.TernaryNode;
 import org.quiltmc.chasm.lang.api.ast.UnaryNode;
+import org.quiltmc.chasm.lang.internal.parse.SourceSpan;
 
 public class Parser {
 
@@ -49,37 +50,47 @@ Node file():
 
 Node literalExpression():
 {
+    Token start = getNextToken();
     Token t;
-    Node e;
+    Node n;
 }
 {
-    t = <NullLiteral>
-    { return NullNode.INSTANCE; }
-    |
-    t = <BooleanLiteral>
-    { return BooleanNode.from(Boolean.parseBoolean(t.getImage())); }
-    |
-    t = <DecIntegerLiteral>
-    { return new IntegerNode(Long.parseLong(t.getImage())); }
-    |
-    t = <HexIntegerLiteral>
-    { return new IntegerNode(Long.parseLong(t.getImage().substring(2), 16)); }
-    |
-    t = <BinIntegerLiteral>
-    { return new IntegerNode(Long.parseLong(t.getImage().substring(2), 2)); }
-    |
-    t = <FloatLiteral>
-    { return new FloatNode(Double.parseDouble(t.getImage())); }
-    |
-    t = <StringLiteral>
-    { return new StringNode(t.getImage().substring(1, t.getImage().length() - 1)); }
-    |
-    t = <CharLiteral>
-    { return new IntegerNode((long) t.getImage().charAt(1)); }
+    (
+        t = <NullLiteral>
+        { n = new NullNode(); }
+        |
+        t = <BooleanLiteral>
+        { n = BooleanNode.from(Boolean.parseBoolean(t.getImage())); }
+        |
+        t = <DecIntegerLiteral>
+        { n = new IntegerNode(Long.parseLong(t.getImage())); }
+        |
+        t = <HexIntegerLiteral>
+        { n = new IntegerNode(Long.parseLong(t.getImage().substring(2), 16)); }
+        |
+        t = <BinIntegerLiteral>
+        { n = new IntegerNode(Long.parseLong(t.getImage().substring(2), 2)); }
+        |
+        t = <FloatLiteral>
+        { n = new FloatNode(Double.parseDouble(t.getImage())); }
+        |
+        t = <StringLiteral>
+        { n = new StringNode(t.getImage().substring(1, t.getImage().length() - 1)); }
+        |
+        t = <CharLiteral>
+        { n = new IntegerNode((long) t.getImage().charAt(1)); }
+    )
+
+    {
+        SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+        n.getMetadata().put(SourceSpan.class, span);
+        return n;
+    }
 }
 
 Node referenceExpression():
 {
+    Token start = getNextToken();
     boolean g = false;
     Token t;
 }
@@ -89,7 +100,12 @@ Node referenceExpression():
         { g = true; }
     )?
     t = <Identifier>
-    { return new ReferenceNode(t.getImage(), g); }
+    {
+        Node n = new ReferenceNode(t.getImage(), g);
+        SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+        n.getMetadata().put(SourceSpan.class, span);
+        return n;
+    }
 }
 
 Node parenthesesExpression():
@@ -105,6 +121,7 @@ Node parenthesesExpression():
 
 Node listExpression():
 {
+    Token start = getNextToken();
     ArrayList<Node> entries = new ArrayList<>();
     Node e;
 }
@@ -123,11 +140,17 @@ Node listExpression():
             )?
         )?
     <RightBrackets>
-    { return new ListNode(entries); }
+    {
+        Node n = new ListNode(entries);
+        SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+        n.getMetadata().put(SourceSpan.class, span);
+        return n;
+    }
 }
 
 Node mapExpression():
 {
+    Token start = getNextToken();
     LinkedHashMap<String, Node> entries = new LinkedHashMap<>();
     Token t;
     Node e;
@@ -151,7 +174,12 @@ Node mapExpression():
             )?
         )?
     <RightBraces>
-    { return new MapNode(entries); }
+    {
+        Node n = new MapNode(entries);
+        SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+        n.getMetadata().put(SourceSpan.class, span);
+        return n;
+    }
 }
 
 Node primaryExpression():
@@ -175,6 +203,7 @@ Node primaryExpression():
 
 Node argumentExpression():
 {
+    Token start = getNextToken();
     Node e;
     Node a;
     Token t;
@@ -186,20 +215,32 @@ Node argumentExpression():
             <LeftParentheses>
             a = expression()
             <RightParentheses>
-            { e = new CallNode(e, a); }
+            {
+                e = new CallNode(e, a);
+                SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+                e.getMetadata().put(SourceSpan.class, span);
+            }
         )
         |
         (
             <LeftBrackets>
             a = expression()
             <RightBrackets>
-            { e = new IndexNode(e, a); }
+            {
+                e = new IndexNode(e, a);
+                SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+                e.getMetadata().put(SourceSpan.class, span);
+            }
         )
         |
         (
             <Dot>
             t = <Identifier>
-            { e = new MemberNode(e, t.getImage()); }
+            {
+                e = new MemberNode(e, t.getImage());
+                SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+                e.getMetadata().put(SourceSpan.class, span);
+            }
         )
     )*
     { return e; }
@@ -207,6 +248,7 @@ Node argumentExpression():
 
 Node unaryExpression():
 {
+    Token start = getNextToken();
     Node e;
     UnaryNode.Operator o = null;
 }
@@ -227,7 +269,10 @@ Node unaryExpression():
     e = argumentExpression()
     {
         if (o != null) {
-            return new UnaryNode(e, o);
+            Node n = new UnaryNode(e, o);
+            SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+            n.getMetadata().put(SourceSpan.class, span);
+            return n;
         } else {
             return e;
         }
@@ -236,6 +281,7 @@ Node unaryExpression():
 
 Node multiplicativeExpression():
 {
+    Token start = getNextToken();
     Node e;
     Node a;
     BinaryNode.Operator o;
@@ -254,13 +300,18 @@ Node multiplicativeExpression():
             { o = BinaryNode.Operator.MODULO; }
         )
         a = unaryExpression()
-        { e = new BinaryNode(e, o, a); }
+        {
+            e = new BinaryNode(e, o, a);
+            SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+            e.getMetadata().put(SourceSpan.class, span);
+        }
     )*
     { return e; }
 }
 
 Node additiveExpression():
 {
+    Token start = getNextToken();
     Node e;
     Node a;
     BinaryNode.Operator o;
@@ -276,13 +327,18 @@ Node additiveExpression():
             { o = BinaryNode.Operator.MINUS; }
         )
         a = multiplicativeExpression()
-        { e = new BinaryNode(e, o, a); }
+        {
+            e = new BinaryNode(e, o, a);
+            SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+            e.getMetadata().put(SourceSpan.class, span);
+        }
     )*
     { return e; }
 }
 
 Node shiftExpression():
 {
+    Token start = getNextToken();
     Node e;
     Node a;
     BinaryNode.Operator o;
@@ -301,13 +357,18 @@ Node shiftExpression():
             { o = BinaryNode.Operator.SHIFT_RIGHT_UNSIGNED; }
         )
         a = additiveExpression()
-        { e = new BinaryNode(e, o, a); }
+        {
+            e = new BinaryNode(e, o, a);
+            SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+            e.getMetadata().put(SourceSpan.class, span);
+        }
     )*
     { return e; }
 }
 
 Node relationalExpression():
 {
+    Token start = getNextToken();
     Node e;
     Node a;
     BinaryNode.Operator o;
@@ -329,13 +390,18 @@ Node relationalExpression():
             { o = BinaryNode.Operator.GREATER_THAN_OR_EQUAL; }
         )
         a = shiftExpression()
-        { e = new BinaryNode(e, o, a); }
+        {
+            e = new BinaryNode(e, o, a);
+            SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+            e.getMetadata().put(SourceSpan.class, span);
+        }
     )*
     { return e; }
 }
 
 Node equalityExpression():
 {
+    Token start = getNextToken();
     Node e;
     Node a;
     BinaryNode.Operator o;
@@ -351,13 +417,18 @@ Node equalityExpression():
             { o = BinaryNode.Operator.NOT_EQUAL; }
         )
         a = relationalExpression()
-        { e = new BinaryNode(e, o, a); }
+        {
+            e = new BinaryNode(e, o, a);
+            SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+            e.getMetadata().put(SourceSpan.class, span);
+        }
     )*
     { return e; }
 }
 
 Node bitwiseAndExpression():
 {
+    Token start = getNextToken();
     Node e;
     Node a;
 }
@@ -366,13 +437,18 @@ Node bitwiseAndExpression():
     (
         <BitwiseAndOperator>
         a = equalityExpression()
-        { e = new BinaryNode(e, BinaryNode.Operator.BITWISE_AND, a); }
+        {
+            e = new BinaryNode(e, BinaryNode.Operator.BITWISE_AND, a);
+            SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+            e.getMetadata().put(SourceSpan.class, span);
+        }
     )*
     { return e; }
 }
 
 Node bitwiseXorExpression():
 {
+    Token start = getNextToken();
     Node e;
     Node a;
 }
@@ -381,13 +457,18 @@ Node bitwiseXorExpression():
     (
         <BitwiseXorOperator>
         a = bitwiseAndExpression()
-        { e = new BinaryNode(e, BinaryNode.Operator.BITWISE_XOR, a); }
+        {
+            e = new BinaryNode(e, BinaryNode.Operator.BITWISE_XOR, a);
+            SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+            e.getMetadata().put(SourceSpan.class, span);
+        }
     )*
     { return e; }
 }
 
 Node bitwiseOrExpression():
 {
+    Token start = getNextToken();
     Node e;
     Node a;
 }
@@ -396,13 +477,18 @@ Node bitwiseOrExpression():
     (
         <BitwiseOrOperator>
         a = bitwiseXorExpression()
-        { e = new BinaryNode(e, BinaryNode.Operator.BITWISE_OR, a); }
+        {
+            e = new BinaryNode(e, BinaryNode.Operator.BITWISE_OR, a);
+            SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+            e.getMetadata().put(SourceSpan.class, span);
+        }
     )*
     { return e; }
 }
 
-Node BooleanAndExpression():
+Node booleanAndExpression():
 {
+    Token start = getNextToken();
     Node e;
     Node a;
 }
@@ -411,29 +497,38 @@ Node BooleanAndExpression():
     (
         <BooleanAndOperator>
         a = bitwiseOrExpression()
-        { e = new BinaryNode(e, BinaryNode.Operator.BOOLEAN_AND, a); }
+        {
+            e = new BinaryNode(e, BinaryNode.Operator.BOOLEAN_AND, a);
+            SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+            e.getMetadata().put(SourceSpan.class, span);
+        }
     )*
     { return e; }
 }
 
 Node booleanOrExpression():
 {
+    Token start = getNextToken();
     Node e;
     Node a;
 }
 {
-    e = BooleanAndExpression()
+    e = booleanAndExpression()
     (
         <BooleanOrOperator>
-        a = BooleanAndExpression()
-        { e = new BinaryNode(e, BinaryNode.Operator.BOOLEAN_OR, a); }
+        a = booleanAndExpression()
+        {
+            e = new BinaryNode(e, BinaryNode.Operator.BOOLEAN_OR, a);
+            SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+            e.getMetadata().put(SourceSpan.class, span);
+        }
     )*
     { return e; }
 }
 
-// Note: This disallows nesting ternaries without parentheses, which is probably a good thing
 Node ternaryExpression():
 {
+    Token start = getNextToken();
     Node e;
     Node t;
     Node f;
@@ -445,13 +540,18 @@ Node ternaryExpression():
         t = ternaryExpression()
         <Colon>
         f = ternaryExpression()
-        { return new TernaryNode(e, t, f); }
+        {
+            e = new TernaryNode(e, t, f);
+            SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+            e.getMetadata().put(SourceSpan.class, span);
+        }
     )?
     { return e; }
 }
 
 Node lambdaExpression():
 {
+    Token start = getNextToken();
     Token t;
     Node e;
 }
@@ -459,11 +559,17 @@ Node lambdaExpression():
     t = <Identifier>
     <LambdaOperator>
     e = expression()
-    { return new LambdaNode(t.getImage(), e ); }
+    {
+        Node n = new LambdaNode(t.getImage(), e );
+        SourceSpan span = SourceSpan.fromToken(start).join(SourceSpan.fromToken(lastConsumedToken));
+        n.getMetadata().put(SourceSpan.class, span);
+        return n;
+    }
 }
 
 Node expression():
 {
+    Token start = getNextToken();
     Node e;
 }
 {
