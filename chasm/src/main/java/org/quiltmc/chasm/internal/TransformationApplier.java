@@ -125,10 +125,10 @@ public class TransformationApplier {
 
         ListNode parentList = NodeUtils.asList(parentNode);
 
-        int change = parentList.getEntries().size() - replacement.getEntries().size();
         int start = sliceTarget.getStartIndex() / 2;
         int end = sliceTarget.getEndIndex() / 2;
         int length = end - start;
+        int change = replacement.getEntries().size() - length;
 
         // Move all slice indices affected by this
         List<Target> affectedTargets =
