@@ -11,7 +11,6 @@ import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.target.NodeTarget;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.target.Target;
-import org.quiltmc.chasm.internal.metadata.MetadataCache;
 import org.quiltmc.chasm.internal.metadata.OriginMetadata;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.tree.ClassNode;
@@ -21,14 +20,12 @@ import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 
 public class TransformationApplier {
-    private final MetadataCache metadataCache;
     private final ListNode classes;
     private final List<Transformation> transformations;
 
     private final Map<PathMetadata, List<Target>> affectedTargets;
 
-    public TransformationApplier(MetadataCache metadataCache, ListNode classes, List<Transformation> transformations) {
-        this.metadataCache = metadataCache;
+    public TransformationApplier(ListNode classes, List<Transformation> transformations) {
         this.classes = classes;
         this.transformations = transformations;
 
@@ -36,10 +33,12 @@ public class TransformationApplier {
     }
 
     private PathMetadata getPath(Target target) {
-        PathMetadata path = metadataCache.get(target.getTarget()).get(PathMetadata.class);
+        PathMetadata path = target.getTarget().getMetadata().get(PathMetadata.class);
+
         if (path == null) {
             throw new RuntimeException("Node in specified target is missing path information.");
         }
+
         return path;
     }
 
@@ -74,9 +73,8 @@ public class TransformationApplier {
         Node target = resolveNode(getPath(transformation.getTarget()), false);
         MapNode sources = resolveSources(transformation);
 
-        // TODO: Replace copies with immutability
         Node replacement = transformation.apply(target, sources.getEntries());
-        metadataCache.get(replacement).put(OriginMetadata.class, new OriginMetadata(transformation));
+        replacement.getMetadata().put(OriginMetadata.class, new OriginMetadata(transformation));
 
         replaceTarget(transformation.getTarget(), replacement);
     }

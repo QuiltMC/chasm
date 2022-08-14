@@ -18,15 +18,14 @@ import org.quiltmc.chasm.api.Lock;
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.target.Target;
-import org.quiltmc.chasm.internal.metadata.MetadataCache;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 
 public class TransformationSorter {
-    public static List<Transformation> sort(Collection<Transformation> transformations, MetadataCache metadata) {
+    public static List<Transformation> sort(Collection<Transformation> transformations) {
         List<TransformationInfo> infos = transformations.stream().map(TransformationInfo::new)
                 .collect(Collectors.toCollection(LinkedList::new));
 
-        computeDependencies(infos, metadata);
+        computeDependencies(infos);
 
         List<Transformation> sorted = new ArrayList<>(transformations.size());
 
@@ -74,7 +73,7 @@ public class TransformationSorter {
         return sorted;
     }
 
-    private static void computeDependencies(Collection<TransformationInfo> transformations, MetadataCache metadata) {
+    private static void computeDependencies(Collection<TransformationInfo> transformations) {
         // Group by Transformer ID
         Map<String, List<TransformationInfo>> byTransformerId = new HashMap<>();
         for (TransformationInfo info : transformations) {
@@ -101,12 +100,12 @@ public class TransformationSorter {
         List<TargetInfo> targets = new ArrayList<>();
         for (TransformationInfo transformation : transformations) {
             Target target = transformation.get().getTarget();
-            PathMetadata targetPath = metadata.get(target.getTarget()).get(PathMetadata.class);
+            PathMetadata targetPath = target.getTarget().getMetadata().get(PathMetadata.class);
             Objects.requireNonNull(targetPath);
             targets.add(new TargetInfo(transformation, target, TargetType.TARGET, targetPath));
 
             for (Target source : transformation.get().getSources().values()) {
-                PathMetadata sourcePath = metadata.get(target.getTarget()).get(PathMetadata.class);
+                PathMetadata sourcePath = target.getTarget().getMetadata().get(PathMetadata.class);
                 Objects.requireNonNull(sourcePath);
                 targets.add(new TargetInfo(transformation, source, TargetType.SOURCE, sourcePath));
             }
@@ -243,9 +242,6 @@ public class TransformationSorter {
             this.target = target;
             this.type = type;
             this.path = path;
-            if (path == null) {
-                System.out.println();
-            }
         }
 
         public PathMetadata getPath() {

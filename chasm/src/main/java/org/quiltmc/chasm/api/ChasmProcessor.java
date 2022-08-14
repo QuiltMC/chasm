@@ -11,7 +11,6 @@ import org.quiltmc.chasm.internal.TransformationApplier;
 import org.quiltmc.chasm.internal.TransformationSorter;
 import org.quiltmc.chasm.internal.TransformerSorter;
 import org.quiltmc.chasm.internal.asm.ChasmClassWriter;
-import org.quiltmc.chasm.internal.metadata.MetadataCache;
 import org.quiltmc.chasm.internal.tree.ClassNode;
 import org.quiltmc.chasm.internal.tree.reader.ClassNodeReader;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
@@ -30,8 +29,6 @@ public class ChasmProcessor {
 
     private final ListNode classes;
     private final List<Transformer> transformers = new ArrayList<>();
-
-    private final MetadataCache metadataCache = new MetadataCache();
 
     /**
      * Creates a new {@link ChasmProcessor} that uses the given {@link ClassInfoProvider}.
@@ -63,8 +60,8 @@ public class ChasmProcessor {
      */
     public void addClass(ClassData classData) {
         ClassReader classReader = new ClassReader(classData.getClassBytes());
-        ClassNode classNode = new ClassNode(classReader, classInfoProvider, metadataCache, classes.getEntries().size());
-        metadataCache.put(classNode, classData.getMetadataProvider());
+        ClassNode classNode = new ClassNode(classReader, classInfoProvider, classes.getEntries().size());
+        classNode.getMetadata().putAll(classData.getMetadata());
         classes.getEntries().add(classNode);
     }
 
@@ -99,10 +96,10 @@ public class ChasmProcessor {
             List<Transformation> transformations = applyTransformers(round, classes);
 
             LOGGER.info("Sorting {} transformations...", transformations.size());
-            List<Transformation> sorted = TransformationSorter.sort(transformations, metadataCache);
+            List<Transformation> sorted = TransformationSorter.sort(transformations);
 
             LOGGER.info("Applying transformations...");
-            TransformationApplier transformationApplier = new TransformationApplier(metadataCache, classes, sorted);
+            TransformationApplier transformationApplier = new TransformationApplier(classes, sorted);
             transformationApplier.applyAll();
         }
 
@@ -120,13 +117,13 @@ public class ChasmProcessor {
                 }
                 ClassWriter classWriter = new ClassWriter(0);
                 ((ClassNode) node).getClassReader().accept(classWriter, 0);
-                classData.add(new ClassData(classWriter.toByteArray(), metadataCache.get(classNode)));
+                classData.add(new ClassData(classWriter.toByteArray(), classNode.getMetadata()));
             } else {
                 // ModifiedClasses
                 ClassNodeReader chasmWriter = new ClassNodeReader(classNode);
                 ClassWriter classWriter = new ChasmClassWriter(classInfoProvider);
                 chasmWriter.accept(classWriter);
-                classData.add(new ClassData(classWriter.toByteArray(), metadataCache.get(classNode)));
+                classData.add(new ClassData(classWriter.toByteArray(), classNode.getMetadata()));
             }
         }
 
