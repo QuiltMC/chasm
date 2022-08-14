@@ -131,6 +131,7 @@ Node listExpression():
             e = expression()
             { entries.add(e); }
             (
+                LOOKAHEAD(2)
                 <Comma>
                 e = expression()
                 { entries.add(e); }
@@ -163,6 +164,7 @@ Node mapExpression():
             e = expression()
             { entries.put(t.getImage(), e); }
             (
+                LOOKAHEAD(2)
                 <Comma>
                 t = <Identifier>
                 <Colon>
