@@ -7,7 +7,6 @@ import java.util.Map;
 import org.objectweb.asm.ClassReader;
 import org.quiltmc.chasm.api.util.ClassInfoProvider;
 import org.quiltmc.chasm.internal.asm.visitor.ChasmClassVisitor;
-import org.quiltmc.chasm.internal.metadata.MetadataCache;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.internal.util.PathInitializer;
@@ -22,13 +21,13 @@ import org.quiltmc.chasm.lang.api.eval.Resolver;
 public class ClassNode extends MapNode {
     private final ClassReader reader;
 
-    public ClassNode(ClassReader reader, ClassInfoProvider classInfoProvider, MetadataCache metadataCache, int index) {
+    public ClassNode(ClassReader reader, ClassInfoProvider classInfoProvider, int index) {
         super(new LazyMap<>(getStaticEntries(reader),
-                () -> getLazyEntries(reader, classInfoProvider, metadataCache, index)));
+                () -> getLazyEntries(reader, classInfoProvider, index)));
         this.reader = reader;
 
         PathMetadata root = new PathMetadata(null, index);
-        PathInitializer.initialize(metadataCache, this, root);
+        PathInitializer.initialize(this, root);
     }
 
     // NOTE: Ensure parity with ChasmClassVisitor
@@ -57,7 +56,7 @@ public class ClassNode extends MapNode {
     }
 
     private static Map<String, Node> getLazyEntries(ClassReader reader, ClassInfoProvider classInfoProvider,
-                                                    MetadataCache metadataCache, int index) {
+                                                    int index) {
         ChasmClassVisitor visitor = new ChasmClassVisitor(classInfoProvider);
         reader.accept(visitor, 0);
         Map<String, Node> entries = visitor.getClassNode().getEntries();
@@ -65,7 +64,7 @@ public class ClassNode extends MapNode {
         PathMetadata root = new PathMetadata(null, index);
         for (Map.Entry<String, Node> entry : entries.entrySet()) {
             PathMetadata path = new PathMetadata(root, entry.getKey());
-            PathInitializer.initialize(metadataCache, entry.getValue(), path);
+            PathInitializer.initialize(entry.getValue(), path);
         }
 
         return entries;

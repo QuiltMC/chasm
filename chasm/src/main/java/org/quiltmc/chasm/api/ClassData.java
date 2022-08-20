@@ -1,28 +1,28 @@
 package org.quiltmc.chasm.api;
 
-import org.quiltmc.chasm.api.metadata.MetadataProvider;
+import org.quiltmc.chasm.lang.api.metadata.Metadata;
 
 /**
  * Represents the data of a class used for transforming.
  */
 public class ClassData {
     private final byte[] classBytes;
-    private final MetadataProvider metadataProvider;
+    private final Metadata metadata;
 
-    public ClassData(byte[] classBytes, MetadataProvider metadataProvider) {
+    public ClassData(byte[] classBytes, Metadata metadata) {
         this.classBytes = classBytes;
-        this.metadataProvider = metadataProvider;
+        this.metadata = metadata;
     }
 
     public ClassData(byte[] classBytes) {
-        this(classBytes, new MetadataProvider());
+        this(classBytes, new Metadata());
     }
 
     public byte[] getClassBytes() {
         return classBytes;
     }
 
-    public MetadataProvider getMetadataProvider() {
-        return metadataProvider;
+    public Metadata getMetadata() {
+        return metadata;
     }
 }
