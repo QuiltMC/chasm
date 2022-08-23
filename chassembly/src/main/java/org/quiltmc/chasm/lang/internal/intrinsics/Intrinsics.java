@@ -12,7 +12,10 @@ public class Intrinsics {
         register(new CharsFunction());
         register(new JoinFunction());
         register(new LenFunction());
+        register(new EntriesFunction());
+        register(new FromEntriesFunction());
         register(new MapFunction());
+        register(new ReduceFunction());
         register(new FlattenFunction());
     }
 

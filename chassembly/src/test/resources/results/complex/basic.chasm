@@ -22,6 +22,11 @@
     list_concat: [1,2,1,"two",false,{
             name: "object", 
         },null,], 
+    map_concat: {
+        a: "b", 
+        b: "c", 
+        c: "d", 
+    }, 
     filter_source: [{
             name: "hi", 
         },{
