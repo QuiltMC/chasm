@@ -23,14 +23,14 @@ public final class other/ExampleClass$ExampleRecord extends java/lang/Record {
     // parameter  first
     // parameter  second
    L0
-    LINENUMBER 71 L0
+    LINENUMBER 65 L0
     ALOAD 0
     INVOKESPECIAL java/lang/Record.<init> ()V
     ALOAD 0
-    ALOAD 1
+    ALOAD 3
     PUTFIELD other/ExampleClass$ExampleRecord.first : Ljava/lang/Integer;
     ALOAD 0
-    ALOAD 2
+    ALOAD 4
     PUTFIELD other/ExampleClass$ExampleRecord.second : Ljava/lang/String;
     RETURN
    L1
@@ -38,12 +38,12 @@ public final class other/ExampleClass$ExampleRecord extends java/lang/Record {
     LOCALVARIABLE first Ljava/lang/Integer; L0 L1 1
     LOCALVARIABLE second Ljava/lang/String; L0 L1 2
     MAXSTACK = 2
-    MAXLOCALS = 3
+    MAXLOCALS = 5
 
   // access flags 0x11
   public final toString()Ljava/lang/String;
    L0
-    LINENUMBER 71 L0
+    LINENUMBER 65 L0
     ALOAD 0
     INVOKEDYNAMIC toString(Lother/ExampleClass$ExampleRecord;)Ljava/lang/String; [
       // handle kind 0x6 : INVOKESTATIC
@@ -65,7 +65,7 @@ public final class other/ExampleClass$ExampleRecord extends java/lang/Record {
   // access flags 0x11
   public final hashCode()I
    L0
-    LINENUMBER 71 L0
+    LINENUMBER 65 L0
     ALOAD 0
     INVOKEDYNAMIC hashCode(Lother/ExampleClass$ExampleRecord;)I [
       // handle kind 0x6 : INVOKESTATIC
@@ -86,8 +86,9 @@ public final class other/ExampleClass$ExampleRecord extends java/lang/Record {
 
   // access flags 0x11
   public final equals(Ljava/lang/Object;)Z
+    // parameter  P0
    L0
-    LINENUMBER 71 L0
+    LINENUMBER 65 L0
     ALOAD 0
     ALOAD 1
     INVOKEDYNAMIC equals(Lother/ExampleClass$ExampleRecord;Ljava/lang/Object;)Z [
@@ -111,7 +112,7 @@ public final class other/ExampleClass$ExampleRecord extends java/lang/Record {
   // access flags 0x1
   public first()Ljava/lang/Integer;
    L0
-    LINENUMBER 71 L0
+    LINENUMBER 65 L0
     ALOAD 0
     GETFIELD other/ExampleClass$ExampleRecord.first : Ljava/lang/Integer;
     ARETURN
@@ -123,7 +124,7 @@ public final class other/ExampleClass$ExampleRecord extends java/lang/Record {
   // access flags 0x1
   public second()Ljava/lang/String;
    L0
-    LINENUMBER 71 L0
+    LINENUMBER 65 L0
     ALOAD 0
     GETFIELD other/ExampleClass$ExampleRecord.second : Ljava/lang/String;
     ARETURN

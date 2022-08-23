@@ -1,0 +1,20 @@
+// class version 61.0 (61)
+// access flags 0x2601
+public abstract @interface other/ExampleAnnotation implements java/lang/annotation/Annotation {
+
+  // compiled from: ExampleAnnotation.java
+
+  @Ljava/lang/annotation/Retention;(value=Ljava/lang/annotation/RetentionPolicy;.RUNTIME)
+
+  // access flags 0x401
+  public abstract value()Ljava/lang/String;
+    default="Example"
+
+  // access flags 0x401
+  public abstract list()[Ljava/lang/String;
+    default={"First", "Second"}
+
+  // access flags 0x401
+  public abstract nested()Lother/SimpleAnnotation;
+    default=@Lother/SimpleAnnotation;(value="Nested")
+}

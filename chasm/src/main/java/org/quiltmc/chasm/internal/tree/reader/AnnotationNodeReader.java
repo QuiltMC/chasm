@@ -22,7 +22,7 @@ public class AnnotationNodeReader {
             AnnotationVisitor arrayVisitor = visitor.visitArray(name);
 
             for (Node entry : NodeUtils.asList(node).getEntries()) {
-                arrayVisitor.visit(null, entry);
+                visitAnnotationValue(arrayVisitor, null, entry);
             }
             arrayVisitor.visitEnd();
         } else if (node instanceof MapNode) {

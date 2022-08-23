@@ -3,19 +3,18 @@
 public abstract class other/ExampleClass {
 
   // compiled from: ExampleClass.java
+
+  @Lother/ExampleAnnotation;(value="Hi", list={"First", "Second", "Third"}, nested=@Lother/SimpleAnnotation;(value="Inner"))
   NESTMEMBER other/ExampleClass$ExampleRecord
-  NESTMEMBER other/ExampleClass$ExampleAnnotation
   // access flags 0x19
   public final static INNERCLASS other/ExampleClass$ExampleRecord other/ExampleClass ExampleRecord
-  // access flags 0x2608
-  static abstract INNERCLASS other/ExampleClass$ExampleAnnotation other/ExampleClass ExampleAnnotation
   // access flags 0x19
   public final static INNERCLASS java/lang/invoke/MethodHandles$Lookup java/lang/invoke/MethodHandles Lookup
 
   // access flags 0x1
   public <init>()V
    L0
-    LINENUMBER 8 L0
+    LINENUMBER 7 L0
     ALOAD 0
     INVOKESPECIAL java/lang/Object.<init> ()V
     RETURN
@@ -28,25 +27,25 @@ public abstract class other/ExampleClass {
   public static publicStaticMethod()V
     TRYCATCHBLOCK L0 L1 L2 java/lang/Exception
    L3
-    LINENUMBER 10 L3
+    LINENUMBER 9 L3
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     LDC "Hello Chasm!"
     INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/String;)V
    L4
-    LINENUMBER 11 L4
+    LINENUMBER 10 L4
     ICONST_5
     ISTORE 0
    L0
-    LINENUMBER 13 L0
+    LINENUMBER 12 L0
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     LDC "5 = 5"
     INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/String;)V
    L5
-    LINENUMBER 14 L5
+    LINENUMBER 13 L5
     ICONST_3
     ISTORE 1
    L6
-    LINENUMBER 15 L6
+    LINENUMBER 14 L6
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 0
     ILOAD 1
@@ -61,47 +60,47 @@ public abstract class other/ExampleClass {
     ]
     INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/String;)V
    L1
-    LINENUMBER 19 L1
+    LINENUMBER 18 L1
     GOTO L7
    L2
-    LINENUMBER 16 L2
+    LINENUMBER 15 L2
    FRAME FULL [I] [java/lang/Exception]
-    ASTORE 1
+    ASTORE 2
    L8
-    LINENUMBER 17 L8
-    ALOAD 1
+    LINENUMBER 16 L8
+    ALOAD 2
     INVOKEVIRTUAL java/lang/Exception.printStackTrace ()V
    L9
-    LINENUMBER 18 L9
+    LINENUMBER 17 L9
     ICONST_0
     ISTORE 0
    L7
-    LINENUMBER 21 L7
+    LINENUMBER 20 L7
    FRAME SAME
     INVOKESTATIC other/ExampleClass.publicStaticMethod ()V
    L10
-    LINENUMBER 23 L10
+    LINENUMBER 22 L10
     ILOAD 0
     LOOKUPSWITCH
       5: L11
       default: L12
    L11
-    LINENUMBER 25 L11
+    LINENUMBER 24 L11
    FRAME SAME
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     LDC "Still 5"
     INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/String;)V
    L13
-    LINENUMBER 26 L13
+    LINENUMBER 25 L13
     GOTO L14
    L12
-    LINENUMBER 28 L12
+    LINENUMBER 27 L12
    FRAME SAME
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     LDC "No longer 5"
     INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/String;)V
    L14
-    LINENUMBER 30 L14
+    LINENUMBER 29 L14
    FRAME SAME
     RETURN
    L15
@@ -109,12 +108,12 @@ public abstract class other/ExampleClass {
     LOCALVARIABLE e Ljava/lang/Exception; L8 L7 1
     LOCALVARIABLE five I L0 L15 0
     MAXSTACK = 5
-    MAXLOCALS = 2
+    MAXLOCALS = 3
 
   // access flags 0x9
   public static testSwitch()Ljava/lang/String;
    L0
-    LINENUMBER 33 L0
+    LINENUMBER 32 L0
     INVOKESTATIC java/lang/Math.random ()D
     LDC 100.0
     DMUL
@@ -124,12 +123,12 @@ public abstract class other/ExampleClass {
       10: L1
       default: L2
    L1
-    LINENUMBER 35 L1
+    LINENUMBER 34 L1
    FRAME SAME
     LDC "Test"
     ASTORE 0
    L3
-    LINENUMBER 36 L3
+    LINENUMBER 35 L3
     ALOAD 0
     ASTORE 1
     ICONST_M1
@@ -154,12 +153,12 @@ public abstract class other/ExampleClass {
       0: L6
       default: L7
    L6
-    LINENUMBER 37 L6
+    LINENUMBER 36 L6
    FRAME SAME
     LDC "NotTest"
     GOTO L8
    L7
-    LINENUMBER 38 L7
+    LINENUMBER 37 L7
    FRAME SAME
     NEW java/lang/IllegalStateException
     DUP
@@ -167,14 +166,14 @@ public abstract class other/ExampleClass {
     INVOKESPECIAL java/lang/IllegalStateException.<init> (Ljava/lang/String;)V
     ATHROW
    L8
-   FRAME FULL [java/lang/String] [java/lang/String]
+   FRAME SAME1 java/lang/String
     GOTO L9
    L2
-    LINENUMBER 41 L2
-   FRAME CHOP 1
+    LINENUMBER 40 L2
+   FRAME CHOP 3
     LDC "Not 10"
    L9
-    LINENUMBER 33 L9
+    LINENUMBER 32 L9
    FRAME SAME1 java/lang/String
     ARETURN
     LOCALVARIABLE nested Ljava/lang/String; L3 L2 0
@@ -184,7 +183,7 @@ public abstract class other/ExampleClass {
   // access flags 0x9
   public static testGenerics()I throws java/util/concurrent/ExecutionException java/lang/InterruptedException 
    L0
-    LINENUMBER 46 L0
+    LINENUMBER 45 L0
     INVOKEDYNAMIC get()Ljava/util/function/Supplier; [
       // handle kind 0x6 : INVOKESTATIC
       java/lang/invoke/LambdaMetafactory.metafactory(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
@@ -205,12 +204,12 @@ public abstract class other/ExampleClass {
       (Ljava/lang/Integer;)Ljava/lang/String;
     ]
    L1
-    LINENUMBER 47 L1
+    LINENUMBER 46 L1
     INVOKEVIRTUAL java/util/concurrent/CompletableFuture.thenApply (Ljava/util/function/Function;)Ljava/util/concurrent/CompletableFuture;
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     DUP
    L2
-    LINENUMBER 48 L2
+    LINENUMBER 47 L2
     INVOKESTATIC java/util/Objects.requireNonNull (Ljava/lang/Object;)Ljava/lang/Object;
     POP
     INVOKEDYNAMIC accept(Ljava/io/PrintStream;)Ljava/util/function/Consumer; [
@@ -233,49 +232,52 @@ public abstract class other/ExampleClass {
       (Ljava/lang/Void;)Ljava/lang/Integer;
     ]
    L3
-    LINENUMBER 49 L3
+    LINENUMBER 48 L3
     INVOKEVIRTUAL java/util/concurrent/CompletableFuture.thenApply (Ljava/util/function/Function;)Ljava/util/concurrent/CompletableFuture;
    L4
-    LINENUMBER 50 L4
+    LINENUMBER 49 L4
     INVOKEVIRTUAL java/util/concurrent/CompletableFuture.get ()Ljava/lang/Object;
     CHECKCAST java/lang/Integer
     INVOKEVIRTUAL java/lang/Integer.intValue ()I
     ISTORE 0
    L5
-    LINENUMBER 52 L5
+    LINENUMBER 51 L5
     ILOAD 0
     LOOKUPSWITCH
       7: L6
       default: L7
    L6
-    LINENUMBER 54 L6
+    LINENUMBER 53 L6
    FRAME APPEND [I]
     BIPUSH 10
     ISTORE 0
    L7
-    LINENUMBER 57 L7
+    LINENUMBER 56 L7
    FRAME SAME
     BIPUSH 7
-    ISTORE 0
+    ISTORE 1
    L8
-    LINENUMBER 60 L8
-    ILOAD 0
+    LINENUMBER 59 L8
+    ILOAD 1
     IRETURN
    L9
     LOCALVARIABLE output I L5 L9 0
     MAXSTACK = 3
-    MAXLOCALS = 1
+    MAXLOCALS = 2
 
   // access flags 0x401
   public abstract annotationTest(Ljava/lang/String;Ljava/lang/String;)V
-    // annotable parameter count: 2 (visible)
-    @Lother/ExampleClass$ExampleAnnotation;(value="first") // parameter 0
-    @Lother/ExampleClass$ExampleAnnotation;(value="second") // parameter 1
+    // parameter  P0
+    // parameter  P1
+    // annotable parameter count: 2 (invisible)
+    @Lother/SimpleAnnotation;(value="first") // invisible, parameter 0
+    @Lother/SimpleAnnotation;(value="second") // invisible, parameter 1
 
   // access flags 0x100A
   private static synthetic lambda$testGenerics$2(Ljava/lang/Void;)Ljava/lang/Integer;
+    // parameter  P0
    L0
-    LINENUMBER 49 L0
+    LINENUMBER 48 L0
     BIPUSH 7
     INVOKESTATIC java/lang/Integer.valueOf (I)Ljava/lang/Integer;
     ARETURN
@@ -286,8 +288,9 @@ public abstract class other/ExampleClass {
 
   // access flags 0x100A
   private static synthetic lambda$testGenerics$1(Ljava/lang/Integer;)Ljava/lang/String;
+    // parameter  P0
    L0
-    LINENUMBER 47 L0
+    LINENUMBER 46 L0
     ALOAD 0
     INVOKEVIRTUAL java/lang/Integer.intValue ()I
     INVOKESTATIC java/lang/Integer.toString (I)Ljava/lang/String;
@@ -300,7 +303,7 @@ public abstract class other/ExampleClass {
   // access flags 0x100A
   private static synthetic lambda$testGenerics$0()Ljava/lang/Integer;
    L0
-    LINENUMBER 46 L0
+    LINENUMBER 45 L0
     ICONST_5
     INVOKESTATIC java/lang/Integer.valueOf (I)Ljava/lang/Integer;
     ARETURN

@@ -1,10 +1,9 @@
 package other;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+@ExampleAnnotation(value = "Hi", list = { "First", "Second", "Third" }, nested = @SimpleAnnotation("Inner"))
 public abstract class ExampleClass {
     public static void publicStaticMethod() {
         System.out.println("Hello Chasm!");
@@ -60,13 +59,8 @@ public abstract class ExampleClass {
         return output;
     }
 
-    public abstract void annotationTest(@ExampleAnnotation("first") String first,
-                                        @ExampleAnnotation("second") String second);
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface ExampleAnnotation {
-        String value();
-    }
+    public abstract void annotationTest(@SimpleAnnotation("first") String first,
+                                        @SimpleAnnotation("second") String second);
 
     public static record ExampleRecord(Integer first, String second) {
 
