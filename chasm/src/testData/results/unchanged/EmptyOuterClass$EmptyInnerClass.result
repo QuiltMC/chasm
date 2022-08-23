@@ -12,6 +12,7 @@ class empty/EmptyOuterClass$EmptyInnerClass {
 
   // access flags 0x0
   <init>(Lempty/EmptyOuterClass;)V
+    // parameter  P0
    L0
     LINENUMBER 7 L0
     ALOAD 0

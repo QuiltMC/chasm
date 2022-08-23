@@ -7,20 +7,20 @@ public class UnchangedTests extends TestsBase {
     @Override
     protected void registerAll() {
         // Empty classes
-        register("empty/EmptyClass", "unchanged/EmptyClass");
-        register("empty/EmptyInterface", "unchanged/EmptyInterface");
-        register("empty/EmptyEnum", "unchanged/EmptyEnum");
-        register("empty/EmptyAnnotation", "unchanged/EmptyAnnotation");
-        register("empty/EmptyRecord", "unchanged/EmptyRecord");
-        register("empty/EmptyOuterClass", "unchanged/EmptyOuterClass");
-        register("empty/EmptyOuterClass$EmptyStaticNestedClass", "unchanged/EmptyOuterClass$EmptyStaticNestedClass");
-        register("empty/EmptyOuterClass$EmptyInnerClass", "unchanged/EmptyOuterClass$EmptyInnerClass");
-        register("empty/EmptySealedClass", "unchanged/EmptySealedClass");
-        register("empty/EmptySealedExtendsClass", "unchanged/EmptySealedExtendsClass");
+        register("empty/EmptyClass", "unchanged/EmptyClass", "touch");
+        register("empty/EmptyInterface", "unchanged/EmptyInterface", "touch");
+        register("empty/EmptyEnum", "unchanged/EmptyEnum", "touch");
+        register("empty/EmptyAnnotation", "unchanged/EmptyAnnotation", "touch");
+        register("empty/EmptyRecord", "unchanged/EmptyRecord", "touch");
+        register("empty/EmptyOuterClass", "unchanged/EmptyOuterClass", "touch");
+        register("empty/EmptyOuterClass$EmptyStaticNestedClass", "unchanged/EmptyOuterClass$EmptyStaticNestedClass", "touch");
+        register("empty/EmptyOuterClass$EmptyInnerClass", "unchanged/EmptyOuterClass$EmptyInnerClass", "touch");
+        register("empty/EmptySealedClass", "unchanged/EmptySealedClass", "touch");
+        register("empty/EmptySealedExtendsClass", "unchanged/EmptySealedExtendsClass", "touch");
 
-        register("other/ExampleClass", "unchanged/ExampleClass");
-        register("other/ExampleClass$ExampleAnnotation", "unchanged/ExampleClass$ExampleAnnotation");
-        register("other/ExampleClass$ExampleRecord", "unchanged/ExampleClass$ExampleRecord");
-        register("other/ExampleEnum", "unchanged/ExampleEnum");
+        register("other/ExampleClass", "unchanged/ExampleClass", "touch");
+        register("other/ExampleAnnotation", "unchanged/ExampleAnnotation", "touch");
+        register("other/ExampleClass$ExampleRecord", "unchanged/ExampleClass$ExampleRecord", "touch");
+        register("other/ExampleEnum", "unchanged/ExampleEnum", "touch");
     }
 }
