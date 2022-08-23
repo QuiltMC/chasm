@@ -5,9 +5,9 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExampleAnnotation {
-    String value();
+    String value() default "Example";
 
-    String[] list();
+    String[] list() default { "First", "Second"};
 
-    SimpleAnnotation nested();
+    SimpleAnnotation nested() default @SimpleAnnotation("Nested");
 }

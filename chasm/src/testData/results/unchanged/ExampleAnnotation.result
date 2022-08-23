@@ -8,10 +8,13 @@ public abstract @interface other/ExampleAnnotation implements java/lang/annotati
 
   // access flags 0x401
   public abstract value()Ljava/lang/String;
+    default="Example"
 
   // access flags 0x401
   public abstract list()[Ljava/lang/String;
+    default={"First", "Second"}
 
   // access flags 0x401
   public abstract nested()Lother/SimpleAnnotation;
+    default=@Lother/SimpleAnnotation;(value="Nested")
 }

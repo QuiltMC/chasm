@@ -142,10 +142,8 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
-        MapNode annotationDefault = new MapNode(new LinkedHashMap<>());
         ListNode values = new ListNode(new ArrayList<>());
-        methodNode.getEntries().put(NodeConstants.ANNOTATION_DEFAULT, annotationDefault);
-        methodNode.getEntries().put(NodeConstants.VALUES, values);
+        methodNode.getEntries().put(NodeConstants.ANNOTATION_DEFAULT, values);
 
         return new ChasmAnnotationVisitor(api, values, super.visitAnnotationDefault());
     }

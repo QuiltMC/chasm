@@ -4,7 +4,7 @@ public abstract class other/ExampleClass {
 
   // compiled from: ExampleClass.java
 
-  @Lother/ExampleAnnotation;(value="Hi", list={"First", "Second"}, nested=@Lother/SimpleAnnotation;(value="Inner"))
+  @Lother/ExampleAnnotation;(value="Hi", list={"First", "Second", "Third"}, nested=@Lother/SimpleAnnotation;(value="Inner"))
   NESTMEMBER other/ExampleClass$ExampleRecord
   // access flags 0x19
   public final static INNERCLASS other/ExampleClass$ExampleRecord other/ExampleClass ExampleRecord

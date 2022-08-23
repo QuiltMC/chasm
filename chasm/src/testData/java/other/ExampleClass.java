@@ -3,7 +3,7 @@ package other;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-@ExampleAnnotation(value = "Hi", list = { "First", "Second" }, nested = @SimpleAnnotation("Inner"))
+@ExampleAnnotation(value = "Hi", list = { "First", "Second", "Third" }, nested = @SimpleAnnotation("Inner"))
 public abstract class ExampleClass {
     public static void publicStaticMethod() {
         System.out.println("Hello Chasm!");
