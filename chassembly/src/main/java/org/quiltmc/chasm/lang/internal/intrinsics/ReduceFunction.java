@@ -26,7 +26,7 @@ public class ReduceFunction extends IntrinsicFunction {
 
                     return ((FunctionNode) function).apply(evaluator, new MapNode(funcArgs));
                 }).orElseThrow(() -> new EvaluationException(
-                        "Built-in function \"reduce\" failed to reduce " + arg
+                        "Can't reduce empty list: " + list
                 ));
             }
         }
