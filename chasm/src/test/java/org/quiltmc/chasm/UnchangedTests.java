@@ -13,7 +13,8 @@ public class UnchangedTests extends TestsBase {
         register("empty/EmptyAnnotation", "unchanged/EmptyAnnotation", "touch");
         register("empty/EmptyRecord", "unchanged/EmptyRecord", "touch");
         register("empty/EmptyOuterClass", "unchanged/EmptyOuterClass", "touch");
-        register("empty/EmptyOuterClass$EmptyStaticNestedClass", "unchanged/EmptyOuterClass$EmptyStaticNestedClass", "touch");
+        register("empty/EmptyOuterClass$EmptyStaticNestedClass", "unchanged/EmptyOuterClass$EmptyStaticNestedClass",
+                "touch");
         register("empty/EmptyOuterClass$EmptyInnerClass", "unchanged/EmptyOuterClass$EmptyInnerClass", "touch");
         register("empty/EmptySealedClass", "unchanged/EmptySealedClass", "touch");
         register("empty/EmptySealedExtendsClass", "unchanged/EmptySealedExtendsClass", "touch");
