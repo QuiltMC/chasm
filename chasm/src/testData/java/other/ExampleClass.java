@@ -5,8 +5,23 @@ import java.util.concurrent.ExecutionException;
 
 @ExampleAnnotation(value = "Hi", list = { "First", "Second", "Third" }, nested = @SimpleAnnotation("Inner"))
 public abstract class ExampleClass {
+    public float publicField = 2.5f;
+    public final int publicFinalField = 1;
+
+    @SimpleAnnotation("This is a Field")
+    private final boolean annotatedPrivateFinalField = true;
+
+    public static double publicStaticField = 1.2d;
+    public static final char PUBLIC_STATIC_FINAL_FIELD = 'x';
+
+    public void instanceMethod() {
+        for (int i = 0; i < this.publicFinalField; i++) {
+            System.out.println("Hello Chasm!");
+        }
+    }
+
     public static void publicStaticMethod() {
-        System.out.println("Hello Chasm!");
+        System.out.println("Static Hello Chasm!");
         int five = 5;
         try {
             System.out.println("5 = " + 5);
