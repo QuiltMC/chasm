@@ -287,6 +287,10 @@ public class BinaryNode extends Node {
             }
             break;
             case EQUAL: {
+                if (left instanceof NullNode ^ right instanceof NullNode) {
+                    return BooleanNode.FALSE;
+                }
+
                 if (left instanceof ValueNode && right instanceof ValueNode) {
                     return BooleanNode.from(
                             Objects.equals(((ValueNode<?>) left).getValue(), ((ValueNode<?>) right).getValue())
@@ -295,6 +299,10 @@ public class BinaryNode extends Node {
             }
             break;
             case NOT_EQUAL: {
+                if (left instanceof NullNode ^ right instanceof NullNode) {
+                    return BooleanNode.TRUE;
+                }
+
                 if (left instanceof ValueNode && right instanceof ValueNode) {
                     return BooleanNode.from(
                             !Objects.equals(((ValueNode<?>) left).getValue(), ((ValueNode<?>) right).getValue())
