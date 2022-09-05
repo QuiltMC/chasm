@@ -1,23 +1,25 @@
 package org.quiltmc.chasm.api.util;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Provides the super class of named classes using the provided {@link ClassLoader}.
  *
- * <p>A {@link ClassInfoProvider} implemented using the provided {@code ClassLoader},
+ * <p>A {@link Context} implemented using the provided {@code ClassLoader},
  * as well as a parent {@code SuperClassProvider} to query when the provided {@code ClassLoader} fails to load a class.
  */
-public class ClassLoaderClassInfoProvider implements ClassInfoProvider {
-    private final ClassInfoProvider parent;
+public class ClassLoaderContext implements Context {
+    private final Context parent;
     private final ClassLoader classLoader;
 
     /**
-     * Constructs a {@link ClassLoaderClassInfoProvider} using a {@link ClassInfoProvider} parent and a
+     * Constructs a {@link ClassLoaderContext} using a {@link Context} parent and a
      * {@link ClassLoader}.
      *
      * @param parent The {@code ClassInfoProvider} to query for classes not found in the given {@code ClassLoader}.
      * @param classLoader The {@code ClassLoader} with which to try to load the queried class.
      */
-    public ClassLoaderClassInfoProvider(ClassInfoProvider parent, ClassLoader classLoader) {
+    public ClassLoaderContext(Context parent, ClassLoader classLoader) {
         this.parent = parent;
         this.classLoader = classLoader;
     }
@@ -64,5 +66,13 @@ public class ClassLoaderClassInfoProvider implements ClassInfoProvider {
             }
             return parent.isAssignable(leftClass, rightClass);
         }
+    }
+
+    @Override
+    public byte @Nullable [] readFile(String path) {
+        if (parent == null) {
+            return null;
+        }
+        return parent.readFile(path);
     }
 }

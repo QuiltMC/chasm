@@ -12,13 +12,13 @@ import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.ast.ReferenceNode;
 import org.quiltmc.chasm.lang.api.eval.ClosureNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
+import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
+import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
-import org.quiltmc.chasm.lang.internal.intrinsics.Intrinsics;
+import org.quiltmc.chasm.lang.internal.intrinsics.BuiltInIntrinsics;
 
 public class EvaluatorImpl implements Evaluator {
-    ResolverImpl resolver = new ResolverImpl(new MapNode(Intrinsics.ALL));
-
-    ArrayDeque<CallStackEntry> callStack = new ArrayDeque<>();
+    final ArrayDeque<CallStackEntry> callStack = new ArrayDeque<>();
 
     static class CallStackEntry {
         final LambdaNode lambda;
@@ -30,7 +30,7 @@ public class EvaluatorImpl implements Evaluator {
         }
     }
 
-    HashMap<ClosureCacheKey, ClosureNode> closureCache = new HashMap<>();
+    final HashMap<ClosureCacheKey, ClosureNode> closureCache = new HashMap<>();
 
     static class ClosureCacheKey {
         private final LambdaNode lambdaNode;
@@ -59,7 +59,10 @@ public class EvaluatorImpl implements Evaluator {
         }
     }
 
-    public EvaluatorImpl(Node node) {
+    final ResolverImpl resolver;
+
+    public EvaluatorImpl(Node node, Map<String, Node> intrinsics) {
+        resolver = new ResolverImpl(new MapNode(intrinsics));
         node.resolve(resolver);
     }
 
@@ -114,5 +117,30 @@ public class EvaluatorImpl implements Evaluator {
         callStack.pop();
 
         return result;
+    }
+
+    @Override
+    public Resolver getResolver() {
+        return resolver;
+    }
+
+    public static class Builder implements Evaluator.Builder {
+        private final Node node;
+        private final Map<String, Node> intrinsics = new HashMap<>(BuiltInIntrinsics.ALL);
+
+        public Builder(Node node) {
+            this.node = node;
+        }
+
+        @Override
+        public Builder addIntrinsic(IntrinsicFunction intrinsic) {
+            intrinsics.put(intrinsic.getName(), intrinsic);
+            return this;
+        }
+
+        @Override
+        public Evaluator build() {
+            return new EvaluatorImpl(node, intrinsics);
+        }
     }
 }
