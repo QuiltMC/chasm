@@ -146,8 +146,8 @@ public class other/TestLocalVariables {
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
    L7
     LINENUMBER 32 L7
-    IINC 1 1
     IINC 0 1
+    IINC 1 1
     RETURN
    L8
     LOCALVARIABLE local I L3 L1 0

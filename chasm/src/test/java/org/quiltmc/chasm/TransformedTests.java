@@ -11,5 +11,6 @@ public class TransformedTests extends TestsBase {
         register("empty/EmptyClass", "add/fields_to_empty", "add_field", "add_field_2");
 
         register("other/TestLocalVariables", "other/test_local_variables", "test_local_variables");
+        register("other/TestMergeInsns", "other/test_merge_insns", "test_merge_insns");
     }
 }

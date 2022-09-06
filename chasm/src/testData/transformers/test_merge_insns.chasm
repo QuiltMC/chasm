@@ -1,0 +1,15 @@
+{
+    target_class: classes[0],
+    return: 177,
+    tail: method -> {
+        node: target_class.methods[m -> m.name = method][0].code.instructions,
+        start: len(node) * 2 - 1,
+        end: start
+    },
+    transformations: [
+        {
+            target: tail("target"),
+            apply: args -> target_class.methods[m -> m.name = "source"][0].code.instructions[i -> i.opcode != return]
+        }
+    ]
+}
