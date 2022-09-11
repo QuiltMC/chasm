@@ -8,6 +8,7 @@ import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.FunctionNode;
+import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 public class ReduceFunction extends IntrinsicFunction {
@@ -37,7 +38,7 @@ public class ReduceFunction extends IntrinsicFunction {
     }
 
     @Override
-    String getName() {
+    public String getName() {
         return "reduce";
     }
 }

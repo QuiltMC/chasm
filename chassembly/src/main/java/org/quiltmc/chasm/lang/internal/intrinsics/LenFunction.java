@@ -4,6 +4,7 @@ import org.quiltmc.chasm.lang.api.ast.IntegerNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
+import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 public class LenFunction extends IntrinsicFunction {
@@ -16,7 +17,7 @@ public class LenFunction extends IntrinsicFunction {
     }
 
     @Override
-    String getName() {
+    public String getName() {
         return "len";
     }
 }

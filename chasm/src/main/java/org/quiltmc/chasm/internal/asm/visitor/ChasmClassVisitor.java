@@ -15,7 +15,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.RecordComponentVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
-import org.quiltmc.chasm.api.util.ClassInfoProvider;
+import org.quiltmc.chasm.api.util.Context;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.internal.util.NodeUtils;
 import org.quiltmc.chasm.lang.api.ast.BooleanNode;
@@ -25,7 +25,7 @@ import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.StringNode;
 
 public class ChasmClassVisitor extends ClassVisitor {
-    private final ClassInfoProvider classInfoProvider;
+    private final Context context;
 
     private final MapNode classNode = new MapNode(new LinkedHashMap<>());
     private final ListNode fields = new ListNode(new ArrayList<>());
@@ -38,9 +38,9 @@ public class ChasmClassVisitor extends ClassVisitor {
 
     private final ListNode annotations = new ListNode(new ArrayList<>());
 
-    public ChasmClassVisitor(ClassInfoProvider classInfoProvider) {
+    public ChasmClassVisitor(Context context) {
         super(Opcodes.ASM9);
-        this.classInfoProvider = classInfoProvider;
+        this.context = context;
     }
 
     public MapNode getClassNode() {
@@ -199,7 +199,7 @@ public class ChasmClassVisitor extends ClassVisitor {
 
         return new ChasmMethodVisitor(
                 api,
-                classInfoProvider,
+                context,
                 Type.getObjectType(nameNode.getValue()),
                 superNode == null ? null : Type.getObjectType(superNode.getValue()),
                 interfaces,
