@@ -9,7 +9,28 @@
     transformations: [
         {
             target: tail("target"),
-            apply: args -> target_class.methods[m -> m.name = "source"][0].code.instructions[i -> i.opcode != return]
+            apply: args -> [
+                {
+                    opcode: 178,
+                    owner: "java/lang/System",
+                    name: "out",
+                    descriptor: "Ljava/io/PrintStream;"
+                },
+                {
+                    opcode: 18,
+                    value: {
+                        type: "string",
+                        value: "Hello Merged World"
+                    }
+                },
+                {
+                    opcode: 184,
+                    owner: "java/io/PrintStream",
+                    name: "println",
+                    descriptor: "(Z)V",
+                    isInterface: false
+                }
+            ]
         }
     ]
 }
