@@ -5,6 +5,8 @@ import java.util.Collection;
 
 import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.Transformer;
+import org.quiltmc.chasm.api.util.Context;
+import org.quiltmc.chasm.internal.intrinsic.ChasmIntrinsics;
 import org.quiltmc.chasm.lang.api.ast.CallNode;
 import org.quiltmc.chasm.lang.api.ast.LambdaNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
@@ -17,9 +19,12 @@ public class ChasmLangTransformer implements Transformer {
 
     private final String id;
 
-    public ChasmLangTransformer(String id, Node parsed) {
+    private final Context context;
+
+    public ChasmLangTransformer(String id, Node parsed, Context context) {
         this.id = id;
         this.parsed = parsed;
+        this.context = context;
     }
 
     @Override
@@ -27,7 +32,7 @@ public class ChasmLangTransformer implements Transformer {
         LambdaNode lambdaExpression = new LambdaNode("classes", parsed);
         CallNode callExpression = new CallNode(lambdaExpression, classes);
 
-        Evaluator evaluator = Evaluator.create(callExpression);
+        Evaluator evaluator = ChasmIntrinsics.makeEvaluator(callExpression, context);
         Node evaluated = callExpression.evaluate(evaluator);
         if (!(evaluated instanceof MapNode)) {
             throw new RuntimeException("Transformers must be maps");

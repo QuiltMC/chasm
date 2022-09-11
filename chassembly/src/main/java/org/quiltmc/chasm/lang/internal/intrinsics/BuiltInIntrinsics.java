@@ -4,8 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
 
-public class Intrinsics {
+public class BuiltInIntrinsics {
     public static final Map<String, Node> ALL = new HashMap<>();
 
     static {
@@ -19,7 +20,7 @@ public class Intrinsics {
         register(new FlattenFunction());
     }
 
-    static void register(IntrinsicFunction function) {
+    private static void register(IntrinsicFunction function) {
         ALL.put(function.getName(), function);
     }
 }
