@@ -15,14 +15,20 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.quiltmc.chasm.api.Transformer;
+import org.quiltmc.chasm.api.util.Context;
 import org.quiltmc.chasm.internal.transformer.ChasmLangTransformer;
 import org.quiltmc.chasm.lang.api.ast.Node;
-import org.quiltmc.chasm.lang.api.eval.Evaluator;
 
 public class ChasmEnvironment implements Closeable {
+    private final Context context;
+
     private final List<Path> rootDirectories = new ArrayList<>();
 
     private final List<Closeable> toClose = new ArrayList<>();
+
+    public ChasmEnvironment(Context context) {
+        this.context = context;
+    }
 
     /**
      * Add a directory or jar to the classpath.
@@ -55,7 +61,7 @@ public class ChasmEnvironment implements Closeable {
                 Path path = chasmFiles.next();
                 String id = transformerRoot.relativize(path).toString();
                 Node node = Node.parse(path);
-                ChasmLangTransformer transformer = new ChasmLangTransformer(id, node);
+                ChasmLangTransformer transformer = new ChasmLangTransformer(id, node, context);
                 Transformer previous = transformers.put(id, transformer);
                 if (previous != null) {
                     throw new RuntimeException("Duplicate chasm transformer: " + id);

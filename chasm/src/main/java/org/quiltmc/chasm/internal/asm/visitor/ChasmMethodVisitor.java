@@ -21,7 +21,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.Frame;
-import org.quiltmc.chasm.api.util.ClassInfoProvider;
+import org.quiltmc.chasm.api.util.Context;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.internal.util.NodeUtils;
 import org.quiltmc.chasm.lang.api.ast.BooleanNode;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 public class ChasmMethodVisitor extends MethodVisitor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChasmMethodVisitor.class);
 
-    private final ClassInfoProvider classInfoProvider;
+    private final Context context;
     private final Type currentClass;
     private final Type currentSuperClass;
     private final List<Type> currentInterfaces;
@@ -60,13 +60,13 @@ public class ChasmMethodVisitor extends MethodVisitor {
     private final Map<AbstractInsnNode, MapNode> localVariableSensitiveInstructions = new HashMap<>();
     private boolean hasCode = false;
 
-    public ChasmMethodVisitor(int api, ClassInfoProvider classInfoProvider, Type currentClass,
+    public ChasmMethodVisitor(int api, Context context, Type currentClass,
                               Type currentSuperClass, List<Type> currentInterfaces,
                               boolean currentClassIsInterface, MapNode methodNode, int access, String name,
                               String descriptor, String signature,
                               String[] exceptions) {
         super(api, new MethodNode(Opcodes.ASM9, access, name, descriptor, signature, exceptions));
-        this.classInfoProvider = classInfoProvider;
+        this.context = context;
         this.currentClass = currentClass;
         this.currentSuperClass = currentSuperClass;
         this.currentInterfaces = currentInterfaces;
@@ -473,7 +473,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
         MethodNode method = (MethodNode) this.mv;
         LocalInterpreter interpreter = new LocalInterpreter(
                 method,
-                classInfoProvider,
+                context,
                 currentClass,
                 currentSuperClass,
                 currentInterfaces,

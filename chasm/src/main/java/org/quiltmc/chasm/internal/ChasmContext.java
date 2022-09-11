@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
-import org.quiltmc.chasm.api.util.ClassInfoProvider;
+import org.quiltmc.chasm.api.util.Context;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.lang.api.ast.IntegerNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
@@ -15,13 +16,13 @@ import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.ast.StringNode;
 
-public class ChasmClassInfoProvider implements ClassInfoProvider {
+public class ChasmContext implements Context {
     private static final String OBJECT = "java/lang/Object";
 
-    private final ClassInfoProvider parent;
+    private final Context parent;
     private final ListNode classes;
 
-    public ChasmClassInfoProvider(ClassInfoProvider parent, ListNode classes) {
+    public ChasmContext(Context parent, ListNode classes) {
         this.parent = parent;
         this.classes = classes;
     }
@@ -109,6 +110,11 @@ public class ChasmClassInfoProvider implements ClassInfoProvider {
         }
 
         return false;
+    }
+
+    @Override
+    public byte @Nullable [] readFile(String path) {
+        return parent.readFile(path);
     }
 
     private static class ClassInfo {

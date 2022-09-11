@@ -12,7 +12,7 @@ import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Interpreter;
 import org.objectweb.asm.tree.analysis.SimpleVerifier;
-import org.quiltmc.chasm.api.util.ClassInfoProvider;
+import org.quiltmc.chasm.api.util.Context;
 
 public class LocalInterpreter extends Interpreter<LocalValue> {
     private final MethodNode method;
@@ -20,7 +20,7 @@ public class LocalInterpreter extends Interpreter<LocalValue> {
 
     protected LocalInterpreter(
             MethodNode method,
-            ClassInfoProvider classInfoProvider,
+            Context context,
             Type currentClass,
             @Nullable Type currentSuperClass,
             List<Type> currentClassInterfaces,
@@ -52,7 +52,7 @@ public class LocalInterpreter extends Interpreter<LocalValue> {
                 if (currentClass.equals(type)) {
                     return isInterface;
                 }
-                return type.getSort() == Type.OBJECT && classInfoProvider.isInterface(type.getInternalName());
+                return type.getSort() == Type.OBJECT && context.isInterface(type.getInternalName());
             }
 
             @Override
@@ -63,7 +63,7 @@ public class LocalInterpreter extends Interpreter<LocalValue> {
                 if (type.getSort() != Type.OBJECT) {
                     return null;
                 }
-                String superClass = classInfoProvider.getSuperClass(type.getInternalName());
+                String superClass = context.getSuperClass(type.getInternalName());
                 return superClass == null ? null : Type.getObjectType(superClass);
             }
 
@@ -85,7 +85,7 @@ public class LocalInterpreter extends Interpreter<LocalValue> {
                     return isAssignableFrom(type1.getElementType(), type2.getElementType());
                 }
                 if (type1.getSort() == Type.OBJECT && type2.getSort() == Type.OBJECT) {
-                    return classInfoProvider.isAssignable(type1.getInternalName(), type2.getInternalName());
+                    return context.isAssignable(type1.getInternalName(), type2.getInternalName());
                 }
                 return type1.equals(type2);
             }
