@@ -287,8 +287,11 @@ public class BinaryNode extends Node {
             }
             break;
             case EQUAL: {
-                if (left instanceof NullNode ^ right instanceof NullNode) {
-                    return BooleanNode.FALSE;
+                if (left instanceof NullNode) {
+                    return BooleanNode.from(right instanceof NullNode);
+                }
+                if (right instanceof NullNode) {
+                    return BooleanNode.FALSE; // Left was checked before
                 }
 
                 if (left instanceof ValueNode && right instanceof ValueNode) {
@@ -299,8 +302,11 @@ public class BinaryNode extends Node {
             }
             break;
             case NOT_EQUAL: {
-                if (left instanceof NullNode ^ right instanceof NullNode) {
-                    return BooleanNode.TRUE;
+                if (left instanceof NullNode) {
+                    return BooleanNode.from(!(right instanceof NullNode));
+                }
+                if (right instanceof NullNode) {
+                    return BooleanNode.TRUE; // Left was checked before
                 }
 
                 if (left instanceof ValueNode && right instanceof ValueNode) {
