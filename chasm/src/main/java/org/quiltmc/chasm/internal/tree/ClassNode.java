@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.objectweb.asm.ClassReader;
-import org.quiltmc.chasm.api.util.ClassInfoProvider;
+import org.quiltmc.chasm.api.util.Context;
 import org.quiltmc.chasm.internal.asm.visitor.ChasmClassVisitor;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.util.NodeConstants;
@@ -21,9 +21,9 @@ import org.quiltmc.chasm.lang.api.eval.Resolver;
 public class ClassNode extends MapNode {
     private final ClassReader reader;
 
-    public ClassNode(ClassReader reader, ClassInfoProvider classInfoProvider, int index) {
+    public ClassNode(ClassReader reader, Context context, int index) {
         super(new LazyMap<>(getStaticEntries(reader),
-                () -> getLazyEntries(reader, classInfoProvider, index)));
+                () -> getLazyEntries(reader, context, index)));
         this.reader = reader;
 
         PathMetadata root = new PathMetadata(null, index);
@@ -55,9 +55,9 @@ public class ClassNode extends MapNode {
         return ((LazyMap<String, Node>) getEntries()).getLazyEntries();
     }
 
-    private static Map<String, Node> getLazyEntries(ClassReader reader, ClassInfoProvider classInfoProvider,
+    private static Map<String, Node> getLazyEntries(ClassReader reader, Context context,
                                                     int index) {
-        ChasmClassVisitor visitor = new ChasmClassVisitor(classInfoProvider);
+        ChasmClassVisitor visitor = new ChasmClassVisitor(context);
         reader.accept(visitor, 0);
         Map<String, Node> entries = visitor.getClassNode().getEntries();
 

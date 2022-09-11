@@ -23,10 +23,9 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.api.ChasmProcessor;
 import org.quiltmc.chasm.api.ClassData;
-import org.quiltmc.chasm.api.util.ClassLoaderClassInfoProvider;
+import org.quiltmc.chasm.api.util.ClassLoaderContext;
 import org.quiltmc.chasm.internal.transformer.ChasmLangTransformer;
 import org.quiltmc.chasm.lang.api.ast.Node;
-import org.quiltmc.chasm.lang.api.eval.Evaluator;
 
 public abstract class TestsBase {
     private static final Path TEST_CLASSES_DIR = Paths.get("build/classes/java/testData");
@@ -53,7 +52,7 @@ public abstract class TestsBase {
     @BeforeEach
     public void setUp() {
         // Instantiate the processor
-        processor = new ChasmProcessor(new ClassLoaderClassInfoProvider(null, getClass().getClassLoader()));
+        processor = new ChasmProcessor(new ClassLoaderContext(null, getClass().getClassLoader()));
     }
 
     @AfterEach
@@ -111,7 +110,7 @@ public abstract class TestsBase {
             Path transformerFile = TEST_TRANSFORMERS_DIR.resolve(transformer + ".chasm");
             Assertions.assertTrue(Files.isRegularFile(transformerFile), transformerFile + " does not exist");
             Node node = Node.parse(transformerFile);
-            processor.addTransformer(new ChasmLangTransformer(transformer, node));
+            processor.addTransformer(new ChasmLangTransformer(transformer, node, processor.getContext()));
         }
 
         // Process the data

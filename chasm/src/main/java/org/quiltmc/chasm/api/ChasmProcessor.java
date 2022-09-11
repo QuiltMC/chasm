@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
-import org.quiltmc.chasm.api.util.ClassInfoProvider;
-import org.quiltmc.chasm.internal.ChasmClassInfoProvider;
+import org.quiltmc.chasm.api.util.Context;
+import org.quiltmc.chasm.internal.ChasmContext;
 import org.quiltmc.chasm.internal.TransformationApplier;
 import org.quiltmc.chasm.internal.TransformationSorter;
 import org.quiltmc.chasm.internal.TransformerSorter;
@@ -25,20 +25,20 @@ import org.slf4j.LoggerFactory;
 public class ChasmProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChasmProcessor.class);
 
-    private final ClassInfoProvider classInfoProvider;
+    private final Context context;
 
     private final ListNode classes;
     private final List<Transformer> transformers = new ArrayList<>();
 
     /**
-     * Creates a new {@link ChasmProcessor} that uses the given {@link ClassInfoProvider}.
+     * Creates a new {@link ChasmProcessor} that uses the given {@link Context}.
      *
-     * @param classInfoProvider A {@code ClassInfoProvider} to supply parents of classes that are not being
+     * @param context A {@code Context} to supply parents of classes that are not being
      *            transformed.
      */
-    public ChasmProcessor(ClassInfoProvider classInfoProvider) {
+    public ChasmProcessor(Context context) {
         classes = new ListNode(new ArrayList<>());
-        this.classInfoProvider = new ChasmClassInfoProvider(classInfoProvider, classes);
+        this.context = new ChasmContext(context, classes);
     }
 
     /**
@@ -60,7 +60,7 @@ public class ChasmProcessor {
      */
     public void addClass(ClassData classData) {
         ClassReader classReader = new ClassReader(classData.getClassBytes());
-        ClassNode classNode = new ClassNode(classReader, classInfoProvider, classes.getEntries().size());
+        ClassNode classNode = new ClassNode(classReader, context, classes.getEntries().size());
         classNode.getMetadata().putAll(classData.getMetadata());
         classes.getEntries().add(classNode);
     }
@@ -121,7 +121,7 @@ public class ChasmProcessor {
             } else {
                 // ModifiedClasses
                 ClassNodeReader chasmWriter = new ClassNodeReader(classNode);
-                ClassWriter classWriter = new ChasmClassWriter(classInfoProvider);
+                ClassWriter classWriter = new ChasmClassWriter(context);
                 chasmWriter.accept(classWriter);
                 classData.add(new ClassData(classWriter.toByteArray(), classNode.getMetadata()));
             }
@@ -140,5 +140,9 @@ public class ChasmProcessor {
         }
 
         return transformations;
+    }
+
+    public Context getContext() {
+        return context;
     }
 }

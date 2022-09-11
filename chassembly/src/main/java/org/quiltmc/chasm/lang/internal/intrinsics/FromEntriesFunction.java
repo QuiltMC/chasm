@@ -9,6 +9,7 @@ import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.ast.StringNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
+import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 public class FromEntriesFunction extends IntrinsicFunction {
@@ -47,7 +48,7 @@ public class FromEntriesFunction extends IntrinsicFunction {
     }
 
     @Override
-    String getName() {
+    public String getName() {
         return "from_entries";
     }
 }

@@ -110,22 +110,22 @@ public class NodeUtils {
             node.getEntries().put(NodeConstants.VALUE, BooleanNode.from((Boolean) value));
         } else if (value instanceof Character) {
             node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.CHARACTER));
-            node.getEntries().put(NodeConstants.VALUE, new IntegerNode((long) value));
+            node.getEntries().put(NodeConstants.VALUE, new IntegerNode((Character) value));
         } else if (value instanceof Short) {
             node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.SHORT));
-            node.getEntries().put(NodeConstants.VALUE, new IntegerNode((long) value));
+            node.getEntries().put(NodeConstants.VALUE, new IntegerNode((Short) value));
         } else if (value instanceof Integer) {
             node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.INTEGER));
-            node.getEntries().put(NodeConstants.VALUE, new IntegerNode((long) value));
+            node.getEntries().put(NodeConstants.VALUE, new IntegerNode((Integer) value));
         } else if (value instanceof Long) {
             node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.LONG));
-            node.getEntries().put(NodeConstants.VALUE, new IntegerNode((long) value));
+            node.getEntries().put(NodeConstants.VALUE, new IntegerNode((Long) value));
         } else if (value instanceof Float) {
             node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.FLOAT));
-            node.getEntries().put(NodeConstants.VALUE, new FloatNode((double) value));
+            node.getEntries().put(NodeConstants.VALUE, new FloatNode((Float) value));
         } else if (value instanceof Double) {
             node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.DOUBLE));
-            node.getEntries().put(NodeConstants.VALUE, new FloatNode((double) value));
+            node.getEntries().put(NodeConstants.VALUE, new FloatNode((Double) value));
         } else if (value instanceof String) {
             node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.STRING));
             node.getEntries().put(NodeConstants.VALUE, new StringNode((String) value));
