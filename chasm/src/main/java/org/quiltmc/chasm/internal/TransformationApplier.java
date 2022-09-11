@@ -154,7 +154,7 @@ public class TransformationApplier {
 
         // Insert new entries
         for (Node entry : replacement.getEntries()) {
-            parentList.getEntries().add(start, entry);
+            parentList.getEntries().add(start++, entry);
         }
     }
 

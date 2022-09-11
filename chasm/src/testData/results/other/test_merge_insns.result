@@ -1,0 +1,40 @@
+// class version 61.0 (61)
+// access flags 0x21
+public class other/TestMergeInsns {
+
+  // compiled from: TestMergeInsns.java
+
+  // access flags 0x1
+  public <init>()V
+   L0
+    LINENUMBER 3 L0
+    ALOAD 0
+    INVOKESPECIAL java/lang/Object.<init> ()V
+    RETURN
+   L1
+    LOCALVARIABLE this Lother/TestMergeInsns; L0 L1 0
+    MAXSTACK = 1
+    MAXLOCALS = 1
+
+  // access flags 0x9
+  public static target()V
+   L0
+    LINENUMBER 5 L0
+    LDC "Dummy Condition"
+    INVOKESTATIC java/lang/System.getProperty (Ljava/lang/String;)Ljava/lang/String;
+    IFNONNULL L1
+   L2
+    LINENUMBER 6 L2
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    LDC "Test Target Method"
+    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/String;)V
+   L1
+    LINENUMBER 8 L1
+   FRAME SAME
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    LDC "Hello Merged World"
+    INVOKESTATIC java/io/PrintStream.println (Z)V
+    RETURN
+    MAXSTACK = 2
+    MAXLOCALS = 0
+}

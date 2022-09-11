@@ -1,0 +1,35 @@
+{
+    target_class: classes[0],
+    tail: method -> {
+        node: target_class.methods[m -> m.name = method][0].code.instructions,
+        start: len(node) * 2 - 1,
+        end: start
+    },
+    transformations: [
+        {
+            target: tail("target"),
+            apply: args -> [
+                {
+                    opcode: 178,
+                    owner: "java/lang/System",
+                    name: "out",
+                    descriptor: "Ljava/io/PrintStream;"
+                },
+                {
+                    opcode: 18,
+                    value: {
+                        type: "string",
+                        value: "Hello Merged World"
+                    }
+                },
+                {
+                    opcode: 184,
+                    owner: "java/io/PrintStream",
+                    name: "println",
+                    descriptor: "(Z)V",
+                    isInterface: false
+                }
+            ]
+        }
+    ]
+}
