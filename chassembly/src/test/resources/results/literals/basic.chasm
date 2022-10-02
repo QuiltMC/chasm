@@ -11,5 +11,5 @@
     escaped_string: "\"escaped\\ string\"", 
     backslash: 92, 
     single_quote: 39, 
-    quoted: 0, 
+    "quoted key": 0, 
 }

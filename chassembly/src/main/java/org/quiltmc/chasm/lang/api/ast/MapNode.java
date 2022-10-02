@@ -28,7 +28,13 @@ public class MapNode extends Node {
         entries.entrySet().forEach(list::add);
         for (int i = 0; i < list.size(); i++) {
             renderer.indent(builder, currentIndentationMultiplier);
-            builder.append(list.get(i).getKey()).append(": ");
+            String key = list.get(i).getKey();
+            if (needsQuotes(key)) {
+                builder.append('"').append(key.replace("\\", "\\\\").replace("\"", "\\\"")).append('"');
+            } else {
+                builder.append(key);
+            }
+            builder.append(": ");
             list.get(i).getValue().render(renderer, builder, currentIndentationMultiplier + 1);
             if (i < entries.size() - 1 || renderer.hasTrailingCommas()) {
                 builder.append(", ");
@@ -38,6 +44,21 @@ public class MapNode extends Node {
             renderer.indent(builder, currentIndentationMultiplier - 1);
         }
         builder.append('}');
+    }
+
+    private static boolean needsQuotes(String key) {
+        if (key.isEmpty()) {
+            return true;
+        }
+
+        for (int i = 0; i < key.length(); i++) {
+            char c = key.charAt(i);
+            if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && c != '_' && (i != 0 || c < '0' || c > '9')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
