@@ -29,8 +29,8 @@ import org.quiltmc.chasm.lang.api.ast.UnaryNode;
 import org.quiltmc.chasm.lang.internal.parse.SourceSpan;
 
 public class Parser {
-    private static String extractStringLiteral(String image) {
-        StringBuilder sb = new StringBuilder(image.length());
+    private static String extractStringOrCharLiteral(String image) {
+        StringBuilder sb = new StringBuilder(image.length() - 2);
         for (int i = 1, e = image.length() - 1; i < e; i++) {
             char c = image.charAt(i);
             if (c == '\\') {
@@ -85,10 +85,10 @@ Node literalExpression():
         { n = new FloatNode(Double.parseDouble(t.getImage())); }
         |
         t = <StringLiteral>
-        { n = new StringNode(extractStringLiteral(t.getImage())); }
+        { n = new StringNode(extractStringOrCharLiteral(t.getImage())); }
         |
         t = <CharLiteral>
-        { n = new IntegerNode((long) t.getImage().charAt(t.getImage().length() - 2)); }
+        { n = new IntegerNode((long) extractStringOrCharLiteral(t.getImage()).charAt(0)); }
     )
 
     {
@@ -175,7 +175,7 @@ Node mapExpression():
                 { key = t.getImage(); }
                 |
                 t = <StringLiteral>
-                { key = extractStringLiteral(t.getImage()); }
+                { key = extractStringOrCharLiteral(t.getImage()); }
             )
             <Colon>
             e = expression()
@@ -188,7 +188,7 @@ Node mapExpression():
                     { key = t.getImage(); }
                     |
                     t = <StringLiteral>
-                    { key = extractStringLiteral(t.getImage()); }
+                    { key = extractStringOrCharLiteral(t.getImage()); }
                 )
                 <Colon>
                 e = expression()

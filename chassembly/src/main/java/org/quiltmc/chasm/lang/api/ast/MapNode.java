@@ -51,14 +51,25 @@ public class MapNode extends Node {
             return true;
         }
 
-        for (int i = 0; i < key.length(); i++) {
-            char c = key.charAt(i);
-            if ((c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && c != '_' && (i != 0 || c < '0' || c > '9')) {
+        if (!isValidIdentifierStartChar(key.charAt(0))) {
+            return true;
+        }
+
+        for (int i = 1; i < key.length(); i++) {
+            if (!isValidIdentifierChar(key.charAt(i))) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private static boolean isValidIdentifierStartChar(char c) {
+        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_';
+    }
+
+    private static boolean isValidIdentifierChar(char c) {
+        return isValidIdentifierStartChar(c) || (c >= '0' && c <= '9');
     }
 
     @Override
