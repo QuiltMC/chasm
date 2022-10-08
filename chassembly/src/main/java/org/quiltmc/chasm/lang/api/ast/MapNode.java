@@ -28,7 +28,13 @@ public class MapNode extends Node {
         entries.entrySet().forEach(list::add);
         for (int i = 0; i < list.size(); i++) {
             renderer.indent(builder, currentIndentationMultiplier);
-            builder.append(list.get(i).getKey()).append(": ");
+            String key = list.get(i).getKey();
+            if (needsQuotes(key)) {
+                builder.append('"').append(key.replace("\\", "\\\\").replace("\"", "\\\"")).append('"');
+            } else {
+                builder.append(key);
+            }
+            builder.append(": ");
             list.get(i).getValue().render(renderer, builder, currentIndentationMultiplier + 1);
             if (i < entries.size() - 1 || renderer.hasTrailingCommas()) {
                 builder.append(", ");
@@ -38,6 +44,32 @@ public class MapNode extends Node {
             renderer.indent(builder, currentIndentationMultiplier - 1);
         }
         builder.append('}');
+    }
+
+    private static boolean needsQuotes(String key) {
+        if (key.isEmpty()) {
+            return true;
+        }
+
+        if (!isValidIdentifierStartChar(key.charAt(0))) {
+            return true;
+        }
+
+        for (int i = 1; i < key.length(); i++) {
+            if (!isValidIdentifierChar(key.charAt(i))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean isValidIdentifierStartChar(char c) {
+        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_';
+    }
+
+    private static boolean isValidIdentifierChar(char c) {
+        return isValidIdentifierStartChar(c) || (c >= '0' && c <= '9');
     }
 
     @Override

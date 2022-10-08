@@ -25,7 +25,8 @@ public class TestEvaluation extends TestBase {
             Assertions.fail("Automatically created result file. Please verify results before committing.");
         }
 
-        String expected = Files.readString(resultPath);
+        String expected = Files.readString(resultPath).replace("\r\n", "\n");
         Assertions.assertEquals(expected, rendered);
     }
 }
+

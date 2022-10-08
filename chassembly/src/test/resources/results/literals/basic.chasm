@@ -8,4 +8,8 @@
     exp: 4000.0, 
     string: "simple string", 
     char: 101, 
+    escaped_string: "\"escaped\\ string\"", 
+    backslash: 92, 
+    single_quote: 39, 
+    "quoted key": 0, 
 }

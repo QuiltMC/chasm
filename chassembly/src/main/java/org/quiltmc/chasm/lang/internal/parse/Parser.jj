@@ -29,7 +29,17 @@ import org.quiltmc.chasm.lang.api.ast.UnaryNode;
 import org.quiltmc.chasm.lang.internal.parse.SourceSpan;
 
 public class Parser {
-
+    private static String extractStringOrCharLiteral(String image) {
+        StringBuilder sb = new StringBuilder(image.length() - 2);
+        for (int i = 1, e = image.length() - 1; i < e; i++) {
+            char c = image.charAt(i);
+            if (c == '\\') {
+                c = image.charAt(++i);
+            }
+            sb.append(c);
+        }
+        return sb.toString();
+    }
 }
 
 PARSER_END(Parser)
@@ -75,10 +85,10 @@ Node literalExpression():
         { n = new FloatNode(Double.parseDouble(t.getImage())); }
         |
         t = <StringLiteral>
-        { n = new StringNode(t.getImage().substring(1, t.getImage().length() - 1)); }
+        { n = new StringNode(extractStringOrCharLiteral(t.getImage())); }
         |
         t = <CharLiteral>
-        { n = new IntegerNode((long) t.getImage().charAt(1)); }
+        { n = new IntegerNode((long) extractStringOrCharLiteral(t.getImage()).charAt(0)); }
     )
 
     {
@@ -154,22 +164,35 @@ Node mapExpression():
     Token start = getNextToken();
     LinkedHashMap<String, Node> entries = new LinkedHashMap<>();
     Token t;
+    String key;
     Node e;
 }
 {
     <LeftBraces>
         (
-            t = <Identifier>
+            (
+                t = <Identifier>
+                { key = t.getImage(); }
+                |
+                t = <StringLiteral>
+                { key = extractStringOrCharLiteral(t.getImage()); }
+            )
             <Colon>
             e = expression()
-            { entries.put(t.getImage(), e); }
+            { entries.put(key, e); }
             (
                 LOOKAHEAD(2)
                 <Comma>
-                t = <Identifier>
+                (
+                    t = <Identifier>
+                    { key = t.getImage(); }
+                    |
+                    t = <StringLiteral>
+                    { key = extractStringOrCharLiteral(t.getImage()); }
+                )
                 <Colon>
                 e = expression()
-                { entries.put(t.getImage(), e); }
+                { entries.put(key, e); }
             )*
             (
                 <Comma>
@@ -604,11 +627,11 @@ TOKEN: {
     |
     <FloatLiteral: ("+" | "-")? (["0" - "9"])+ "." (["0" - "9"])+ ("e" ("+" | "-")? (["0" - "9"])+)?>
     |
-    <#StringChar: ~["\""] | "\\\"">
+    <#StringChar: ~["\"", "\\"] | "\\\"" | "\\\\">
     |
     <StringLiteral: "\"" (<StringChar>)* "\"" >
     |
-    <#Char: ~["'"] | "\\\'" >
+    <#Char: ~["'", "\\"] | "\\'" | "\\\\" >
     |
     <CharLiteral: "'" <Char> "'" >
 }
