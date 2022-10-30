@@ -4,6 +4,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+import org.quiltmc.chasm.lang.internal.render.RenderUtil;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class ReferenceNode extends Node {
@@ -55,7 +56,7 @@ public class ReferenceNode extends Node {
             builder.append("$");
         }
 
-        builder.append(identifier);
+        builder.append(RenderUtil.quotifyIdentifierIfNeeded(identifier, '`'));
     }
 
     @Override

@@ -32,5 +32,6 @@
     shift: x -> x << 1,
     shift_call: shift(125),
     shifting: x -> x << 1 ^ x >> 1,
-    xmas: "Hello " + "World" + "!"
+    xmas: "Hello " + "World" + "!",
+    quoted_ref: {"hello world": 0}.`hello world`,
 }

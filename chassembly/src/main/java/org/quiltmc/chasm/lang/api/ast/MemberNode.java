@@ -6,6 +6,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+import org.quiltmc.chasm.lang.internal.render.RenderUtil;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class MemberNode extends Node {
@@ -36,7 +37,7 @@ public class MemberNode extends Node {
     @Override
     public void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier) {
         left.render(renderer, builder, currentIndentationMultiplier);
-        builder.append(".").append(identifier);
+        builder.append(".").append(RenderUtil.quotifyIdentifierIfNeeded(identifier, '`'));
     }
 
     @Override
