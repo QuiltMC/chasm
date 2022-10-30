@@ -53,4 +53,5 @@
     shift_call: 250, 
     shifting: <Closure can't be rendered>, 
     xmas: "Hello World!", 
+    quoted_ref: 0, 
 }

@@ -12,4 +12,5 @@
     backslash: '\\',
     single_quote: '\'',
     "quoted key": 0,
+    quoted_key_ref: `quoted key`,
 }
