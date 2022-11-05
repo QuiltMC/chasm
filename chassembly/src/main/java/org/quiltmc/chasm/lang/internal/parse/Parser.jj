@@ -620,7 +620,7 @@ SKIP: {
     |
     <Newline: ["\n"] >
     |
-    <LineComment: "//" (~["\n"])* "\n" >
+    <LineComment: "//" (~["\n"])* >
     |
     <InlineComment: "/*" (~["*"] | ("*" ~["/"]))* "*/" >
 }
