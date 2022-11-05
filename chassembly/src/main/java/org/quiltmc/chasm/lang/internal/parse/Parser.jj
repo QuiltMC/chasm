@@ -619,6 +619,10 @@ SKIP: {
     <Space: [" "] >
     |
     <Newline: ["\n"] >
+    |
+    <LineComment: "//" (~["\n"])* "\n" >
+    |
+    <InlineComment: "/*" (~["*"] | ("*" ~["/"]))* "*/" >
 }
 
 // Literal Tokens
