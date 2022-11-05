@@ -1,5 +1,9 @@
 package org.quiltmc.chasm.lang.internal.intrinsics;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.quiltmc.chasm.lang.api.ast.IntegerNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
@@ -8,10 +12,6 @@ import org.quiltmc.chasm.lang.api.ast.NullNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class WithElementsFunction extends IntrinsicFunction {
     @Override
