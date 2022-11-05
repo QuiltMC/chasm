@@ -18,6 +18,10 @@ public class BuiltInIntrinsics {
         register(new MapFunction());
         register(new ReduceFunction());
         register(new FlattenFunction());
+        register(new ToIntegerIntrinsic());
+        register(new ToFloatIntrinsic());
+        register(new ConvertSinglePrecisionFloatBits());
+        register(new ConvertDoublePrecisionFloatBits());
     }
 
     private static void register(IntrinsicFunction function) {

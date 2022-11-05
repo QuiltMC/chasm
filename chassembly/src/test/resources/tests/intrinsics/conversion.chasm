@@ -1,0 +1,13 @@
+{
+    i2i: to_integer(2),
+    f2i: to_integer(1.5),
+    s2i: to_integer("42"),
+    i2f: to_float(2),
+    f2f: to_float(1.5),
+    s2f: to_float("4.2"),
+
+    single_i2f: convert_single_precision_float_bits(0x42280000),
+    single_f2i: convert_single_precision_float_bits(42.0),
+    double_i2f: convert_double_precision_float_bits(0x4045000000000000),
+    double_f2i: convert_double_precision_float_bits(42.0),
+}
