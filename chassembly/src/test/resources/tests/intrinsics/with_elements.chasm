@@ -1,0 +1,9 @@
+{
+    test: with_elements({
+        list: [3, "hello", 1.5],
+        elements: [
+            {index: 2, value: "world"},
+            {index: 0, value: null},
+        ]
+    }),
+}
