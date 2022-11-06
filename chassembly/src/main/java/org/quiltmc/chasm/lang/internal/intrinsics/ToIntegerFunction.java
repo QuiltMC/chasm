@@ -8,27 +8,27 @@ import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
-public class ToFloatIntrinsic extends IntrinsicFunction {
+public class ToIntegerFunction extends IntrinsicFunction {
     @Override
     public Node apply(Evaluator evaluator, Node arg) {
-        if (arg instanceof FloatNode) {
+        if (arg instanceof IntegerNode) {
             return arg;
-        } else if (arg instanceof IntegerNode) {
-            return new FloatNode(((IntegerNode) arg).getValue().doubleValue());
+        } else if (arg instanceof FloatNode) {
+            return new IntegerNode(((FloatNode) arg).getValue().longValue());
         } else if (arg instanceof StringNode) {
             String str = ((StringNode) arg).getValue();
             try {
-                return new FloatNode(Double.parseDouble(str));
+                return new IntegerNode(Long.parseLong(str));
             } catch (NumberFormatException e) {
-                throw new EvaluationException("Cannot convert string \"" + str + "\" to float");
+                throw new EvaluationException("Cannot convert string \"" + str + "\" to integer");
             }
         } else {
-            throw new EvaluationException("Cannot convert " + arg + " to float");
+            throw new EvaluationException("Cannot convert " + arg + " to integer");
         }
     }
 
     @Override
     public String getName() {
-        return "to_float";
+        return "to_integer";
     }
 }
