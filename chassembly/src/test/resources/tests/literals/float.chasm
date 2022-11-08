@@ -1,0 +1,9 @@
+{
+    nan: NaN,
+    plus_inf: Infinity,
+    minus_inf: -Infinity,
+    normal: 0.5,
+    leading_point: .5,
+    trailing_point: 5.,
+    exp: 2.0e5,
+}
