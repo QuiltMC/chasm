@@ -643,9 +643,7 @@ TOKEN: {
     |
     <#DecFloatLiteral: (<Sign>)? (((<Digit>)+ "." (<Digit>)*) | ("." (<Digit>)+)) (("e" | "E") (<Sign>)? (<Digit>)+)? >
     |
-    <#HexFloatLiteral: (<Sign>)? "0x" (((<HexDigit>)+ ("." (<HexDigit>)*)?) | ("." (<HexDigit>)+)) ("p" | "P") (<Sign>)? (<Digit>)+>
-    |
-    <FloatLiteral: <SpecialFloatLiteral> | <DecFloatLiteral> | <HexFloatLiteral> >
+    <FloatLiteral: <SpecialFloatLiteral> | <DecFloatLiteral> >
     |
     <#StringChar: ~["\"", "\\"] | "\\\"" | "\\\\">
     |
