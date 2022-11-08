@@ -8,4 +8,5 @@
     forty_two: split_float(42.0),
     half: split_float(0.5),
     minus_one: split_float(-1.0),
+    subnormal: split_float(4.9e-324),
 }
