@@ -1,0 +1,8 @@
+{
+    i2i: to_integer(2),
+    f2i: to_integer(1.5),
+    s2i: to_integer("42"),
+    i2f: to_float(2),
+    f2f: to_float(1.5),
+    s2f: to_float("4.2"),
+}

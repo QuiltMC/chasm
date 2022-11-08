@@ -1,0 +1,8 @@
+// This is a single line comment
+{
+/* This is a multi-
+    line comment */
+    foo: 0,
+/* These can contain * stars and / slashes too */
+}
+// Line comments are allowed at the end of the file

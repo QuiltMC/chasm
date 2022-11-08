@@ -1,0 +1,11 @@
+{
+    zero: split_float(0.0),
+    neg_zero: split_float(-0.0),
+    nan: split_float(0.0 / 0.0),
+    infinity: split_float(1.0 / 0.0),
+    neg_infinity: split_float(-1.0 / 0.0),
+    one: split_float(1.0),
+    forty_two: split_float(42.0),
+    half: split_float(0.5),
+    minus_one: split_float(-1.0),
+}
