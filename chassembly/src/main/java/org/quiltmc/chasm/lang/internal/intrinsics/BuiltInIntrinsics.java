@@ -18,6 +18,9 @@ public class BuiltInIntrinsics {
         register(new MapFunction());
         register(new ReduceFunction());
         register(new FlattenFunction());
+        register(new ToIntegerFunction());
+        register(new ToFloatFunction());
+        register(new SplitFloatFunction());
     }
 
     private static void register(IntrinsicFunction function) {

@@ -1,0 +1,47 @@
+{
+    zero: {
+        sign: 1, 
+        exponent: 0, 
+        coefficient: 0.0, 
+    }, 
+    neg_zero: {
+        sign: -1, 
+        exponent: 0, 
+        coefficient: 0.0, 
+    }, 
+    nan: {
+        sign: 1, 
+        exponent: 0, 
+        coefficient: NaN, 
+    }, 
+    infinity: {
+        sign: 1, 
+        exponent: 0, 
+        coefficient: Infinity, 
+    }, 
+    neg_infinity: {
+        sign: -1, 
+        exponent: 0, 
+        coefficient: Infinity, 
+    }, 
+    one: {
+        sign: 1, 
+        exponent: 0, 
+        coefficient: 1.0, 
+    }, 
+    forty_two: {
+        sign: 1, 
+        exponent: 5, 
+        coefficient: 1.3125, 
+    }, 
+    half: {
+        sign: 1, 
+        exponent: -1, 
+        coefficient: 1.0, 
+    }, 
+    minus_one: {
+        sign: -1, 
+        exponent: 0, 
+        coefficient: 1.0, 
+    }, 
+}

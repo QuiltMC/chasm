@@ -1,0 +1,57 @@
+package org.quiltmc.chasm.lang.internal.intrinsics;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.quiltmc.chasm.lang.api.ast.FloatNode;
+import org.quiltmc.chasm.lang.api.ast.IntegerNode;
+import org.quiltmc.chasm.lang.api.ast.MapNode;
+import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.eval.Evaluator;
+import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
+import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+
+/**
+ * Converts a float into its sign (integer), coefficient (float) and exponent (integer). Produces a map with these
+ * keys and values. It is always the case that {@code sign * coefficient * (2.0 ^ exponent)} will produce the original
+ * float.
+ */
+public class SplitFloatFunction extends IntrinsicFunction {
+    @Override
+    public Node apply(Evaluator evaluator, Node arg) {
+        if (!(arg instanceof FloatNode)) {
+            throw new EvaluationException(getName() + " expected float, got " + arg);
+        }
+        double d = ((FloatNode) arg).getValue();
+        long bits = Double.doubleToRawLongBits(d);
+
+        int sign = (bits & Long.MIN_VALUE) == 0 ? 1 : -1;
+        int exponent;
+        double coefficient;
+        if (d == 0.0) { // covers both positive and negative zero
+            exponent = 0;
+            coefficient = 0.0;
+        } else if (Double.isNaN(d)) {
+            sign = 1;
+            exponent = 0;
+            coefficient = Double.NaN;
+        } else if (Double.isInfinite(d)) {
+            exponent = 0;
+            coefficient = Double.POSITIVE_INFINITY;
+        } else {
+            exponent = (int) (((bits >> 52) & ((1L << 11) - 1)) - 1023);
+            coefficient = Double.longBitsToDouble((1023L << 52) | (bits & ((1L << 52) - 1)));
+        }
+
+        Map<String, Node> map = new LinkedHashMap<>(3);
+        map.put("sign", new IntegerNode(sign));
+        map.put("exponent", new IntegerNode(exponent));
+        map.put("coefficient", new FloatNode(coefficient));
+        return new MapNode(map);
+    }
+
+    @Override
+    public String getName() {
+        return "split_float";
+    }
+}
