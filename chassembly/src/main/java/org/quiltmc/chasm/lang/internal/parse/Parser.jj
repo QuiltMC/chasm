@@ -627,13 +627,25 @@ TOKEN: {
     |
     <BooleanLiteral: "true" | "false">
     |
-    <DecIntegerLiteral: ("+" | "-")? (["0" - "9"])+ >
+    <#Sign: "+" | "-">
     |
-    <HexIntegerLiteral: "0x" (["0" - "9", "a" - "f", "A"-"F"])+ >
+    <#Digit: ["0" - "9"]>
     |
-    <BinIntegerLiteral: "0b" (["0" - "1"])+ >
+    <#HexDigit: <Digit> | ["a" - "f", "A" - "F"] >
     |
-    <FloatLiteral: ("+" | "-")? (["0" - "9"])+ "." (["0" - "9"])+ ("e" ("+" | "-")? (["0" - "9"])+)?>
+    <DecIntegerLiteral: (<Sign>)? (<Digit>)+ >
+    |
+    <HexIntegerLiteral: (<Sign>)? "0x" (<HexDigit>)+ >
+    |
+    <BinIntegerLiteral: (<Sign>)? "0b" (["0" - "1"])+ >
+    |
+    <#SpecialFloatLiteral: (<Sign>)? ("NaN" | "Infinity")>
+    |
+    <#DecFloatLiteral: (<Sign>)? (((<Digit>)+ "." (<Digit>)*) | ("." (<Digit>)+)) (("e" | "E") (<Sign>)? (<Digit>)+)? >
+    |
+    <#HexFloatLiteral: (<Sign>)? "0x" (((<HexDigit>)+ ("." (<HexDigit>)*)?) | ("." (<HexDigit>)+)) ("p" | "P") (<Sign>)? (<Digit>)+>
+    |
+    <FloatLiteral: <SpecialFloatLiteral> | <DecFloatLiteral> | <HexFloatLiteral> >
     |
     <#StringChar: ~["\"", "\\"] | "\\\"" | "\\\\">
     |
