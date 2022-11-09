@@ -44,4 +44,9 @@
         exponent: 0, 
         coefficient: 1.0, 
     }, 
+    subnormal: {
+        sign: 1, 
+        exponent: -1074, 
+        coefficient: 1.0, 
+    }, 
 }

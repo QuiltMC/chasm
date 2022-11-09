@@ -40,7 +40,14 @@ public class SplitFloatFunction extends IntrinsicFunction {
             coefficient = Double.POSITIVE_INFINITY;
         } else {
             exponent = (int) (((bits >> 52) & ((1L << 11) - 1)) - 1023);
-            coefficient = Double.longBitsToDouble((1023L << 52) | (bits & ((1L << 52) - 1)));
+            long mantissa = bits & ((1L << 52) - 1);
+            if (exponent == -1023) {
+                // subnormal
+                int factorBelowNormal = Long.numberOfLeadingZeros(mantissa) - 11;
+                exponent -= factorBelowNormal - 1;
+                mantissa <<= factorBelowNormal;
+            }
+            coefficient = Double.longBitsToDouble((1023L << 52) | mantissa);
         }
 
         Map<String, Node> map = new LinkedHashMap<>(3);
