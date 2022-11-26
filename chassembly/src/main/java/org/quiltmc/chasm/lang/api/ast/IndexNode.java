@@ -11,27 +11,47 @@ import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
+/**
+ * An index expression, e.g. {@code foo[bar]}.
+ */
 public class IndexNode extends Node {
     private Node left;
     private Node index;
 
+    /**
+     * Creates an index expression.
+     *
+     * @see Ast#index(Node, Node)
+     */
     public IndexNode(Node left, Node index) {
         this.left = left;
         this.index = index;
     }
 
+    /**
+     * Gets the subject of this index expression, i.e. the object being indexed into.
+     */
     public Node getLeft() {
         return left;
     }
 
+    /**
+     * Sets the subject of this index expression, i.e. the object being indexed into.
+     */
     public void setLeft(Node node) {
         this.left = node;
     }
 
+    /**
+     * Gets the index.
+     */
     public Node getIndex() {
         return index;
     }
 
+    /**
+     * Gets the index.
+     */
     public void setIndex(Node index) {
         this.index = index;
     }
@@ -55,7 +75,7 @@ public class IndexNode extends Node {
             List<Node> entries = ((ListNode) leftNode).getEntries();
 
             if (index < 0 || index >= entries.size()) {
-                return new NullNode();
+                return NullNode.INSTANCE;
             }
 
             return entries.get((int) index).evaluate(evaluator);
@@ -88,7 +108,7 @@ public class IndexNode extends Node {
             Map<String, Node> entries = ((MapNode) leftNode).getEntries();
 
             if (!entries.containsKey(key)) {
-                return new NullNode();
+                return NullNode.INSTANCE;
             }
 
             return entries.get(key).evaluate(evaluator);

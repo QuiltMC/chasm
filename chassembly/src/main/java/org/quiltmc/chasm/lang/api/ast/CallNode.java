@@ -7,27 +7,47 @@ import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
+/**
+ * A call expression, representing function application.
+ */
 public class CallNode extends Node {
     private Node function;
     private Node arg;
 
+    /**
+     * Creates a call expression.
+     *
+     * @see Ast#call(Node, Node)
+     */
     public CallNode(Node function, Node arg) {
         this.function = function;
         this.arg = arg;
     }
 
+    /**
+     * Gets the function that is being applied.
+     */
     public Node getFunction() {
         return function;
     }
 
+    /**
+     * Sets the function that is being applied.
+     */
     public void setFunction(Node function) {
         this.function = function;
     }
 
+    /**
+     * Gets the argument to the application.
+     */
     public Node getArg() {
         return arg;
     }
 
+    /**
+     * Sets the argument to the application.
+     */
     public void setArg(Node arg) {
         this.arg = arg;
     }

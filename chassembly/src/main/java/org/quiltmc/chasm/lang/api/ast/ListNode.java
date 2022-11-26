@@ -10,13 +10,24 @@ import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
+/**
+ * A list expression, for list creation syntax, e.g. {@code [foo, bar, baz]}.
+ */
 public class ListNode extends Node {
     private final List<Node> entries;
 
+    /**
+     * Creates a list expression.
+     *
+     * @see Ast#list()
+     */
     public ListNode(List<Node> entries) {
         this.entries = entries;
     }
 
+    /**
+     * Gets the entries of this list expression.
+     */
     public List<Node> getEntries() {
         return entries;
     }
