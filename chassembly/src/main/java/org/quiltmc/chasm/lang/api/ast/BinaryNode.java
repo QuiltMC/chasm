@@ -1,12 +1,14 @@
 package org.quiltmc.chasm.lang.api.ast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
@@ -418,6 +420,13 @@ public class BinaryNode extends Node {
         private final int precedence;
         private final boolean requiresBracketsWithSelf;
 
+        private static final Map<String, Operator> IMAGE_TO_OPERATOR = new HashMap<>();
+        static {
+            for (Operator op : values()) {
+                IMAGE_TO_OPERATOR.put(op.image, op);
+            }
+        }
+
         Operator(String image, int precedence, boolean requiresBracketsWithSelf) {
             this.image = image;
             this.precedence = precedence;
@@ -443,6 +452,14 @@ public class BinaryNode extends Node {
 
         public boolean requiresBracketsWithSelf() {
             return requiresBracketsWithSelf;
+        }
+
+        /**
+         * Gets an operator by its image.
+         */
+        @Nullable
+        public static Operator getOperator(String image) {
+            return IMAGE_TO_OPERATOR.get(image);
         }
     }
 }

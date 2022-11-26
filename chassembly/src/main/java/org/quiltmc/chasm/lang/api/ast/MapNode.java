@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.internal.render.RenderUtil;
@@ -65,5 +66,43 @@ public class MapNode extends Node {
         }
 
         return new MapNode(newEntries);
+    }
+
+    /**
+     * A builder for map nodes.
+     *
+     * @see Ast#map()
+     */
+    public static final class Builder {
+        private final Map<String, Node> entries = new LinkedHashMap<>();
+
+        Builder() {
+        }
+
+        /**
+         * Adds an entry to this map node.
+         * Supported values are null, boxed primitives, strings, maps for map nodes, iterables for list nodes,
+         * builders for map and list nodes, and nodes.
+         */
+        public Builder put(String key, @Nullable Object value) {
+            entries.put(key, Ast.objectToNode(value));
+            return this;
+        }
+
+        /**
+         * Adds the given entries to this map node.
+         * Supported values are the same as in {@linkplain #put(String, Object)}.
+         */
+        public Builder putAll(Map<String, ?> values) {
+            values.forEach((key, value) -> entries.put(key, Ast.objectToNode(value)));
+            return this;
+        }
+
+        /**
+         * Creates the map node.
+         */
+        public MapNode build() {
+            return new MapNode(entries);
+        }
     }
 }
