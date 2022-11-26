@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
 public class ListNode extends Node {
-    private List<Node> entries;
+    private final List<Node> entries;
 
     public ListNode(List<Node> entries) {
         this.entries = entries;
@@ -51,5 +53,56 @@ public class ListNode extends Node {
             }
         }
         builder.append("]");
+    }
+
+    /**
+     * A builder for list nodes.
+     *
+     * @see Ast#list()
+     */
+    public static final class Builder {
+        private final List<Node> entries = new ArrayList<>();
+
+        Builder() {
+        }
+
+        /**
+         * Adds an object to this list node.
+         * Supported values are null, boxed primitives, strings, maps for map nodes, iterables for list nodes,
+         * builders for map and list nodes, and nodes.
+         */
+        public Builder add(@Nullable Object value) {
+            entries.add(Ast.objectToNode(value));
+            return this;
+        }
+
+        /**
+         * Adds a sequence of objects to this list node.
+         * Supported values are the same as in {@linkplain #add(Object)}.
+         */
+        public Builder addAll(@Nullable Object @NotNull ... values) {
+            for (Object value : values) {
+                entries.add(Ast.objectToNode(value));
+            }
+            return this;
+        }
+
+        /**
+         * Adds a sequence of objects to this list node.
+         * Supported values are the same as in {@linkplain #add(Object)}.
+         */
+        public Builder addAll(@NotNull Iterable<?> values) {
+            for (Object value : values) {
+                entries.add(Ast.objectToNode(value));
+            }
+            return this;
+        }
+
+        /**
+         * Creates the list node.
+         */
+        public ListNode build() {
+            return new ListNode(entries);
+        }
     }
 }
