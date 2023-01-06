@@ -100,6 +100,12 @@ public class TransformerSorter {
                 }
             } while (checkAgain);
 
+            // If no roundInfos were added, then dependencies did not change. Therefore, no roundInfos will be added next
+            // loop either. Therefore, assuming we're not about to end the loop anyway, we're stuck in an infinite loop.
+            if (roundInfo.isEmpty() && !remaining.isEmpty()) {
+                throw new RuntimeException("Dependency loop in transformer sorting.");
+            }
+
             // Extract transformers and remove remaining round dependencies
             List<Transformer> round = new ArrayList<>();
             for (TransformerInfo info : roundInfo) {
