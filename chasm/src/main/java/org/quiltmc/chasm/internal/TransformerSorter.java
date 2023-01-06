@@ -30,22 +30,19 @@ public class TransformerSorter {
         }
 
         // Create vertices for transformers that don't exist.
-        {
-            Set<String> knownIds = new HashSet<>(infoById.keySet());
-            transformers.stream()
-                    .flatMap(transformer -> Stream.concat(
-                            Stream.concat(
-                                    transformer.mustRunAfter(knownIds).stream(),
-                                    transformer.mustRunBefore(knownIds).stream()
-                            ),
-                            Stream.concat(
-                                    transformer.mustRunRoundAfter(knownIds).stream(),
-                                    transformer.mustRunBefore(knownIds).stream()
-                            )
-                    ))
-                    .distinct()
-                    .filter(s -> !infoById.containsKey(s))
-                    .forEach(s -> infoById.put(s, new TransformerInfo(null)));
+        Set<String> existingTransformerIds = new HashSet<>(infoById.keySet());
+        for (Transformer transformer : transformers) {
+            Set<String> referencedTransformers = new HashSet<>();
+            referencedTransformers.addAll(transformer.mustRunAfter(existingTransformerIds));
+            referencedTransformers.addAll(transformer.mustRunBefore(existingTransformerIds));
+            referencedTransformers.addAll(transformer.mustRunRoundAfter(existingTransformerIds));
+            referencedTransformers.addAll(transformer.mustRunRoundBefore(existingTransformerIds));
+
+            for (String referencedTransformerId : referencedTransformers) {
+                if (!infoById.containsKey(referencedTransformerId)) {
+                    infoById.put(referencedTransformerId, new TransformerInfo(null));
+                }
+            }
         }
 
         // Create dependencies
@@ -126,8 +123,7 @@ public class TransformerSorter {
                 }
             } while (checkAgain);
 
-            // If no roundInfos were added, then dependencies did not change. Therefore, no roundInfos will be added
-            // next loop either, so we're in an infinite loop.
+            // Abort if no more transformers could be added - there is a dependency cycle
             if (roundInfo.isEmpty()) {
                 throw new RuntimeException("Dependency cycle in transformer sorting.");
             }
