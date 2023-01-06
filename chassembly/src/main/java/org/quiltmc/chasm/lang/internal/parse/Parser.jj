@@ -67,7 +67,7 @@ Node literalExpression():
 {
     (
         t = <NullLiteral>
-        { n = new NullNode(); }
+        { n = NullNode.INSTANCE; }
         |
         t = <BooleanLiteral>
         { n = BooleanNode.from(Boolean.parseBoolean(t.getImage())); }

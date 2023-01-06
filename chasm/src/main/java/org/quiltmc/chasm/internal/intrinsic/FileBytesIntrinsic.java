@@ -27,7 +27,7 @@ public class FileBytesIntrinsic extends IntrinsicFunction {
                 "Built-in function \"file_bytes\" can only be applied to strings but found " + arg);
         }
         byte[] bytes = context.readFile(((StringNode) arg).getValue());
-        return bytes == null ? new NullNode() : new ListNode(IntStream.range(0, bytes.length)
+        return bytes == null ? NullNode.INSTANCE : new ListNode(IntStream.range(0, bytes.length)
                 .mapToObj(index -> new IntegerNode(bytes[index] & 0xff)).collect(Collectors.toList()));
     }
 

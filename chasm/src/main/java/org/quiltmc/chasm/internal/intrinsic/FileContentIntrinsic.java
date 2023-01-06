@@ -21,7 +21,7 @@ public class FileContentIntrinsic extends IntrinsicFunction {
     @Override
     public Node apply(Evaluator evaluator, Node arg) {
         String content = readString(arg, context);
-        return content == null ? new NullNode() : new StringNode(content);
+        return content == null ? NullNode.INSTANCE : new StringNode(content);
     }
 
     @Override

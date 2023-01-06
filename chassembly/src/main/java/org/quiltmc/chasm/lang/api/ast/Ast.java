@@ -66,7 +66,7 @@ public final class Ast {
      * @see NullNode
      */
     public static NullNode nullNode() {
-        return new NullNode();
+        return NullNode.INSTANCE;
     }
 
     /**

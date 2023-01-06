@@ -12,13 +12,24 @@ import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.internal.render.RenderUtil;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
+/**
+ * A map expression, for map creation syntax, e.g. {@code {foo: bar}}.
+ */
 public class MapNode extends Node {
     private final Map<String, Node> entries;
 
+    /**
+     * Creates a map expression.
+     *
+     * @see Ast#map()
+     */
     public MapNode(Map<String, Node> entries) {
         this.entries = entries;
     }
 
+    /**
+     * Gets the entries of this map expression.
+     */
     public Map<String, Node> getEntries() {
         return entries;
     }

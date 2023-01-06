@@ -6,17 +6,29 @@ import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.internal.render.RenderUtil;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
+/**
+ * The base class for literal expressions.
+ */
 public abstract class ValueNode<T> extends Node {
     private T value;
 
+    /**
+     * Creates a literal expression.
+     */
     public ValueNode(T value) {
         this.value = value;
     }
 
+    /**
+     * Gets the value of the literal expression.
+     */
     public T getValue() {
         return value;
     }
 
+    /**
+     * Sets the value of the literal expression.
+     */
     public void setValue(T value) {
         this.value = value;
     }
