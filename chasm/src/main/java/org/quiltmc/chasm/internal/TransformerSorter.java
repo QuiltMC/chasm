@@ -126,8 +126,8 @@ public class TransformerSorter {
                 }
             } while (checkAgain);
 
-            // If no roundInfos were added, then dependencies did not change. Therefore, no roundInfos will be added next
-            // loop either, so we're in an infinite loop.
+            // If no roundInfos were added, then dependencies did not change. Therefore, no roundInfos will be added
+            // next loop either, so we're in an infinite loop.
             if (roundInfo.isEmpty()) {
                 throw new RuntimeException("Dependency cycle in transformer sorting.");
             }

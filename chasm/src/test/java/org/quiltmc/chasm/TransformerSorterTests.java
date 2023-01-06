@@ -107,7 +107,8 @@ public class TransformerSorterTests {
                         List.of(a)
                 ),
                 sorted
-        );    }
+        );
+    }
 
     /**
      * The sorter should be able to sort A in the first round, and B in the second round, since A mustRunRoundBefore B.
@@ -162,7 +163,7 @@ public class TransformerSorterTests {
     }
 
     /**
-     * The sorter should reject this cycle involving a transitive
+     * The sorter should reject this cycle involving a transitive dependency on a nonexistant transformer.
      */
     @Test
     public void testRejectsMissingDependenciesCycle() {
@@ -183,13 +184,20 @@ public class TransformerSorterTests {
      * @param <T>           the type of the expected Throwable
      */
     private static <T extends Throwable> void assertThrowsWithinTimeout(Class<T> expectedType, Executable executable) {
-         Assertions.assertTimeoutPreemptively(INFINITE_LOOP_DURATION,
-                () ->
-                        Assertions.assertThrows(
-                                expectedType,
-                                executable
-                        )
+        Assertions.assertTimeoutPreemptively(
+                INFINITE_LOOP_DURATION,
+                () -> Assertions.assertThrows(expectedType, executable)
         );
+    }
+
+    private static String transformersToString(List<Transformer> transformers) {
+        return transformers.stream().map(Transformer::getId)
+                .collect(
+                        StringBuilder::new,
+                        (b, s) -> b.append(b.isEmpty() ? "" : ", ").append(s),
+                        StringBuilder::append
+                )
+                .toString();
     }
 
     private static void assertTransformerListsEqual(List<Transformer> expectedOrder, List<Transformer> actualOrder) {
@@ -197,25 +205,35 @@ public class TransformerSorterTests {
             var expected = expectedOrder.get(i);
             var actual = actualOrder.get(i);
             if (expected != actual) {
-                var expectedString = expectedOrder.stream().map(Transformer::getId).collect(StringBuilder::new, (b, s) -> b.append(", ").append(s), StringBuilder::append).toString();
-                var actualString = actualOrder.stream().map(Transformer::getId).collect(StringBuilder::new, (b, s) -> b.append(", ").append(s), StringBuilder::append).toString();
-                Assertions.fail(("Transformer order was wrong. Expected [%s], got [%s].").formatted(expectedString, actualString));
+                Assertions.fail(
+                        "Transformer order was wrong. Expected [%s], got [%s].".formatted(
+                                transformersToString(expectedOrder), transformersToString(actualOrder)
+                        )
+                );
             }
         }
     }
 
+
     private static void assertIsInOrder(List<Transformer> expectedOrder, List<List<Transformer>> sorted) {
         var flattened = sorted.stream().flatMap(List::stream).toList();
         if (flattened.size() != expectedOrder.size()) {
-            Assertions.fail("Transformer count was wrong. Expected %s, got %s".formatted(expectedOrder.size(), flattened.size()));
+            Assertions.fail("Transformer count was wrong. Expected %s, got %s".formatted(
+                            expectedOrder.size(), flattened.size()
+                    ));
         }
 
         assertTransformerListsEqual(expectedOrder, flattened);
     }
 
-    private static void assertIsInOrderWithRounds(List<List<Transformer>> expectedOrderWithRounds, List<List<Transformer>> sorted) {
+    private static void assertIsInOrderWithRounds(
+            List<List<Transformer>> expectedOrderWithRounds,
+            List<List<Transformer>> sorted
+    ) {
         if (expectedOrderWithRounds.size() != sorted.size()) {
-            Assertions.fail("Round count was wrong. Expected %s, got %s".formatted(expectedOrderWithRounds.size(), sorted.size()));
+            Assertions.fail("Round count was wrong. Expected %s, got %s".formatted(
+                    expectedOrderWithRounds.size(), sorted.size()
+            ));
         }
 
         for (int i = 0; i < expectedOrderWithRounds.size(); i++) {
@@ -228,7 +246,10 @@ public class TransformerSorterTests {
     private static class DummyTransformer implements Transformer {
 
         private final String id;
-        private final Set<String> mustRunAfter, mustRunBefore, mustRunRoundAfter, mustRunRoundBefore;
+        private final Set<String> mustRunAfter;
+        private final Set<String> mustRunBefore;
+        private final Set<String> mustRunRoundAfter;
+        private final Set<String> mustRunRoundBefore;
 
         private DummyTransformer(String id, Set<String> mustRunAfter, Set<String> mustRunBefore,
                                  Set<String> mustRunRoundAfter, Set<String> mustRunRoundBefore) {
