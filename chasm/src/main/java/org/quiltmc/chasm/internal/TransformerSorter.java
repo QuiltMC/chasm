@@ -2,21 +2,25 @@ package org.quiltmc.chasm.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import org.jetbrains.annotations.Nullable;
 import org.quiltmc.chasm.api.Transformer;
 
 public class TransformerSorter {
     public static List<List<Transformer>> sort(Collection<Transformer> transformers) {
         Map<String, TransformerInfo> infoById = new LinkedHashMap<>();
 
-        // Create vertices
+        // Create vertices for transformers that exist
         for (Transformer transformer : transformers) {
             if (infoById.containsKey(transformer.getId())) {
                 throw new RuntimeException("Duplicate transformer id: " + transformer.getId());
@@ -25,9 +29,28 @@ public class TransformerSorter {
             infoById.put(transformer.getId(), vertex);
         }
 
+        // Create vertices for transformers that don't exist.
+        Set<String> existingTransformerIds = new HashSet<>(infoById.keySet());
+        for (Transformer transformer : transformers) {
+            Set<String> referencedTransformers = new HashSet<>();
+            referencedTransformers.addAll(transformer.mustRunAfter(existingTransformerIds));
+            referencedTransformers.addAll(transformer.mustRunBefore(existingTransformerIds));
+            referencedTransformers.addAll(transformer.mustRunRoundAfter(existingTransformerIds));
+            referencedTransformers.addAll(transformer.mustRunRoundBefore(existingTransformerIds));
+
+            for (String referencedTransformerId : referencedTransformers) {
+                if (!infoById.containsKey(referencedTransformerId)) {
+                    infoById.put(referencedTransformerId, new TransformerInfo(null));
+                }
+            }
+        }
+
         // Create dependencies
         for (TransformerInfo info : infoById.values()) {
-            Transformer transformer = info.get();
+            @Nullable Transformer transformer = info.get();
+            if (transformer == null) {
+                continue;
+            }
 
             // mustRunAfter
             for (String otherId : transformer.mustRunAfter(infoById.keySet())) {
@@ -100,11 +123,19 @@ public class TransformerSorter {
                 }
             } while (checkAgain);
 
+            // Abort if no more transformers could be added - there is a dependency cycle
+            if (roundInfo.isEmpty()) {
+                throw new RuntimeException("Dependency cycle in transformer sorting.");
+            }
+
             // Extract transformers and remove remaining round dependencies
             List<Transformer> round = new ArrayList<>();
             for (TransformerInfo info : roundInfo) {
                 info.removeRoundDependencies();
-                round.add(info.get());
+                @Nullable Transformer transformer = info.get();
+                if (transformer != null) {
+                    round.add(transformer);
+                }
             }
             rounds.add(round);
         }
@@ -113,7 +144,7 @@ public class TransformerSorter {
     }
 
     static class TransformerInfo {
-        private final Transformer transformer;
+        private final @Nullable Transformer transformer;
 
         private final Set<TransformerInfo> roundDependencies = new LinkedHashSet<>();
         private final Set<TransformerInfo> roundDependents = new LinkedHashSet<>();
@@ -121,12 +152,12 @@ public class TransformerSorter {
         private final Set<TransformerInfo> dependencies = new LinkedHashSet<>();
         private final Set<TransformerInfo> dependents = new LinkedHashSet<>();
 
-        public TransformerInfo(Transformer transformer) {
+        public TransformerInfo(@Nullable Transformer transformer) {
             this.transformer = transformer;
         }
 
-        public Transformer get() {
-            return transformer;
+        public @Nullable Transformer get() {
+            return this.transformer;
         }
 
         public void addDependency(TransformerInfo other) {
@@ -135,26 +166,26 @@ public class TransformerSorter {
         }
 
         public void addRoundDependency(TransformerInfo other) {
-            roundDependencies.add(other);
+            this.roundDependencies.add(other);
             other.roundDependents.add(this);
         }
 
         public Set<TransformerInfo> getDependencies() {
-            return dependencies;
+            return this.dependencies;
         }
 
         public Set<TransformerInfo> getRoundDependencies() {
-            return roundDependencies;
+            return this.roundDependencies;
         }
 
         public void removeDependencies() {
-            for (TransformerInfo info : dependents) {
+            for (TransformerInfo info : this.dependents) {
                 info.dependencies.remove(this);
             }
         }
 
         public void removeRoundDependencies() {
-            for (TransformerInfo info : roundDependents) {
+            for (TransformerInfo info : this.roundDependents) {
                 info.roundDependencies.remove(this);
             }
         }
