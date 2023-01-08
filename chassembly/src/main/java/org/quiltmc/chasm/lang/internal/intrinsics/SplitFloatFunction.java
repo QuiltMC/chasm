@@ -9,6 +9,7 @@ import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 /**
@@ -20,7 +21,10 @@ public class SplitFloatFunction extends IntrinsicFunction {
     @Override
     public Node apply(Evaluator evaluator, Node arg) {
         if (!(arg instanceof FloatNode)) {
-            throw new EvaluationException(getName() + " expected float, got " + arg);
+            throw new EvaluationException(
+                    getName() + " expected float, got " + arg,
+                    arg.getMetadata().get(SourceSpan.class)
+            );
         }
         double d = ((FloatNode) arg).getValue();
         long bits = Double.doubleToRawLongBits(d);

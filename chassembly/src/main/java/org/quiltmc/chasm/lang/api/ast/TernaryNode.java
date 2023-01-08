@@ -3,6 +3,7 @@ package org.quiltmc.chasm.lang.api.ast;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
@@ -71,7 +72,10 @@ public class TernaryNode extends Node {
         Node condition = this.condition.evaluate(evaluator);
 
         if (!(condition instanceof BooleanNode)) {
-            throw new EvaluationException("Condition in ternary must evaluate to a boolean but found " + condition);
+            throw new EvaluationException(
+                    "Condition in ternary must evaluate to a boolean but found " + condition,
+                    condition.getMetadata().get(SourceSpan.class)
+            );
         }
 
         if (((BooleanNode) condition).getValue()) {

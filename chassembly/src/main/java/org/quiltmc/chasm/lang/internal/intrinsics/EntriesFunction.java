@@ -11,6 +11,7 @@ import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.ast.StringNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 public class EntriesFunction extends IntrinsicFunction {
@@ -29,7 +30,10 @@ public class EntriesFunction extends IntrinsicFunction {
 
             return new ListNode(entryList);
         }
-        throw new EvaluationException("Built-in function \"entries\" can only be applied to maps but found " + arg);
+        throw new EvaluationException(
+                "Built-in function \"entries\" can only be applied to maps but found " + arg,
+                arg.getMetadata().get(SourceSpan.class)
+        );
     }
 
     @Override

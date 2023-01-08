@@ -10,6 +10,7 @@ import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.ast.StringNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 public class FromEntriesFunction extends IntrinsicFunction {
@@ -43,7 +44,8 @@ public class FromEntriesFunction extends IntrinsicFunction {
     private static EvaluationException createException(Node arg) {
         return new EvaluationException(
                 "Built-in function \"from_entries\" can only be applied to lists of maps, "
-                        + "each with {key: string, value: any}, but found " + arg
+                        + "each with {key: string, value: any}, but found " + arg,
+                arg.getMetadata().get(SourceSpan.class)
         );
     }
 

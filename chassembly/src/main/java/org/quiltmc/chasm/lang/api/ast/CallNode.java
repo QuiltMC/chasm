@@ -4,6 +4,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.FunctionNode;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
@@ -55,6 +56,9 @@ public class CallNode extends Node {
             return ((FunctionNode) function).apply(evaluator, arg.evaluate(evaluator));
         }
 
-        throw new EvaluationException("Can only call functions but found " + function);
+        throw new EvaluationException(
+                "Can only call functions but found " + function,
+                function.getMetadata().get(SourceSpan.class)
+        );
     }
 }

@@ -12,6 +12,7 @@ import org.quiltmc.chasm.lang.api.ast.StringNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+import org.quiltmc.chasm.lang.internal.parse.SourceSpanImpl;
 
 public class FileBytesIntrinsic extends IntrinsicFunction {
     private final Context context;
@@ -24,7 +25,8 @@ public class FileBytesIntrinsic extends IntrinsicFunction {
     public Node apply(Evaluator evaluator, Node arg) {
         if (!(arg instanceof StringNode)) {
             throw new EvaluationException(
-                "Built-in function \"file_bytes\" can only be applied to strings but found " + arg);
+                "Built-in function \"file_bytes\" can only be applied to strings but found " + arg,
+                    arg.getMetadata().get(SourceSpanImpl.class));
         }
         byte[] bytes = context.readFile(((StringNode) arg).getValue());
         return bytes == null ? new NullNode() : new ListNode(IntStream.range(0, bytes.length)

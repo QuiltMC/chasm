@@ -47,7 +47,9 @@ public interface SourceSpan {
             builder.append("line " + getLineStart() + ", column " + getColumnStart());
             builder.append(" to line " + getLineEnd() + ", column " + getColumnEnd());
         }
-        builder.append(" (" + getLineStart() + ":" + getColumnStart() + "-" + getLineEnd() + ":" + getColumnEnd() + ")");
+        builder.append(
+                " (" + getLineStart() + ":" + getColumnStart() + "-" + getLineEnd() + ":" + getColumnEnd() + ")"
+        );
         return builder.toString();
     }
 }

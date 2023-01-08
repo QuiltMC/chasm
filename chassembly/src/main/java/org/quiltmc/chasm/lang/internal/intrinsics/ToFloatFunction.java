@@ -6,6 +6,7 @@ import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.ast.StringNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 public class ToFloatFunction extends IntrinsicFunction {
@@ -20,10 +21,16 @@ public class ToFloatFunction extends IntrinsicFunction {
             try {
                 return new FloatNode(Double.parseDouble(str));
             } catch (NumberFormatException e) {
-                throw new EvaluationException("Cannot convert string \"" + str + "\" to float");
+                throw new EvaluationException(
+                        "Cannot convert string \"" + str + "\" to float",
+                        arg.getMetadata().get(SourceSpan.class)
+                );
             }
         } else {
-            throw new EvaluationException("Cannot convert " + arg + " to float");
+            throw new EvaluationException(
+                    "Cannot convert " + arg + " to float",
+                    arg.getMetadata().get(SourceSpan.class)
+            );
         }
     }
 

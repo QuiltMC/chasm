@@ -12,6 +12,7 @@ import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.ast.ReferenceNode;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 public class ResolverImpl implements Resolver {
@@ -28,13 +29,19 @@ public class ResolverImpl implements Resolver {
     @Override
     public void resolveReference(ReferenceNode referenceNode) {
         if (references.containsKey(referenceNode)) {
-            throw new EvaluationException("Reference node " + referenceNode + " has already been resolved");
+            throw new EvaluationException(
+                    "Reference node " + referenceNode + " has already been resolved",
+                    referenceNode.getMetadata().get(SourceSpan.class)
+            );
         }
 
         Reference reference = resolveReference(referenceNode.getIdentifier(), referenceNode.isGlobal());
 
         if (reference == null) {
-            throw new EvaluationException("Unresolved reference " + referenceNode);
+            throw new EvaluationException(
+                    "Unresolved reference " + referenceNode,
+                    referenceNode.getMetadata().get(SourceSpan.class)
+            );
         }
 
         references.put(referenceNode, reference);

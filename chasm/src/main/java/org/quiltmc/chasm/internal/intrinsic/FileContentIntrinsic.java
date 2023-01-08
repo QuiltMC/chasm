@@ -9,6 +9,7 @@ import org.quiltmc.chasm.lang.api.ast.NullNode;
 import org.quiltmc.chasm.lang.api.ast.StringNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 public class FileContentIntrinsic extends IntrinsicFunction {
@@ -33,7 +34,9 @@ public class FileContentIntrinsic extends IntrinsicFunction {
     static String readString(Node arg, Context context) {
         if (!(arg instanceof StringNode)) {
             throw new EvaluationException(
-                "Built-in function \"file_content\" can only be applied to strings but found " + arg);
+                    "Built-in function \"file_content\" can only be applied to strings but found " + arg,
+                    arg.getMetadata().get(SourceSpan.class)
+            );
         }
         String path = ((StringNode) arg).getValue();
         byte[] bytes = context.readFile(path);
@@ -43,7 +46,10 @@ public class FileContentIntrinsic extends IntrinsicFunction {
         try {
             return new String(bytes, StandardCharsets.UTF_8);
         } catch (IllegalArgumentException e) {
-            throw new EvaluationException("File \"" + path + "\" is not utf8 encoded");
+            throw new EvaluationException(
+                    "File \"" + path + "\" is not utf8 encoded",
+                    arg.getMetadata().get(SourceSpan.class)
+            );
         }
     }
 }
