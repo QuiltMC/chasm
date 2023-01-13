@@ -103,11 +103,14 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitParameter(String name, int access) {
+        // TODO: Add debug information elsewhere
+        /*
         MapNode parameterNode = (MapNode) this.parameters.getEntries().get(visitedParameterCount++);
         if (name != null) {
             parameterNode.getEntries().put(NodeConstants.NAME, new StringNode(name));
         }
         parameterNode.getEntries().put(NodeConstants.ACCESS, new IntegerNode(access));
+        */
         super.visitParameter(name, access);
     }
 
