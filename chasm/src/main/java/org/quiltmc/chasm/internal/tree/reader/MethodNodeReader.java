@@ -1,9 +1,10 @@
 package org.quiltmc.chasm.internal.tree.reader;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
@@ -14,25 +15,36 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LocalVariableAnnotationNode;
+import org.objectweb.asm.tree.LocalVariableNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.analysis.Analyzer;
+import org.objectweb.asm.tree.analysis.AnalyzerException;
+import org.objectweb.asm.tree.analysis.BasicInterpreter;
+import org.objectweb.asm.tree.analysis.BasicValue;
+import org.objectweb.asm.tree.analysis.Frame;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.internal.util.NodeUtils;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MethodNodeReader {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodNodeReader.class);
+
+    private final String className;
     private final MapNode methodNode;
+    private MethodNode outputMethodNode;
     private final Map<String, Label> labelMap = new HashMap<>();
     private final Map<String, Integer> localVariableIndexes = new HashMap<>();
     private int nextLocalIndex = 0;
-    private final Map<String, Label> localStarts = new HashMap<>();
-    private final Map<String, Label> localEnds = new HashMap<>();
-    private Label lastLabel;
-    private final Set<String> localsSinceLastLabel = new HashSet<>();
-    @Nullable
-    private String variableStoredLastInsn = null;
 
-    public MethodNodeReader(MapNode methodNode) {
+    public MethodNodeReader(String className, MapNode methodNode) {
+        this.className = className;
         this.methodNode = methodNode;
     }
 
@@ -62,7 +74,7 @@ public class MethodNodeReader {
         // insert a label at the start of the instructions if there isn't one already
         MapNode firstInstruction = NodeUtils.asMap(instructions.getEntries().get(0));
         if (!firstInstruction.getEntries().containsKey(NodeConstants.LABEL)) {
-            visitLabel(methodVisitor, new Label(), isStatic, params);
+            methodVisitor.visitLabel(new Label());
         }
 
         for (int index = 0; index < instructions.getEntries().size(); index++) {
@@ -72,7 +84,8 @@ public class MethodNodeReader {
             // visitLabel
             if (instruction.getEntries().containsKey(NodeConstants.LABEL)) {
                 String labelName = NodeUtils.getAsString(instruction, NodeConstants.LABEL);
-                visitLabel(methodVisitor, obtainLabel(labelName), isStatic, params);
+                Label label = obtainLabel(labelName);
+                methodVisitor.visitLabel(label);
                 continue;
             }
 
@@ -81,14 +94,8 @@ public class MethodNodeReader {
             if (index == instructions.getEntries().size() - 1 && index != 0) {
                 MapNode prevInstruction = NodeUtils.asMap(instructions.getEntries().get(index - 1));
                 if (!prevInstruction.getEntries().containsKey(NodeConstants.LABEL)) {
-                    visitLabel(methodVisitor, new Label(), isStatic, params);
+                    methodVisitor.visitLabel(new Label());
                 }
-            }
-
-            if (variableStoredLastInsn != null) {
-                this.localStarts.putIfAbsent(variableStoredLastInsn, lastLabel);
-                this.localsSinceLastLabel.add(variableStoredLastInsn);
-                variableStoredLastInsn = null;
             }
 
             // visit<...>Insn
@@ -231,14 +238,6 @@ public class MethodNodeReader {
                             || opcode == Opcodes.DSTORE ? 2 : 1;
                     int localIndex = getLocalIndex(varName, size);
                     methodVisitor.visitVarInsn(opcode, localIndex);
-                    // save variable stores until the next instruction for the purpose of debug info, as they are not
-                    // able to be read at the start of this instruction.
-                    if (opcode >= Opcodes.ISTORE && opcode <= Opcodes.ASTORE) {
-                        variableStoredLastInsn = varName;
-                    } else {
-                        this.localStarts.putIfAbsent(varName, this.lastLabel);
-                        this.localsSinceLastLabel.add(varName);
-                    }
                     break;
                 }
                 case Opcodes.NEW:
@@ -325,8 +324,6 @@ public class MethodNodeReader {
                     int varIndex = getLocalIndex(varName, 1);
                     int increment = NodeUtils.getAsInt(instruction, NodeConstants.INCREMENT);
                     methodVisitor.visitIincInsn(varIndex, increment);
-                    this.localStarts.putIfAbsent(varName, this.lastLabel);
-                    this.localsSinceLastLabel.add(varName);
                     break;
                 }
                 case Opcodes.TABLESWITCH:
@@ -386,31 +383,6 @@ public class MethodNodeReader {
         }
     }
 
-    private void visitLabel(MethodVisitor methodVisitor, Label label, boolean isStatic, ListNode params) {
-        methodVisitor.visitLabel(label);
-        this.lastLabel = label;
-        for (String localName : this.localsSinceLastLabel) {
-            this.localEnds.put(localName, label);
-        }
-        this.localsSinceLastLabel.clear();
-
-        if (variableStoredLastInsn != null) {
-            this.localStarts.putIfAbsent(variableStoredLastInsn, label);
-            this.localEnds.put(variableStoredLastInsn, label);
-            variableStoredLastInsn = null;
-        }
-
-        if (!isStatic) {
-            this.localStarts.putIfAbsent("this", label);
-            this.localEnds.put("this", label);
-        }
-        for (Node param : params.getEntries()) {
-            String paramName = NodeUtils.asString(param);
-            this.localStarts.putIfAbsent(paramName, label);
-            this.localEnds.put(paramName, label);
-        }
-    }
-
     private int getLocalIndex(
             String varName,
             int size
@@ -451,7 +423,42 @@ public class MethodNodeReader {
         }
     }
 
-    private void visitLocalVariables(MethodVisitor methodVisitor) {
+    private void addLocalVariableDebugInfo() {
+        Analyzer<BasicValue> analyzer = new Analyzer<>(new BasicInterpreter());
+        Frame<BasicValue>[] frames;
+        try {
+            frames = analyzer.analyzeAndComputeMaxs(this.className, this.outputMethodNode);
+        } catch (AnalyzerException e) {
+            LOGGER.error("Failed to analyze method {}.{}{}, local variable debug info will not be present",
+                    className, outputMethodNode.name, outputMethodNode.desc);
+            return;
+        }
+        @SuppressWarnings("unchecked")
+        List<Integer>[] readabilityStarts = new List[this.outputMethodNode.maxLocals];
+        Arrays.setAll(readabilityStarts, i -> new ArrayList<>());
+        @SuppressWarnings("unchecked")
+        List<Integer>[] readabilityEnds = new List[this.outputMethodNode.maxLocals];
+        Arrays.setAll(readabilityEnds, i -> new ArrayList<>());
+        for (int insnIndex = 0; insnIndex < frames.length; insnIndex++) {
+            for (int localIndex = 0; localIndex < this.outputMethodNode.maxLocals; localIndex++) {
+                boolean isReadable = frames[insnIndex] != null
+                        && !BasicValue.UNINITIALIZED_VALUE.equals(frames[insnIndex].getLocal(localIndex));
+                boolean wasReadable = insnIndex != 0 && frames[insnIndex - 1] != null
+                        && !BasicValue.UNINITIALIZED_VALUE.equals(frames[insnIndex - 1].getLocal(localIndex));
+                if (isReadable && !wasReadable) {
+                    readabilityStarts[localIndex].add(insnIndex);
+                } else if (!isReadable && wasReadable) {
+                    readabilityEnds[localIndex].add(insnIndex);
+                }
+            }
+        }
+        for (int localIndex = 0; localIndex < this.outputMethodNode.maxLocals; localIndex++) {
+            if (readabilityEnds[localIndex].size() == readabilityStarts[localIndex].size() - 1) {
+                readabilityEnds[localIndex].add(frames.length - 1);
+            }
+            assert readabilityEnds[localIndex].size() == readabilityStarts[localIndex].size();
+        }
+
         MapNode locals = NodeUtils.getAsMap(this.methodNode, NodeConstants.LOCALS);
         locals.getEntries().forEach((name, rawLocal) -> {
             MapNode local = NodeUtils.asMap(rawLocal);
@@ -463,34 +470,65 @@ public class MethodNodeReader {
             String sourceDesc = NodeUtils.getAsString(local, NodeConstants.SOURCE_DESCRIPTOR);
             String signature = NodeUtils.getAsString(local, NodeConstants.SIGNATURE);
             if (sourceName != null || sourceDesc != null || signature != null) {
-                Label startLabel = localStarts.get(name);
-                Label endLabel = localEnds.get(name);
-                methodVisitor.visitLocalVariable(sourceName, sourceDesc, signature, startLabel, endLabel, index);
+                for (int scopeIndex = 0; scopeIndex < readabilityStarts[index].size(); scopeIndex++) {
+                    LabelNode startLabel = findClosestLabel(readabilityStarts[index].get(scopeIndex), true);
+                    LabelNode endLabel = findClosestLabel(readabilityEnds[index].get(scopeIndex), false);
+                    if (outputMethodNode.localVariables == null) {
+                        outputMethodNode.localVariables = new ArrayList<>();
+                    }
+                    outputMethodNode.localVariables.add(
+                            new LocalVariableNode(sourceName, sourceDesc, signature, startLabel, endLabel, index));
+                }
             }
 
             ListNode annotations = NodeUtils.getAsList(local, NodeConstants.ANNOTATIONS);
             if (annotations != null) {
                 for (Node rawAnnotation : annotations.getEntries()) {
                     MapNode annotation = NodeUtils.asMap(rawAnnotation);
-                    int typeRef = NodeUtils.getAsInt(annotation, NodeConstants.TYPE_REF);
-                    String typePath = NodeUtils.getAsString(annotation, NodeConstants.TYPE_PATH);
-                    String descriptor = NodeUtils.getAsString(annotation, NodeConstants.DESCRIPTOR);
-                    boolean visible = NodeUtils.getAsBoolean(annotation, NodeConstants.VISIBLE);
-                    AnnotationVisitor av = methodVisitor.visitLocalVariableAnnotation(
-                            typeRef,
-                            TypePath.fromString(typePath),
-                            new Label[] {localStarts.get(name)},
-                            new Label[] {localEnds.get(name)},
-                            new int[] {index},
-                            descriptor,
-                            visible
-                    );
-                    if (av != null) {
-                        AnnotationNodeReader.visitValues(av, NodeUtils.getAsMap(annotation, NodeConstants.VALUES));
+                    final int typeRef = NodeUtils.getAsInt(annotation, NodeConstants.TYPE_REF);
+                    final String typePath = NodeUtils.getAsString(annotation, NodeConstants.TYPE_PATH);
+                    final String descriptor = NodeUtils.getAsString(annotation, NodeConstants.DESCRIPTOR);
+                    final boolean visible = NodeUtils.getAsBoolean(annotation, NodeConstants.VISIBLE);
+
+                    LabelNode[] localStarts = new LabelNode[readabilityStarts[index].size()];
+                    Arrays.setAll(localStarts, i -> findClosestLabel(readabilityStarts[index].get(i), true));
+                    LabelNode[] localEnds = new LabelNode[localStarts.length];
+                    Arrays.setAll(localEnds, i -> findClosestLabel(readabilityEnds[index].get(i), false));
+                    int[] indexes = new int[localStarts.length];
+                    Arrays.fill(indexes, index);
+
+                    LocalVariableAnnotationNode node = new LocalVariableAnnotationNode(
+                            typeRef, TypePath.fromString(typePath), localStarts, localEnds, indexes, descriptor);
+                    AnnotationNodeReader.visitValues(node, NodeUtils.getAsMap(annotation, NodeConstants.VALUES));
+                    if (visible) {
+                        if (outputMethodNode.visibleLocalVariableAnnotations == null) {
+                            outputMethodNode.visibleLocalVariableAnnotations = new ArrayList<>();
+                        }
+                        outputMethodNode.visibleLocalVariableAnnotations.add(node);
+                    } else {
+                        if (outputMethodNode.invisibleLocalVariableAnnotations == null) {
+                            outputMethodNode.invisibleLocalVariableAnnotations = new ArrayList<>();
+                        }
+                        outputMethodNode.invisibleLocalVariableAnnotations.add(node);
                     }
                 }
             }
         });
+    }
+
+    @Nullable
+    private LabelNode findClosestLabel(int insnIndex, boolean preferReverse) {
+        for (int i = 0; i < 2; i++) {
+            for (AbstractInsnNode insn = this.outputMethodNode.instructions.get(insnIndex);
+                    insn != null;
+                    insn = preferReverse ? insn.getPrevious() : insn.getNext()) {
+                if (insn instanceof LabelNode) {
+                    return (LabelNode) insn;
+                }
+            }
+            preferReverse = !preferReverse;
+        }
+        return null;
     }
 
     private void visitLineNumbers(MethodVisitor methodVisitor, MapNode codeNode) {
@@ -583,21 +621,21 @@ public class MethodNodeReader {
         String[] exceptions = exceptionsNode == null ? new String[0] :
                 exceptionsNode.getEntries().stream().map(NodeUtils::asString).toArray(String[]::new);
 
-        MethodVisitor methodVisitor = visitor.visitMethod(access, name, descriptor, signature, exceptions);
+        outputMethodNode = new MethodNode(access, name, descriptor, signature, exceptions);
 
         // visitParameter
-        visitParameters(methodVisitor);
+        visitParameters(outputMethodNode);
 
         // visitAnnotableParameterCount/visitParameterAnnotation
-        visitParameterAnnotations(methodVisitor);
+        visitParameterAnnotations(outputMethodNode);
 
         // visitAnnotationDefault
-        visitAnnotationDefault(methodVisitor);
+        visitAnnotationDefault(outputMethodNode);
 
         // visitAnnotation/visitTypeAnnotation
-        visitAnnotations(methodVisitor);
+        visitAnnotations(outputMethodNode);
 
-        // visitCod
+        // visitCode
         if (methodNode.getEntries().containsKey(NodeConstants.CODE)) {
             MapNode codeNode = NodeUtils.getAsMap(methodNode, NodeConstants.CODE);
 
@@ -605,23 +643,23 @@ public class MethodNodeReader {
             // Don't care
 
             // Instructions
-            Map<String, Integer> remappedLocalIndexes = new HashMap<>();
-            visitInstructions((access & Opcodes.ACC_STATIC) != 0, parameters, methodVisitor, codeNode);
+            visitInstructions((access & Opcodes.ACC_STATIC) != 0, parameters, outputMethodNode, codeNode);
 
             // visitTryCatchBlock
-            visitTryCatchBlocks(methodVisitor, codeNode);
-
-            // visitLocalVariable
-            visitLocalVariables(methodVisitor);
+            visitTryCatchBlocks(outputMethodNode, codeNode);
 
             // visitLineNumber
-            visitLineNumbers(methodVisitor, codeNode);
+            visitLineNumbers(outputMethodNode, codeNode);
 
             // visitMaxs
-            methodVisitor.visitMaxs(0, 0);
+            outputMethodNode.visitMaxs(0, 0);
         }
 
         // visitEnd
-        methodVisitor.visitEnd();
+        outputMethodNode.visitEnd();
+
+        addLocalVariableDebugInfo();
+
+        outputMethodNode.accept(visitor);
     }
 }

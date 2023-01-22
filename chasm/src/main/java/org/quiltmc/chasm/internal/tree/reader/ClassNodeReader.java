@@ -81,7 +81,7 @@ public class ClassNodeReader {
         if (methodListNode != null) {
             for (Node node : methodListNode.getEntries()) {
                 MapNode methodNode = NodeUtils.asMap(node);
-                MethodNodeReader methodNodeReader = new MethodNodeReader(methodNode);
+                MethodNodeReader methodNodeReader = new MethodNodeReader(name, methodNode);
                 methodNodeReader.visitMethod(visitor);
             }
         }
