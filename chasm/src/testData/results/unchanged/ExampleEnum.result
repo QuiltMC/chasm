@@ -35,7 +35,7 @@ public enum other/ExampleEnum extends java/lang/Enum {
 
   // access flags 0x9
   public static valueOf(Ljava/lang/String;)Lother/ExampleEnum;
-    // parameter  P0
+    // parameter  name
    L0
     LINENUMBER 3 L0
     LDC Lother/ExampleEnum;.class
@@ -52,9 +52,9 @@ public enum other/ExampleEnum extends java/lang/Enum {
   // signature (I)V
   // declaration: void <init>(int)
   private <init>(Ljava/lang/String;II)V
-    // parameter  P0
-    // parameter  P1
-    // parameter  P2
+    // parameter  <no name>
+    // parameter  <no name>
+    // parameter  value
    L0
     LINENUMBER 12 L0
     ALOAD 0

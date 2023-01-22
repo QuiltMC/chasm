@@ -22,7 +22,7 @@ public final enum empty/EmptyEnum extends java/lang/Enum {
 
   // access flags 0x9
   public static valueOf(Ljava/lang/String;)Lempty/EmptyEnum;
-    // parameter  P0
+    // parameter  name
    L0
     LINENUMBER 3 L0
     LDC Lempty/EmptyEnum;.class
@@ -39,8 +39,8 @@ public final enum empty/EmptyEnum extends java/lang/Enum {
   // signature ()V
   // declaration: void <init>()
   private <init>(Ljava/lang/String;I)V
-    // parameter  P0
-    // parameter  P1
+    // parameter  <no name>
+    // parameter  <no name>
    L0
     LINENUMBER 3 L0
     ALOAD 0

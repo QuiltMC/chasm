@@ -82,8 +82,8 @@ public abstract class other/ExampleClass {
    FRAME SAME
     RETURN
    L5
-    LOCALVARIABLE i I L1 L2 1
     LOCALVARIABLE this Lother/ExampleClass; L0 L5 0
+    LOCALVARIABLE i I L0 L2 1
     MAXSTACK = 2
     MAXLOCALS = 2
 
@@ -167,10 +167,9 @@ public abstract class other/ExampleClass {
     LINENUMBER 44 L14
    FRAME SAME
     RETURN
-   L15
-    LOCALVARIABLE three I L6 L1 1
-    LOCALVARIABLE e Ljava/lang/Exception; L8 L7 1
-    LOCALVARIABLE five I L0 L15 0
+    LOCALVARIABLE five I L4 L11 0
+    LOCALVARIABLE three I L5 L1 1
+    LOCALVARIABLE e Ljava/lang/Exception; L2 L9 2
     MAXSTACK = 5
     MAXLOCALS = 3
 
@@ -240,7 +239,7 @@ public abstract class other/ExampleClass {
     LINENUMBER 47 L9
    FRAME SAME1 java/lang/String
     ARETURN
-    LOCALVARIABLE nested Ljava/lang/String; L3 L2 0
+    LOCALVARIABLE nested Ljava/lang/String; L1 L4 0
     MAXSTACK = 4
     MAXLOCALS = 3
 
@@ -325,21 +324,22 @@ public abstract class other/ExampleClass {
     ILOAD 1
     IRETURN
    L9
-    LOCALVARIABLE output I L5 L9 0
+    LOCALVARIABLE output I L4 L7 0
+    LOCALVARIABLE output I L7 L9 1
     MAXSTACK = 3
     MAXLOCALS = 2
 
   // access flags 0x401
   public abstract annotationTest(Ljava/lang/String;Ljava/lang/String;)V
-    // parameter  P0
-    // parameter  P1
+    // parameter  <no name>
+    // parameter  <no name>
     // annotable parameter count: 2 (invisible)
     @Lother/SimpleAnnotation;(value="first") // invisible, parameter 0
     @Lother/SimpleAnnotation;(value="second") // invisible, parameter 1
 
   // access flags 0x100A
   private static synthetic lambda$testGenerics$2(Ljava/lang/Void;)Ljava/lang/Integer;
-    // parameter  P0
+    // parameter  v
    L0
     LINENUMBER 63 L0
     BIPUSH 7
@@ -352,7 +352,7 @@ public abstract class other/ExampleClass {
 
   // access flags 0x100A
   private static synthetic lambda$testGenerics$1(Ljava/lang/Integer;)Ljava/lang/String;
-    // parameter  P0
+    // parameter  i
    L0
     LINENUMBER 61 L0
     ALOAD 0

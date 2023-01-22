@@ -1,10 +1,15 @@
 package org.quiltmc.chasm.internal.asm.visitor;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
@@ -17,6 +22,9 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.IincInsnNode;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LocalVariableAnnotationNode;
+import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
@@ -24,6 +32,7 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.quiltmc.chasm.api.util.Context;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.internal.util.NodeUtils;
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.BooleanNode;
 import org.quiltmc.chasm.lang.api.ast.IntegerNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
@@ -36,6 +45,8 @@ public class ChasmMethodVisitor extends MethodVisitor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChasmMethodVisitor.class);
 
     private final Context context;
+    private final boolean isStatic;
+    private final String descriptor;
     private final Type currentClass;
     private final Type currentSuperClass;
     private final List<Type> currentInterfaces;
@@ -43,12 +54,11 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     private final MapNode methodNode;
 
-    private final ListNode parameters = new ListNode(new ArrayList<>());
     private final ListNode annotations = new ListNode(new ArrayList<>());
 
     private final MapNode code = new MapNode(new LinkedHashMap<>());
     private final ListNode instructions = new ListNode(new ArrayList<>());
-    private final ListNode sourceLocals = new ListNode(new ArrayList<>());
+    private final MapNode locals = Ast.emptyMap();
     private final ListNode tryCatchBlocks = new ListNode(new ArrayList<>());
 
     private final ListNode lineNumbers = new ListNode(new ArrayList<>());
@@ -67,6 +77,8 @@ public class ChasmMethodVisitor extends MethodVisitor {
                               String[] exceptions) {
         super(api, new MethodNode(Opcodes.ASM9, access, name, descriptor, signature, exceptions));
         this.context = context;
+        this.isStatic = (access & Opcodes.ACC_STATIC) != 0;
+        this.descriptor = descriptor;
         this.currentClass = currentClass;
         this.currentSuperClass = currentSuperClass;
         this.currentInterfaces = currentInterfaces;
@@ -76,13 +88,20 @@ public class ChasmMethodVisitor extends MethodVisitor {
         methodNode.getEntries().put(NodeConstants.ACCESS, new IntegerNode(access));
         methodNode.getEntries().put(NodeConstants.NAME, new StringNode(name));
 
-        methodNode.getEntries().put(NodeConstants.PARAMETERS, parameters);
+        methodNode.getEntries().put(NodeConstants.LOCALS, this.locals);
+
+        if ((access & Opcodes.ACC_STATIC) == 0) {
+            MapNode thisVar = Ast.map().put(NodeConstants.TYPE, currentClass.getDescriptor()).build();
+            this.locals.getEntries().put("this", thisVar);
+        }
+
+        ListNode params = Ast.emptyList();
+        methodNode.getEntries().put(NodeConstants.PARAMETERS, params);
         Type[] argumentTypes = Type.getArgumentTypes(descriptor);
         for (int i = 0; i < argumentTypes.length; i++) {
-            MapNode parameterNode = new MapNode(new LinkedHashMap<>());
-            parameterNode.getEntries().put(NodeConstants.TYPE, new StringNode(argumentTypes[i].toString()));
-            parameterNode.getEntries().put(NodeConstants.NAME, new StringNode("P" + i));
-            this.parameters.getEntries().add(parameterNode);
+            MapNode param = Ast.map().put(NodeConstants.TYPE, argumentTypes[i].getDescriptor()).build();
+            this.locals.getEntries().put("P" + i, param);
+            params.getEntries().add(Ast.literal("P" + i));
         }
 
         Type returnType = Type.getReturnType(descriptor);
@@ -103,21 +122,25 @@ public class ChasmMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitParameter(String name, int access) {
-        MapNode parameterNode = (MapNode) this.parameters.getEntries().get(visitedParameterCount++);
-        if (name != null) {
-            parameterNode.getEntries().put(NodeConstants.NAME, new StringNode(name));
+        MapNode parameterNode = (MapNode) this.locals.getEntries().get("P" + visitedParameterCount++);
+        if (parameterNode != null) {
+            if (name != null) {
+                parameterNode.getEntries().put(NodeConstants.NAME, Ast.literal(name));
+            }
+            parameterNode.getEntries().put(NodeConstants.ACCESS, Ast.literal(access));
         }
-        parameterNode.getEntries().put(NodeConstants.ACCESS, new IntegerNode(access));
         super.visitParameter(name, access);
     }
 
     @Override
     public void visitAnnotableParameterCount(int parameterCount, boolean visible) {
         // We simply right-align the annotations, assuming that non-annotable parameters are always at the start.
+        int totalNumParameters = (int) this.locals.getEntries().keySet().stream()
+                .filter(it -> it.startsWith("P")).count();
         if (visible) {
-            visibleParameterAnnotationOffset = this.parameters.getEntries().size() - parameterCount;
+            visibleParameterAnnotationOffset = totalNumParameters - parameterCount;
         } else {
-            parameterAnnotationOffset = this.parameters.getEntries().size() - parameterCount;
+            parameterAnnotationOffset = totalNumParameters - parameterCount;
         }
 
         super.visitAnnotableParameterCount(parameterCount, visible);
@@ -132,7 +155,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
         annotation.getEntries().put(NodeConstants.VALUES, values);
 
         int actualIndex = parameter + (visible ? visibleParameterAnnotationOffset : parameterAnnotationOffset);
-        MapNode parameterNode = (MapNode) this.parameters.getEntries().get(actualIndex);
+        MapNode parameterNode = (MapNode) this.locals.getEntries().get("P" + actualIndex);
         ListNode annotations = (ListNode) (parameterNode.getEntries()
                 .computeIfAbsent(NodeConstants.ANNOTATIONS, s -> new ListNode(new ArrayList<>())));
         annotations.getEntries().add(annotation);
@@ -188,7 +211,6 @@ public class ChasmMethodVisitor extends MethodVisitor {
         hasCode = true;
         methodNode.getEntries().put(NodeConstants.CODE, code);
         code.getEntries().put(NodeConstants.INSTRUCTIONS, instructions);
-        code.getEntries().put(NodeConstants.SOURCE_LOCALS, sourceLocals);
         code.getEntries().put(NodeConstants.TRY_CATCH_BLOCKS, tryCatchBlocks);
         code.getEntries().put(NodeConstants.LINE_NUMBERS, lineNumbers);
         super.visitCode();
@@ -422,23 +444,14 @@ public class ChasmMethodVisitor extends MethodVisitor {
             Label end,
             int index
     ) {
-        MapNode localNode = new MapNode(new LinkedHashMap<>());
-        localNode.getEntries().put(NodeConstants.NAME, new StringNode(name));
-        localNode.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(descriptor));
-        localNode.getEntries().put(NodeConstants.SIGNATURE, new StringNode(signature));
-        localNode.getEntries().put(NodeConstants.START, new StringNode(getLabelId(start)));
-        localNode.getEntries().put(NodeConstants.END, new StringNode(getLabelId(end)));
-        // TODO: what should we do about this index?
-        localNode.getEntries().put(NodeConstants.INDEX, new IntegerNode(index));
-        sourceLocals.getEntries().add(localNode);
-
+        // We do the local variables at the end
         super.visitLocalVariable(name, descriptor, signature, start, end, index);
     }
 
     @Override
     public AnnotationVisitor visitLocalVariableAnnotation(int typeRef, TypePath typePath, Label[] start, Label[] end,
                                                           int[] index, String descriptor, boolean visible) {
-        // TODO: How to handle this?
+        // We do the local variables at the end
         return super.visitLocalVariableAnnotation(typeRef, typePath, start, end, index, descriptor, visible);
     }
 
@@ -462,6 +475,7 @@ public class ChasmMethodVisitor extends MethodVisitor {
         super.visitEnd();
         if (hasCode) {
             computeLocalVariables();
+            handleSourceLocals();
         }
     }
 
@@ -501,9 +515,14 @@ public class ChasmMethodVisitor extends MethodVisitor {
             index += argType.getSize();
         }
 
+        // Build up a sorted list of local variables to add to the locals map.
+        // Cannot add them directly because localVariableSensitiveInstructions is in an unpredictable order which would
+        // lead to randomness in the output.
+        Map<Integer, @Nullable Type> localVariablesToAdd = new TreeMap<>();
+
         localVariableSensitiveInstructions.forEach((asmInsn, chasmInsn) -> {
             int opcode = asmInsn.getOpcode();
-            int varIndex = opcode == Opcodes.IINC ? ((IincInsnNode) asmInsn).var : ((VarInsnNode) asmInsn).var;
+            int varIndex = getVar(asmInsn);
             @Nullable String localLabel;
             if (varIndex < paramIndexes.length) {
                 if (varIndex == 0 && (method.access & Opcodes.ACC_STATIC) == 0) {
@@ -528,6 +547,8 @@ public class ChasmMethodVisitor extends MethodVisitor {
                                 sourceStore = equivalentStores[sourceStore];
                             }
                             localLabel = "V" + sourceStore;
+
+                            localVariablesToAdd.put(sourceStore, value.getType());
                         }
                     }
                 }
@@ -535,6 +556,14 @@ public class ChasmMethodVisitor extends MethodVisitor {
             if (localLabel != null) {
                 chasmInsn.getEntries().put(NodeConstants.VAR, new StringNode(localLabel));
             }
+        });
+
+        localVariablesToAdd.forEach((id, type) -> {
+            MapNode local = Ast.emptyMap();
+            if (type != null) {
+                local.getEntries().put(NodeConstants.TYPE, Ast.literal(type.getDescriptor()));
+            }
+            this.locals.getEntries().put("V" + id, local);
         });
     }
 
@@ -551,20 +580,20 @@ public class ChasmMethodVisitor extends MethodVisitor {
                 if (index + 1 < frames.length) {
                     Frame<LocalValue> frame = frames[index + 1];
                     if (frame != null) {
-                        int[] sourceStoresHere = frame.getLocal(((VarInsnNode) insn).var).getSourceStores();
+                        int[] sourceStoresHere = frame.getLocal(getVar(insn)).getSourceStores();
                         findEquivalentSourceStores(equivalentStores, index, sourceStoresHere);
                     }
                 }
             } else if (opcode >= Opcodes.ILOAD && opcode <= Opcodes.ALOAD || opcode == Opcodes.RET) {
                 Frame<LocalValue> frame = frames[index];
                 if (frame != null) {
-                    int[] sourceStoresHere = frame.getLocal(((VarInsnNode) insn).var).getSourceStores();
+                    int[] sourceStoresHere = frame.getLocal(getVar(insn)).getSourceStores();
                     findEquivalentSourceStores(equivalentStores, index, sourceStoresHere);
                 }
             } else if (opcode == Opcodes.IINC) {
                 Frame<LocalValue> frame = frames[index];
                 if (frame != null) {
-                    int[] sourceStoresHere = frame.getLocal(((IincInsnNode) insn).var).getSourceStores();
+                    int[] sourceStoresHere = frame.getLocal(getVar(insn)).getSourceStores();
                     findEquivalentSourceStores(equivalentStores, index, sourceStoresHere);
                 }
             }
@@ -584,10 +613,98 @@ public class ChasmMethodVisitor extends MethodVisitor {
         }
     }
 
-    private MapNode makeLocal(int index, Type type) {
-        MapNode node = new MapNode(new LinkedHashMap<>());
-        node.getEntries().put(NodeConstants.INDEX, new IntegerNode(index));
-        node.getEntries().put(NodeConstants.TYPE, new StringNode(type.toString()));
-        return node;
+    private Collection<String> findChasmLocalsForSourceLocal(int slot, LabelNode start, LabelNode end) {
+        if (slot == 0 && !isStatic) {
+            return Collections.singletonList("this");
+        }
+        int paramSlot = isStatic ? 0 : 1;
+        int paramIndex = 0;
+        for (Type argType : Type.getArgumentTypes(this.descriptor)) {
+            if (slot == paramSlot) {
+                return Collections.singletonList("P" + paramIndex);
+            }
+            paramIndex++;
+            paramSlot += argType.getSize();
+        }
+
+        Set<String> result = new LinkedHashSet<>();
+        for (AbstractInsnNode insn = start; insn != null && insn != end; insn = insn.getNext()) {
+            MapNode chasmInsn = localVariableSensitiveInstructions.get(insn);
+            if (chasmInsn == null) {
+                continue;
+            }
+            if (getVar(insn) == slot) {
+                result.add(NodeUtils.getAsString(chasmInsn, NodeConstants.VAR));
+            }
+        }
+        return result;
+    }
+
+    private void handleSourceLocals() {
+        MethodNode methodNode = (MethodNode) this.mv;
+        if (methodNode.instructions == null) {
+            return;
+        }
+
+        if (methodNode.localVariables != null) {
+            for (LocalVariableNode localVariable : methodNode.localVariables) {
+                handleSourceLocal(localVariable);
+            }
+        }
+
+        if (methodNode.invisibleLocalVariableAnnotations != null) {
+            for (LocalVariableAnnotationNode annotation : methodNode.invisibleLocalVariableAnnotations) {
+                handleLocalVariableAnnotation(annotation, false);
+            }
+        }
+        if (methodNode.visibleLocalVariableAnnotations != null) {
+            for (LocalVariableAnnotationNode annotation : methodNode.visibleLocalVariableAnnotations) {
+                handleLocalVariableAnnotation(annotation, true);
+            }
+        }
+    }
+
+    private void handleSourceLocal(LocalVariableNode localVariable) {
+        Collection<String> chasmLocals
+                = findChasmLocalsForSourceLocal(localVariable.index, localVariable.start, localVariable.end);
+        for (String chasmLocal : chasmLocals) {
+            MapNode localNode = NodeUtils.getAsMap(this.locals, chasmLocal);
+            if (localVariable.name != null) {
+                localNode.getEntries().put(NodeConstants.SOURCE_NAME, Ast.literal(localVariable.name));
+            }
+            if (localVariable.desc != null) {
+                localNode.getEntries().put(NodeConstants.SOURCE_DESCRIPTOR, Ast.literal(localVariable.desc));
+            }
+            if (localVariable.signature != null) {
+                localNode.getEntries().put(NodeConstants.SIGNATURE, Ast.literal(localVariable.signature));
+            }
+        }
+    }
+
+    private void handleLocalVariableAnnotation(LocalVariableAnnotationNode annotation, boolean visible) {
+        for (int i = 0; i < annotation.start.size(); i++) {
+            int slot = annotation.index.get(i);
+            LabelNode start = annotation.start.get(i);
+            LabelNode end = annotation.end.get(i);
+            Collection<String> chasmLocals = findChasmLocalsForSourceLocal(slot, start, end);
+            for (String chasmLocal : chasmLocals) {
+                MapNode localNode = NodeUtils.getAsMap(this.locals, chasmLocal);
+                ListNode annotations = NodeUtils.asList(
+                        localNode.getEntries().computeIfAbsent(NodeConstants.ANNOTATIONS, k -> Ast.emptyList()));
+                MapNode values = Ast.emptyMap();
+                annotations.getEntries().add(Ast.map()
+                        .put(NodeConstants.VISIBLE, visible)
+                        .put(NodeConstants.TYPE_REF, annotation.typeRef)
+                        .put(NodeConstants.TYPE_PATH, annotation.typePath.toString())
+                        .put(NodeConstants.DESCRIPTOR, annotation.desc)
+                        .put(NodeConstants.VALUES, values)
+                        .build());
+                annotation.accept(new ChasmAnnotationVisitor(Opcodes.ASM9, values));
+            }
+        }
+    }
+
+    private static int getVar(AbstractInsnNode insn) {
+        return insn instanceof IincInsnNode ? ((IincInsnNode) insn).var : ((VarInsnNode) insn).var;
     }
 }

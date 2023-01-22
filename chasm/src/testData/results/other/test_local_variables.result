@@ -21,8 +21,8 @@ public class other/TestLocalVariables {
 
   // access flags 0x8
   static staticMethod(ID)V
-    // parameter  P0
-    // parameter  P1
+    // parameter  param1
+    // parameter  param2
    L0
     LINENUMBER 9 L0
     GETSTATIC other/TestLocalVariables.random : Ljava/util/Random;
@@ -56,15 +56,15 @@ public class other/TestLocalVariables {
    L5
     LOCALVARIABLE param1 I L0 L5 0
     LOCALVARIABLE param2 D L0 L5 1
-    LOCALVARIABLE local1 I L1 L5 3
-    LOCALVARIABLE local2 D L3 L5 4
+    LOCALVARIABLE local1 I L0 L5 3
+    LOCALVARIABLE local2 D L2 L4 4
     MAXSTACK = 5
     MAXLOCALS = 6
 
   // access flags 0x0
   instanceMethod(ID)V
-    // parameter  P0
-    // parameter  P1
+    // parameter  param1
+    // parameter  param2
    L0
     LINENUMBER 16 L0
     GETSTATIC other/TestLocalVariables.random : Ljava/util/Random;
@@ -101,8 +101,8 @@ public class other/TestLocalVariables {
     LOCALVARIABLE this Lother/TestLocalVariables; L0 L5 0
     LOCALVARIABLE param1 I L0 L5 1
     LOCALVARIABLE param2 D L0 L5 2
-    LOCALVARIABLE local1 I L1 L5 4
-    LOCALVARIABLE local2 D L2 L5 5
+    LOCALVARIABLE local1 I L0 L5 4
+    LOCALVARIABLE local2 D L1 L3 5
     MAXSTACK = 5
     MAXLOCALS = 7
 
@@ -118,8 +118,7 @@ public class other/TestLocalVariables {
     GETSTATIC other/TestLocalVariables.random : Ljava/util/Random;
     INVOKEVIRTUAL java/util/Random.nextInt ()I
     ISTORE 0
-   L3
-    GOTO L4
+    GOTO L3
    L1
     LINENUMBER 27 L1
    FRAME SAME
@@ -128,30 +127,30 @@ public class other/TestLocalVariables {
     ICONST_1
     IADD
     ISTORE 0
-   L4
-    LINENUMBER 29 L4
+   L3
+    LINENUMBER 29 L3
    FRAME APPEND [I]
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 0
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-   L5
-    LINENUMBER 30 L5
+   L4
+    LINENUMBER 30 L4
     GETSTATIC other/TestLocalVariables.random : Ljava/util/Random;
     INVOKEVIRTUAL java/util/Random.nextInt ()I
     ISTORE 1
-   L6
-    LINENUMBER 31 L6
+   L5
+    LINENUMBER 31 L5
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 1
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-   L7
-    LINENUMBER 32 L7
+   L6
+    LINENUMBER 32 L6
     IINC 0 1
     IINC 1 1
     RETURN
-   L8
-    LOCALVARIABLE local I L3 L1 0
-    LOCALVARIABLE local I L4 L8 0
+   L7
+    LOCALVARIABLE local I L2 L7 0
+    LOCALVARIABLE local I L4 L7 1
     MAXSTACK = 2
     MAXLOCALS = 2
 
