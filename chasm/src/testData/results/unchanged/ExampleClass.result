@@ -83,7 +83,7 @@ public abstract class other/ExampleClass {
     RETURN
    L5
     LOCALVARIABLE this Lother/ExampleClass; L0 L5 0
-    LOCALVARIABLE i I L0 L2 1
+    LOCALVARIABLE i I L1 L2 1
     MAXSTACK = 2
     MAXLOCALS = 2
 
@@ -167,9 +167,9 @@ public abstract class other/ExampleClass {
     LINENUMBER 44 L14
    FRAME SAME
     RETURN
-    LOCALVARIABLE five I L4 L11 0
-    LOCALVARIABLE three I L5 L1 1
-    LOCALVARIABLE e Ljava/lang/Exception; L2 L9 2
+    LOCALVARIABLE five I L0 L11 0
+    LOCALVARIABLE three I L6 L1 1
+    LOCALVARIABLE e Ljava/lang/Exception; L8 L9 2
     MAXSTACK = 5
     MAXLOCALS = 3
 
@@ -239,7 +239,7 @@ public abstract class other/ExampleClass {
     LINENUMBER 47 L9
    FRAME SAME1 java/lang/String
     ARETURN
-    LOCALVARIABLE nested Ljava/lang/String; L1 L4 0
+    LOCALVARIABLE nested Ljava/lang/String; L3 L4 0
     MAXSTACK = 4
     MAXLOCALS = 3
 
@@ -324,8 +324,8 @@ public abstract class other/ExampleClass {
     ILOAD 1
     IRETURN
    L9
-    LOCALVARIABLE output I L4 L7 0
-    LOCALVARIABLE output I L7 L9 1
+    LOCALVARIABLE output I L5 L7 0
+    LOCALVARIABLE output I L8 L9 1
     MAXSTACK = 3
     MAXLOCALS = 2
 

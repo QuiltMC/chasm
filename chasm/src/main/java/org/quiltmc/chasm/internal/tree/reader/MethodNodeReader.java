@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Handle;
@@ -28,6 +29,8 @@ public class MethodNodeReader {
     private final Map<String, Label> localEnds = new HashMap<>();
     private Label lastLabel;
     private final Set<String> localsSinceLastLabel = new HashSet<>();
+    @Nullable
+    private String variableStoredLastInsn = null;
 
     public MethodNodeReader(MapNode methodNode) {
         this.methodNode = methodNode;
@@ -80,6 +83,12 @@ public class MethodNodeReader {
                 if (!prevInstruction.getEntries().containsKey(NodeConstants.LABEL)) {
                     visitLabel(methodVisitor, new Label(), isStatic, params);
                 }
+            }
+
+            if (variableStoredLastInsn != null) {
+                this.localStarts.putIfAbsent(variableStoredLastInsn, lastLabel);
+                this.localsSinceLastLabel.add(variableStoredLastInsn);
+                variableStoredLastInsn = null;
             }
 
             // visit<...>Insn
@@ -222,8 +231,14 @@ public class MethodNodeReader {
                             || opcode == Opcodes.DSTORE ? 2 : 1;
                     int localIndex = getLocalIndex(varName, size);
                     methodVisitor.visitVarInsn(opcode, localIndex);
-                    this.localStarts.putIfAbsent(varName, this.lastLabel);
-                    this.localsSinceLastLabel.add(varName);
+                    // save variable stores until the next instruction for the purpose of debug info, as they are not
+                    // able to be read at the start of this instruction.
+                    if (opcode >= Opcodes.ISTORE && opcode <= Opcodes.ASTORE) {
+                        variableStoredLastInsn = varName;
+                    } else {
+                        this.localStarts.putIfAbsent(varName, this.lastLabel);
+                        this.localsSinceLastLabel.add(varName);
+                    }
                     break;
                 }
                 case Opcodes.NEW:
@@ -378,6 +393,12 @@ public class MethodNodeReader {
             this.localEnds.put(localName, label);
         }
         this.localsSinceLastLabel.clear();
+
+        if (variableStoredLastInsn != null) {
+            this.localStarts.putIfAbsent(variableStoredLastInsn, label);
+            this.localEnds.put(variableStoredLastInsn, label);
+            variableStoredLastInsn = null;
+        }
 
         if (!isStatic) {
             this.localStarts.putIfAbsent("this", label);
