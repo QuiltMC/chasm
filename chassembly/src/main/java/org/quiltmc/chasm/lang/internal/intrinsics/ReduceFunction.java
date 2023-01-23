@@ -1,8 +1,6 @@
 package org.quiltmc.chasm.lang.internal.intrinsics;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
@@ -15,17 +13,14 @@ public class ReduceFunction extends IntrinsicFunction {
     @Override
     public Node apply(Evaluator evaluator, Node arg) {
         if (arg instanceof MapNode) {
-            Map<String, Node> args = ((MapNode) arg).getEntries();
+            MapNode args = (MapNode) arg;
             Node list = args.get("list");
             Node function = args.get("func");
 
             if (list instanceof ListNode && function instanceof FunctionNode) {
                 return ((ListNode) list).getEntries().stream().reduce((first, second) -> {
-                    Map<String, Node> funcArgs = new LinkedHashMap<>();
-                    funcArgs.put("first", first);
-                    funcArgs.put("second", second);
-
-                    return ((FunctionNode) function).apply(evaluator, new MapNode(funcArgs));
+                    MapNode funcArgs = Ast.map().put("first", first).put("second", second).build();
+                    return ((FunctionNode) function).apply(evaluator, funcArgs);
                 }).orElseThrow(() -> new EvaluationException(
                         "Can't reduce empty list: " + list
                 ));

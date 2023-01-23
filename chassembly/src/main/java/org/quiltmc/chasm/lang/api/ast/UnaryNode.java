@@ -97,23 +97,23 @@ public class UnaryNode extends Node {
             break;
             case MINUS: {
                 if (inner instanceof IntegerNode) {
-                    return new IntegerNode(-((IntegerNode) inner).getValue());
+                    return Ast.literal(-((IntegerNode) inner).getValue());
                 }
 
                 if (inner instanceof FloatNode) {
-                    return new FloatNode(-((FloatNode) inner).getValue());
+                    return Ast.literal(-((FloatNode) inner).getValue());
                 }
             }
             break;
             case NOT: {
                 if (inner instanceof BooleanNode) {
-                    return BooleanNode.from(!((BooleanNode) inner).getValue());
+                    return Ast.literal(!((BooleanNode) inner).getValue());
                 }
             }
             break;
             case INVERT: {
                 if (inner instanceof IntegerNode) {
-                    return new IntegerNode(~((IntegerNode) inner).getValue());
+                    return Ast.literal(~((IntegerNode) inner).getValue());
                 }
             }
             break;

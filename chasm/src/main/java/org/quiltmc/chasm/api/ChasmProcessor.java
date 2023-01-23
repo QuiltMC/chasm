@@ -13,6 +13,8 @@ import org.quiltmc.chasm.internal.TransformerSorter;
 import org.quiltmc.chasm.internal.asm.ChasmClassWriter;
 import org.quiltmc.chasm.internal.tree.ClassNode;
 import org.quiltmc.chasm.internal.tree.reader.ClassNodeReader;
+import org.quiltmc.chasm.internal.util.NodeUtils;
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
@@ -37,7 +39,7 @@ public class ChasmProcessor {
      *            transformed.
      */
     public ChasmProcessor(Context context) {
-        classes = new ListNode(new ArrayList<>());
+        classes = Ast.emptyList();
         this.context = new ChasmContext(context, classes);
     }
 
@@ -60,9 +62,9 @@ public class ChasmProcessor {
      */
     public void addClass(ClassData classData) {
         ClassReader classReader = new ClassReader(classData.getClassBytes());
-        ClassNode classNode = new ClassNode(classReader, context, classes.getEntries().size());
+        ClassNode classNode = new ClassNode(classReader, context, classes.size());
         classNode.getMetadata().putAll(classData.getMetadata());
-        classes.getEntries().add(classNode);
+        classes.add(classNode);
     }
 
 
@@ -85,7 +87,7 @@ public class ChasmProcessor {
      * @return The resulting list of class data.
      */
     public List<ClassData> process(boolean onlyModifiedClasses) {
-        LOGGER.info("Processing {} classes...", classes.getEntries().size());
+        LOGGER.info("Processing {} classes...", classes.size());
 
         LOGGER.info("Sorting {} transformers...", transformers.size());
         List<List<Transformer>> rounds = TransformerSorter.sort(transformers);
@@ -103,10 +105,10 @@ public class ChasmProcessor {
             transformationApplier.applyAll();
         }
 
-        LOGGER.info("Writing {} classes...", classes.getEntries().size());
+        LOGGER.info("Writing {} classes...", classes.size());
         List<ClassData> classData = new ArrayList<>();
         for (Node node : classes.getEntries()) {
-            MapNode classNode = (MapNode) node;
+            MapNode classNode = NodeUtils.asMap(node);
 
             // Unmodified classes
             if (node instanceof ClassNode) {

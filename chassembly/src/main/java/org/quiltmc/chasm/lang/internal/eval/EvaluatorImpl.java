@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.LambdaNode;
-import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.ast.ReferenceNode;
 import org.quiltmc.chasm.lang.api.eval.ClosureNode;
@@ -63,7 +63,7 @@ public class EvaluatorImpl implements Evaluator {
     final ResolverImpl resolver;
 
     public EvaluatorImpl(Node node, Map<String, Node> intrinsics) {
-        resolver = new ResolverImpl(new MapNode(intrinsics));
+        resolver = new ResolverImpl(Ast.map(intrinsics));
         node.resolve(resolver);
     }
 

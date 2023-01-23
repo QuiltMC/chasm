@@ -73,13 +73,13 @@ public class MethodNodeReader {
         ListNode instructions = NodeUtils.getAsList(codeNode, NodeConstants.INSTRUCTIONS);
 
         // insert a label at the start of the instructions if there isn't one already
-        MapNode firstInstruction = NodeUtils.asMap(instructions.getEntries().get(0));
+        MapNode firstInstruction = NodeUtils.asMap(instructions.get(0));
         if (!firstInstruction.getEntries().containsKey(NodeConstants.LABEL)) {
             methodVisitor.visitLabel(new Label());
         }
 
-        for (int index = 0; index < instructions.getEntries().size(); index++) {
-            Node rawInstruction = instructions.getEntries().get(index);
+        for (int index = 0; index < instructions.size(); index++) {
+            Node rawInstruction = instructions.get(index);
             MapNode instruction = NodeUtils.asMap(rawInstruction);
 
             // visitLabel
@@ -92,8 +92,8 @@ public class MethodNodeReader {
 
             // insert a label just before the end of the instructions (before the return insn),
             // if there isn't one already
-            if (index == instructions.getEntries().size() - 1 && index != 0) {
-                MapNode prevInstruction = NodeUtils.asMap(instructions.getEntries().get(index - 1));
+            if (index == instructions.size() - 1 && index != 0) {
+                MapNode prevInstruction = NodeUtils.asMap(instructions.get(index - 1));
                 if (!prevInstruction.getEntries().containsKey(NodeConstants.LABEL)) {
                     methodVisitor.visitLabel(new Label());
                 }
@@ -279,7 +279,7 @@ public class MethodNodeReader {
                     String descriptor = NodeUtils.getAsString(instruction, NodeConstants.DESCRIPTOR);
                     Handle handle = NodeUtils.asHandle(NodeUtils.get(instruction, NodeConstants.HANDLE));
                     ListNode arguments = NodeUtils.getAsList(instruction, NodeConstants.ARGUMENTS);
-                    Object[] args = new Object[arguments.getEntries().size()];
+                    Object[] args = new Object[arguments.size()];
 
                     int i = 0;
                     for (Node entry : arguments.getEntries()) {
@@ -333,10 +333,10 @@ public class MethodNodeReader {
                     String defaultString = NodeUtils.getAsString(instruction, NodeConstants.DEFAULT);
                     Label dflt = obtainLabel(defaultString);
                     ListNode cases = NodeUtils.getAsList(instruction, NodeConstants.CASES);
-                    int[] keys = new int[cases.getEntries().size()];
-                    Label[] labels = new Label[cases.getEntries().size()];
-                    for (int i = 0; i < cases.getEntries().size(); i++) {
-                        MapNode caseNode = NodeUtils.asMap(cases.getEntries().get(i));
+                    int[] keys = new int[cases.size()];
+                    Label[] labels = new Label[cases.size()];
+                    for (int i = 0; i < cases.size(); i++) {
+                        MapNode caseNode = NodeUtils.asMap(cases.get(i));
                         keys[i] = NodeUtils.getAsInt(caseNode, NodeConstants.KEY);
                         String caseLabelString = NodeUtils.getAsString(caseNode, NodeConstants.LABEL);
                         labels[i] = obtainLabel(caseLabelString);
@@ -570,13 +570,13 @@ public class MethodNodeReader {
 
         // visitAnnotableParameterCount
         // We make all parameters annotable
-        methodVisitor.visitAnnotableParameterCount(parameters.getEntries().size(), true);
-        methodVisitor.visitAnnotableParameterCount(parameters.getEntries().size(), false);
+        methodVisitor.visitAnnotableParameterCount(parameters.size(), true);
+        methodVisitor.visitAnnotableParameterCount(parameters.size(), false);
 
         // visitParameterAnnotation
-        for (int i = 0; i < parameters.getEntries().size(); i++) {
+        for (int i = 0; i < parameters.size(); i++) {
             int index = i;
-            String paramName = NodeUtils.asString(parameters.getEntries().get(i));
+            String paramName = NodeUtils.asString(parameters.get(i));
             MapNode parameterNode = NodeUtils.getAsMap(NodeUtils.getAsMap(methodNode, NodeConstants.LOCALS), paramName);
             ListNode annotations = NodeUtils.getAsList(parameterNode, NodeConstants.ANNOTATIONS);
             if (annotations != null) {
@@ -605,7 +605,7 @@ public class MethodNodeReader {
 
         Type returnType = Type.getType(NodeUtils.getAsString(methodNode, NodeConstants.RETURN_TYPE));
         ListNode parameters = NodeUtils.getAsList(methodNode, NodeConstants.PARAMETERS);
-        Type[] parameterTypes = new Type[parameters.getEntries().size()];
+        Type[] parameterTypes = new Type[parameters.size()];
 
         int i = 0;
         for (Node entry : parameters.getEntries()) {

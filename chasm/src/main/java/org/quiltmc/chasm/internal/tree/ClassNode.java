@@ -1,6 +1,5 @@
 package org.quiltmc.chasm.internal.tree;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -10,11 +9,9 @@ import org.quiltmc.chasm.internal.asm.visitor.ChasmClassVisitor;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.internal.util.PathInitializer;
-import org.quiltmc.chasm.lang.api.ast.IntegerNode;
-import org.quiltmc.chasm.lang.api.ast.ListNode;
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
-import org.quiltmc.chasm.lang.api.ast.StringNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 
@@ -34,15 +31,10 @@ public class ClassNode extends MapNode {
     private static Map<String, Node> getStaticEntries(ClassReader reader) {
         Map<String, Node> entries = new LinkedHashMap<>();
 
-        entries.put(NodeConstants.ACCESS, new IntegerNode(reader.getAccess()));
-        entries.put(NodeConstants.NAME, new StringNode(reader.getClassName()));
-        entries.put(NodeConstants.SUPER, new StringNode(reader.getSuperName()));
-
-        ListNode interfacesNode = new ListNode(new ArrayList<>());
-        for (String iface : reader.getInterfaces()) {
-            interfacesNode.getEntries().add(new StringNode(iface));
-        }
-        entries.put(NodeConstants.INTERFACES, interfacesNode);
+        entries.put(NodeConstants.ACCESS, Ast.literal(reader.getAccess()));
+        entries.put(NodeConstants.NAME, Ast.literal(reader.getClassName()));
+        entries.put(NodeConstants.SUPER, Ast.nullableString(reader.getSuperName()));
+        entries.put(NodeConstants.INTERFACES, Ast.list((Object[]) reader.getInterfaces()));
 
         return entries;
     }

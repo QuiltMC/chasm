@@ -1,25 +1,25 @@
 package org.quiltmc.chasm.internal.util;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-
 import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Type;
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.BooleanNode;
 import org.quiltmc.chasm.lang.api.ast.FloatNode;
 import org.quiltmc.chasm.lang.api.ast.IntegerNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.ast.NullNode;
 import org.quiltmc.chasm.lang.api.ast.StringNode;
+import org.quiltmc.chasm.lang.internal.Assert;
 
 public class NodeUtils {
     private NodeUtils() {
     }
 
     public static Node get(Node node, String key) {
-        return asMap(node).getEntries().get(key);
+        return asMap(node).get(key);
     }
 
     public static MapNode getAsMap(Node node, String key) {
@@ -47,7 +47,7 @@ public class NodeUtils {
     }
 
     public static MapNode asMap(Node node) {
-        if (node == null) {
+        if (node == null || node instanceof NullNode) {
             return null;
         }
         if (node instanceof MapNode) {
@@ -57,7 +57,7 @@ public class NodeUtils {
     }
 
     public static ListNode asList(Node node) {
-        if (node == null) {
+        if (node == null || node instanceof NullNode) {
             return null;
         }
         if (node instanceof ListNode) {
@@ -67,7 +67,7 @@ public class NodeUtils {
     }
 
     public static String asString(Node node) {
-        if (node == null) {
+        if (node == null || node instanceof NullNode) {
             return null;
         }
         if (node instanceof StringNode) {
@@ -77,7 +77,7 @@ public class NodeUtils {
     }
 
     public static Long asLong(Node node) {
-        if (node == null) {
+        if (node == null || node instanceof NullNode) {
             return null;
         }
         if (node instanceof IntegerNode) {
@@ -87,7 +87,7 @@ public class NodeUtils {
     }
 
     public static Boolean asBoolean(Node node) {
-        if (node == null) {
+        if (node == null || node instanceof NullNode) {
             return null;
         }
         if (node instanceof BooleanNode) {
@@ -96,48 +96,52 @@ public class NodeUtils {
         throw createWrongTypeException(node, IntegerNode.class);
     }
 
+    public static int asInt(Node node) {
+        return asLong(node).intValue();
+    }
+
     public static IllegalStateException createWrongTypeException(Node node, Class<?> clazz) {
         return new IllegalStateException("Expected " + clazz + " but found " + node);
     }
 
     public static Node getValueNode(Object value) {
-        MapNode node = new MapNode(new LinkedHashMap<>());
+        MapNode node = Ast.emptyMap();
         if (value instanceof Byte) {
-            node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.BYTE));
-            node.getEntries().put(NodeConstants.VALUE, new IntegerNode((long) value));
+            node.put(NodeConstants.TYPE, Ast.literal(NodeConstants.BYTE));
+            node.put(NodeConstants.VALUE, Ast.literal((long) value));
         } else if (value instanceof Boolean) {
-            node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.BOOLEAN));
-            node.getEntries().put(NodeConstants.VALUE, BooleanNode.from((Boolean) value));
+            node.put(NodeConstants.TYPE, Ast.literal(NodeConstants.BOOLEAN));
+            node.put(NodeConstants.VALUE, Ast.literal((Boolean) value));
         } else if (value instanceof Character) {
-            node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.CHARACTER));
-            node.getEntries().put(NodeConstants.VALUE, new IntegerNode((Character) value));
+            node.put(NodeConstants.TYPE, Ast.literal(NodeConstants.CHARACTER));
+            node.put(NodeConstants.VALUE, Ast.literal((Character) value));
         } else if (value instanceof Short) {
-            node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.SHORT));
-            node.getEntries().put(NodeConstants.VALUE, new IntegerNode((Short) value));
+            node.put(NodeConstants.TYPE, Ast.literal(NodeConstants.SHORT));
+            node.put(NodeConstants.VALUE, Ast.literal((Short) value));
         } else if (value instanceof Integer) {
-            node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.INTEGER));
-            node.getEntries().put(NodeConstants.VALUE, new IntegerNode((Integer) value));
+            node.put(NodeConstants.TYPE, Ast.literal(NodeConstants.INTEGER));
+            node.put(NodeConstants.VALUE, Ast.literal((Integer) value));
         } else if (value instanceof Long) {
-            node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.LONG));
-            node.getEntries().put(NodeConstants.VALUE, new IntegerNode((Long) value));
+            node.put(NodeConstants.TYPE, Ast.literal(NodeConstants.LONG));
+            node.put(NodeConstants.VALUE, Ast.literal((Long) value));
         } else if (value instanceof Float) {
-            node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.FLOAT));
-            node.getEntries().put(NodeConstants.VALUE, new FloatNode((Float) value));
+            node.put(NodeConstants.TYPE, Ast.literal(NodeConstants.FLOAT));
+            node.put(NodeConstants.VALUE, Ast.literal((Float) value));
         } else if (value instanceof Double) {
-            node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.DOUBLE));
-            node.getEntries().put(NodeConstants.VALUE, new FloatNode((Double) value));
+            node.put(NodeConstants.TYPE, Ast.literal(NodeConstants.DOUBLE));
+            node.put(NodeConstants.VALUE, Ast.literal((Double) value));
         } else if (value instanceof String) {
-            node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.STRING));
-            node.getEntries().put(NodeConstants.VALUE, new StringNode((String) value));
+            node.put(NodeConstants.TYPE, Ast.literal(NodeConstants.STRING));
+            node.put(NodeConstants.VALUE, Ast.literal((String) value));
         } else if (value instanceof Type) {
-            node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.TYPE));
-            node.getEntries().put(NodeConstants.VALUE, new StringNode(((Type) value).getDescriptor()));
+            node.put(NodeConstants.TYPE, Ast.literal(NodeConstants.TYPE));
+            node.put(NodeConstants.VALUE, Ast.literal(((Type) value).getDescriptor()));
         } else if (value instanceof Handle) {
-            node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.HANDLE));
-            node.getEntries().put(NodeConstants.VALUE, getHandleNode((Handle) value));
+            node.put(NodeConstants.TYPE, Ast.literal(NodeConstants.HANDLE));
+            node.put(NodeConstants.VALUE, getHandleNode((Handle) value));
         } else if (value instanceof ConstantDynamic) {
-            node.getEntries().put(NodeConstants.TYPE, new StringNode(NodeConstants.CONSTANT_DYNAMIC));
-            node.getEntries().put(NodeConstants.VALUE, getConstantDynamicNode((ConstantDynamic) value));
+            node.put(NodeConstants.TYPE, Ast.literal(NodeConstants.CONSTANT_DYNAMIC));
+            node.put(NodeConstants.VALUE, getConstantDynamicNode((ConstantDynamic) value));
         } else {
             throw new RuntimeException("Invalid annotation value: " + value);
         }
@@ -147,7 +151,8 @@ public class NodeUtils {
 
     public static Object fromValueNode(Node node) {
         String type = getAsString(node, NodeConstants.TYPE);
-        Node valueNode = asMap(node).getEntries().get(NodeConstants.VALUE);
+        Node valueNode = asMap(node).get(NodeConstants.VALUE);
+        Assert.check(valueNode != null);
 
         switch (type) {
             case NodeConstants.BYTE:
@@ -180,23 +185,23 @@ public class NodeUtils {
     }
 
     public static ListNode getValueListNode(Object[] values) {
-        ListNode argumentsNode = new ListNode(new ArrayList<>());
+        ListNode argumentsNode = Ast.emptyList();
 
         for (Object value : values) {
-            argumentsNode.getEntries().add(getValueNode(value));
+            argumentsNode.add(getValueNode(value));
         }
 
         return argumentsNode;
     }
 
     public static MapNode getHandleNode(Handle handle) {
-        MapNode handleNode = new MapNode(new LinkedHashMap<>());
-        handleNode.getEntries().put(NodeConstants.TAG, new IntegerNode(handle.getTag()));
-        handleNode.getEntries().put(NodeConstants.OWNER, new StringNode(handle.getOwner()));
-        handleNode.getEntries().put(NodeConstants.NAME, new StringNode(handle.getName()));
-        handleNode.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(handle.getDesc()));
-        handleNode.getEntries().put(NodeConstants.IS_INTERFACE, BooleanNode.from(handle.isInterface()));
-        return handleNode;
+        return Ast.map()
+                .put(NodeConstants.TAG, handle.getTag())
+                .put(NodeConstants.OWNER, handle.getOwner())
+                .put(NodeConstants.NAME, handle.getName())
+                .put(NodeConstants.DESCRIPTOR, handle.getDesc())
+                .put(NodeConstants.IS_INTERFACE, handle.isInterface())
+                .build();
     }
 
     public static Handle asHandle(Node node) {
@@ -214,18 +219,17 @@ public class NodeUtils {
     }
 
     public static MapNode getConstantDynamicNode(ConstantDynamic constantDynamic) {
-        MapNode constDynamicNode = new MapNode(new LinkedHashMap<>());
-        constDynamicNode.getEntries().put(NodeConstants.NAME, new StringNode(constantDynamic.getName()));
-        constDynamicNode.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(constantDynamic.getDescriptor()));
-        constDynamicNode.getEntries().put(NodeConstants.HANDLE, getHandleNode(constantDynamic.getBootstrapMethod()));
-
         Object[] arguments = new Object[constantDynamic.getBootstrapMethodArgumentCount()];
         for (int i = 0; i < arguments.length; i++) {
             arguments[i] = constantDynamic.getBootstrapMethodArgument(i);
         }
-        constDynamicNode.getEntries().put(NodeConstants.ARGUMENTS, getValueListNode(arguments));
 
-        return constDynamicNode;
+        return Ast.map()
+                .put(NodeConstants.NAME, constantDynamic.getName())
+                .put(NodeConstants.DESCRIPTOR, constantDynamic.getDescriptor())
+                .put(NodeConstants.HANDLE, getHandleNode(constantDynamic.getBootstrapMethod()))
+                .put(NodeConstants.ARGUMENTS, getValueListNode(arguments))
+                .build();
     }
 
     public static ConstantDynamic asConstantDynamic(Node node) {
@@ -234,7 +238,7 @@ public class NodeUtils {
         Handle handle = asHandle(getAsMap(node, NodeConstants.HANDLE));
 
         ListNode arguments = getAsList(node, NodeConstants.ARGUMENTS);
-        Object[] args = new Object[arguments.getEntries().size()];
+        Object[] args = new Object[arguments.size()];
         int i = 0;
         for (Node entry : arguments.getEntries()) {
             args[i++] = fromValueNode(entry);

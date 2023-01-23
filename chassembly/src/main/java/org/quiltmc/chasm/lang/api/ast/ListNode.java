@@ -32,6 +32,27 @@ public class ListNode extends Node {
         return entries;
     }
 
+    /**
+     * Appends a node to the end of this list.
+     */
+    public void add(Node node) {
+        this.entries.add(node);
+    }
+
+    /**
+     * Gets the node at the given index in this list.
+     */
+    public Node get(int index) {
+        return this.entries.get(index);
+    }
+
+    /**
+     * Gets the size of this list.
+     */
+    public int size() {
+        return this.entries.size();
+    }
+
     @Override
     @ApiStatus.OverrideOnly
     public void resolve(Resolver resolver) {

@@ -1,11 +1,7 @@
 package org.quiltmc.chasm.lang.internal.intrinsics;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.FloatNode;
-import org.quiltmc.chasm.lang.api.ast.IntegerNode;
-import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
@@ -50,11 +46,11 @@ public class SplitFloatFunction extends IntrinsicFunction {
             coefficient = Double.longBitsToDouble((1023L << 52) | mantissa);
         }
 
-        Map<String, Node> map = new LinkedHashMap<>(3);
-        map.put("sign", new IntegerNode(sign));
-        map.put("exponent", new IntegerNode(exponent));
-        map.put("coefficient", new FloatNode(coefficient));
-        return new MapNode(map);
+        return Ast.map()
+                .put("sign", sign)
+                .put("exponent", exponent)
+                .put("coefficient", coefficient)
+                .build();
     }
 
     @Override

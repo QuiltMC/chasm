@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.quiltmc.chasm.api.util.ClassLoaderContext;
 import org.quiltmc.chasm.api.util.Context;
 import org.quiltmc.chasm.internal.intrinsic.ChasmIntrinsics;
+import org.quiltmc.chasm.internal.util.NodeUtils;
 import org.quiltmc.chasm.lang.api.ast.IntegerNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
@@ -38,7 +39,7 @@ public class IntrinsicsTest {
     public void testFileBytes() {
         ListNode bytes = (ListNode) evaluate("file_bytes(\"hello.txt\")");
         int[] byteArray = bytes.getEntries().stream()
-                .mapToInt(entry -> ((IntegerNode) entry).getValue().intValue()).toArray();
+                .mapToInt(NodeUtils::asInt).toArray();
         Assertions.assertArrayEquals(new int[] { 72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100, 33 }, byteArray);
     }
 
@@ -63,13 +64,13 @@ public class IntrinsicsTest {
     @Test
     public void testLib1() {
         MapNode result = (MapNode) evaluate("{lib: include(\"lib.chasm\"), result: lib.inc(41)}");
-        Assertions.assertEquals(42, ((IntegerNode) result.getEntries().get("result")).getValue());
+        Assertions.assertEquals(42, ((IntegerNode) result.get("result")).getValue());
     }
 
     @Test
     public void testLib2() {
         MapNode result = (MapNode) evaluate("{lib: include(\"lib.chasm\"), result: lib.result}");
-        Assertions.assertEquals(3, ((IntegerNode) result.getEntries().get("result")).getValue());
+        Assertions.assertEquals(3, ((IntegerNode) result.get("result")).getValue());
     }
 
     @Test

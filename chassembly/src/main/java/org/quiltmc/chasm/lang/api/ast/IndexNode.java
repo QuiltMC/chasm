@@ -1,7 +1,5 @@
 package org.quiltmc.chasm.lang.api.ast;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.ApiStatus;
@@ -72,23 +70,22 @@ public class IndexNode extends Node {
         // Index list
         if (leftNode instanceof ListNode && indexNode instanceof IntegerNode) {
             long index = ((IntegerNode) indexNode).getValue();
-            List<Node> entries = ((ListNode) leftNode).getEntries();
+            ListNode leftList = (ListNode) leftNode;
 
-            if (index < 0 || index >= entries.size()) {
-                return NullNode.INSTANCE;
+            if (index < 0 || index >= leftList.size()) {
+                return Ast.nullNode();
             }
 
-            return entries.get((int) index).evaluate(evaluator);
+            return leftList.get((int) index).evaluate(evaluator);
         }
 
         // Filter list
         if (leftNode instanceof ListNode && indexNode instanceof ClosureNode) {
             ClosureNode closure = (ClosureNode) indexNode;
-            List<Node> entries = ((ListNode) leftNode).getEntries();
-            List<Node> newEntries = new ArrayList<>();
+            ListNode newEntries = Ast.emptyList();
 
-            for (Node entry : entries) {
-                CallNode callExpression = new CallNode(closure, entry);
+            for (Node entry : ((ListNode) leftNode).getEntries()) {
+                CallNode callExpression = Ast.call(closure, entry);
                 Node reduced = callExpression.evaluate(evaluator);
                 if (!(reduced instanceof BooleanNode)) {
                     throw new EvaluationException("Filter function must return a boolean but found " + reduced);
@@ -99,7 +96,7 @@ public class IndexNode extends Node {
                 }
             }
 
-            return new ListNode(newEntries);
+            return newEntries;
         }
 
         // Index map
@@ -108,7 +105,7 @@ public class IndexNode extends Node {
             Map<String, Node> entries = ((MapNode) leftNode).getEntries();
 
             if (!entries.containsKey(key)) {
-                return NullNode.INSTANCE;
+                return Ast.nullNode();
             }
 
             return entries.get(key).evaluate(evaluator);
