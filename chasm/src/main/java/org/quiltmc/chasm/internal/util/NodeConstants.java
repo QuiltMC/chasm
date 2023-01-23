@@ -4,7 +4,6 @@ public class NodeConstants {
     public static final String ACCESS = "access";
     public static final String ANNOTATIONS = "annotations";
     public static final String ANNOTATION_DEFAULT = "annotationDefault";
-    public static final String ARGS = "args";
     public static final String ARGUMENTS = "arguments";
     public static final String BOOLEAN = "bool";
     public static final String BYTE = "byte";
@@ -69,7 +68,8 @@ public class NodeConstants {
     public static final String SHORT = "short";
     public static final String SIGNATURE = "signature";
     public static final String SOURCE = "source";
-    public static final String SOURCE_LOCALS = "sourceLocals";
+    public static final String SOURCE_DESCRIPTOR = "sourceDescriptor";
+    public static final String SOURCE_NAME = "sourceName";
     public static final String START = "start";
     public static final String STRING = "string";
     public static final String SUPER = "super";

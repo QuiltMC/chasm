@@ -21,8 +21,8 @@ public class other/TestLocalVariables {
 
   // access flags 0x8
   static staticMethod(ID)V
-    // parameter  P0
-    // parameter  P1
+    // parameter  param1
+    // parameter  param2
    L0
     LINENUMBER 9 L0
     GETSTATIC other/TestLocalVariables.random : Ljava/util/Random;
@@ -63,8 +63,8 @@ public class other/TestLocalVariables {
 
   // access flags 0x0
   instanceMethod(ID)V
-    // parameter  P0
-    // parameter  P1
+    // parameter  param1
+    // parameter  param2
    L0
     LINENUMBER 16 L0
     GETSTATIC other/TestLocalVariables.random : Ljava/util/Random;
@@ -152,6 +152,7 @@ public class other/TestLocalVariables {
    L8
     LOCALVARIABLE local I L3 L1 0
     LOCALVARIABLE local I L4 L8 0
+    LOCALVARIABLE local I L6 L8 1
     MAXSTACK = 2
     MAXLOCALS = 2
 

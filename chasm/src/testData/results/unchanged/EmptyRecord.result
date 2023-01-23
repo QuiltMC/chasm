@@ -57,7 +57,7 @@ public final class empty/EmptyRecord extends java/lang/Record {
 
   // access flags 0x11
   public final equals(Ljava/lang/Object;)Z
-    // parameter  P0
+    // parameter  o
    L0
     LINENUMBER 3 L0
     ALOAD 0
