@@ -30,6 +30,7 @@ import org.quiltmc.chasm.internal.util.NodeUtils;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.internal.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -456,7 +457,7 @@ public class MethodNodeReader {
             if (readabilityEnds[localIndex].size() == readabilityStarts[localIndex].size() - 1) {
                 readabilityEnds[localIndex].add(frames.length - 1);
             }
-            assert readabilityEnds[localIndex].size() == readabilityStarts[localIndex].size();
+            Assert.check(readabilityEnds[localIndex].size() == readabilityStarts[localIndex].size());
         }
 
         MapNode locals = NodeUtils.getAsMap(this.methodNode, NodeConstants.LOCALS);

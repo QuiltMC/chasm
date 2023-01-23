@@ -15,6 +15,7 @@ import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
+import org.quiltmc.chasm.lang.internal.Assert;
 import org.quiltmc.chasm.lang.internal.intrinsics.BuiltInIntrinsics;
 
 public class EvaluatorImpl implements Evaluator {
@@ -78,7 +79,7 @@ public class EvaluatorImpl implements Evaluator {
 
         if (reference instanceof LambdaReference) {
             CallStackEntry topEntry = callStack.peek();
-            assert Objects.requireNonNull(topEntry).lambda == ((LambdaReference) reference).getLambda();
+            Assert.check(Objects.requireNonNull(topEntry).lambda == ((LambdaReference) reference).getLambda());
             return topEntry.scope.get(((LambdaReference) reference).getIdentifier());
         }
 
