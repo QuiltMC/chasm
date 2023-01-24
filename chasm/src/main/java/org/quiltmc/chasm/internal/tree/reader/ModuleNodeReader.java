@@ -92,9 +92,9 @@ public class ModuleNodeReader {
             ListNode reqModules = NodeUtils.getAsList(exportNode, NodeConstants.MODULES);
             String[] modules = null;
             if (reqModules != null) {
-                modules = new String[reqModules.getEntries().size()];
-                for (int i = 0; i < reqModules.getEntries().size(); i++) {
-                    modules[i] = NodeUtils.asString(reqModules.getEntries().get(i));
+                modules = new String[reqModules.size()];
+                for (int i = 0; i < reqModules.size(); i++) {
+                    modules[i] = NodeUtils.asString(reqModules.get(i));
                 }
             }
             moduleVisitor.visitExport(expPackage, expAccess, modules);
@@ -113,9 +113,9 @@ public class ModuleNodeReader {
             ListNode openModules = NodeUtils.getAsList(openNode, NodeConstants.MODULES);
             String[] modules = null;
             if (openModules != null) {
-                modules = new String[openModules.getEntries().size()];
-                for (int i = 0; i < openModules.getEntries().size(); i++) {
-                    modules[i] = NodeUtils.asString(openModules.getEntries().get(i));
+                modules = new String[openModules.size()];
+                for (int i = 0; i < openModules.size(); i++) {
+                    modules[i] = NodeUtils.asString(openModules.get(i));
                 }
             }
 
@@ -142,9 +142,9 @@ public class ModuleNodeReader {
             MapNode providesNode = NodeUtils.asMap(n);
             String service = NodeUtils.getAsString(providesNode, NodeConstants.SERVICE);
             ListNode providers = NodeUtils.getAsList(providesNode, NodeConstants.PROVIDERS);
-            String[] prov = new String[providers.getEntries().size()];
-            for (int i = 0; i < providers.getEntries().size(); i++) {
-                prov[i] = NodeUtils.asString(providers.getEntries().get(i));
+            String[] prov = new String[providers.size()];
+            for (int i = 0; i < providers.size(); i++) {
+                prov[i] = NodeUtils.asString(providers.get(i));
             }
             moduleVisitor.visitProvide(service, prov);
         }

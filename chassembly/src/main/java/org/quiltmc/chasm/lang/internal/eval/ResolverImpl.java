@@ -51,7 +51,7 @@ public class ResolverImpl implements Resolver {
             Node node = global ? it.next() : it.previous();
 
             if (node instanceof MapNode) {
-                Node target = ((MapNode) node).getEntries().get(identifier);
+                Node target = ((MapNode) node).get(identifier);
                 if (target != null) {
                     reference = new NodeReference(target);
                     break;

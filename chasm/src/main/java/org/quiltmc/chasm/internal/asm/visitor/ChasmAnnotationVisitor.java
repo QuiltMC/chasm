@@ -1,16 +1,12 @@
 package org.quiltmc.chasm.internal.asm.visitor;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.objectweb.asm.AnnotationVisitor;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.internal.util.NodeUtils;
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
-import org.quiltmc.chasm.lang.api.ast.StringNode;
 
 public class ChasmAnnotationVisitor extends AnnotationVisitor {
     private final Node values;
@@ -45,9 +41,10 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
 
     @Override
     public void visitEnum(String name, String descriptor, String value) {
-        MapNode enumValueNode = new MapNode(new LinkedHashMap<>());
-        enumValueNode.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(descriptor));
-        enumValueNode.getEntries().put(NodeConstants.VALUE, new StringNode(value));
+        MapNode enumValueNode = Ast.map()
+                .put(NodeConstants.DESCRIPTOR, descriptor)
+                .put(NodeConstants.VALUE, value)
+                .build();
 
         visitValueNode(name, enumValueNode);
 
@@ -56,10 +53,11 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotation(String name, String descriptor) {
-        MapNode annotationValueNode = new MapNode(new LinkedHashMap<>());
-        MapNode values = new MapNode(new LinkedHashMap<>());
-        annotationValueNode.getEntries().put(NodeConstants.DESCRIPTOR, new StringNode(descriptor));
-        annotationValueNode.getEntries().put(NodeConstants.VALUES, values);
+        MapNode values = Ast.emptyMap();
+        MapNode annotationValueNode = Ast.map()
+                .put(NodeConstants.DESCRIPTOR, descriptor)
+                .put(NodeConstants.VALUES, values)
+                .build();
 
         visitValueNode(name, annotationValueNode);
 
@@ -68,7 +66,7 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
 
     @Override
     public AnnotationVisitor visitArray(String name) {
-        ListNode values = new ListNode(new ArrayList<>());
+        ListNode values = Ast.emptyList();
 
         visitValueNode(name, values);
 
@@ -88,12 +86,12 @@ public class ChasmAnnotationVisitor extends AnnotationVisitor {
                 throw new RuntimeException("Annotation value is missing name");
             }
 
-            NodeUtils.asMap(values).getEntries().put(name, value);
+            NodeUtils.asMap(values).put(name, value);
         }
 
         // If this is processing a list, name must not be set
         if (values instanceof ListNode) {
-            NodeUtils.asList(values).getEntries().add(value);
+            NodeUtils.asList(values).add(value);
         }
     }
 }

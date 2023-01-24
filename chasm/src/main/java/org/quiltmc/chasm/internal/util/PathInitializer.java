@@ -34,8 +34,8 @@ public abstract class PathInitializer {
             ListNode listNode = (ListNode) root;
 
             // Recursively set the path for all entries
-            for (int i = 0; i < listNode.getEntries().size(); i++) {
-                initialize(listNode.getEntries().get(i), new PathMetadata(path, i));
+            for (int i = 0; i < listNode.size(); i++) {
+                initialize(listNode.get(i), new PathMetadata(path, i));
             }
         }
     }

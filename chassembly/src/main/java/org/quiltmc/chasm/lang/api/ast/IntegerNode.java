@@ -12,13 +12,4 @@ public class IntegerNode extends ValueNode<Long> {
     public IntegerNode(long value) {
         super(value);
     }
-
-    /**
-     * Creates an integer literal expression.
-     *
-     * @see Ast#literal(long)
-     */
-    public IntegerNode(int value) {
-        super((long) value);
-    }
 }

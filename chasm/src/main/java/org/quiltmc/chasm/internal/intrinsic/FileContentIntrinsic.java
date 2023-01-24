@@ -4,8 +4,8 @@ import java.nio.charset.StandardCharsets;
 
 import org.jetbrains.annotations.Nullable;
 import org.quiltmc.chasm.api.util.Context;
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.Node;
-import org.quiltmc.chasm.lang.api.ast.NullNode;
 import org.quiltmc.chasm.lang.api.ast.StringNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
@@ -21,7 +21,7 @@ public class FileContentIntrinsic extends IntrinsicFunction {
     @Override
     public Node apply(Evaluator evaluator, Node arg) {
         String content = readString(arg, context);
-        return content == null ? NullNode.INSTANCE : new StringNode(content);
+        return Ast.nullableString(content);
     }
 
     @Override

@@ -2,7 +2,6 @@ package org.quiltmc.chasm.internal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -15,6 +14,7 @@ import org.quiltmc.chasm.internal.metadata.OriginMetadata;
 import org.quiltmc.chasm.internal.metadata.PathMetadata;
 import org.quiltmc.chasm.internal.tree.ClassNode;
 import org.quiltmc.chasm.internal.util.NodeUtils;
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
@@ -107,7 +107,7 @@ public class TransformationApplier {
         // Replace in map
         if (parentNode instanceof MapNode && entry.isString()) {
             MapNode parentList = NodeUtils.asMap(parentNode);
-            parentList.getEntries().put(entry.asString(), replacement);
+            parentList.put(entry.asString(), replacement);
             return;
         }
 
@@ -128,7 +128,7 @@ public class TransformationApplier {
         int start = sliceTarget.getStartIndex() / 2;
         int end = sliceTarget.getEndIndex() / 2;
         int length = end - start;
-        int change = replacement.getEntries().size() - length;
+        int change = replacement.size() - length;
 
         // Move all slice indices affected by this
         List<Target> affectedTargets =
@@ -184,7 +184,7 @@ public class TransformationApplier {
                 // Get next node
                 ListNode listNode = NodeUtils.asList(currentNode);
                 int index = entry.asInteger();
-                Node nextNode = listNode.getEntries().get(index);
+                Node nextNode = listNode.get(index);
 
                 // Resolve lazy nodes
                 if (resolveLazyNodes && nextNode instanceof ClassNode) {
@@ -197,12 +197,12 @@ public class TransformationApplier {
                 // Get next node
                 MapNode mapNode = NodeUtils.asMap(currentNode);
                 String key = entry.asString();
-                Node nextNode = mapNode.getEntries().get(key);
+                Node nextNode = mapNode.get(key);
 
                 // Resolve lazy nodes
                 if (resolveLazyNodes && nextNode instanceof ClassNode) {
                     nextNode = new MapNode(((ClassNode) nextNode).getLazyEntries());
-                    mapNode.getEntries().put(key, nextNode);
+                    mapNode.put(key, nextNode);
                 }
 
                 currentNode = nextNode;
@@ -216,9 +216,9 @@ public class TransformationApplier {
     }
 
     private MapNode resolveSources(Transformation transformation) {
-        MapNode resolvedSources = new MapNode(new LinkedHashMap<>());
+        MapNode resolvedSources = Ast.emptyMap();
         for (Map.Entry<String, Target> source : transformation.getSources().entrySet()) {
-            resolvedSources.getEntries().put(source.getKey(), resolveNode(getPath(source.getValue()), false));
+            resolvedSources.put(source.getKey(), resolveNode(getPath(source.getValue()), false));
         }
         return resolvedSources;
     }
