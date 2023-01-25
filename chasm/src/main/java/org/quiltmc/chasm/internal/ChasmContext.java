@@ -39,7 +39,7 @@ public class ChasmContext implements Context {
 
             return new ClassInfo(
                     className,
-                    superName == null ? ClassInfo.OBJECT : superName,
+                    superName == null && !className.equals(ClassInfo.OBJECT) ? ClassInfo.OBJECT : superName,
                     interfaces.getEntries().stream().map(NodeUtils::asString).toArray(String[]::new),
                     (access & Opcodes.ACC_INTERFACE) != 0
             );

@@ -48,7 +48,6 @@ public class ClassInfo {
      *
      * @return The internal name of the super class.
      */
-    @Contract(pure = true)
     public String getSuperClass() {
         return superClass;
     }
@@ -67,7 +66,6 @@ public class ClassInfo {
      *
      * @return Whether the class is an interface.
      */
-    @Contract(pure = true)
     public boolean isInterface() {
         return isInterface;
     }
@@ -79,9 +77,18 @@ public class ClassInfo {
      * @return The information extracted from the provided class.
      */
     public static ClassInfo fromClass(Class<?> clazz) {
+        if (clazz == Object.class) {
+            return new ClassInfo(
+                    ClassInfo.OBJECT,
+                    null,
+                    new String[0],
+                    false
+            );
+        }
+
         return new ClassInfo(
                 clazz.getName().replace('.', '/'),
-                clazz.getSuperclass().getName().replace('.', '/'),
+                clazz.isInterface() ? ClassInfo.OBJECT : clazz.getSuperclass().getName().replace('.', '/'),
                 Arrays.stream(clazz.getInterfaces()).map(c -> c.getName().replace('.', '/')).toArray(String[]::new),
                 clazz.isInterface()
         );

@@ -90,45 +90,46 @@ public class LocalInterpreter extends Interpreter<LocalValue> {
                     return isAssignableFrom(type1.getElementType(), type2.getElementType());
                 }
                 if (type1.getSort() == Type.OBJECT && type2.getSort() == Type.OBJECT) {
-                    String leftClass = type1.getInternalName();
-                    String rightClass = type2.getInternalName();
+                    return isAssignable(type1.getInternalName(), type2.getInternalName());
+                }
+                return type1.equals(type2);
+            }
 
-                    Set<String> interfacesToCheck = new HashSet<>();
+            private boolean isAssignable(String leftClass, String rightClass) {
+                Set<String> interfacesToCheck = new HashSet<>();
 
-                    while (!rightClass.equals(ClassInfo.OBJECT)) {
-                        if (leftClass.equals(rightClass)) {
-                            return true;
-                        }
-
-                        ClassInfo rightInfo = context.getClassInfo(rightClass);
-                        Collections.addAll(interfacesToCheck, rightInfo.getInterfaces());
-                        rightClass = rightInfo.getSuperClass();
+                while (!rightClass.equals(ClassInfo.OBJECT)) {
+                    if (leftClass.equals(rightClass)) {
+                        return true;
                     }
 
-                    if (context.getClassInfo(leftClass).isInterface()) {
-                        Set<String> checkedInterfaces = new HashSet<>();
-                        while (!interfacesToCheck.isEmpty()) {
-                            Set<String> current = interfacesToCheck;
-                            interfacesToCheck = new HashSet<>();
+                    ClassInfo rightInfo = context.getClassInfo(rightClass);
+                    Collections.addAll(interfacesToCheck, rightInfo.getInterfaces());
+                    rightClass = rightInfo.getSuperClass();
+                }
 
-                            for (String currntInterface : current) {
-                                if (leftClass.equals(currntInterface)) {
-                                    return true;
-                                }
+                if (context.getClassInfo(leftClass).isInterface()) {
+                    Set<String> checkedInterfaces = new HashSet<>();
+                    while (!interfacesToCheck.isEmpty()) {
+                        Set<String> current = interfacesToCheck;
+                        interfacesToCheck = new HashSet<>();
 
-                                ClassInfo classInfo = context.getClassInfo(currntInterface);
-                                for (String superInterface : classInfo.getInterfaces()) {
-                                    if (checkedInterfaces.add(superInterface)) {
-                                        interfacesToCheck.add(superInterface);
-                                    }
+                        for (String currntInterface : current) {
+                            if (leftClass.equals(currntInterface)) {
+                                return true;
+                            }
+
+                            ClassInfo classInfo = context.getClassInfo(currntInterface);
+                            for (String superInterface : classInfo.getInterfaces()) {
+                                if (checkedInterfaces.add(superInterface)) {
+                                    interfacesToCheck.add(superInterface);
                                 }
                             }
                         }
                     }
-
-                    return false;
                 }
-                return type1.equals(type2);
+
+                return false;
             }
         };
     }
