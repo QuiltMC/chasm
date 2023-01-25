@@ -22,10 +22,11 @@ import org.junit.jupiter.api.TestFactory;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.api.ChasmProcessor;
-import org.quiltmc.chasm.api.ClassData;
+import org.quiltmc.chasm.api.ClassResult;
 import org.quiltmc.chasm.api.util.ClassLoaderContext;
 import org.quiltmc.chasm.internal.transformer.ChasmLangTransformer;
 import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.metadata.Metadata;
 
 public abstract class TestsBase {
     private static final Path TEST_CLASSES_DIR = Paths.get("build/classes/java/testData");
@@ -95,13 +96,13 @@ public abstract class TestsBase {
         // Load the test class
         Path classFile = testDefinition.getClassFile();
         Assertions.assertTrue(Files.isRegularFile(classFile), classFile + " does not exist");
-        processor.addClass(new ClassData(Files.readAllBytes(classFile)));
+        processor.addClass(Files.readAllBytes(classFile), new Metadata());
 
         // Load any additional classes
         for (String additionalClass : testDefinition.additionalClasses) {
             Path additionalClassFile = TEST_CLASSES_DIR.resolve(additionalClass + ".class");
             Assertions.assertTrue(Files.isRegularFile(additionalClassFile), additionalClassFile + " does not exist");
-            processor.addClass(new ClassData(Files.readAllBytes(additionalClassFile)));
+            processor.addClass(Files.readAllBytes(additionalClassFile), new Metadata());
         }
 
 
@@ -114,13 +115,18 @@ public abstract class TestsBase {
         }
 
         // Process the data
-        List<ClassData> processedClasses = processor.process();
+        List<ClassResult> processedClasses = processor.process();
 
         // Find the result class by name
         ClassReader resultClass = null;
-        for (ClassData classData : processedClasses) {
+        for (ClassResult result : processedClasses) {
+            byte[] classBytes = result.getClassBytes();
+            if (classBytes == null) {
+                continue;
+            }
+
             // Read basic class info
-            resultClass = new ClassReader(classData.getClassBytes());
+            resultClass = new ClassReader(classBytes);
 
             // Convert the JVM binary name (e.g. org/example/Class$Inner) into
             // the JLS binary name (e.g. org.example.Class$Inner)
