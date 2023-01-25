@@ -1,7 +1,10 @@
 package org.quiltmc.chasm.internal.asm.visitor;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
@@ -12,7 +15,9 @@ import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Interpreter;
 import org.objectweb.asm.tree.analysis.SimpleVerifier;
+import org.quiltmc.chasm.api.util.ClassInfo;
 import org.quiltmc.chasm.api.util.Context;
+import org.quiltmc.chasm.internal.ChasmContext;
 
 public class LocalInterpreter extends Interpreter<LocalValue> {
     private final MethodNode method;
@@ -52,7 +57,7 @@ public class LocalInterpreter extends Interpreter<LocalValue> {
                 if (currentClass.equals(type)) {
                     return isInterface;
                 }
-                return type.getSort() == Type.OBJECT && context.isInterface(type.getInternalName());
+                return type.getSort() == Type.OBJECT && context.getClassInfo(type.getInternalName()).isInterface();
             }
 
             @Override
@@ -63,7 +68,7 @@ public class LocalInterpreter extends Interpreter<LocalValue> {
                 if (type.getSort() != Type.OBJECT) {
                     return null;
                 }
-                String superClass = context.getSuperClass(type.getInternalName());
+                String superClass = context.getClassInfo(type.getInternalName()).getSuperClass();
                 return superClass == null ? null : Type.getObjectType(superClass);
             }
 
@@ -85,7 +90,43 @@ public class LocalInterpreter extends Interpreter<LocalValue> {
                     return isAssignableFrom(type1.getElementType(), type2.getElementType());
                 }
                 if (type1.getSort() == Type.OBJECT && type2.getSort() == Type.OBJECT) {
-                    return context.isAssignable(type1.getInternalName(), type2.getInternalName());
+                    String leftClass = type1.getInternalName();
+                    String rightClass = type2.getInternalName();
+
+                    Set<String> interfacesToCheck = new HashSet<>();
+
+                    while (!rightClass.equals(ClassInfo.OBJECT)) {
+                        if (leftClass.equals(rightClass)) {
+                            return true;
+                        }
+
+                        ClassInfo rightInfo = context.getClassInfo(rightClass);
+                        Collections.addAll(interfacesToCheck, rightInfo.getInterfaces());
+                        rightClass = rightInfo.getSuperClass();
+                    }
+
+                    if (context.getClassInfo(leftClass).isInterface()) {
+                        Set<String> checkedInterfaces = new HashSet<>();
+                        while (!interfacesToCheck.isEmpty()) {
+                            Set<String> current = interfacesToCheck;
+                            interfacesToCheck = new HashSet<>();
+
+                            for (String currntInterface : current) {
+                                if (leftClass.equals(currntInterface)) {
+                                    return true;
+                                }
+
+                                ClassInfo classInfo = context.getClassInfo(currntInterface);
+                                for (String superInterface : classInfo.getInterfaces()) {
+                                    if (checkedInterfaces.add(superInterface)) {
+                                        interfacesToCheck.add(superInterface);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    return false;
                 }
                 return type1.equals(type2);
             }

@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.quiltmc.chasm.api.util.ClassLoaderContext;
+import org.quiltmc.chasm.api.util.ClassInfo;
 import org.quiltmc.chasm.api.util.Context;
 import org.quiltmc.chasm.internal.intrinsic.ChasmIntrinsics;
 import org.quiltmc.chasm.internal.util.NodeUtils;
@@ -19,7 +19,16 @@ import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 public class IntrinsicsTest {
     private Node evaluate(String chassembly) {
-        Context context = new ClassLoaderContext(null, getClass().getClassLoader()) {
+        Context context = new Context() {
+            @Override
+            public @Nullable ClassInfo getClassInfo(String className) {
+                try {
+                    return ClassInfo.fromClass(Class.forName(className, false, getClass().getClassLoader()));
+                } catch (ClassNotFoundException e) {
+                    return null;
+                }
+            }
+
             @Override
             public byte @Nullable [] readFile(String path) {
                 return switch (path) {
