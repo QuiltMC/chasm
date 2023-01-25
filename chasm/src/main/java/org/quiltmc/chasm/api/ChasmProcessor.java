@@ -125,7 +125,7 @@ public class ChasmProcessor {
                 result.add(new ClassResult(
                         classData.getClassBytes(),
                         classData.getMetadata(),
-                        ClassResult.Type.Unmodified
+                        ClassResult.Type.UNMODIFIED
                 ));
             } else {
                 // Modified or added class
@@ -135,13 +135,13 @@ public class ChasmProcessor {
                 result.add(new ClassResult(
                         classWriter.toByteArray(),
                         classNode.getMetadata(),
-                        classData == null ? ClassResult.Type.Added : ClassResult.Type.Modified
+                        classData == null ? ClassResult.Type.ADDED : ClassResult.Type.MODIFIED
                 ));
             }
         }
 
         for (Map.Entry<String, ClassData> entry : nameToData.entrySet()) {
-            result.add(new ClassResult(null, entry.getValue().getMetadata(), ClassResult.Type.Removed));
+            result.add(new ClassResult(null, entry.getValue().getMetadata(), ClassResult.Type.REMOVED));
         }
 
         LOGGER.info("Processing done!");
