@@ -1,23 +1,30 @@
 package org.quiltmc.chasm.api;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.quiltmc.chasm.api.util.Context;
 import org.quiltmc.chasm.internal.ChasmContext;
+import org.quiltmc.chasm.internal.ClassData;
 import org.quiltmc.chasm.internal.TransformationApplier;
 import org.quiltmc.chasm.internal.TransformationSorter;
 import org.quiltmc.chasm.internal.TransformerSorter;
 import org.quiltmc.chasm.internal.asm.ChasmClassWriter;
 import org.quiltmc.chasm.internal.tree.ClassNode;
 import org.quiltmc.chasm.internal.tree.reader.ClassNodeReader;
+import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.internal.util.NodeUtils;
 import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.metadata.Metadata;
+import org.quiltmc.chasm.lang.internal.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +36,9 @@ public class ChasmProcessor {
 
     private final Context context;
 
-    private final ListNode classes;
     private final List<Transformer> transformers = new ArrayList<>();
+
+    private final List<ClassData> classes = new ArrayList<>();
 
     /**
      * Creates a new {@link ChasmProcessor} that uses the given {@link Context}.
@@ -39,8 +47,7 @@ public class ChasmProcessor {
      *            transformed.
      */
     public ChasmProcessor(Context context) {
-        classes = Ast.emptyList();
-        this.context = new ChasmContext(context, classes);
+        this.context = context;
     }
 
     /**
@@ -58,36 +65,35 @@ public class ChasmProcessor {
      * Adds the passed class data to this {@link ChasmProcessor}'s
      * list of classes to transform.
      *
-     * @param classData The data of the transformable class.
+     * @param classBytes The bytes of the class.
+     * @param metadata The metadata associated with the class.
      */
-    public void addClass(ClassData classData) {
-        ClassReader classReader = new ClassReader(classData.getClassBytes());
-        ClassNode classNode = new ClassNode(classReader, context, classes.size());
-        classNode.getMetadata().putAll(classData.getMetadata());
-        classes.add(classNode);
-    }
-
-
-    /**
-     * Transforms this {@link ChasmProcessor}'s list of classes according
-     * to this {@code ChasmProcessor}'s list of {@link Transformer}s.
-     * If you only want the classes returned, see {@link #process(boolean)}.
-     *
-     * @return The resulting list of class data including unchanged classes.
-     */
-    public List<ClassData> process() {
-        return process(false);
+    public void addClass(byte @NotNull [] classBytes, @NotNull Metadata metadata) {
+        this.classes.add(new ClassData(classBytes, metadata));
     }
 
     /**
-     * Transforms this {@link ChasmProcessor}'s list of classes according
-     * to this {@code ChasmProcessor}'s list of {@link Transformer}s.
+     * Transforms the {@link ClassData} passed via {@link #addClass} using
+     * the {@link Transformer Transformers} passed via {@link #addTransformer}.
      *
-     * @param onlyModifiedClasses If this method should only return classes that changed during transformation.
-     * @return The resulting list of class data.
+     * @return The transformed {@link ClassData}, wrapped in {@link ClassResult}.
      */
-    public List<ClassData> process(boolean onlyModifiedClasses) {
+    public List<ClassResult> process() {
         LOGGER.info("Processing {} classes...", classes.size());
+
+        ListNode classes = Ast.emptyList();
+        Context context = new ChasmContext(this.context, classes);
+        Map<String, ClassData> nameToData = new HashMap<>();
+        for (ClassData classData : this.classes) {
+            ClassReader classReader = new ClassReader(classData.getClassBytes());
+            ClassNode classNode = new ClassNode(classReader, context, classes.size());
+            classNode.getMetadata().putAll(classData.getMetadata());
+            classes.add(classNode);
+
+            if (nameToData.putIfAbsent(classReader.getClassName(), classData) != null) {
+                throw new RuntimeException("Duplicate class: " + classReader.getClassName());
+            }
+        }
 
         LOGGER.info("Sorting {} transformers...", transformers.size());
         List<List<Transformer>> rounds = TransformerSorter.sort(transformers);
@@ -106,31 +112,40 @@ public class ChasmProcessor {
         }
 
         LOGGER.info("Writing {} classes...", classes.size());
-        List<ClassData> classData = new ArrayList<>();
+        List<ClassResult> result = new ArrayList<>();
         for (Node node : classes.getEntries()) {
             MapNode classNode = NodeUtils.asMap(node);
+            String name = NodeUtils.getAsString(node, NodeConstants.NAME);
+            ClassData classData = nameToData.remove(name);
 
             // Unmodified classes
             if (node instanceof ClassNode) {
-                // Unmodified classes
-                if (onlyModifiedClasses) {
-                    // Skip if requested
-                    continue;
-                }
-                ClassWriter classWriter = new ClassWriter(0);
-                ((ClassNode) node).getClassReader().accept(classWriter, 0);
-                classData.add(new ClassData(classWriter.toByteArray(), classNode.getMetadata()));
+                // Unmodified class
+                Assert.check(classData != null);
+                result.add(new ClassResult(
+                        classData.getClassBytes(),
+                        classData.getMetadata(),
+                        ClassResult.Type.UNMODIFIED
+                ));
             } else {
-                // ModifiedClasses
+                // Modified or added class
                 ClassNodeReader chasmWriter = new ClassNodeReader(classNode);
                 ClassWriter classWriter = new ChasmClassWriter(context);
                 chasmWriter.accept(classWriter);
-                classData.add(new ClassData(classWriter.toByteArray(), classNode.getMetadata()));
+                result.add(new ClassResult(
+                        classWriter.toByteArray(),
+                        classNode.getMetadata(),
+                        classData == null ? ClassResult.Type.ADDED : ClassResult.Type.MODIFIED
+                ));
             }
         }
 
+        for (Map.Entry<String, ClassData> entry : nameToData.entrySet()) {
+            result.add(new ClassResult(null, entry.getValue().getMetadata(), ClassResult.Type.REMOVED));
+        }
+
         LOGGER.info("Processing done!");
-        return classData;
+        return result;
     }
 
     private List<Transformation> applyTransformers(List<Transformer> transformers, ListNode classes) {
