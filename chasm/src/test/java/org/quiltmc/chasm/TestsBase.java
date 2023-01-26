@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +24,8 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.api.ChasmProcessor;
 import org.quiltmc.chasm.api.ClassResult;
-import org.quiltmc.chasm.api.util.ClassLoaderContext;
+import org.quiltmc.chasm.api.util.ClassInfo;
+import org.quiltmc.chasm.api.util.Context;
 import org.quiltmc.chasm.internal.transformer.ChasmLangTransformer;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.metadata.Metadata;
@@ -53,7 +55,21 @@ public abstract class TestsBase {
     @BeforeEach
     public void setUp() {
         // Instantiate the processor
-        processor = new ChasmProcessor(new ClassLoaderContext(null, getClass().getClassLoader()));
+        processor = new ChasmProcessor(new Context() {
+            @Override
+            public @Nullable ClassInfo getClassInfo(String className) {
+                try {
+                    return ClassInfo.fromClass(Class.forName(className, false, getClass().getClassLoader()));
+                } catch (ClassNotFoundException e) {
+                    return null;
+                }
+            }
+
+            @Override
+            public byte @Nullable [] readFile(String path) {
+                return null;
+            }
+        });
     }
 
     @AfterEach
