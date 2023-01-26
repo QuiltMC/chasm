@@ -30,10 +30,10 @@ public class ClassResult {
 
     /**
      * Get the bytes representing the class of this result.
-     * This will be {@code null} if and only if {@link #getType} is {@link Type#Removed}.
+     * This will be {@code null} if and only if {@link #getType} is {@link Type#REMOVED}.
      *
      * @return The bytes representing the class of this result,
-     *     or {@code null} if {@link #getType} is {@link Type#Removed}.
+     *     or {@code null} if {@link #getType} is {@link Type#REMOVED}.
      */
     public byte @Nullable [] getClassBytes() {
         return classBytes;
@@ -65,22 +65,22 @@ public class ClassResult {
          * Indicates that the class hasn't been modified during processing.
          * Note that this doesn't apply to {@link org.quiltmc.chasm.lang.api.metadata.Metadata}.
          */
-        Unmodified,
+        UNMODIFIED,
 
         /**
          * Indicates that the class may have been modified during processing.
          */
-        Modified,
+        MODIFIED,
 
         /**
          * Indicates that this class was created during processing.
          */
-        Added,
+        ADDED,
 
         /**
          * Indicates that this class was deleted during processing.
          * This means that {@link #getClassBytes} will return null.
          */
-        Removed
+        REMOVED
     }
 }
