@@ -45,7 +45,7 @@ public class ChasmContext implements Context {
             );
         }
 
-        return null;
+        return parent.getClassInfo(className);
     }
 
     @Override
