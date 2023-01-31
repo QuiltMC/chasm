@@ -18,12 +18,19 @@ public class ReduceFunction extends IntrinsicFunction {
             Node function = args.get("func");
 
             if (list instanceof ListNode && function instanceof FunctionNode) {
-                return ((ListNode) list).getEntries().stream().reduce((first, second) -> {
-                    MapNode funcArgs = Ast.map().put("first", first).put("second", second).build();
-                    return ((FunctionNode) function).apply(evaluator, funcArgs);
-                }).orElseThrow(() -> new EvaluationException(
-                        "Can't reduce empty list: " + list
-                ));
+                ListNode listNode = (ListNode) list;
+                if (listNode.size() == 0) {
+                    throw new EvaluationException("Can't reduce empty list: " + list);
+                }
+                FunctionNode funcNode = (FunctionNode) function;
+
+                Node result = listNode.get(0);
+                for (int i = 1; i < listNode.size(); i++) {
+                    MapNode funcArgs = Ast.map().put("first", result).put("second", listNode.get(i)).build();
+                    result = funcNode.apply(evaluator, funcArgs);
+                }
+
+                return result;
             }
         }
 
