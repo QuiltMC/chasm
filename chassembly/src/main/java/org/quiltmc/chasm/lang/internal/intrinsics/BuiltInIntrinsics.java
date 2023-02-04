@@ -15,6 +15,7 @@ public class BuiltInIntrinsics {
         register(new LenFunction());
         register(new EntriesFunction());
         register(new FromEntriesFunction());
+        register(new WithElementsFunction());
         register(new MapFunction());
         register(new ReduceFunction());
         register(new FlattenFunction());
