@@ -1,101 +1,89 @@
 package org.quiltmc.chasm.internal.asm.visitor;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-
 import org.objectweb.asm.ModuleVisitor;
 import org.quiltmc.chasm.internal.util.NodeConstants;
-import org.quiltmc.chasm.lang.api.ast.IntegerNode;
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
-import org.quiltmc.chasm.lang.api.ast.StringNode;
 
 public class ChasmModuleVisitor extends ModuleVisitor {
     private final MapNode moduleNode;
 
-    private final ListNode packages = new ListNode(new ArrayList<>());
-    private final ListNode requires = new ListNode(new ArrayList<>());
-    private final ListNode exports = new ListNode(new ArrayList<>());
-    private final ListNode opens = new ListNode(new ArrayList<>());
-    private final ListNode uses = new ListNode(new ArrayList<>());
-    private final ListNode provides = new ListNode(new ArrayList<>());
+    private final ListNode packages = Ast.emptyList();
+    private final ListNode requires = Ast.emptyList();
+    private final ListNode exports = Ast.emptyList();
+    private final ListNode opens = Ast.emptyList();
+    private final ListNode uses = Ast.emptyList();
+    private final ListNode provides = Ast.emptyList();
 
     public ChasmModuleVisitor(int api, MapNode moduleNode) {
         super(api);
         this.moduleNode = moduleNode;
 
-        moduleNode.getEntries().put(NodeConstants.PACKAGES, packages);
-        moduleNode.getEntries().put(NodeConstants.REQUIRES, requires);
-        moduleNode.getEntries().put(NodeConstants.EXPORTS, exports);
-        moduleNode.getEntries().put(NodeConstants.OPENS, opens);
-        moduleNode.getEntries().put(NodeConstants.USES, uses);
-        moduleNode.getEntries().put(NodeConstants.PROVIDERS, provides);
+        moduleNode.put(NodeConstants.PACKAGES, packages);
+        moduleNode.put(NodeConstants.REQUIRES, requires);
+        moduleNode.put(NodeConstants.EXPORTS, exports);
+        moduleNode.put(NodeConstants.OPENS, opens);
+        moduleNode.put(NodeConstants.USES, uses);
+        moduleNode.put(NodeConstants.PROVIDERS, provides);
     }
 
     @Override
     public void visitMainClass(String mainClass) {
-        moduleNode.getEntries().put(NodeConstants.MAIN, new StringNode(mainClass));
+        moduleNode.put(NodeConstants.MAIN, Ast.literal(mainClass));
     }
 
     @Override
     public void visitPackage(String packaze) {
-        packages.getEntries().add(new StringNode(packaze));
+        packages.add(Ast.literal(packaze));
     }
 
     @Override
     public void visitRequire(String module, int access, String version) {
-        MapNode requireNode = new MapNode(new LinkedHashMap<>());
-        requireNode.getEntries().put(NodeConstants.MODULE, new StringNode(module));
-        requireNode.getEntries().put(NodeConstants.ACCESS, new IntegerNode(access));
-        requireNode.getEntries().put(NodeConstants.VERSION, new StringNode(version));
-        requires.getEntries().add(requireNode);
+        MapNode requireNode = Ast.map()
+                .put(NodeConstants.MODULE, module)
+                .put(NodeConstants.ACCESS, access)
+                .put(NodeConstants.VERSION, version)
+                .build();
+        requires.add(requireNode);
     }
 
     @Override
     public void visitExport(String packaze, int access, String... modules) {
-        MapNode exportNode = new MapNode(new LinkedHashMap<>());
-        exportNode.getEntries().put(NodeConstants.PACKAGE, new StringNode(packaze));
-        exportNode.getEntries().put(NodeConstants.ACCESS, new IntegerNode(access));
+        MapNode exportNode = Ast.map()
+                .put(NodeConstants.PACKAGE, packaze)
+                .put(NodeConstants.ACCESS, access)
+                .build();
         if (modules != null) {
-            ListNode modulesNode = new ListNode(new ArrayList<>());
-            for (String m : modules) {
-                modulesNode.getEntries().add(new StringNode(m));
-            }
-            exportNode.getEntries().put(NodeConstants.MODULES, modulesNode);
+            exportNode.put(NodeConstants.MODULES, Ast.list((Object[]) modules));
         }
-        exports.getEntries().add(exportNode);
+        exports.add(exportNode);
     }
 
     @Override
     public void visitOpen(String packaze, int access, String... modules) {
-        MapNode openNode = new MapNode(new LinkedHashMap<>());
-        openNode.getEntries().put(NodeConstants.PACKAGE, new StringNode(packaze));
-        openNode.getEntries().put(NodeConstants.ACCESS, new IntegerNode(access));
+        MapNode openNode = Ast.map()
+                .put(NodeConstants.PACKAGE, packaze)
+                .put(NodeConstants.ACCESS, access)
+                .build();
         if (modules != null) {
-            ListNode modulesNode = new ListNode(new ArrayList<>());
-            for (String m : modules) {
-                modulesNode.getEntries().add(new StringNode(m));
-            }
-            openNode.getEntries().put(NodeConstants.MODULES, modulesNode);
+            openNode.put(NodeConstants.MODULES, Ast.list((Object[]) modules));
         }
-        opens.getEntries().add(openNode);
+        opens.add(openNode);
     }
 
     @Override
     public void visitUse(String service) {
-        uses.getEntries().add(new StringNode(service));
+        uses.add(Ast.literal(service));
     }
 
     @Override
     public void visitProvide(String service, String... providers) {
-        MapNode provideNode = new MapNode(new LinkedHashMap<>());
-        provideNode.getEntries().put(NodeConstants.SERVICE, new StringNode(service));
-        ListNode providersNode = new ListNode(new ArrayList<>());
-        for (String provider : providers) {
-            providersNode.getEntries().add(new StringNode(provider));
-        }
-        provideNode.getEntries().put(NodeConstants.PROVIDERS, providersNode);
-        provides.getEntries().add(provideNode);
+        MapNode provideNode = Ast.map()
+                .put(NodeConstants.SERVICE, service)
+                .put(NodeConstants.PROVIDERS, Ast.list((Object[]) providers))
+                .build();
+        provides.add(provideNode);
     }
 
     @Override

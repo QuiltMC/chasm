@@ -5,9 +5,10 @@ import java.nio.charset.StandardCharsets;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.quiltmc.chasm.api.util.ClassLoaderContext;
+import org.quiltmc.chasm.api.util.ClassInfo;
 import org.quiltmc.chasm.api.util.Context;
 import org.quiltmc.chasm.internal.intrinsic.ChasmIntrinsics;
+import org.quiltmc.chasm.internal.util.NodeUtils;
 import org.quiltmc.chasm.lang.api.ast.IntegerNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
@@ -18,7 +19,16 @@ import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 public class IntrinsicsTest {
     private Node evaluate(String chassembly) {
-        Context context = new ClassLoaderContext(null, getClass().getClassLoader()) {
+        Context context = new Context() {
+            @Override
+            public @Nullable ClassInfo getClassInfo(String className) {
+                try {
+                    return ClassInfo.fromClass(Class.forName(className, false, getClass().getClassLoader()));
+                } catch (ClassNotFoundException e) {
+                    return null;
+                }
+            }
+
             @Override
             public byte @Nullable [] readFile(String path) {
                 return switch (path) {
@@ -38,7 +48,7 @@ public class IntrinsicsTest {
     public void testFileBytes() {
         ListNode bytes = (ListNode) evaluate("file_bytes(\"hello.txt\")");
         int[] byteArray = bytes.getEntries().stream()
-                .mapToInt(entry -> ((IntegerNode) entry).getValue().intValue()).toArray();
+                .mapToInt(NodeUtils::asInt).toArray();
         Assertions.assertArrayEquals(new int[] { 72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100, 33 }, byteArray);
     }
 
@@ -63,13 +73,13 @@ public class IntrinsicsTest {
     @Test
     public void testLib1() {
         MapNode result = (MapNode) evaluate("{lib: include(\"lib.chasm\"), result: lib.inc(41)}");
-        Assertions.assertEquals(42, ((IntegerNode) result.getEntries().get("result")).getValue());
+        Assertions.assertEquals(42, ((IntegerNode) result.get("result")).getValue());
     }
 
     @Test
     public void testLib2() {
         MapNode result = (MapNode) evaluate("{lib: include(\"lib.chasm\"), result: lib.result}");
-        Assertions.assertEquals(3, ((IntegerNode) result.getEntries().get("result")).getValue());
+        Assertions.assertEquals(3, ((IntegerNode) result.get("result")).getValue());
     }
 
     @Test

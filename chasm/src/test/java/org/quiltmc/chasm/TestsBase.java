@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,10 +23,12 @@ import org.junit.jupiter.api.TestFactory;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.quiltmc.chasm.api.ChasmProcessor;
-import org.quiltmc.chasm.api.ClassData;
-import org.quiltmc.chasm.api.util.ClassLoaderContext;
+import org.quiltmc.chasm.api.ClassResult;
+import org.quiltmc.chasm.api.util.ClassInfo;
+import org.quiltmc.chasm.api.util.Context;
 import org.quiltmc.chasm.internal.transformer.ChasmLangTransformer;
 import org.quiltmc.chasm.lang.api.ast.Node;
+import org.quiltmc.chasm.lang.api.metadata.Metadata;
 
 public abstract class TestsBase {
     private static final Path TEST_CLASSES_DIR = Paths.get("build/classes/java/testData");
@@ -52,7 +55,21 @@ public abstract class TestsBase {
     @BeforeEach
     public void setUp() {
         // Instantiate the processor
-        processor = new ChasmProcessor(new ClassLoaderContext(null, getClass().getClassLoader()));
+        processor = new ChasmProcessor(new Context() {
+            @Override
+            public @Nullable ClassInfo getClassInfo(String className) {
+                try {
+                    return ClassInfo.fromClass(Class.forName(className, false, getClass().getClassLoader()));
+                } catch (ClassNotFoundException e) {
+                    return null;
+                }
+            }
+
+            @Override
+            public byte @Nullable [] readFile(String path) {
+                return null;
+            }
+        });
     }
 
     @AfterEach
@@ -95,13 +112,13 @@ public abstract class TestsBase {
         // Load the test class
         Path classFile = testDefinition.getClassFile();
         Assertions.assertTrue(Files.isRegularFile(classFile), classFile + " does not exist");
-        processor.addClass(new ClassData(Files.readAllBytes(classFile)));
+        processor.addClass(Files.readAllBytes(classFile), new Metadata());
 
         // Load any additional classes
         for (String additionalClass : testDefinition.additionalClasses) {
             Path additionalClassFile = TEST_CLASSES_DIR.resolve(additionalClass + ".class");
             Assertions.assertTrue(Files.isRegularFile(additionalClassFile), additionalClassFile + " does not exist");
-            processor.addClass(new ClassData(Files.readAllBytes(additionalClassFile)));
+            processor.addClass(Files.readAllBytes(additionalClassFile), new Metadata());
         }
 
 
@@ -114,13 +131,18 @@ public abstract class TestsBase {
         }
 
         // Process the data
-        List<ClassData> processedClasses = processor.process();
+        List<ClassResult> processedClasses = processor.process();
 
         // Find the result class by name
         ClassReader resultClass = null;
-        for (ClassData classData : processedClasses) {
+        for (ClassResult result : processedClasses) {
+            byte[] classBytes = result.getClassBytes();
+            if (classBytes == null) {
+                continue;
+            }
+
             // Read basic class info
-            resultClass = new ClassReader(classData.getClassBytes());
+            resultClass = new ClassReader(classBytes);
 
             // Convert the JVM binary name (e.g. org/example/Class$Inner) into
             // the JLS binary name (e.g. org.example.Class$Inner)

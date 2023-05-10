@@ -10,27 +10,47 @@ import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.render.RenderUtil;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
+/**
+ * A member access expression, for member syntax for accessing values in a map, e.g. {@code foo.bar}.
+ */
 public class MemberNode extends Node {
     private Node left;
     private String identifier;
 
+    /**
+     * Creates a member access expression.
+     *
+     * @see Ast#member(Node, String)
+     */
     public MemberNode(Node node, String identifier) {
         this.left = node;
         this.identifier = identifier;
     }
 
+    /**
+     * Gets the map from which to get the member.
+     */
     public Node getLeft() {
         return left;
     }
 
+    /**
+     * Sets the map from which to get the member.
+     */
     public void setLeft(Node left) {
         this.left = left;
     }
 
+    /**
+     * Gets the member to extract from the map.
+     */
     public String getIdentifier() {
         return identifier;
     }
 
+    /**
+     * Sets the member to extract from the map.
+     */
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
     }
@@ -61,7 +81,7 @@ public class MemberNode extends Node {
         Map<String, Node> entries = ((MapNode) left).getEntries();
 
         if (!entries.containsKey(identifier)) {
-            return new NullNode();
+            return Ast.nullNode();
         }
 
         return entries.get(identifier).evaluate(evaluator);

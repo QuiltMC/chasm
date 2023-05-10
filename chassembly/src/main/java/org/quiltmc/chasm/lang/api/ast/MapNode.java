@@ -1,5 +1,6 @@
 package org.quiltmc.chasm.lang.api.ast;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,18 +10,48 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
+import org.quiltmc.chasm.lang.internal.Assert;
 import org.quiltmc.chasm.lang.internal.render.RenderUtil;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
+/**
+ * A map expression, for map creation syntax, e.g. {@code {foo: bar}}.
+ */
 public class MapNode extends Node {
     private final Map<String, Node> entries;
 
+    /**
+     * Creates a map expression.
+     *
+     * @see Ast#map()
+     */
     public MapNode(Map<String, Node> entries) {
+        Assert.check(entries.getClass() != HashMap.class,
+                "HashMap given to MapNode, order will be impure!");
         this.entries = entries;
     }
 
+    /**
+     * Gets the entries of this map expression.
+     */
     public Map<String, Node> getEntries() {
         return entries;
+    }
+
+    /**
+     * Gets the value associated with the given key, or null if no value was associated.
+     */
+    @Nullable
+    public Node get(String key) {
+        return this.entries.get(key);
+    }
+
+    /**
+     * Sets the value associated with the given key, returning the previous value if present.
+     */
+    @Nullable
+    public Node put(String key, Node value) {
+        return this.entries.put(key, value);
     }
 
     @Override

@@ -18,36 +18,14 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface Context {
     /**
-     * Returns the name of the super class of a given class. The names are <a href="ClassLoader.html#binary-name">binary
-     * names</a> as returned by {@link Class#getName()}, but with slashes '/' instead of dots '.'. For interfaces, this
-     * should return "java/lang/Object".
+     * Returns information about a class.
      *
-     * @param className The binary name of a class to query.
-     *
-     * @return The binary name of the super class of className.
+     * @param className The internal name of a class to query (See {@link org.objectweb.asm.Type#getInternalName}).
+     * @return The {@link ClassInfo} corresponding to the specified {@code className},
+     *     or {@code null} if it couldn't be located.
      */
     @Contract(pure = true)
-    String getSuperClass(String className);
-
-    /**
-     * Returns whether the input class is an interface.
-     *
-     * @param className The binary name of a class.
-     * @return Whether the input class is an interface.
-     */
-    @Contract(pure = true)
-    boolean isInterface(String className);
-
-    /**
-     * Returns whether the assignment {@code left = right} would succeed, where
-     * {@code left} is of type {@code leftClass} and {@code right} is of type {@code rightClass}.
-     *
-     * @param leftClass The binary name of the left class.
-     * @param rightClass The binary name of the right class.
-     * @return Whether the assignment {@code left = right} would succeed.
-     */
-    @Contract(pure = true)
-    boolean isAssignable(String leftClass, String rightClass);
+    @Nullable ClassInfo getClassInfo(String className);
 
     /**
      * Returns the contents of the file at the given path, or {@code null} if the file does not exist or if chasm

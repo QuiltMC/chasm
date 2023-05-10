@@ -7,24 +7,11 @@ options {
 
 PARSER_BEGIN(Parser)
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.BinaryNode;
-import org.quiltmc.chasm.lang.api.ast.BooleanNode;
-import org.quiltmc.chasm.lang.api.ast.CallNode;
-import org.quiltmc.chasm.lang.api.ast.FloatNode;
-import org.quiltmc.chasm.lang.api.ast.IndexNode;
-import org.quiltmc.chasm.lang.api.ast.IntegerNode;
-import org.quiltmc.chasm.lang.api.ast.LambdaNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
-import org.quiltmc.chasm.lang.api.ast.NullNode;
-import org.quiltmc.chasm.lang.api.ast.StringNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
-import org.quiltmc.chasm.lang.api.ast.MemberNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
-import org.quiltmc.chasm.lang.api.ast.ReferenceNode;
-import org.quiltmc.chasm.lang.api.ast.TernaryNode;
 import org.quiltmc.chasm.lang.api.ast.UnaryNode;
 import org.quiltmc.chasm.lang.internal.parse.SourceSpanImpl;
 import org.quiltmc.chasm.lang.api.eval.SourceSpan;
@@ -68,28 +55,28 @@ Node literalExpression():
 {
     (
         t = <NullLiteral>
-        { n = new NullNode(); }
+        { n = Ast.nullNode(); }
         |
         t = <BooleanLiteral>
-        { n = BooleanNode.from(Boolean.parseBoolean(t.getImage())); }
+        { n = Ast.literal(Boolean.parseBoolean(t.getImage())); }
         |
         t = <DecIntegerLiteral>
-        { n = new IntegerNode(Long.parseLong(t.getImage())); }
+        { n = Ast.literal(Long.parseLong(t.getImage())); }
         |
         t = <HexIntegerLiteral>
-        { n = new IntegerNode(Long.parseLong(t.getImage().substring(2), 16)); }
+        { n = Ast.literal(Long.parseLong(t.getImage().substring(2), 16)); }
         |
         t = <BinIntegerLiteral>
-        { n = new IntegerNode(Long.parseLong(t.getImage().substring(2), 2)); }
+        { n = Ast.literal(Long.parseLong(t.getImage().substring(2), 2)); }
         |
         t = <FloatLiteral>
-        { n = new FloatNode(Double.parseDouble(t.getImage())); }
+        { n = Ast.literal(Double.parseDouble(t.getImage())); }
         |
         t = <StringLiteral>
-        { n = new StringNode(extractTextualLiteral(t.getImage())); }
+        { n = Ast.literal(extractTextualLiteral(t.getImage())); }
         |
         t = <CharLiteral>
-        { n = new IntegerNode((long) extractTextualLiteral(t.getImage()).charAt(0)); }
+        { n = Ast.literal(extractTextualLiteral(t.getImage()).charAt(0)); }
     )
 
     {
@@ -116,7 +103,7 @@ Node referenceExpression():
         if (s.startsWith("`")) {
             s = extractTextualLiteral(s);
         }
-        Node n = new ReferenceNode(s, g);
+        Node n = g ? Ast.globalRef(s) : Ast.ref(s);
         SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
         n.getMetadata().put(SourceSpan.class, span);
         return n;
@@ -137,19 +124,19 @@ Node parenthesesExpression():
 Node listExpression():
 {
     Token start = getNextToken();
-    ArrayList<Node> entries = new ArrayList<>();
+    ListNode n = Ast.emptyList();
     Node e;
 }
 {
     <LeftBrackets>
         (
             e = expression()
-            { entries.add(e); }
+            { n.add(e); }
             (
                 LOOKAHEAD(2)
                 <Comma>
                 e = expression()
-                { entries.add(e); }
+                { n.add(e); }
             )*
             (
                 <Comma>
@@ -157,7 +144,6 @@ Node listExpression():
         )?
     <RightBrackets>
     {
-        Node n = new ListNode(entries);
         SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
         n.getMetadata().put(SourceSpan.class, span);
         return n;
@@ -167,7 +153,7 @@ Node listExpression():
 Node mapExpression():
 {
     Token start = getNextToken();
-    LinkedHashMap<String, Node> entries = new LinkedHashMap<>();
+    MapNode n = Ast.emptyMap();
     Token t;
     String key;
     Node e;
@@ -184,7 +170,7 @@ Node mapExpression():
             )
             <Colon>
             e = expression()
-            { entries.put(key, e); }
+            { n.put(key, e); }
             (
                 LOOKAHEAD(2)
                 <Comma>
@@ -197,7 +183,7 @@ Node mapExpression():
                 )
                 <Colon>
                 e = expression()
-                { entries.put(key, e); }
+                { n.put(key, e); }
             )*
             (
                 <Comma>
@@ -205,7 +191,6 @@ Node mapExpression():
         )?
     <RightBraces>
     {
-        Node n = new MapNode(entries);
         SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
         n.getMetadata().put(SourceSpan.class, span);
         return n;
@@ -246,7 +231,7 @@ Node argumentExpression():
             a = expression()
             <RightParentheses>
             {
-                e = new CallNode(e, a);
+                e = Ast.call(e, a);
                 SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
                 e.getMetadata().put(SourceSpan.class, span);
             }
@@ -257,7 +242,7 @@ Node argumentExpression():
             a = expression()
             <RightBrackets>
             {
-                e = new IndexNode(e, a);
+                e = Ast.index(e, a);
                 SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
                 e.getMetadata().put(SourceSpan.class, span);
             }
@@ -271,7 +256,7 @@ Node argumentExpression():
                 if (s.startsWith("`")) {
                     s = extractTextualLiteral(s);
                 }
-                e = new MemberNode(e, s);
+                e = Ast.member(e, s);
                 SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
                 e.getMetadata().put(SourceSpan.class, span);
             }
@@ -303,7 +288,7 @@ Node unaryExpression():
     e = argumentExpression()
     {
         if (o != null) {
-            Node n = new UnaryNode(e, o);
+            Node n = Ast.unary(o, e);
             SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
             n.getMetadata().put(SourceSpan.class, span);
             return n;
@@ -335,7 +320,7 @@ Node multiplicativeExpression():
         )
         a = unaryExpression()
         {
-            e = new BinaryNode(e, o, a);
+            e = Ast.binary(e, o, a);
             SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
             e.getMetadata().put(SourceSpan.class, span);
         }
@@ -362,7 +347,7 @@ Node additiveExpression():
         )
         a = multiplicativeExpression()
         {
-            e = new BinaryNode(e, o, a);
+            e = Ast.binary(e, o, a);
             SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
             e.getMetadata().put(SourceSpan.class, span);
         }
@@ -392,7 +377,7 @@ Node shiftExpression():
         )
         a = additiveExpression()
         {
-            e = new BinaryNode(e, o, a);
+            e = Ast.binary(e, o, a);
             SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
             e.getMetadata().put(SourceSpan.class, span);
         }
@@ -425,7 +410,7 @@ Node relationalExpression():
         )
         a = shiftExpression()
         {
-            e = new BinaryNode(e, o, a);
+            e = Ast.binary(e, o, a);
             SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
             e.getMetadata().put(SourceSpan.class, span);
         }
@@ -452,7 +437,7 @@ Node equalityExpression():
         )
         a = relationalExpression()
         {
-            e = new BinaryNode(e, o, a);
+            e = Ast.binary(e, o, a);
             SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
             e.getMetadata().put(SourceSpan.class, span);
         }
@@ -472,7 +457,7 @@ Node bitwiseAndExpression():
         <BitwiseAndOperator>
         a = equalityExpression()
         {
-            e = new BinaryNode(e, BinaryNode.Operator.BITWISE_AND, a);
+            e = Ast.binary(e, BinaryNode.Operator.BITWISE_AND, a);
             SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
             e.getMetadata().put(SourceSpan.class, span);
         }
@@ -492,7 +477,7 @@ Node bitwiseXorExpression():
         <BitwiseXorOperator>
         a = bitwiseAndExpression()
         {
-            e = new BinaryNode(e, BinaryNode.Operator.BITWISE_XOR, a);
+            e = Ast.binary(e, BinaryNode.Operator.BITWISE_XOR, a);
             SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
             e.getMetadata().put(SourceSpan.class, span);
         }
@@ -512,7 +497,7 @@ Node bitwiseOrExpression():
         <BitwiseOrOperator>
         a = bitwiseXorExpression()
         {
-            e = new BinaryNode(e, BinaryNode.Operator.BITWISE_OR, a);
+            e = Ast.binary(e, BinaryNode.Operator.BITWISE_OR, a);
             SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
             e.getMetadata().put(SourceSpan.class, span);
         }
@@ -532,7 +517,7 @@ Node booleanAndExpression():
         <BooleanAndOperator>
         a = bitwiseOrExpression()
         {
-            e = new BinaryNode(e, BinaryNode.Operator.BOOLEAN_AND, a);
+            e = Ast.binary(e, BinaryNode.Operator.BOOLEAN_AND, a);
             SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
             e.getMetadata().put(SourceSpan.class, span);
         }
@@ -552,7 +537,7 @@ Node booleanOrExpression():
         <BooleanOrOperator>
         a = booleanAndExpression()
         {
-            e = new BinaryNode(e, BinaryNode.Operator.BOOLEAN_OR, a);
+            e = Ast.binary(e, BinaryNode.Operator.BOOLEAN_OR, a);
             SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
             e.getMetadata().put(SourceSpan.class, span);
         }
@@ -575,7 +560,7 @@ Node ternaryExpression():
         <Colon>
         f = ternaryExpression()
         {
-            e = new TernaryNode(e, t, f);
+            e = Ast.ternary(e, t, f);
             SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
             e.getMetadata().put(SourceSpan.class, span);
         }
@@ -594,7 +579,7 @@ Node lambdaExpression():
     <LambdaOperator>
     e = expression()
     {
-        Node n = new LambdaNode(t.getImage(), e );
+        Node n = Ast.lambda(t.getImage(), e);
         SourceSpanImpl span = SourceSpanImpl.fromToken(start).join(SourceSpanImpl.fromToken(lastConsumedToken));
         n.getMetadata().put(SourceSpan.class, span);
         return n;

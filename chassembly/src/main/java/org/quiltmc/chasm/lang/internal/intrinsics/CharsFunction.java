@@ -1,9 +1,6 @@
 package org.quiltmc.chasm.lang.internal.intrinsics;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.quiltmc.chasm.lang.api.ast.IntegerNode;
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.ast.StringNode;
@@ -29,11 +26,11 @@ class CharsFunction extends IntrinsicFunction {
 
         String value = ((StringNode) arg).getValue();
 
-        List<Node> entries = new ArrayList<>();
+        ListNode entries = Ast.emptyList();
         for (int i = 0; i < value.length(); i++) {
-            entries.add(new IntegerNode((long) value.charAt(i)));
+            entries.add(Ast.literal(value.charAt(i)));
         }
 
-        return new ListNode(entries);
+        return entries;
     }
 }

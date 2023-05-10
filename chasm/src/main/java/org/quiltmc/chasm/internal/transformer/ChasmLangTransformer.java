@@ -7,6 +7,7 @@ import org.quiltmc.chasm.api.Transformation;
 import org.quiltmc.chasm.api.Transformer;
 import org.quiltmc.chasm.api.util.Context;
 import org.quiltmc.chasm.internal.intrinsic.ChasmIntrinsics;
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.CallNode;
 import org.quiltmc.chasm.lang.api.ast.LambdaNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
@@ -29,8 +30,8 @@ public class ChasmLangTransformer implements Transformer {
 
     @Override
     public Collection<Transformation> apply(ListNode classes) {
-        LambdaNode lambdaExpression = new LambdaNode("classes", parsed);
-        CallNode callExpression = new CallNode(lambdaExpression, classes);
+        LambdaNode lambdaExpression = Ast.lambda("classes", parsed);
+        CallNode callExpression = Ast.call(lambdaExpression, classes);
 
         Evaluator evaluator = ChasmIntrinsics.makeEvaluator(callExpression, context);
         Node evaluated = callExpression.evaluate(evaluator);
@@ -39,7 +40,7 @@ public class ChasmLangTransformer implements Transformer {
         }
 
         MapNode transformerExpression = (MapNode) evaluated;
-        Node transformationsNode = transformerExpression.getEntries().get("transformations");
+        Node transformationsNode = transformerExpression.get("transformations");
         if (!(transformationsNode instanceof ListNode)) {
             throw new RuntimeException("Transformers must declare a list \"transformations\" in their root map");
         }

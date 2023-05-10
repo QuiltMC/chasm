@@ -54,10 +54,19 @@ public final class Ast {
     /**
      * Creates a literal string node.
      *
+     * <p>If the argument may be null, use {@linkplain #nullableString(String)} instead.
+     *
      * @see StringNode
      */
     public static StringNode literal(@NotNull String value) {
         return new StringNode(value);
+    }
+
+    /**
+     * Creates a literal string node if the argument is not null, and a null node otherwise.
+     */
+    public static Node nullableString(@Nullable String value) {
+        return value == null ? nullNode() : literal(value);
     }
 
     /**
@@ -66,7 +75,7 @@ public final class Ast {
      * @see NullNode
      */
     public static NullNode nullNode() {
-        return new NullNode();
+        return NullNode.INSTANCE;
     }
 
     /**

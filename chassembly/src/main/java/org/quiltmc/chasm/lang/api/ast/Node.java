@@ -55,6 +55,9 @@ public abstract class Node {
         return parser.file();
     }
 
+    /**
+     * Writes this node to a file.
+     */
     public void write(Path path) throws IOException {
         Renderer renderer = Renderer.builder().build();
         StringBuilder sb = new StringBuilder();

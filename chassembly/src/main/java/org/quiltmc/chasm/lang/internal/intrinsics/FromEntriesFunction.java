@@ -1,9 +1,6 @@
 package org.quiltmc.chasm.lang.internal.intrinsics;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
@@ -17,14 +14,13 @@ public class FromEntriesFunction extends IntrinsicFunction {
     @Override
     public Node apply(Evaluator evaluator, Node arg) {
         if (arg instanceof ListNode) {
-            List<Node> entries = ((ListNode) arg).getEntries();
-            Map<String, Node> result = new LinkedHashMap<>();
+            MapNode result = Ast.emptyMap();
 
-            for (Node node : entries) {
+            for (Node node : ((ListNode) arg).getEntries()) {
                 if (node instanceof MapNode) {
-                    Map<String, Node> nodeEntries = ((MapNode) node).getEntries();
-                    Node key = nodeEntries.get("key");
-                    Node value = nodeEntries.get("value");
+                    MapNode mapNode = (MapNode) node;
+                    Node key = mapNode.get("key");
+                    Node value = mapNode.get("value");
 
                     if (!(key instanceof StringNode) || value == null) {
                         throw createException(arg);
@@ -36,7 +32,7 @@ public class FromEntriesFunction extends IntrinsicFunction {
                 }
             }
 
-            return new MapNode(result);
+            return result;
         }
         throw createException(arg);
     }

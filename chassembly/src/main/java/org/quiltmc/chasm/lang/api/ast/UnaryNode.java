@@ -11,27 +11,47 @@ import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
+/**
+ * A unary operator expression, e.g. {@code -foo}.
+ */
 public class UnaryNode extends Node {
     private Node inner;
     private Operator operator;
 
+    /**
+     * Creates a unary operator expression.
+     *
+     * @see Ast#unary(Operator, Node)
+     */
     public UnaryNode(Node inner, Operator operator) {
         this.inner = inner;
         this.operator = operator;
     }
 
+    /**
+     * Gets the operand.
+     */
     public Node getInner() {
         return inner;
     }
 
+    /**
+     * Sets the operand.
+     */
     public void setInner(Node inner) {
         this.inner = inner;
     }
 
+    /**
+     * Gets the operator.
+     */
     public Operator getOperator() {
         return operator;
     }
 
+    /**
+     * Sets the operator.
+     */
     public void setOperator(Operator operator) {
         this.operator = operator;
     }
@@ -78,23 +98,23 @@ public class UnaryNode extends Node {
             break;
             case MINUS: {
                 if (inner instanceof IntegerNode) {
-                    return new IntegerNode(-((IntegerNode) inner).getValue());
+                    return Ast.literal(-((IntegerNode) inner).getValue());
                 }
 
                 if (inner instanceof FloatNode) {
-                    return new FloatNode(-((FloatNode) inner).getValue());
+                    return Ast.literal(-((FloatNode) inner).getValue());
                 }
             }
             break;
             case NOT: {
                 if (inner instanceof BooleanNode) {
-                    return BooleanNode.from(!((BooleanNode) inner).getValue());
+                    return Ast.literal(!((BooleanNode) inner).getValue());
                 }
             }
             break;
             case INVERT: {
                 if (inner instanceof IntegerNode) {
-                    return new IntegerNode(~((IntegerNode) inner).getValue());
+                    return Ast.literal(~((IntegerNode) inner).getValue());
                 }
             }
             break;
@@ -112,10 +132,25 @@ public class UnaryNode extends Node {
         );
     }
 
+    /**
+     * The operator of a unary expression.
+     */
     public enum Operator {
+        /**
+         * The unary plus operator, {@code +}.
+         */
         PLUS("+", 2),
+        /**
+         * The negation operator, {@code -}.
+         */
         MINUS("-", 2),
+        /**
+         * The boolean not operator, {@code !}.
+         */
         NOT("!", 2),
+        /**
+         * The bitwise inversion operator, {@code ~}.
+         */
         INVERT("~", 2);
 
         private final String image;
@@ -133,10 +168,16 @@ public class UnaryNode extends Node {
             this.precedence = precedence;
         }
 
+        /**
+         * The image of this operator, or the string that represents it in code.
+         */
         public String getImage() {
             return image;
         }
 
+        /**
+         * The precedence of the operator, lower values means it's evaluated first by default.
+         */
         public int getPrecedence() {
             return precedence;
         }
@@ -146,6 +187,9 @@ public class UnaryNode extends Node {
             return image;
         }
 
+        /**
+         * Returns whether this operator's precedence is greater than the given value.
+         */
         public boolean morePrecedenceThan(int precedence) {
             return this.precedence > precedence;
         }

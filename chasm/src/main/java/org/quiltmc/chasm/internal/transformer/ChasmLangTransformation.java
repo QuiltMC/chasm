@@ -1,6 +1,5 @@
 package org.quiltmc.chasm.internal.transformer;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -10,9 +9,9 @@ import org.quiltmc.chasm.api.target.NodeTarget;
 import org.quiltmc.chasm.api.target.SliceTarget;
 import org.quiltmc.chasm.api.target.Target;
 import org.quiltmc.chasm.internal.util.NodeUtils;
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.CallNode;
 import org.quiltmc.chasm.lang.api.ast.IntegerNode;
-import org.quiltmc.chasm.lang.api.ast.LambdaNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
@@ -36,19 +35,19 @@ public class ChasmLangTransformation implements Transformation {
 
         MapNode transformationExpression = (MapNode) node;
 
-        Node targetNode = transformationExpression.getEntries().get("target");
+        Node targetNode = transformationExpression.get("target");
         if (!(targetNode instanceof MapNode)) {
             throw new RuntimeException("Transformations must declare a map \"target\" in their root map");
         }
         this.target = parseTarget((MapNode) targetNode);
 
-        Node applyNode = transformationExpression.getEntries().get("apply");
+        Node applyNode = transformationExpression.get("apply");
         if (!(applyNode instanceof FunctionNode)) {
             throw new RuntimeException("Transformations must declare a function \"apply\" in their root map");
         }
         this.apply = (FunctionNode) applyNode;
 
-        Node sourcesNode = transformationExpression.getEntries().get("sources");
+        Node sourcesNode = transformationExpression.get("sources");
         if (sourcesNode != null) {
             if (!(sourcesNode instanceof MapNode)) {
                 throw new RuntimeException("Element \"sources\" in transformation must be a map");
@@ -82,11 +81,11 @@ public class ChasmLangTransformation implements Transformation {
 
     @Override
     public Node apply(Node targetNode, Map<String, Node> nodeSources) {
-        HashMap<String, Node> args = new HashMap<>();
-        args.put("target", targetNode);
-        args.put("sources", new MapNode(nodeSources));
-
-        CallNode callExpression = new CallNode(apply, new MapNode(args));
+        MapNode args = Ast.map()
+                .put("target", targetNode)
+                .put("sources", nodeSources)
+                .build();
+        CallNode callExpression = Ast.call(apply, args);
         return callExpression.evaluate(evaluator);
     }
 

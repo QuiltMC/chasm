@@ -1,6 +1,6 @@
 package org.quiltmc.chasm.lang.internal.intrinsics;
 
-import org.quiltmc.chasm.lang.api.ast.IntegerNode;
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
@@ -17,7 +17,7 @@ public class LenFunction extends IntrinsicFunction {
                     arg.getMetadata().get(SourceSpan.class)
             );
         }
-        return new IntegerNode(((ListNode) arg).getEntries().size());
+        return Ast.literal(((ListNode) arg).size());
     }
 
     @Override

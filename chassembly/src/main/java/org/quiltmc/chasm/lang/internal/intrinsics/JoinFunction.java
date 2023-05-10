@@ -3,10 +3,10 @@ package org.quiltmc.chasm.lang.internal.intrinsics;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.quiltmc.chasm.lang.api.ast.Ast;
 import org.quiltmc.chasm.lang.api.ast.IntegerNode;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
-import org.quiltmc.chasm.lang.api.ast.StringNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
 import org.quiltmc.chasm.lang.api.eval.SourceSpan;
@@ -40,6 +40,6 @@ class JoinFunction extends IntrinsicFunction {
                 .map(e -> Character.toString((char) (((IntegerNode) e).getValue()).shortValue()))
                 .collect(Collectors.joining());
 
-        return new StringNode(joined);
+        return Ast.literal(joined);
     }
 }
