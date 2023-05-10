@@ -87,6 +87,11 @@ public class ListNode extends Node {
         builder.append("]");
     }
 
+    @Override
+    public String typeName() {
+        return "list";
+    }
+
     /**
      * A builder for list nodes.
      *

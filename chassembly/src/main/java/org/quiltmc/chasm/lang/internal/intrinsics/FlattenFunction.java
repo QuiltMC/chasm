@@ -6,6 +6,7 @@ import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 /**
@@ -38,7 +39,9 @@ public class FlattenFunction extends IntrinsicFunction {
 
     private static EvaluationException createArgsException(Node arg) {
         return new EvaluationException(
-                "Built-in function \"flatten\" can only be applied to lists of lists but found " + arg
+                "Built-in function \"flatten\" can only be applied to lists of lists but found " + arg.typeName()
+                        + " (" + arg + ")",
+                arg.getMetadata().get(SourceSpan.class)
         );
     }
 }

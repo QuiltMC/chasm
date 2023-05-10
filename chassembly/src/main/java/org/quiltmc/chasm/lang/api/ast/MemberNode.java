@@ -5,6 +5,7 @@ import java.util.Map;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.render.RenderUtil;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
@@ -72,7 +73,9 @@ public class MemberNode extends Node {
         Node left = this.left.evaluate(evaluator);
 
         if (!(left instanceof MapNode)) {
-            throw new EvaluationException("Member access expected a map, but got a " + left);
+            throw new EvaluationException(
+                    "Member access expected a map, but got a " + left.typeName(),
+                    left.getMetadata().get(SourceSpan.class));
         }
 
         Map<String, Node> entries = ((MapNode) left).getEntries();
@@ -82,5 +85,10 @@ public class MemberNode extends Node {
         }
 
         return entries.get(identifier).evaluate(evaluator);
+    }
+
+    @Override
+    public String typeName() {
+        return "member expression";
     }
 }

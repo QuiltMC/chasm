@@ -11,6 +11,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
@@ -90,7 +91,7 @@ public class BinaryNode extends Node {
         if (operator == Operator.BOOLEAN_AND || operator == Operator.BOOLEAN_OR) {
             if (!(left instanceof BooleanNode)) {
                 throw new EvaluationException("The left side of boolean operator " + operator
-                        + " must be a boolean but found " + left);
+                        + " must be a boolean but found " + left.typeName(), left.getMetadata().get(SourceSpan.class));
             }
 
             if (operator == BinaryNode.Operator.BOOLEAN_OR && ((BooleanNode) left).getValue()) {
@@ -377,12 +378,14 @@ public class BinaryNode extends Node {
             }
             break;
             default: {
-                throw new EvaluationException("Unexpected operator " + operator);
+                throw new EvaluationException("Unexpected operator " + operator,
+                        SourceSpan.endOf(left.getMetadata().get(SourceSpan.class)));
             }
         }
 
         throw new EvaluationException(
-                "Can't apply binary operator " + operator + " to " + left + " and " + right
+                "Can't apply binary operator " + operator + " to " + left.typeName() + " and " + right.typeName(),
+                SourceSpan.endOf(left.getMetadata().get(SourceSpan.class))
         );
     }
 
@@ -419,6 +422,11 @@ public class BinaryNode extends Node {
         if (rightNeedsBrackets) {
             builder.append(')');
         }
+    }
+
+    @Override
+    public String typeName() {
+        return "binary expression";
     }
 
     /**

@@ -3,6 +3,7 @@ package org.quiltmc.chasm.lang.api.ast;
 import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.render.RenderUtil;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
@@ -69,7 +70,10 @@ public class ReferenceNode extends Node {
         Node resolved = evaluator.resolveReference(this);
 
         if (resolved == null) {
-            throw new EvaluationException("Failed to resolve reference: " + this);
+            throw new EvaluationException(
+                    "Failed to resolve reference: " + this,
+                    this.getMetadata().get(SourceSpan.class)
+            );
         }
 
         return resolved.evaluate(evaluator);
@@ -87,5 +91,10 @@ public class ReferenceNode extends Node {
     @Override
     public String toString() {
         return "Ref<" + identifier + ">";
+    }
+
+    @Override
+    public String typeName() {
+        return "reference expression";
     }
 }

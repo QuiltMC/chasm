@@ -26,6 +26,8 @@ public abstract class Node {
 
     public abstract void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier);
 
+    public abstract String typeName();
+
     public Metadata getMetadata() {
         return metadata;
     }

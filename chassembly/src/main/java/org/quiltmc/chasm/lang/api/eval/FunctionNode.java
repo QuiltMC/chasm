@@ -19,4 +19,9 @@ public abstract class FunctionNode extends Node {
     public final Node evaluate(Evaluator evaluator) {
         return this;
     }
+
+    @Override
+    public String typeName() {
+        return "function";
+    }
 }

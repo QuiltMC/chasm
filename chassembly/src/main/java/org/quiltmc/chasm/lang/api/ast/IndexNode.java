@@ -6,6 +6,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.quiltmc.chasm.lang.api.eval.ClosureNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
@@ -88,7 +89,10 @@ public class IndexNode extends Node {
                 CallNode callExpression = Ast.call(closure, entry);
                 Node reduced = callExpression.evaluate(evaluator);
                 if (!(reduced instanceof BooleanNode)) {
-                    throw new EvaluationException("Filter function must return a boolean but found " + reduced);
+                    throw new EvaluationException(
+                            "Filter function must return a boolean but found " + reduced.typeName(),
+                            reduced.getMetadata().get(SourceSpan.class)
+                    );
                 }
 
                 if (((BooleanNode) reduced).getValue()) {
@@ -111,7 +115,10 @@ public class IndexNode extends Node {
             return entries.get(key).evaluate(evaluator);
         }
 
-        throw new EvaluationException("Can't index " + leftNode + " with " + indexNode);
+        throw new EvaluationException(
+                "Can't index " + leftNode.typeName() + " with " + indexNode.typeName(),
+                indexNode.getMetadata().get(SourceSpan.class)
+        );
     }
 
     @Override
@@ -120,5 +127,10 @@ public class IndexNode extends Node {
         builder.append('[');
         index.render(renderer, builder, currentIndentationMultiplier + 1);
         builder.append(']');
+    }
+
+    @Override
+    public String typeName() {
+        return "index expression";
     }
 }

@@ -8,6 +8,7 @@ import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.FunctionNode;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 /**
@@ -40,7 +41,8 @@ public class MapFunction extends IntrinsicFunction {
 
     private static EvaluationException createArgsException(Node arg) {
         return new EvaluationException(
-                "Built-in function \"map\" can only be applied to args {list, func} but found " + arg
+                "Built-in function \"map\" can only be applied to args {list, func} but found " + arg.typeName() + " (" + arg + ")",
+                arg.getMetadata().get(SourceSpan.class)
         );
     }
 }

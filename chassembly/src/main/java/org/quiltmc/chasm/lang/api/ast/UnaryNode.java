@@ -7,6 +7,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.render.Renderer;
 
@@ -119,12 +120,21 @@ public class UnaryNode extends Node {
             break;
             default: {
                 throw new EvaluationException(
-                        "Unknown unary operator " + operator
+                        "Unknown unary operator " + operator,
+                        SourceSpan.startOf(inner.getMetadata().get(SourceSpan.class))
                 );
             }
         }
 
-        throw new EvaluationException("Can't apply unary operator " + operator + " to " + inner);
+        throw new EvaluationException(
+                "Can't apply unary operator " + operator + " to " + inner.typeName(),
+                inner.getMetadata().get(SourceSpan.class)
+        );
+    }
+
+    @Override
+    public String typeName() {
+        return "unary expression";
     }
 
     /**

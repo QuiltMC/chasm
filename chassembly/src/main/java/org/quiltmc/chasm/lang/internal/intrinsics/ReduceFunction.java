@@ -7,6 +7,7 @@ import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.FunctionNode;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 public class ReduceFunction extends IntrinsicFunction {
@@ -20,7 +21,10 @@ public class ReduceFunction extends IntrinsicFunction {
             if (list instanceof ListNode && function instanceof FunctionNode) {
                 ListNode listNode = (ListNode) list;
                 if (listNode.size() == 0) {
-                    throw new EvaluationException("Can't reduce empty list: " + list);
+                    throw new EvaluationException(
+                            "Can't reduce empty list: " + list,
+                            arg.getMetadata().get(SourceSpan.class)
+                    );
                 }
                 FunctionNode funcNode = (FunctionNode) function;
 
@@ -35,7 +39,9 @@ public class ReduceFunction extends IntrinsicFunction {
         }
 
         throw new EvaluationException(
-                "Built-in function \"reduce\" can only be applied to args {list, func} but found " + arg
+                "Built-in function \"reduce\" can only be applied to args {list, func} but found " + arg.typeName()
+                        + " (" + arg + ")",
+                arg.getMetadata().get(SourceSpan.class)
         );
     }
 

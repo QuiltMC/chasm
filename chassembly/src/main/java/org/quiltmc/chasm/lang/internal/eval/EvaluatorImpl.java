@@ -14,6 +14,7 @@ import org.quiltmc.chasm.lang.api.eval.ClosureNode;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
 import org.quiltmc.chasm.lang.api.eval.Resolver;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 import org.quiltmc.chasm.lang.internal.Assert;
 import org.quiltmc.chasm.lang.internal.intrinsics.BuiltInIntrinsics;
@@ -83,7 +84,7 @@ public class EvaluatorImpl implements Evaluator {
             return topEntry.scope.get(((LambdaReference) reference).getIdentifier());
         }
 
-        throw new EvaluationException("Failed to resolve reference: " + reference);
+        throw new EvaluationException("Failed to resolve reference: " + reference, SourceSpan.from(0, 0));
     }
 
     @Override

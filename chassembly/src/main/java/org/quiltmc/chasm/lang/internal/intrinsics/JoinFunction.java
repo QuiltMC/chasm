@@ -9,6 +9,7 @@ import org.quiltmc.chasm.lang.api.ast.ListNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 import org.quiltmc.chasm.lang.api.eval.Evaluator;
 import org.quiltmc.chasm.lang.api.eval.IntrinsicFunction;
+import org.quiltmc.chasm.lang.api.eval.SourceSpan;
 import org.quiltmc.chasm.lang.api.exception.EvaluationException;
 
 class JoinFunction extends IntrinsicFunction {
@@ -21,14 +22,19 @@ class JoinFunction extends IntrinsicFunction {
     public Node apply(Evaluator evaluator, Node arg) {
         if (!(arg instanceof ListNode)) {
             throw new EvaluationException(
-                    "Built-in function \"join\" can only be applied to list of integers but found " + arg);
+                    "Built-in function \"join\" can only be applied to list of integers but found " + arg.typeName(),
+                    arg.getMetadata().get(SourceSpan.class)
+            );
         }
 
         List<Node> entries = ((ListNode) arg).getEntries();
 
         if (!entries.stream().allMatch(e -> e instanceof IntegerNode)) {
             throw new EvaluationException(
-                    "Built-in function \"join\" can only be applied to list of integers but found " + arg);
+                    "Built-in function \"join\" can only be applied to list of integers but found " + arg.typeName()
+                            + " (" + arg + ")",
+                    arg.getMetadata().get(SourceSpan.class)
+            );
         }
 
         String joined = entries.stream()
