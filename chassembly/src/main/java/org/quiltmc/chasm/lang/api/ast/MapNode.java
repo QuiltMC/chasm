@@ -99,6 +99,11 @@ public class MapNode extends Node {
         return new MapNode(newEntries);
     }
 
+    @Override
+    public String typeName() {
+        return "map";
+    }
+
     /**
      * A builder for map nodes.
      *

@@ -41,7 +41,7 @@ public class MapFunction extends IntrinsicFunction {
 
     private static EvaluationException createArgsException(Node arg) {
         return new EvaluationException(
-                "Built-in function \"map\" can only be applied to args {list, func} but found " + arg,
+                "Built-in function \"map\" can only be applied to args {list, func} but found " + arg.typeName() + " (" + arg + ")",
                 arg.getMetadata().get(SourceSpan.class)
         );
     }

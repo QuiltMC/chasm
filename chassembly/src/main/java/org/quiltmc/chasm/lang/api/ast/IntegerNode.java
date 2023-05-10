@@ -12,4 +12,9 @@ public class IntegerNode extends ValueNode<Long> {
     public IntegerNode(long value) {
         super(value);
     }
+
+    @Override
+    public String typeName() {
+        return "integer";
+    }
 }

@@ -77,8 +77,13 @@ public class CallNode extends Node {
         }
 
         throw new EvaluationException(
-                "Can only call functions but found " + function,
+                "Can only call functions but found " + function.typeName(),
                 function.getMetadata().get(SourceSpan.class)
         );
+    }
+
+    @Override
+    public String typeName() {
+        return "call expression";
     }
 }

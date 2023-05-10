@@ -74,7 +74,7 @@ public class MemberNode extends Node {
 
         if (!(left instanceof MapNode)) {
             throw new EvaluationException(
-                    "Member access expected a map, but got a " + left,
+                    "Member access expected a map, but got a " + left.typeName(),
                     left.getMetadata().get(SourceSpan.class));
         }
 
@@ -85,5 +85,10 @@ public class MemberNode extends Node {
         }
 
         return entries.get(identifier).evaluate(evaluator);
+    }
+
+    @Override
+    public String typeName() {
+        return "member expression";
     }
 }

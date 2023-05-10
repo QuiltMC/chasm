@@ -99,7 +99,7 @@ public class TernaryNode extends Node {
 
         if (!(condition instanceof BooleanNode)) {
             throw new EvaluationException(
-                    "Condition in ternary must evaluate to a boolean but found " + condition,
+                    "Condition in ternary must evaluate to a boolean but found " + condition.typeName(),
                     condition.getMetadata().get(SourceSpan.class)
             );
         }
@@ -109,5 +109,10 @@ public class TernaryNode extends Node {
         } else {
             return falseExp.evaluate(evaluator);
         }
+    }
+
+    @Override
+    public String typeName() {
+        return "ternary expression";
     }
 }

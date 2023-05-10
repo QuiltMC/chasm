@@ -29,7 +29,7 @@ public class ToIntegerFunction extends IntrinsicFunction {
             }
         } else {
             throw new EvaluationException(
-                    "Cannot convert " + arg + " to integer",
+                    "Cannot convert " + arg.typeName() + " to integer",
                     arg.getMetadata().get(SourceSpan.class)
             );
         }

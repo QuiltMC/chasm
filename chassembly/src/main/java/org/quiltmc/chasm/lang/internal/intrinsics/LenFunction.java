@@ -13,7 +13,7 @@ public class LenFunction extends IntrinsicFunction {
     public Node apply(Evaluator evaluator, Node arg) {
         if (!(arg instanceof ListNode)) {
             throw new EvaluationException(
-                    "Built-in function \"len\" can only be applied to lists but found " + arg,
+                    "Built-in function \"len\" can only be applied to lists but found " + arg.typeName(),
                     arg.getMetadata().get(SourceSpan.class)
             );
         }

@@ -90,7 +90,7 @@ public class IndexNode extends Node {
                 Node reduced = callExpression.evaluate(evaluator);
                 if (!(reduced instanceof BooleanNode)) {
                     throw new EvaluationException(
-                            "Filter function must return a boolean but found " + reduced,
+                            "Filter function must return a boolean but found " + reduced.typeName(),
                             reduced.getMetadata().get(SourceSpan.class)
                     );
                 }
@@ -116,7 +116,7 @@ public class IndexNode extends Node {
         }
 
         throw new EvaluationException(
-                "Can't index " + leftNode + " with " + indexNode,
+                "Can't index " + leftNode.typeName() + " with " + indexNode.typeName(),
                 indexNode.getMetadata().get(SourceSpan.class)
         );
     }
@@ -127,5 +127,10 @@ public class IndexNode extends Node {
         builder.append('[');
         index.render(renderer, builder, currentIndentationMultiplier + 1);
         builder.append(']');
+    }
+
+    @Override
+    public String typeName() {
+        return "index expression";
     }
 }

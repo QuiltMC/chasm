@@ -21,7 +21,7 @@ public class EntriesFunction extends IntrinsicFunction {
             return entryList;
         }
         throw new EvaluationException(
-                "Built-in function \"entries\" can only be applied to maps but found " + arg,
+                "Built-in function \"entries\" can only be applied to maps but found " + arg.typeName(),
                 arg.getMetadata().get(SourceSpan.class)
         );
     }

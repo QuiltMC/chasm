@@ -70,4 +70,9 @@ public class LambdaNode extends Node {
     public Node evaluate(Evaluator evaluator) {
         return evaluator.createClosure(this);
     }
+
+    @Override
+    public String typeName() {
+        return "lambda expression";
+    }
 }

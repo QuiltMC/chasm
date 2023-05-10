@@ -25,4 +25,9 @@ public final class BooleanNode extends ValueNode<Boolean> {
     public static BooleanNode from(boolean value) {
         return value ? TRUE : FALSE;
     }
+
+    @Override
+    public String typeName() {
+        return "boolean";
+    }
 }

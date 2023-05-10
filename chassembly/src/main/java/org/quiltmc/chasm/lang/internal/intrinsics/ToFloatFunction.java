@@ -29,7 +29,7 @@ public class ToFloatFunction extends IntrinsicFunction {
             }
         } else {
             throw new EvaluationException(
-                    "Cannot convert " + arg + " to float",
+                    "Cannot convert " + arg.typeName() + " to float",
                     arg.getMetadata().get(SourceSpan.class)
             );
         }

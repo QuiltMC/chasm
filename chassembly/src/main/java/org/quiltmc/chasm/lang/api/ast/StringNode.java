@@ -15,4 +15,9 @@ public final class StringNode extends ValueNode<String> {
         super(value);
         Assert.check(value != null, "Null given to StringNode");
     }
+
+    @Override
+    public String typeName() {
+        return "string";
+    }
 }

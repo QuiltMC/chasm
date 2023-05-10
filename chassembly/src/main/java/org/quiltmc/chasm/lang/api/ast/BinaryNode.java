@@ -91,7 +91,7 @@ public class BinaryNode extends Node {
         if (operator == Operator.BOOLEAN_AND || operator == Operator.BOOLEAN_OR) {
             if (!(left instanceof BooleanNode)) {
                 throw new EvaluationException("The left side of boolean operator " + operator
-                        + " must be a boolean but found " + left, left.getMetadata().get(SourceSpan.class));
+                        + " must be a boolean but found " + left.typeName(), left.getMetadata().get(SourceSpan.class));
             }
 
             if (operator == BinaryNode.Operator.BOOLEAN_OR && ((BooleanNode) left).getValue()) {
@@ -384,7 +384,7 @@ public class BinaryNode extends Node {
         }
 
         throw new EvaluationException(
-                "Can't apply binary operator " + operator + " to " + left + " and " + right,
+                "Can't apply binary operator " + operator + " to " + left.typeName() + " and " + right.typeName(),
                 SourceSpan.endOf(left.getMetadata().get(SourceSpan.class))
         );
     }
@@ -422,6 +422,11 @@ public class BinaryNode extends Node {
         if (rightNeedsBrackets) {
             builder.append(')');
         }
+    }
+
+    @Override
+    public String typeName() {
+        return "binary expression";
     }
 
     /**

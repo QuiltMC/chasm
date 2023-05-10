@@ -92,4 +92,9 @@ public class ReferenceNode extends Node {
     public String toString() {
         return "Ref<" + identifier + ">";
     }
+
+    @Override
+    public String typeName() {
+        return "reference expression";
+    }
 }

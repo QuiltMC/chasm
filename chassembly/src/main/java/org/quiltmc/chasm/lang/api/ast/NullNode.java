@@ -14,4 +14,9 @@ public final class NullNode extends ValueNode<Void> {
     private NullNode() {
         super(null);
     }
+
+    @Override
+    public String typeName() {
+        return "null";
+    }
 }

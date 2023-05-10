@@ -18,7 +18,7 @@ public class SplitFloatFunction extends IntrinsicFunction {
     public Node apply(Evaluator evaluator, Node arg) {
         if (!(arg instanceof FloatNode)) {
             throw new EvaluationException(
-                    getName() + " expected float, got " + arg,
+                    getName() + " expected float, got " + arg.typeName(),
                     arg.getMetadata().get(SourceSpan.class)
             );
         }

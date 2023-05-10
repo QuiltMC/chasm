@@ -127,9 +127,14 @@ public class UnaryNode extends Node {
         }
 
         throw new EvaluationException(
-                "Can't apply unary operator " + operator + " to " + inner,
+                "Can't apply unary operator " + operator + " to " + inner.typeName(),
                 inner.getMetadata().get(SourceSpan.class)
         );
+    }
+
+    @Override
+    public String typeName() {
+        return "unary expression";
     }
 
     /**

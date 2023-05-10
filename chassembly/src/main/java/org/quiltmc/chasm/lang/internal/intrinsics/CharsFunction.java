@@ -19,7 +19,7 @@ class CharsFunction extends IntrinsicFunction {
     public Node apply(Evaluator evaluator, Node arg) {
         if (!(arg instanceof StringNode)) {
             throw new EvaluationException(
-                    "Built-in function \"chars\" can only be applied to strings but found " + arg,
+                    "Built-in function \"chars\" can only be applied to strings but found " + arg.typeName(),
                     arg.getMetadata().get(SourceSpan.class)
             );
         }

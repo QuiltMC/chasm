@@ -21,7 +21,7 @@ public class FileBytesIntrinsic extends IntrinsicFunction {
     public Node apply(Evaluator evaluator, Node arg) {
         if (!(arg instanceof StringNode)) {
             throw new EvaluationException(
-                "Built-in function \"file_bytes\" can only be applied to strings but found " + arg,
+                "Built-in function \"file_bytes\" can only be applied to strings but found " + arg.typeName(),
                     arg.getMetadata().get(SourceSpanImpl.class));
         }
         byte[] bytes = context.readFile(((StringNode) arg).getValue());

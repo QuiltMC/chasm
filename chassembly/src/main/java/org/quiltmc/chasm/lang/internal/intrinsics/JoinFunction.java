@@ -22,7 +22,7 @@ class JoinFunction extends IntrinsicFunction {
     public Node apply(Evaluator evaluator, Node arg) {
         if (!(arg instanceof ListNode)) {
             throw new EvaluationException(
-                    "Built-in function \"join\" can only be applied to list of integers but found " + arg,
+                    "Built-in function \"join\" can only be applied to list of integers but found " + arg.typeName(),
                     arg.getMetadata().get(SourceSpan.class)
             );
         }
@@ -31,7 +31,8 @@ class JoinFunction extends IntrinsicFunction {
 
         if (!entries.stream().allMatch(e -> e instanceof IntegerNode)) {
             throw new EvaluationException(
-                    "Built-in function \"join\" can only be applied to list of integers but found " + arg,
+                    "Built-in function \"join\" can only be applied to list of integers but found " + arg.typeName()
+                            + " (" + arg + ")",
                     arg.getMetadata().get(SourceSpan.class)
             );
         }

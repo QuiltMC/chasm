@@ -12,4 +12,9 @@ public final class FloatNode extends ValueNode<Double> {
     public FloatNode(double value) {
         super(value);
     }
+
+    @Override
+    public String typeName() {
+        return "float";
+    }
 }

@@ -39,7 +39,8 @@ public class FlattenFunction extends IntrinsicFunction {
 
     private static EvaluationException createArgsException(Node arg) {
         return new EvaluationException(
-                "Built-in function \"flatten\" can only be applied to lists of lists but found " + arg,
+                "Built-in function \"flatten\" can only be applied to lists of lists but found " + arg.typeName()
+                        + " (" + arg + ")",
                 arg.getMetadata().get(SourceSpan.class)
         );
     }
