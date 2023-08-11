@@ -2,7 +2,6 @@ package org.quiltmc.chasm.api.util;
 
 import java.util.Arrays;
 
-import org.jetbrains.annotations.Contract;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 

@@ -32,12 +32,10 @@ public class TransformerSorterTests {
     public void testRejectsDuplicateId() {
         Assertions.assertThrows(
                 RuntimeException.class,
-                () -> {
-                    TransformerSorter.sort(Set.of(
-                            new DummyTransformer("a", Set.of(), Set.of(), Set.of(), Set.of()),
-                            new DummyTransformer("a", Set.of(), Set.of(), Set.of(), Set.of())
-                    ));
-                });
+                () -> TransformerSorter.sort(Set.of(
+                        new DummyTransformer("a", Set.of(), Set.of(), Set.of(), Set.of()),
+                        new DummyTransformer("a", Set.of(), Set.of(), Set.of(), Set.of())
+                )));
     }
 
     /**
@@ -48,12 +46,10 @@ public class TransformerSorterTests {
     public void testRejectsSimpleLoop() {
         assertThrowsWithinTimeout(
                 RuntimeException.class,
-                () -> {
-                    TransformerSorter.sort(Set.of(
-                            new DummyTransformer("a", Set.of("b"), Set.of(), Set.of(), Set.of()),
-                            new DummyTransformer("b", Set.of("a"), Set.of(), Set.of(), Set.of())
-                    ));
-                });
+                () -> TransformerSorter.sort(Set.of(
+                        new DummyTransformer("a", Set.of("b"), Set.of(), Set.of(), Set.of()),
+                        new DummyTransformer("b", Set.of("a"), Set.of(), Set.of(), Set.of())
+                )));
     }
 
     /**
@@ -64,11 +60,9 @@ public class TransformerSorterTests {
     public void testRejectsSelfDependency() {
         assertThrowsWithinTimeout(
                 RuntimeException.class,
-                () -> {
-                    TransformerSorter.sort(Set.of(
-                            new DummyTransformer("a", Set.of("a"), Set.of(), Set.of(), Set.of())
-                    ));
-                });
+                () -> TransformerSorter.sort(Set.of(
+                        new DummyTransformer("a", Set.of("a"), Set.of(), Set.of(), Set.of())
+                )));
     }
 
     /**
@@ -163,7 +157,7 @@ public class TransformerSorterTests {
     }
 
     /**
-     * The sorter should reject this cycle involving a transitive dependency on a nonexistant transformer.
+     * The sorter should reject this cycle involving a transitive dependency on a nonexistent transformer.
      */
     @Test
     public void testRejectsMissingDependenciesCycle() {

@@ -1,11 +1,5 @@
 package org.quiltmc.chasm.internal;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.quiltmc.chasm.api.util.ClassInfo;
@@ -13,7 +7,6 @@ import org.quiltmc.chasm.api.util.Context;
 import org.quiltmc.chasm.internal.util.NodeConstants;
 import org.quiltmc.chasm.internal.util.NodeUtils;
 import org.quiltmc.chasm.lang.api.ast.ListNode;
-import org.quiltmc.chasm.lang.api.ast.MapNode;
 import org.quiltmc.chasm.lang.api.ast.Node;
 
 public class ChasmContext implements Context {

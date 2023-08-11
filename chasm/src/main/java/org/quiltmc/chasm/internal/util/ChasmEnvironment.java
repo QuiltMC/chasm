@@ -37,7 +37,7 @@ public class ChasmEnvironment implements Closeable {
      */
     public void addToClasspath(Path path) throws IOException {
         if (Files.isRegularFile(path) && path.toString().endsWith(".jar")) {
-            FileSystem fileSystem = FileSystems.newFileSystem(path, (ClassLoader) null);
+            FileSystem fileSystem = FileSystems.newFileSystem(path, null);
             fileSystem.getRootDirectories().forEach(rootDirectories::add);
             toClose.add(fileSystem);
         } else if (Files.isDirectory(path)) {
@@ -75,7 +75,7 @@ public class ChasmEnvironment implements Closeable {
 
     public void collectClasses() {
         for (Path rootDirectory : rootDirectories) {
-
+            // TODO: finish this or remove it
         }
     }
 

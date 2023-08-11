@@ -22,9 +22,9 @@ public class ChasmClassWriter extends ClassWriter {
                 if (current1.equals(current2)) {
                     return current1;
                 }
-                current2 = context.getClassInfo(current2).getSuperClass();
+                current2 = context.getClassInfo(current2).getSuperClass(); // FIXME: this might return null
             }
-            current1 = context.getClassInfo(current1).getSuperClass();
+            current1 = context.getClassInfo(current1).getSuperClass(); // FIXME: this too
         }
 
         return ClassInfo.OBJECT;

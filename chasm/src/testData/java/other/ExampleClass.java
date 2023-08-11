@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @ExampleAnnotation(value = "Hi", list = { "First", "Second", "Third" }, nested = @SimpleAnnotation("Inner"))
+@SuppressWarnings("ALL")
 public abstract class ExampleClass {
     public float publicField = 2.5f;
     public final int publicFinalField = 1;
@@ -35,11 +36,8 @@ public abstract class ExampleClass {
         publicStaticMethod();
 
         switch (five) {
-            case 5:
-                System.out.println("Still 5");
-                break;
-            default:
-                System.out.println("No longer 5");
+            case 5 -> System.out.println("Still 5");
+            default -> System.out.println("No longer 5");
         }
     }
 

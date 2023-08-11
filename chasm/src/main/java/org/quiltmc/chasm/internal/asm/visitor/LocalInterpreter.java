@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +18,6 @@ import org.objectweb.asm.tree.analysis.Interpreter;
 import org.objectweb.asm.tree.analysis.SimpleVerifier;
 import org.quiltmc.chasm.api.util.ClassInfo;
 import org.quiltmc.chasm.api.util.Context;
-import org.quiltmc.chasm.internal.ChasmContext;
 
 public class LocalInterpreter extends Interpreter<LocalValue> {
     private final MethodNode method;
@@ -57,7 +57,8 @@ public class LocalInterpreter extends Interpreter<LocalValue> {
                 if (currentClass.equals(type)) {
                     return isInterface;
                 }
-                return type.getSort() == Type.OBJECT && context.getClassInfo(type.getInternalName()).isInterface();
+                return type.getSort() == Type.OBJECT && Objects.requireNonNull(
+                        context.getClassInfo(type.getInternalName())).isInterface();
             }
 
             @Override
@@ -68,7 +69,7 @@ public class LocalInterpreter extends Interpreter<LocalValue> {
                 if (type.getSort() != Type.OBJECT) {
                     return null;
                 }
-                String superClass = context.getClassInfo(type.getInternalName()).getSuperClass();
+                String superClass = Objects.requireNonNull(context.getClassInfo(type.getInternalName())).getSuperClass();
                 return superClass == null ? null : Type.getObjectType(superClass);
             }
 
@@ -104,11 +105,11 @@ public class LocalInterpreter extends Interpreter<LocalValue> {
                     }
 
                     ClassInfo rightInfo = context.getClassInfo(rightClass);
-                    Collections.addAll(interfacesToCheck, rightInfo.getInterfaces());
+                    Collections.addAll(interfacesToCheck, Objects.requireNonNull(rightInfo).getInterfaces());
                     rightClass = rightInfo.getSuperClass();
                 }
 
-                if (context.getClassInfo(leftClass).isInterface()) {
+                if (Objects.requireNonNull(context.getClassInfo(leftClass)).isInterface()) {
                     Set<String> checkedInterfaces = new HashSet<>();
                     while (!interfacesToCheck.isEmpty()) {
                         Set<String> current = interfacesToCheck;
@@ -120,7 +121,7 @@ public class LocalInterpreter extends Interpreter<LocalValue> {
                             }
 
                             ClassInfo classInfo = context.getClassInfo(currntInterface);
-                            for (String superInterface : classInfo.getInterfaces()) {
+                            for (String superInterface : Objects.requireNonNull(classInfo).getInterfaces()) {
                                 if (checkedInterfaces.add(superInterface)) {
                                     interfacesToCheck.add(superInterface);
                                 }

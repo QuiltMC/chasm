@@ -1,5 +1,6 @@
 package other;
 
+@SuppressWarnings("ALL")
 public enum ExampleEnum {
     A(1), B(2) {
         public String toString() {

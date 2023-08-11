@@ -10,11 +10,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.quiltmc.chasm.lang.api.ast.Node;
-import org.quiltmc.chasm.lang.api.eval.Evaluator;
 
 public abstract class TestBase {
     private static final Path TESTS_DIR = Paths.get("src/test/resources/tests");

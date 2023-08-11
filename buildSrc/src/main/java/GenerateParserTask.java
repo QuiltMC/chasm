@@ -1,8 +1,6 @@
-import java.io.IOException;
 import java.util.Collections;
 
 import com.javacc.Main;
-import freemarker.template.TemplateException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;

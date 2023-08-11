@@ -55,7 +55,7 @@ public abstract class TestsBase {
     @BeforeEach
     public void setUp() {
         // Instantiate the processor
-        processor = new ChasmProcessor(new Context() {
+        processor = new ChasmProcessor(new Context() { // TODO: create a helper class for this
             @Override
             public @Nullable ClassInfo getClassInfo(String className) {
                 try {
@@ -184,7 +184,7 @@ public abstract class TestsBase {
         }
     }
 
-    static class TestDefinition {
+    protected static class TestDefinition {
         public final String testClass;
         public final List<String> transformers;
         public final List<String> additionalClasses;

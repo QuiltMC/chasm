@@ -69,7 +69,7 @@ public class MapNode extends Node {
                 builder.append(", ");
             }
         }
-        if (list.size() > 0) {
+        if (!list.isEmpty()) {
             renderer.indent(builder, currentIndentationMultiplier - 1);
         }
         builder.append('}');

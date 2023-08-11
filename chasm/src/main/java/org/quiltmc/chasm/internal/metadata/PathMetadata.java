@@ -84,7 +84,7 @@ public class PathMetadata implements Iterable<PathMetadata.Entry> {
     @Override
     public Iterator<Entry> iterator() {
         return new Iterator<Entry>() {
-            Iterator<Entry> parentIter = parent == null ? null : parent.iterator();
+            final Iterator<Entry> parentIter = parent == null ? null : parent.iterator();
             boolean isConsumed = false;
 
             @Override
