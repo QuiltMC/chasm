@@ -81,9 +81,13 @@ public class ChasmProcessor {
     public List<ClassResult> process() {
         LOGGER.info("Processing {} classes...", classes.size());
 
+        // create a list to store ClassNodes
         ListNode classes = Ast.emptyList();
+        // initialize a ChasmContext
         Context context = new ChasmContext(this.context, classes);
+        // initialize a name-to-ClassData map
         Map<String, ClassData> nameToData = new HashMap<>();
+        // turn ClassData's into ClassNodes
         for (ClassData classData : this.classes) {
             ClassReader classReader = new ClassReader(classData.getClassBytes());
             ClassNode classNode = new ClassNode(classReader, context, classes.size());

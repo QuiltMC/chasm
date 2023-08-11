@@ -2,8 +2,9 @@ package other;
 
 import java.util.Random;
 
+@SuppressWarnings("ALL")
 public class TestLocalVariables {
-    static Random random = new Random(0);
+    static final Random random = new Random(0);
 
     static void staticMethod(int param1, double param2) {
         int local1 = random.nextInt();

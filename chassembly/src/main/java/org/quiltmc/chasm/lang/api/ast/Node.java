@@ -24,6 +24,7 @@ public abstract class Node {
 
     public abstract Node evaluate(Evaluator evaluator);
 
+    @ApiStatus.Internal
     public abstract void render(Renderer renderer, StringBuilder builder, int currentIndentationMultiplier);
 
     public Metadata getMetadata() {

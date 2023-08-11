@@ -1,6 +1,7 @@
 package org.quiltmc.chasm;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
@@ -73,19 +74,17 @@ public class IntrinsicsTest {
     @Test
     public void testLib1() {
         MapNode result = (MapNode) evaluate("{lib: include(\"lib.chasm\"), result: lib.inc(41)}");
-        Assertions.assertEquals(42, ((IntegerNode) result.get("result")).getValue());
+        Assertions.assertEquals(42, ((IntegerNode) Objects.requireNonNull(result.get("result"))).getValue());
     }
 
     @Test
     public void testLib2() {
         MapNode result = (MapNode) evaluate("{lib: include(\"lib.chasm\"), result: lib.result}");
-        Assertions.assertEquals(3, ((IntegerNode) result.get("result")).getValue());
+        Assertions.assertEquals(3, ((IntegerNode) Objects.requireNonNull(result.get("result"))).getValue());
     }
 
     @Test
     public void testIncludeCannotResolveOuter() {
-        Assertions.assertThrows(EvaluationException.class, () -> {
-            evaluate("{outer: 42, lib: include(\"lib_invalid.chasm\")}");
-        });
+        Assertions.assertThrows(EvaluationException.class, () -> evaluate("{outer: 42, lib: include(\"lib_invalid.chasm\")}"));
     }
 }

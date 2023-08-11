@@ -9,9 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 import org.quiltmc.chasm.api.Transformer;

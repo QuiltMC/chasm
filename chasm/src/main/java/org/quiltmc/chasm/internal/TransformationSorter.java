@@ -177,7 +177,7 @@ public class TransformationSorter {
                 List<TargetInfo> endTargets = targetsByEnd.getOrDefault(index, Collections.emptyList());
 
                 // Remove from enclosing targets
-                enclosingTargets.removeAll(endTargets);
+                endTargets.forEach(enclosingTargets::remove);
 
                 // All remaining enclosing targets depend on all slice ends
                 for (TargetInfo enclosingTarget : enclosingTargets) {
@@ -222,7 +222,7 @@ public class TransformationSorter {
         }
 
         // End of all node targets
-        enclosingTargets.removeAll(nodeTargets);
+        nodeTargets.forEach(enclosingTargets::remove);
     }
 
     enum TargetType {

@@ -1,9 +1,7 @@
 package org.quiltmc.chasm.lang.internal.eval;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Map;
 
