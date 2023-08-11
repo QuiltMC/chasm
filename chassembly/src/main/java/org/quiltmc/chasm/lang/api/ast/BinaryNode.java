@@ -344,7 +344,8 @@ public class BinaryNode extends Node {
                 }
             }
             break;
-            case BOOLEAN_AND, BOOLEAN_OR: {
+            case BOOLEAN_AND:
+            case BOOLEAN_OR: {
                 // Left side was already checked before
                 if (right instanceof BooleanNode) {
                     return right;
